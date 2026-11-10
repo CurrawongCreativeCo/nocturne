@@ -1659,6 +1659,28 @@ export const blogSettingsLifted = {
   },
 }
 
+/**
+ * Picture depth on the post cards (tests/e2e/blog-card-design.spec.ts): Blog settings with a depth on the pictures
+ * only (a card draws no surface of its own), and, while one is on, a post with no picture (the index's newest).
+ */
+const depthSettings = (fields) => ({ _id: 'blogSettings', _type: 'blogSettings', ...fields })
+const pictureDepthOf = (fields) => ({ _type: 'object', ...fields })
+export const blogSettingsPictureDepth = {
+  raised: depthSettings({ pictureDepthDesign: pictureDepthOf({ shadow: 'raised' }) }),
+  floating: depthSettings({ pictureDepthDesign: pictureDepthOf({ shadow: 'floating' }) }),
+  // With a card of its own as well, so the picture's depth is shown beside a surface, a border and padding.
+  glow: depthSettings({
+    cardDesign: { border: 'thin' },
+    pictureDepthDesign: pictureDepthOf({ shadow: 'floating', glow: 'strong' }),
+  }),
+  glowOnly: depthSettings({ pictureDepthDesign: pictureDepthOf({ glow: 'strong' }) }),
+  flat: depthSettings({ pictureDepthDesign: pictureDepthOf({ shadow: 'flat', glow: 'off' }) }),
+}
+export const blogPostWithoutPicture = {
+  ...blogPost('a-post-with-no-picture', 'A post with no picture', '2026-10-20T09:00:00Z'),
+  mainImage: undefined,
+}
+
 /** Navigation with the footer's social icons switched on (tests/e2e/footer-social.spec.ts). */
 export const footerSocialOn = { footerShowSocial: true, footerSocialStyle: 'circle' }
 

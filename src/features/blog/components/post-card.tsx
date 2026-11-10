@@ -14,10 +14,11 @@ import {
   OWN_SHADOW,
   resolveCardDepth,
   resolveCardLift,
+  resolvePictureDepth,
 } from '@/lib/sanity/depth-options'
 import { textRoleProps } from '@/lib/sanity/text-role'
 
-import type { BlogCardDesign, PostCardData } from '../types'
+import type { BlogCardDesign, BlogPictureDepth, PostCardData } from '../types'
 import { authorName } from '../utils/author'
 
 /** The text roles a card draws (post-card-capabilities.ts), and what each draws with nothing chosen. */
@@ -41,6 +42,8 @@ interface Props {
   preload?: boolean
   /** The post cards' design, from Blog settings. */
   cardDesign?: BlogCardDesign | null
+  /** A shadow and glow on the picture (Blog settings › Post card pictures, task 147): not on the whole card. */
+  pictureDepth?: BlogPictureDepth | null
   /** The tone the card sits on, which its mark is measured against. */
   tone?: string
 }
@@ -51,6 +54,7 @@ export function PostCard({
   headingLevel: Heading = 'h2',
   preload = false,
   cardDesign,
+  pictureDepth,
   tone,
 }: Props) {
   const publishedAt = stegaClean(post.publishedAt)
@@ -62,6 +66,8 @@ export function PostCard({
   const { background, border } = look.surface
   const surfaced = background !== 'transparent' && (Boolean(background) || Boolean(border))
   const depth = surfaced ? resolveCardDepth([cardDesign], OWN_SHADOW.siteCardFree) : undefined
+  // The picture's own depth, a separate choice from the card's: it needs no surface, only a picture.
+  const pictureLook = resolvePictureDepth(pictureDepth)
 
   return (
     <CardSurface
@@ -80,7 +86,8 @@ export function PostCard({
         height={450}
         preload={preload}
         sizes="(min-width: 1024px) 384px, (min-width: 640px) 50vw, 100vw"
-        className="aspect-video w-full rounded-card object-cover"
+        className={`aspect-video w-full rounded-card object-cover${pictureLook ? ` ${pictureLook.className}` : ''}`}
+        style={pictureLook?.style}
       />
       <p {...textRoleProps('meta', 'mt-4 text-small text-ink-muted', OWN_META, look.text.meta)}>
         <time dateTime={publishedAt}>{formatDate(publishedAt, siteLanguage)}</time>

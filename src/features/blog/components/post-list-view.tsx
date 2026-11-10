@@ -7,7 +7,7 @@ import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
 import { CategoryNav } from './category-nav'
 import { Pagination } from './pagination'
 import { PostCard } from './post-card'
-import { getBlogCardDesign, getPostList } from '../api/get-posts'
+import { getBlogCardSettings, getPostList } from '../api/get-posts'
 import { pageCount, pagePath } from '../utils/pagination'
 
 interface ViewProps {
@@ -18,9 +18,9 @@ interface ViewProps {
 
 /** The blog index (`category` null) or one category, a page of posts at a time. */
 export async function PostListView({ category, page, ...mode }: ViewProps & FetchMode) {
-  const [list, cardDesign] = await Promise.all([
+  const [list, { cardDesign, pictureDepth }] = await Promise.all([
     getPostList({ category, page, ...mode }),
-    getBlogCardDesign(mode),
+    getBlogCardSettings(mode),
   ])
   if (!list || (category !== null && !list.category)) notFound()
 
@@ -49,7 +49,12 @@ export async function PostListView({ category, page, ...mode }: ViewProps & Fetc
         <ul className="mt-12 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
           {list.posts.map((post, i) => (
             <li key={post._id}>
-              <PostCard post={post} preload={i === 0} cardDesign={cardDesign} />
+              <PostCard
+                post={post}
+                preload={i === 0}
+                cardDesign={cardDesign}
+                pictureDepth={pictureDepth}
+              />
             </li>
           ))}
         </ul>

@@ -9,7 +9,12 @@ import { privateFields, type SchemaField } from '@/lib/design/schema-capabilitie
 
 vi.mock('next-sanity/image', () => ({
   Image: (props: Record<string, unknown>) =>
-    createElement('img', { src: props.src, className: props.className, alt: '' }),
+    createElement('img', {
+      src: props.src,
+      className: props.className,
+      style: props.style,
+      alt: props.alt,
+    }),
 }))
 vi.mock('next/server', () => ({ connection: () => Promise.resolve() }))
 vi.mock('server-only', () => ({}))
@@ -29,6 +34,15 @@ async function draw(cardDesign?: Record<string, unknown>) {
   if (!drawer) throw new Error('blogPostCards has no drawer.')
   const state = { ...(await drawer.seed()), settings: cardDesign ? { cardDesign } : {} }
   return parseHtml(await drawer.draw(state))
+}
+
+/** A card with a picture depth from Blog settings (task 147), and optionally no main image. */
+async function drawDepth(settings: Record<string, unknown>, options: { noPicture?: boolean } = {}) {
+  if (!drawer) throw new Error('blogPostCards has no drawer.')
+  const seed = (await drawer.seed()) as { post: Record<string, unknown> }
+  const post = options.noPicture ? { ...seed.post, mainImage: undefined } : seed.post
+  const html = await drawer.draw({ ...seed, post, settings })
+  return { html, document: parseHtml(html) }
 }
 
 describe('a post card with nothing in Blog settings', () => {
@@ -174,5 +188,103 @@ describe('Blog settings in the contract', () => {
     expect(privateFields(schema, withPrivate, [], DESIGN_CONTEXTS)).toEqual([
       { path: 'settings.cardTint', problem: 'unbuilt' },
     ])
+  })
+})
+
+describe('a post card’s picture depth (Blog settings › Post card pictures)', () => {
+  const FLOATING = { shadow: 'floating', glow: 'soft' }
+  const UNSET = [
+    {},
+    { shadow: null, glow: null },
+    { shadow: 'flat' },
+    { glow: 'off' },
+    { shadow: 'flat', glow: 'off' },
+    { shadow: 'gigantic', glow: 'blinding' },
+  ]
+  const picture = (document: Document) => document.querySelector('article img')
+
+  it('is drawn exactly as before while nothing is chosen, however it is stored empty', async () => {
+    const base = await drawDepth({})
+    expect(picture(base.document)).not.toBeNull()
+    expect(base.html).not.toContain('depth-filter')
+    for (const stored of UNSET) {
+      const same = await drawDepth({ pictureDepthDesign: stored })
+      expect(same.html, JSON.stringify(stored)).toBe(base.html)
+    }
+  })
+
+  it('puts the filter on the picture, keeping its shape classes first, and nowhere else', async () => {
+    const { document } = await drawDepth({ pictureDepthDesign: FLOATING })
+    const img = picture(document)
+    expect(img?.className).toBe(
+      'aspect-video w-full rounded-card object-cover [filter:var(--depth-filter)]',
+    )
+    expect(img?.getAttribute('style')).toContain('--depth-picture-floating')
+    // Not the card, not its link, not its text.
+    const card = document.querySelector('article')
+    expect(card?.className).toBe('group relative flex h-full flex-col')
+    expect(card?.getAttribute('style')).toBeNull()
+    expect(
+      document.querySelectorAll('[class*="depth-filter"], [style*="depth-filter"]'),
+    ).toHaveLength(1)
+  })
+
+  it('draws each level through the shared tokens, a glow alone and a glow colour', async () => {
+    const styleOf = async (stored: Record<string, unknown>) =>
+      picture((await drawDepth({ pictureDepthDesign: stored })).document)?.getAttribute('style')
+    expect(await styleOf({ shadow: 'soft' })).toBe('--depth-filter:var(--depth-picture-soft)')
+    expect(await styleOf({ shadow: 'raised' })).toBe('--depth-filter:var(--depth-picture-raised)')
+    expect(await styleOf({ shadow: 'floating' })).toBe(
+      '--depth-filter:var(--depth-picture-floating)',
+    )
+    expect(await styleOf({ glow: 'strong' })).toMatch(/^--depth-filter:drop-shadow\(0 0 14px/)
+    expect(await styleOf({ glow: 'soft', glowColour: { colour: 'highlight' } })).toContain(
+      'var(--color-highlight',
+    )
+  })
+
+  it('needs no card surface, and is separate from the card’s own depth', async () => {
+    // No fill or border: the card draws nothing of its own, and the picture still has its shadow.
+    const bare = await drawDepth({ pictureDepthDesign: FLOATING })
+    expect(picture(bare.document)?.className).toContain('[filter:var(--depth-filter)]')
+    // A surfaced card with its own Floating depth: the card's shadow is its own, the picture's is its own.
+    const both = await drawDepth({
+      cardDesign: { border: 'thin', shadow: 'raised' },
+      pictureDepthDesign: { shadow: 'floating' },
+    })
+    expect(both.document.querySelector('article')?.getAttribute('style')).toContain(
+      '--depth-shadow',
+    )
+    expect(both.document.querySelector('article')?.getAttribute('style')).not.toContain(
+      'depth-filter',
+    )
+    expect(picture(both.document)?.getAttribute('style')).toContain('--depth-picture-floating')
+    expect(picture(both.document)?.getAttribute('style')).not.toContain('--depth-shadow')
+    // The card's own depth does not reach the picture without a picture depth.
+    const cardOnly = await drawDepth({ cardDesign: { border: 'thin', shadow: 'floating' } })
+    expect(picture(cardOnly.document)?.getAttribute('style')).toBeNull()
+  })
+
+  it('leaves a card with no picture exactly as it was', async () => {
+    const plain = await drawDepth({}, { noPicture: true })
+    const stored = await drawDepth({ pictureDepthDesign: FLOATING }, { noPicture: true })
+    expect(picture(plain.document)).toBeNull()
+    expect(stored.html).toBe(plain.html)
+    expect(stored.html).not.toContain('depth-filter')
+  })
+
+  it('keeps the card one link, with the same hover feedback, and the picture’s semantics', async () => {
+    const before = await drawDepth({})
+    const after = await drawDepth({ pictureDepthDesign: FLOATING })
+    const describeCard = (document: Document) => [
+      document.querySelectorAll('article a').length,
+      document.querySelector('article a')?.className,
+      document.querySelector('article a')?.getAttribute('href'),
+      picture(document)?.getAttribute('alt'),
+      picture(document)?.getAttribute('role'),
+      picture(document)?.getAttribute('aria-hidden'),
+    ]
+    expect(describeCard(after.document)).toEqual(describeCard(before.document))
+    expect(describeCard(after.document)[0]).toBe(1)
   })
 })

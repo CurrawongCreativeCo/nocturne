@@ -691,13 +691,6 @@
     },
     {
       "component": "blogPostCards",
-      "capability": "pictureDepth",
-      "scope": "card",
-      "layouts": [null],
-      "closingTask": 147
-    },
-    {
-      "component": "blogPostCards",
       "capability": "glass",
       "scope": "card",
       "layouts": [null],

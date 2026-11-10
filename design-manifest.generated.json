@@ -37269,11 +37269,26 @@
                   "reachable": true
                 },
                 "closingTask": 147,
-                "fields": [],
-                "availability": "pending"
+                "fields": [
+                  "settings.pictureDepthDesign.shadow"
+                ],
+                "availability": "verified"
               }
             ],
-            "evidence": []
+            "evidence": [
+              {
+                "id": "blogPostCards.pictureDepth.card",
+                "field": "settings.pictureDepthDesign.shadow",
+                "resolvers": [
+                  "@/lib/sanity/depth-options#resolvePictureDepth"
+                ],
+                "render": "src/features/blog/components/post-card.tsx",
+                "target": "article img",
+                "cases": [
+                  "blogPostCards.pictureDepth.card"
+                ]
+              }
+            ]
           },
           "overlay": {
             "notApplicable": "No background picture"

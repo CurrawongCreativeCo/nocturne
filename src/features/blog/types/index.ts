@@ -19,3 +19,8 @@ export type PostData = StegaBranded<NonNullable<POST_QUERY_RESULT>>
 
 /** The post cards' design, from Blog settings. */
 export type BlogCardDesign = StegaBranded<NonNullable<BLOG_SETTINGS_QUERY_RESULT>>['cardDesign']
+
+/** The depth of the post cards' pictures, from Blog settings. */
+export type BlogPictureDepth = StegaBranded<
+  NonNullable<BLOG_SETTINGS_QUERY_RESULT>
+>['pictureDepthDesign']

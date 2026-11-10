@@ -933,6 +933,21 @@ export const EVIDENCE: readonly Evidence[] = [
     // A post card draws no surface until one is chosen, and a shadow needs one to sit on.
     depthBase: { 'settings.cardDesign.border': 'thin' },
   }),
+  // A shadow and glow on the post card's picture (task 147), for a post that has one (the fixture post does): Blog
+  // settings' own `pictureDepthDesign`, beside the card's design. It needs no surface, only the picture.
+  {
+    id: 'blogPostCards.pictureDepth.card',
+    component: 'blogPostCards',
+    capability: 'pictureDepth',
+    scope: 'card',
+    field: 'settings.pictureDepthDesign.shadow',
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolvePictureDepth' }],
+    render: 'src/features/blog/components/post-card.tsx',
+    target: 'article img',
+    change: 'attributes',
+    base: {},
+    probe: { 'settings.pictureDepthDesign.shadow': 'floating' },
+  },
   // The glyph at the end of a post card (task 137): none until Blog settings chooses one.
   {
     id: 'blogPostCards.action.card',

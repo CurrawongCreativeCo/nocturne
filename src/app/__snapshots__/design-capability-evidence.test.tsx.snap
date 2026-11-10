@@ -21,6 +21,12 @@ exports[`design capability evidence > blogPostCards.depth.card: the probe change
 
 exports[`design capability evidence > blogPostCards.mark.card: the probe changes the registered target 1`] = `[]`;
 
+exports[`design capability evidence > blogPostCards.pictureDepth.card: the probe changes the registered target 1`] = `
+[
+  "<img alt="" class="aspect-video w-full rounded-card object-cover" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=40,0,1120,630&w=800&h=450&fit=crop&auto=format">",
+]
+`;
+
 exports[`design capability evidence > blogPostCards.surface.card: the probe changes the registered target 1`] = `
 [
   "<article class="group relative flex h-full flex-col">",

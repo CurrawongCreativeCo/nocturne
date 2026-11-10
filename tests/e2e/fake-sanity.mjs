@@ -17,7 +17,9 @@ import {
   documents,
   experimentRunning,
   footerSocialOn,
+  blogPostWithoutPicture,
   blogSettingsDesigned,
+  blogSettingsPictureDepth,
   buttonStyleDesign,
   withButtonStyle,
   blogSettingsLifted,
@@ -60,6 +62,9 @@ let footerSocialPatch = null
 /** Whether the blog's cards have a design; switched by POST /__fixture/blog-settings/<on|lift|off>. */
 let blogSettingsPatch = null
 
+/** A post with no picture, served while a picture depth is on (POST /__fixture/blog-settings/depth-*). */
+let blogExtraPost = null
+
 /** Whether the header menu has dropdowns; switched by POST /__fixture/navigation/<flat|nested>. */
 let navigationPatch = null
 
@@ -100,6 +105,7 @@ function datasetFor(perspective, variant) {
       experimentPatch && doc._type === 'experiment' ? { ...doc, ...experimentPatch } : doc,
     )
   if (blogSettingsPatch) published.push(blogSettingsPatch)
+  if (blogExtraPost) published.push(blogExtraPost)
   // Content variants replace the base documents with the same id, like the real Content Lake.
   const variantDocs = variant ? (variantDocuments[variant] ?? []) : []
   const swapped = new Set(variantDocs.map((doc) => doc._id))
@@ -151,14 +157,20 @@ createServer(async (req, res) => {
     res.writeHead(204).end()
     return
   }
-  const blogSettings = /^\/__fixture\/blog-settings\/(on|lift|off)$/.exec(url.pathname)?.[1]
+  const blogSettings = /^\/__fixture\/blog-settings\/(on|lift|off|depth-[a-zA-Z]+)$/.exec(
+    url.pathname,
+  )?.[1]
   if (req.method === 'POST' && blogSettings) {
+    const depth = blogSettings.startsWith('depth-')
+      ? blogSettingsPictureDepth[blogSettings.slice('depth-'.length)]
+      : undefined
     blogSettingsPatch =
       blogSettings === 'on'
         ? blogSettingsDesigned
         : blogSettings === 'lift'
           ? blogSettingsLifted
-          : null
+          : (depth ?? null)
+    blogExtraPost = depth ? blogPostWithoutPicture : null
     res.writeHead(204).end()
     return
   }
