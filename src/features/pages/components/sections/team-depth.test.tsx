@@ -138,17 +138,53 @@ describe.each(['grid', 'slider'])('Team %s: picture depth', (layout) => {
     const card = cardsOf(framed.document)[0]
     const box = card?.querySelector('[data-framed-image]')
     expect(box?.className).toContain('[filter:var(--depth-filter)]')
-    // A framed portrait is already inset by its card (24px): it keeps that, not a second inset.
-    expect(portraitSlot(card)?.className).toBe('px-6 pt-6')
+    // Already inset by its card (24px), it takes more at the sides only where its depth needs more (Floating
+    // with a soft glow: 30px), and the bottom gives back the height the narrower picture loses.
+    expect(portraitSlot(card)?.getAttribute('style')).toBe('padding:24px 30px 12px')
   })
 
-  it('leaves a portrait that is already inset (a circle) where it is, with the filter on it', async () => {
+  it('gives a portrait that is already inset (a circle, an arch) more at the sides only where it needs more', async () => {
+    const cases = {
+      // The margin it already has is enough: nothing about the slot changes, the filter goes on.
+      raised: [{ shadow: 'raised' }, 'px-6 pt-6', null],
+      'a strong glow': [{ glow: 'strong' }, 'px-6 pt-6', null],
+      // More is needed: the sides grow to the table's room, the bottom gives back exactly the height it loses.
+      floating: [{ shadow: 'floating' }, '', 'padding:24px 28px 8px'],
+      'floating and a soft glow': [
+        { shadow: 'floating', glow: 'soft' },
+        '',
+        'padding:24px 30px 12px',
+      ],
+      'floating and a strong glow': [
+        { shadow: 'floating', glow: 'strong' },
+        '',
+        'padding:24px 34px 20px',
+      ],
+    } as const
+    for (const [name, [stored, className, style]] of Object.entries(cases)) {
+      const { document } = await draw(layout, { imageDesign: CIRCLE, pictureDepthDesign: stored })
+      const slot = portraitSlot(cardsOf(document)[0])
+      expect(slot?.className ?? '', name).toBe(className)
+      expect(slot?.getAttribute('style'), name).toBe(style)
+      expect(cardsOf(document)[0]?.querySelector('img')?.className, name).toContain(
+        '[filter:var(--depth-filter)]',
+      )
+    }
+  })
+
+  it('keeps an arch’s height too: its 4:5 picture gives back 5/4 of the width it loses', async () => {
+    const ARCH = { _type: 'imageDesign', appearance: 'arch' }
+    const { document } = await draw(layout, {
+      imageDesign: ARCH,
+      pictureDepthDesign: { shadow: 'floating', glow: 'strong' },
+    })
+    expect(portraitSlot(cardsOf(document)[0])?.getAttribute('style')).toBe('padding:24px 34px 25px')
+  })
+
+  it('leaves a shaped portrait with no depth exactly where it was', async () => {
     const plain = await draw(layout, { imageDesign: CIRCLE })
-    const { document } = await draw(layout, { imageDesign: CIRCLE, pictureDepthDesign: FLOATING })
-    const card = cardsOf(document)[0]
-    expect(portraitSlot(card)?.className).toBe('px-6 pt-6')
-    expect(portraitSlot(card)?.getAttribute('style')).toBeNull()
-    expect(card?.querySelector('img')?.className).toContain('[filter:var(--depth-filter)]')
+    expect(portraitSlot(cardsOf(plain.document)[0])?.className).toBe('px-6 pt-6')
+    expect(portraitSlot(cardsOf(plain.document)[0])?.getAttribute('style')).toBeNull()
     expect(plain.html).not.toContain('depth-filter')
   })
 

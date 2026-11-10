@@ -3884,6 +3884,20 @@ documents.push({
       imageDesign: imageDesign({ appearance: 'circle' }),
       pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
     }),
+    depthTeam('depth-team-circle-none', 'Team circle nothing chosen', 'grid', {
+      imageDesign: imageDesign({ appearance: 'circle' }),
+    }),
+    depthTeam('depth-team-arch-none', 'Team arch nothing chosen', 'grid', {
+      imageDesign: imageDesign({ appearance: 'arch' }),
+    }),
+    depthTeam('depth-team-circle-glow', 'Team circle floating strong glow', 'grid', {
+      imageDesign: imageDesign({ appearance: 'circle' }),
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthTeam('depth-team-arch-glow', 'Team arch floating strong glow', 'grid', {
+      imageDesign: imageDesign({ appearance: 'arch' }),
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
     depthText(2),
     depthTeam('depth-team-slider-none', 'Team slider nothing chosen', 'slider'),
     depthTeam('depth-team-slider-glow', 'Team slider floating strong glow', 'slider', {

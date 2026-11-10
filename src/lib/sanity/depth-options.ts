@@ -226,7 +226,11 @@ export interface PictureClearance {
  * plus 2px, rounded up to an even number; the approved first values (Soft 8, Raised 16, Floating 28) are the
  * least any level gets. A glow's fade is much longer than its blur radius, and a glow added to a shadow lengthens
  * the shadow's own tail, so a combination is its own measurement, not the larger of the two. One table, so no
- * family makes up its own, and a change to the filter tokens (`depth.picture-*`, `depth.glow-*`) is a change here.
+ * family makes up its own.
+ *
+ * These values depend on the filter tokens (`depth.picture-*` and `depth.glow-*`, scripts/build-tokens.mjs) and on
+ * `glowFilter`'s blur. If either changes, the clearances must be measured again before anything else: a test in
+ * scripts/build-tokens.test.mjs pins the tokens and fails with this instruction when they move.
  */
 export const PICTURE_CLEARANCE: Record<
   ShadowLevel,
@@ -256,12 +260,30 @@ export function pictureClearance(
  * Where that room goes in a slot that must keep its size: `side` on each side, `top` above, and the rest of the
  * slot's vertical padding below, so the picture keeps its ratio and the slot its height. `ratio` is the picture's
  * height over its width (1 for a square, 9/16 for a 16:9 picture): the padding a ratio-keeping inset adds is
- * twice the side's room times that ratio. A top that would not fit is cut back to what does.
+ * twice the side's room times that ratio, exactly: a rounded figure would leave the slot half a pixel too tall
+ * or short and move the text below it. A top that would not fit is cut back to what does.
  */
 export function pictureInset({ side, top }: PictureClearance, ratio = 1) {
-  const vertical = Math.round(2 * side * ratio)
+  const vertical = Number((2 * side * ratio).toFixed(2))
   const above = Math.min(top, vertical)
-  return { side, top: above, bottom: vertical - above }
+  return { side, top: above, bottom: Number((vertical - above).toFixed(2)) }
+}
+
+/**
+ * A picture that already sits inside its card with a fixed margin (Team's shaped portraits: 24px at the sides and
+ * above, none below) and needs more room at the sides than that: the sides grow to the clearance, the picture
+ * narrows with them, and the bottom takes up exactly what its height lost, so the slot keeps its height. `ratio` is
+ * the picture's height over its width (1 for a circle, 5/4 for an arch). Undefined while the margin is enough.
+ */
+export function pictureInsetBeyond(
+  { side }: PictureClearance,
+  existing: { side: number; top: number },
+  ratio = 1,
+) {
+  if (side <= existing.side) return undefined
+  // Slot height before: top + ratio x (width - 2 x existing side). After: top + ratio x (width - 2 x side) + bottom.
+  const bottom = Number((ratio * 2 * (side - existing.side)).toFixed(2))
+  return { side, top: existing.top, bottom }
 }
 
 /**

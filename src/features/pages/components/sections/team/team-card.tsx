@@ -17,11 +17,12 @@ import {
   OWN_SHADOW,
   pictureClearance,
   pictureInset,
+  pictureInsetBeyond,
   resolveCardDepth,
   resolveCardLift,
   resolvePictureDepth,
 } from '@/lib/sanity/depth-options'
-import { resolveImageDesign } from '@/lib/sanity/image-design-options'
+import { forcedAspect, resolveImageDesign } from '@/lib/sanity/image-design-options'
 import { resolveAvatar } from '@/lib/sanity/profile-image-options'
 import { hasImageDesign } from '@/lib/sanity/team-portrait'
 import { textRoleProps } from '@/lib/sanity/text-role'
@@ -47,6 +48,8 @@ type Design = SectionProps<'team'>['data']['imageDesign']
 
 /** A portrait's corners are the card's until the design names a shape. */
 const PORTRAIT_SHAPE = { fallbackShape: 'square' } as const
+/** The margin a shaped portrait sits in already: 24px at the sides and above (`px-6 pt-6`), none below. */
+const SHAPED_MARGIN = { side: 24, top: 24 } as const
 /** A flush portrait that is inset for its shadow (task 147) has the card's corners until the design names a shape. */
 const INSET_PORTRAIT_SHAPE = { fallbackShape: 'standard' } as const
 
@@ -143,12 +146,19 @@ export function TeamCard({
   tone,
 }: CardProps) {
   // The default portrait fills the top of the card; a shape of its own (a circle, an arch) sits inside it.
-  const inset = resolveImageDesign(stegaClean(design), PORTRAIT_SHAPE).shape !== 'square'
-  // The card clips, so a flush portrait's shadow would be cut off at the card's edge. When a depth is chosen
-  // it is inset by the room that depth needs, inside the space it already has: the card keeps its size and
-  // the portrait its ratio. A portrait that is already inset keeps its own room. Unset changes nothing.
-  const clearance = inset ? undefined : pictureClearance(pictureDepth)
-  const room = clearance === undefined ? undefined : pictureInset(clearance)
+  const { shape } = resolveImageDesign(stegaClean(design), PORTRAIT_SHAPE)
+  const inset = shape !== 'square'
+  // The card clips, so a portrait's shadow would be cut off at the card's edge. When a depth is chosen the
+  // portrait is inset by the room that depth needs, inside the space it already has: the card keeps its size
+  // and the portrait its ratio. A flush portrait gets all of it. One that is already inset (24px at the sides
+  // and above) keeps that, and takes more at the sides only where its depth needs more than 24px, the bottom
+  // giving back exactly the height the narrower portrait loses. Unset changes nothing.
+  const clearance = pictureClearance(pictureDepth)
+  const room = clearance && !inset ? pictureInset(clearance) : undefined
+  const wider =
+    clearance && inset
+      ? pictureInsetBeyond(clearance, SHAPED_MARGIN, forcedAspect(shape) === '4/5' ? 5 / 4 : 1)
+      : undefined
   const look = resolveCardDesign(cardDesign, ROLES)
   const motion = liftOf(member, cardDesign)
   return (
@@ -163,8 +173,14 @@ export function TeamCard({
       mark={{ input: cardDesign?.mark, scope: 'card', tone, levels: [cardDesign] }}
     >
       <div
-        className={room ? 'aspect-square' : inset ? 'px-6 pt-6' : undefined}
-        style={room ? { padding: `${room.top}px ${room.side}px ${room.bottom}px` } : undefined}
+        className={room ? 'aspect-square' : wider ? undefined : inset ? 'px-6 pt-6' : undefined}
+        style={
+          room
+            ? { padding: `${room.top}px ${room.side}px ${room.bottom}px` }
+            : wider
+              ? { padding: `${wider.top}px ${wider.side}px ${wider.bottom}px` }
+              : undefined
+        }
       >
         <FramedImage
           image={member.portrait}

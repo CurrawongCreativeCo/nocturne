@@ -11,6 +11,7 @@ import {
   resolveDepth,
   pictureClearance,
   pictureInset,
+  pictureInsetBeyond,
   resolvePictureDepth,
 } from './depth-options'
 
@@ -324,9 +325,57 @@ describe('pictureClearance and pictureInset', () => {
   })
 
   it('keeps a wider picture’s ratio, and cuts the top back to what fits', () => {
-    const wide = pictureInset({ side: 28, top: 12 }, 9 / 16)
-    expect(wide.top + wide.bottom).toBe(Math.round(2 * 28 * (9 / 16)))
+    // The total is exact, not rounded: 2 x 28 x 9/16 is 31.5, and a slot 0.5px off moves the text below it.
+    expect(pictureInset({ side: 28, top: 12 }, 9 / 16)).toEqual({ side: 28, top: 12, bottom: 19.5 })
+    expect(pictureInset({ side: 34, top: 24 }, 9 / 16)).toEqual({
+      side: 34,
+      top: 24,
+      bottom: 14.25,
+    })
     // Little vertical room: the top takes it all, the bottom none, never a negative.
-    expect(pictureInset({ side: 4, top: 12 }, 9 / 16)).toEqual({ side: 4, top: 5, bottom: 0 })
+    expect(pictureInset({ side: 4, top: 12 }, 9 / 16)).toEqual({ side: 4, top: 4.5, bottom: 0 })
+  })
+})
+
+describe('pictureInsetBeyond', () => {
+  const margin = { side: 24, top: 24 }
+
+  it('is undefined while the margin a portrait already has is enough', () => {
+    expect(pictureInsetBeyond({ side: 16, top: 6 }, margin)).toBeUndefined()
+    expect(pictureInsetBeyond({ side: 22, top: 22 }, margin)).toBeUndefined()
+    expect(pictureInsetBeyond({ side: 24, top: 12 }, margin)).toBeUndefined()
+  })
+
+  it('widens the sides and gives back the height a square picture loses', () => {
+    expect(pictureInsetBeyond({ side: 28, top: 12 }, margin)).toEqual({
+      side: 28,
+      top: 24,
+      bottom: 8,
+    })
+    expect(pictureInsetBeyond({ side: 34, top: 24 }, margin)).toEqual({
+      side: 34,
+      top: 24,
+      bottom: 20,
+    })
+  })
+
+  it('gives back more for a taller picture: an arch loses 5/4 of the width', () => {
+    expect(pictureInsetBeyond({ side: 34, top: 24 }, margin, 5 / 4)).toEqual({
+      side: 34,
+      top: 24,
+      bottom: 25,
+    })
+  })
+
+  it('keeps the slot’s height for any width: top + picture + bottom is the same before and after', () => {
+    for (const width of [300, 364, 395, 480]) {
+      for (const ratio of [1, 5 / 4]) {
+        const room = pictureInsetBeyond({ side: 34, top: 24 }, margin, ratio)
+        expect(room).toBeDefined()
+        const before = 24 + ratio * (width - 48)
+        const after = (room?.top ?? 0) + ratio * (width - 2 * 34) + (room?.bottom ?? 0)
+        expect(after).toBeCloseTo(before, 6)
+      }
+    }
   })
 })
