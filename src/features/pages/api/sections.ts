@@ -52,6 +52,17 @@ const headerDesignProjection = /* groq */ `
   }
 `
 
+/** The same, with the divider between the title and the intro (task 151): the sections `SectionHeader` draws. */
+const sectionHeaderDesignProjection = /* groq */ `
+  eyebrow,
+  headerDesign {
+    eyebrow { ${roleStyleProjection} },
+    heading { ${roleStyleProjection} },
+    intro { ${roleStyleProjection} },
+    divider { ${decorativeDividerFields} }
+  }
+`
+
 /** A framed picture's shadow level and glow (pictureDepthFields, task 147). */
 const pictureDepthProjection = /* groq */ `pictureDepthDesign { shadow, glow, glowColour { colour, hex } }`
 
@@ -131,7 +142,7 @@ export const featuresGridFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
-    ${headerDesignProjection},
+    ${sectionHeaderDesignProjection},
     columns,
     iconDesign { ${iconDesignFields} },
     items[] {
@@ -153,7 +164,7 @@ export const logoCloudFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
-    ${headerDesignProjection},
+    ${sectionHeaderDesignProjection},
     logos[] {
       _key,
       name,
@@ -209,7 +220,7 @@ export const testimonialsFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
-    ${headerDesignProjection},
+    ${sectionHeaderDesignProjection},
     cardDesign {
       ${surfaceProjection},
       ${depthProjection},
@@ -246,7 +257,7 @@ export const faqFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
-    ${headerDesignProjection},
+    ${sectionHeaderDesignProjection},
     cardDesign {
       itemStyle,
       ${surfaceProjection},
@@ -269,7 +280,7 @@ export const ctaBannerFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
-    ${headerDesignProjection},
+    ${sectionHeaderDesignProjection},
     cardDesign { ${depthProjection} },
     text,
     ctas[] { ${ctaFields} },
@@ -283,7 +294,7 @@ export const formSectionFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
-    ${headerDesignProjection},
+    ${sectionHeaderDesignProjection},
     text,
     cardDesign { ${surfaceProjection}, ${depthProjection} },
     form-> { _id, ${formFields} }
@@ -297,7 +308,7 @@ export const pricingTableFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
-    ${headerDesignProjection},
+    ${sectionHeaderDesignProjection},
     iconDesign { ${iconDesignFields} },
     cardDesign { ${pricingCardDesignProjection} },
     // Plans whose price was deleted or archived at Stripe are left out rather than shown unbuyable.
@@ -322,7 +333,7 @@ export const newsletterSignupFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
-    ${headerDesignProjection},
+    ${sectionHeaderDesignProjection},
     text,
     cardDesign { ${surfaceProjection}, ${depthProjection} },
     submitLabel,
@@ -338,7 +349,7 @@ export const statsFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
-    ${headerDesignProjection},
+    ${sectionHeaderDesignProjection},
     cardDesign {
       ${surfaceProjection},
       ${depthProjection},
@@ -358,7 +369,7 @@ export const galleryFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
-    ${headerDesignProjection},
+    ${sectionHeaderDesignProjection},
     columns,
     imageDesign { ${imageDesignFields} },
     ${pictureDepthProjection},
@@ -373,7 +384,7 @@ export const locationFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
-    ${headerDesignProjection},
+    ${sectionHeaderDesignProjection},
     cardDesign {
       ${surfaceProjection},
       ${depthProjection},
@@ -421,7 +432,7 @@ export const teamFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     text,
-    ${headerDesignProjection},
+    ${sectionHeaderDesignProjection},
     cardDesign { ${teamCardDesignProjection} },
     imageDesign { ${imageDesignFields} },
     portraitDesign { ${avatarDesignFields} },
@@ -440,7 +451,7 @@ export const videoFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
-    ${headerDesignProjection},
+    ${sectionHeaderDesignProjection},
     text,
     source,
     url,
@@ -459,7 +470,7 @@ export const processFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     intro,
-    ${headerDesignProjection},
+    ${sectionHeaderDesignProjection},
     cardDesign {
       label { ${roleStyleProjection} },
       title { ${roleStyleProjection} },
@@ -483,7 +494,7 @@ export const embedFragment = /* groq */ `
     title,
     heading,
     "headingPlain": pt::text(heading),
-    ${headerDesignProjection},
+    ${sectionHeaderDesignProjection},
     text,
     cardDesign { ${surfaceProjection}, ${depthProjection} },
     provider,
@@ -626,7 +637,7 @@ export const eventsFragment = /* groq */ `
     heading,
     "headingPlain": pt::text(heading),
     text,
-    ${headerDesignProjection},
+    ${sectionHeaderDesignProjection},
     cardDesign { ${teamCardDesignProjection} },
     ${pictureDepthProjection},
     count,

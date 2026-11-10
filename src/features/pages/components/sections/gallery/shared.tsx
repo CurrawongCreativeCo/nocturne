@@ -5,6 +5,7 @@ import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import type { ElementDepth } from '@/lib/sanity/depth-options'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveTextRoles } from '@/lib/sanity/text-role'
 
@@ -48,6 +49,7 @@ export function GalleryHeader({ data }: { data: GalleryData }) {
       heading={heading}
       intro={intro}
       design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+      divider={resolveDivider(data.headerDesign?.divider)}
       spacing="mb-12 max-w-measure-narrow"
       block={block}
       text={text}

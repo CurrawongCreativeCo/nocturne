@@ -99,7 +99,7 @@ export const logoCloud = defineType({
           }),
         ],
       }),
-      headerDesignField(),
+      headerDesignField({}, { divider: true }),
       accessField,
       // Shown first in the Content tab.
       variantField(LOGO_CLOUD_VARIANTS),

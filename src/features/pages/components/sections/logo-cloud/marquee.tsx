@@ -4,6 +4,7 @@ import type { CSSProperties } from 'react'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits } from '@/components/ui/section-style'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveTextRoles } from '@/lib/sanity/text-role'
 
@@ -26,7 +27,7 @@ const OWN_CAPTION = { size: 'text-small', weight: 'semibold', colour: 'text-ink-
 export function LogoCloudMarquee({ data, isFirst }: SectionProps<'logoCloud'>) {
   const { heading, intro, logos } = data
   const title = sectionTitle(data)
-  const { text, justify, align } = sectionTraits(data.style, LOGO_CLOUD_DEFAULTS)
+  const { block, text, justify, align } = sectionTraits(data.style, LOGO_CLOUD_DEFAULTS)
   const colour = stegaClean(data.logoColour) === 'colour' ? 'colour' : 'grey'
 
   const track = {
@@ -45,6 +46,8 @@ export function LogoCloudMarquee({ data, isFirst }: SectionProps<'logoCloud'>) {
         heading={heading}
         intro={intro}
         design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+        divider={resolveDivider(data.headerDesign?.divider)}
+        dividerBlock={block}
         headingClass="text-small font-semibold text-ink-muted"
         own={{ heading: OWN_CAPTION }}
         each={text}

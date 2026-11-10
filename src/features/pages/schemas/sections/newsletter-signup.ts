@@ -61,7 +61,7 @@ export const newsletterSignup = defineType({
         initialValue: 'Thanks! Check your inbox for a message from us.',
         validation: (rule) => rule.required().max(300),
       }),
-      headerDesignField(),
+      headerDesignField({}, { divider: true }),
       formCardField({
         subject: 'the signup form',
         unset:

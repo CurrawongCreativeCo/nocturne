@@ -217,6 +217,8 @@ interface CardFamilyEvidence {
   headerRoles?: readonly TextRole[]
   /** The file that draws them, when a section composes them itself (Image + text's intro is its body). */
   headerRender?: string
+  /** Also proves the header's divider (task 151): `SectionHeader` draws it between the title and the intro. */
+  headerDivider?: boolean
   /** The array whose members have their own Appearance, and which member the probes set. */
   item?: { array: string; index?: number }
   /** The Cards box's name on the section. */
@@ -269,6 +271,32 @@ function iconContainerEvidence(config: {
     target: config.target ?? '[data-icon-shape]',
     change: config.change ?? 'attributes',
     probe: { [`${box}.iconShape`]: config.shape ?? 'circle' },
+  }
+}
+
+/**
+ * A section header's divider (task 151): the stored choice is `headerDesign.divider`, `resolveDivider` reads
+ * it and `DecorativeDivider` draws it between the title and the intro, so the probe makes it appear. `base`
+ * gives the section the title and the intro the divider sits between.
+ */
+function headerDividerEvidence(
+  component: string,
+  layouts: readonly string[] | undefined,
+  base: Patch,
+): CapabilityEvidence {
+  return {
+    id: `${component}.divider.section`,
+    component,
+    ...(layouts ? { layouts } : {}),
+    capability: 'divider',
+    scope: 'section',
+    field: 'headerDesign.divider',
+    resolvers: [{ module: '@/lib/sanity/divider-options', export: 'resolveDivider' }],
+    render: 'src/components/ui/decorative-divider.tsx',
+    target: '[data-decorative-divider]',
+    change: 'appears',
+    base,
+    probe: { 'headerDesign.divider': { _type: 'decorativeDivider', style: 'line' } },
   }
 }
 
@@ -347,6 +375,7 @@ function cardFamilyEvidence(config: CardFamilyEvidence): CapabilityEvidence[] {
       change: 'attributes',
       probe: { [`headerDesign.${role}.size`]: 'large' },
     })),
+    ...(config.headerDivider ? [headerDividerEvidence(component, layouts, base)] : []),
     ...(config.depth ? scopes : []).map((scope): CapabilityEvidence => ({
       id: `${component}.depth.${scope}${named}`,
       ...common(scope, cardLayouts ?? layouts),
@@ -1223,6 +1252,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: TESTIMONIAL_CONTENT,
     probe: { [`cardDesign.${role}.size`]: 'large' },
   })),
+  headerDividerEvidence('testimonials', TESTIMONIAL_LAYOUTS, TESTIMONIAL_CONTENT),
   ...(['eyebrow', 'heading', 'intro'] as const).map((role): CapabilityEvidence => ({
     id: `testimonials.header.section.${role}`,
     component: 'testimonials',
@@ -1319,6 +1349,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Why us', intro: 'An intro.' },
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    headerDivider: true,
   }),
   iconContainerEvidence({
     component: 'featuresGrid',
@@ -1343,6 +1374,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Trusted by', intro: 'An intro.' },
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    headerDivider: true,
   }),
   ...frameEvidence('logoCloud', {
     mark: ['grid', 'marquee'],
@@ -1362,6 +1394,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Questions', intro: 'An intro.' },
     roles: ['title', 'body'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    headerDivider: true,
   }),
   ...cardFamilyEvidence({
     component: 'faq',
@@ -1383,6 +1416,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Ready?', text: 'An intro.' },
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    headerDivider: true,
   }),
   // The banner's one card: its depth is the only thing its Cards box offers (its fill is the tone).
   {
@@ -1407,6 +1441,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Contact', text: 'An intro.' },
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    headerDivider: true,
   }),
   ...sectionCardEvidence({
     component: 'formSection',
@@ -1450,6 +1485,7 @@ export const EVIDENCE: readonly Evidence[] = [
     headerRoles: ['eyebrow', 'heading', 'intro'],
     item: { array: 'plans' },
     depth: true,
+    headerDivider: true,
   }),
   iconContainerEvidence({
     component: 'pricingTable',
@@ -1481,6 +1517,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Updates', text: 'An intro.' },
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    headerDivider: true,
   }),
   ...sectionCardEvidence({
     component: 'newsletterSignup',
@@ -1507,6 +1544,7 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: ['number', 'label'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
     depth: true,
+    headerDivider: true,
   }),
   ...frameEvidence('stats', {
     mark: ['inline', 'cards'],
@@ -1524,6 +1562,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Our work', intro: 'An intro.' },
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    headerDivider: true,
   }),
   // Masonry draws a plain picture inside its button, which is the tile's outline: the filter goes on the button
   // (the tile's own hook, `aria-haspopup`, is what every tile has and nothing else does).
@@ -1575,6 +1614,7 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: ['title', 'body', 'meta'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
     depth: true,
+    headerDivider: true,
   }),
   ...cardFamilyEvidence({
     component: 'location',
@@ -1624,6 +1664,7 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: ['title', 'meta', 'body'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
     depth: true,
+    headerDivider: true,
   }),
   // A shadow and glow on the portraits (task 147). The cards and slides draw a flush portrait, which is inset
   // by the room the depth needs; the list's small portrait is `ProfileImage`, which needs none.
@@ -1694,6 +1735,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Watch', text: 'An intro.' },
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    headerDivider: true,
   }),
   ...frameEvidence('video', {
     overlay: ['embed', 'ambient'],
@@ -1723,6 +1765,7 @@ export const EVIDENCE: readonly Evidence[] = [
     },
     roles: ['label', 'title', 'body'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    headerDivider: true,
   }),
   iconContainerEvidence({
     component: 'process',
@@ -1750,6 +1793,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Book', text: 'An intro.' },
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    headerDivider: true,
   }),
   ...sectionCardEvidence({
     component: 'embed',
@@ -1769,6 +1813,7 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: ['title', 'meta', 'body'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
     depth: true,
+    headerDivider: true,
   }),
   // A shadow and glow on the Featured card's picture (task 147), for an event that has one (the gallery's first
   // event does). The picture is inset by the room the depth needs, so the filter and `pictureClearance` are both

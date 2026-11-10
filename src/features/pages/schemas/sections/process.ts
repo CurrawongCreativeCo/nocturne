@@ -163,7 +163,7 @@ export const process = defineType({
           }),
         ],
       }),
-      headerDesignField(),
+      headerDesignField({}, { divider: true }),
       iconsDesignField(),
       cardDesignField({
         title: scopedGroupTitle('Steps', 'card'),

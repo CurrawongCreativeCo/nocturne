@@ -121,7 +121,7 @@ export const location = defineType({
           lengthWarning(rule, LIMITS.directionsLabel, 'Labels'),
         ],
       }),
-      headerDesignField(),
+      headerDesignField({}, { divider: true }),
       iconsDesignField(),
       cardDesignField({
         description:

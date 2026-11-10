@@ -3,6 +3,7 @@ import { useId } from 'react'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveTextRoles } from '@/lib/sanity/text-role'
 
@@ -33,6 +34,7 @@ export function FormSection({ data, isFirst, renderForm }: SectionProps<'formSec
         heading={heading}
         intro={text}
         design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+        divider={resolveDivider(data.headerDesign?.divider)}
         className={`mb-10 ${textAlign}`}
         headingId={headingId}
       />

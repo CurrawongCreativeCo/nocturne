@@ -181,7 +181,7 @@ export const video = defineType({
           direction: 'horizontal',
         },
       }),
-      headerDesignField(),
+      headerDesignField({}, { divider: true }),
       accessField,
       // Shown first in the Content tab.
       variantField(VIDEO_VARIANTS),

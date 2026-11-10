@@ -65,27 +65,45 @@ export const eyebrowField = (max = 40) =>
 
 /**
  * The section header's three roles, agency only. `hidden` hides a role where the section doesn't draw it
- * as text (a Link list's heading shown as a wordmark picture).
+ * as text (a Link list's heading shown as a wordmark picture). `divider` adds the shared decorative
+ * divider between the title and the intro (task 151): offered only by a section whose header is drawn by
+ * `SectionHeader`, which draws it. Empty is None, so nothing changes until one is chosen.
  */
 export const headerDesignField = (
   hidden: Partial<Record<'eyebrow' | 'heading' | 'intro', ConditionalPropertyCallback>> = {},
+  { divider = false }: { divider?: boolean } = {},
 ) =>
   defineField({
     name: 'headerDesign',
     title: scopedGroupTitle('Section header', 'section'),
     type: 'object',
     group: 'design',
-    description: 'The eyebrow, title and intro. Inherit uses the section’s own.',
+    description: divider
+      ? 'The eyebrow, title and intro, and a divider between the title and the intro. Inherit uses the section’s own.'
+      : 'The eyebrow, title and intro. Inherit uses the section’s own.',
     hidden: hiddenFromClients,
     options: { collapsible: true, collapsed: true },
-    fields: (['eyebrow', 'heading', 'intro'] as const).map((role) =>
-      textRoleField({
-        role,
-        inherits: 'the section’s own',
-        capability: 'header',
-        hidden: hidden[role],
-      }),
-    ),
+    fields: [
+      ...(['eyebrow', 'heading', 'intro'] as const).map((role) =>
+        textRoleField({
+          role,
+          inherits: 'the section’s own',
+          capability: 'header',
+          hidden: hidden[role],
+        }),
+      ),
+      ...(divider
+        ? [
+            defineField({
+              name: 'divider',
+              title: 'Divider',
+              type: 'decorativeDivider',
+              description:
+                'A rule between the title and the intro. Drawn only when the section has both.',
+            }),
+          ]
+        : []),
+    ],
   })
 
 /**

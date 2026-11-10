@@ -5,6 +5,7 @@ import { SectionFrame } from '@/components/ui/section-frame'
 import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { CARD_SHADOW_CLASS, OWN_SHADOW, resolveCardDepth } from '@/lib/sanity/depth-options'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveTextRoles } from '@/lib/sanity/text-role'
 
@@ -51,6 +52,8 @@ export function CtaBanner({ data, isFirst }: SectionProps<'ctaBanner'>) {
           heading={heading}
           intro={text}
           design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+          divider={resolveDivider(data.headerDesign?.divider)}
+          dividerBlock={block}
           introClass={`mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted ${block}`}
         />
         <CtaGroup ctas={ctas} surface={card.surface} className={`mt-8 ${justify}`} />

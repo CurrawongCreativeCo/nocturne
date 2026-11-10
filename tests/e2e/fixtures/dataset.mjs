@@ -5508,6 +5508,75 @@ documents.push(
     ],
   },
   {
+    // A divider between a section header's title and its intro (tests/e2e/header-dividers.spec.ts): in a
+    // start-aligned and a centred section with a header of their own, in two that draw their header with
+    // no wrapper (a call to action, a logo cloud), beside a header with no divider, and one with no intro.
+    _id: 'page-header-dividers',
+    _type: 'page',
+    title: 'Header dividers',
+    slug: { _type: 'slug', current: 'header-dividers' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      ...[
+        ['hd-start', 'Start header', 'start', true, 'An introduction under the divider.'],
+        ['hd-centre', 'Centre header', 'center', true, 'An introduction under the divider.'],
+        ['hd-control', 'Control header', 'center', false, 'An introduction with no divider.'],
+        ['hd-no-intro', 'Title only', 'center', true, undefined],
+      ].map(([id, title, align, divider, intro]) => ({
+        _key: id,
+        _type: 'featuresGrid',
+        title,
+        ...(intro ? { intro } : {}),
+        columns: 2,
+        style: { _type: 'sectionStyle', align },
+        ...(divider
+          ? {
+              headerDesign: {
+                _type: 'object',
+                divider: { _type: 'decorativeDivider', style: 'line', width: 'short' },
+              },
+            }
+          : {}),
+        items: [1, 2].map((i) => ({
+          _key: key(),
+          _type: 'featureItem',
+          title: `Feature ${i}`,
+          text: 'Text.',
+          icon: image(''),
+        })),
+      })),
+      {
+        _key: 'hd-cta',
+        _type: 'ctaBanner',
+        title: 'Call to action',
+        text: 'Banner text under the divider.',
+        style: { _type: 'sectionStyle', align: 'center' },
+        headerDesign: {
+          _type: 'object',
+          divider: { _type: 'decorativeDivider', style: 'line', width: 'short' },
+        },
+        ctas: [cta('Get started', internal('page-about'))],
+      },
+      {
+        _key: 'hd-logos',
+        _type: 'logoCloud',
+        title: 'Trusted by',
+        intro: 'Teams we have worked with.',
+        style: { _type: 'sectionStyle', align: 'center' },
+        headerDesign: {
+          _type: 'object',
+          divider: { _type: 'decorativeDivider', style: 'line', width: 'short' },
+        },
+        logos: ['Acme', 'Globex', 'Initech'].map((name) => ({
+          _key: key(),
+          name,
+          image: image(name),
+        })),
+      },
+    ],
+  },
+  {
     // The blur preview is only for opaque pictures (tests/e2e/image-placeholder.spec.ts): a transparent
     // logo as the profile picture and as a wordmark, and an opaque photo as a picture.
     _id: 'page-image-placeholders',

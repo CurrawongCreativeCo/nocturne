@@ -71,7 +71,7 @@ export const ctaBanner = defineType({
         },
         validation: (rule) => rule.required(),
       }),
-      headerDesignField(),
+      headerDesignField({}, { divider: true }),
       // The banner is one card: only its depth is chosen here (its fill is the tone above).
       cardDesignField({
         description: 'The banner’s shadow and glow. Empty follows the site’s Card depth.',

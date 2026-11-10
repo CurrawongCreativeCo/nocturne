@@ -20,6 +20,7 @@ import {
   resolveCardDepth,
   resolvePictureDepth,
 } from '@/lib/sanity/depth-options'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveIconDesign, type IconDesign, type OwnIcon } from '@/lib/sanity/surface-options'
 import { resolveTextRoles, textRoleProps } from '@/lib/sanity/text-role'
@@ -131,6 +132,7 @@ export function Location({ data, isFirst, business }: SectionProps<'location'>) 
       heading={heading}
       intro={intro}
       design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+      divider={resolveDivider(data.headerDesign?.divider)}
       spacing="max-w-measure-narrow lg:col-span-2"
       block={block}
       text={text}

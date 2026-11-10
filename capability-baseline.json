@@ -111,40 +111,12 @@
       "closingTask": 276
     },
     {
-      "component": "featuresGrid",
-      "capability": "divider",
-      "scope": "section",
-      "layouts": [null],
-      "closingTask": 151
-    },
-    {
-      "component": "logoCloud",
-      "capability": "divider",
-      "scope": "section",
-      "layouts": ["grid", "marquee"],
-      "closingTask": 151
-    },
-    {
       "component": "testimonials",
       "capability": "framing",
       "scope": "card",
       "part": "avatar",
       "layouts": ["grid", "slider"],
       "closingTask": 177
-    },
-    {
-      "component": "testimonials",
-      "capability": "divider",
-      "scope": "section",
-      "layouts": ["grid", "slider"],
-      "closingTask": 151
-    },
-    {
-      "component": "faq",
-      "capability": "divider",
-      "scope": "section",
-      "layouts": [null],
-      "closingTask": 151
     },
     {
       "component": "ctaBanner",
@@ -161,41 +133,6 @@
       "closingTask": 159
     },
     {
-      "component": "ctaBanner",
-      "capability": "divider",
-      "scope": "section",
-      "layouts": [null],
-      "closingTask": 151
-    },
-    {
-      "component": "formSection",
-      "capability": "divider",
-      "scope": "section",
-      "layouts": [null],
-      "closingTask": 151
-    },
-    {
-      "component": "pricingTable",
-      "capability": "divider",
-      "scope": "section",
-      "layouts": [null],
-      "closingTask": 151
-    },
-    {
-      "component": "newsletterSignup",
-      "capability": "divider",
-      "scope": "section",
-      "layouts": [null],
-      "closingTask": 151
-    },
-    {
-      "component": "stats",
-      "capability": "divider",
-      "scope": "section",
-      "layouts": ["inline", "cards"],
-      "closingTask": 151
-    },
-    {
       "component": "gallery",
       "capability": "framing",
       "scope": "card",
@@ -204,54 +141,12 @@
       "closingTask": 177
     },
     {
-      "component": "gallery",
-      "capability": "divider",
-      "scope": "section",
-      "layouts": ["grid", "masonry", "slider"],
-      "closingTask": 151
-    },
-    {
-      "component": "location",
-      "capability": "divider",
-      "scope": "section",
-      "layouts": [null],
-      "closingTask": 151
-    },
-    {
       "component": "team",
       "capability": "framing",
       "scope": "card",
       "part": "portrait",
       "layouts": ["grid", "slider", "list"],
       "closingTask": 177
-    },
-    {
-      "component": "team",
-      "capability": "divider",
-      "scope": "section",
-      "layouts": ["grid", "slider", "list"],
-      "closingTask": 151
-    },
-    {
-      "component": "video",
-      "capability": "divider",
-      "scope": "section",
-      "layouts": ["embed", "ambient"],
-      "closingTask": 151
-    },
-    {
-      "component": "process",
-      "capability": "divider",
-      "scope": "section",
-      "layouts": ["vertical", "alternating"],
-      "closingTask": 151
-    },
-    {
-      "component": "embed",
-      "capability": "divider",
-      "scope": "section",
-      "layouts": [null],
-      "closingTask": 151
     },
     {
       "component": "linkList",
@@ -267,13 +162,6 @@
       "part": "picture",
       "layouts": ["featured"],
       "closingTask": 177
-    },
-    {
-      "component": "events",
-      "capability": "divider",
-      "scope": "section",
-      "layouts": ["list", "agenda", "featured"],
-      "closingTask": 151
     },
     {
       "component": "slotImage",
