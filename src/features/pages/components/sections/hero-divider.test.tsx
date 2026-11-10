@@ -132,6 +132,49 @@ describe('Hero divider (task 151)', () => {
     expect(before(greeting, document.querySelector('section p:not([data-greeting])'))).toBe(true)
   })
 
+  it('keeps every original margin while nothing is chosen', async () => {
+    const { document } = await draw('overlay', { showGreeting: true }, { greeting: true })
+    const intro = document.querySelector('section p:not([data-greeting])')
+    expect(intro?.className).toContain('mt-6')
+    expect(intro?.className).not.toContain('mt-0')
+    expect(document.querySelector('[data-greeting]')?.parentElement?.className).not.toContain(
+      '[&>*]:mt-0!',
+    )
+    expect(document.querySelector('a')?.closest('[class*="mt-10"]')).not.toBeNull()
+  })
+
+  it('gives the divider the space: what follows it drops its top margin', async () => {
+    for (const layout of LAYOUTS) {
+      const withIntro = await draw(layout, { dividerDesign: LINE })
+      const intro = withIntro.document.querySelector('section p')
+      expect(intro?.className, layout).toContain('mt-0')
+      expect(intro?.className, layout).not.toContain('mt-6')
+      // The buttons keep their gap below the intro.
+      expect(
+        withIntro.document.querySelector('a')?.closest('[class*="mt-10"]'),
+        layout,
+      ).not.toBeNull()
+
+      // With no intro the buttons follow the divider, so they take none.
+      const buttons = await draw(layout, { dividerDesign: LINE, description: null })
+      expect(buttons.document.querySelector('a')?.closest('[class*="mt-10"]'), layout).toBeNull()
+      expect(buttons.document.querySelector('a')?.closest('[class*="mt-0"]'), layout).not.toBeNull()
+    }
+  })
+
+  it('draws the greeting with no top margin and 24px below it, and only under a divider', async () => {
+    const { document } = await draw(
+      'overlay',
+      { dividerDesign: LINE, showGreeting: true },
+      { greeting: true },
+    )
+    const wrapper = document.querySelector('[data-greeting]')?.parentElement
+    expect(wrapper?.className).toContain('[&>*]:mt-0!')
+    expect(wrapper?.className).toContain('[&>*]:mb-6!')
+    // The intro below it has no top margin either, so the greeting's bottom margin is the only gap.
+    expect(document.querySelector('section p:not([data-greeting])')?.className).toContain('mt-0')
+  })
+
   it('is drawn whether or not the greeting is on', async () => {
     const off = await draw(
       'split',

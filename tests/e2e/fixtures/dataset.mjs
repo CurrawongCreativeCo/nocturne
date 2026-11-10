@@ -5591,13 +5591,16 @@ documents.push(
       ['editorial', 'Hero editorial', true],
       ['full-bleed', 'Hero panel', true],
       ['overlay', 'Hero control', false],
-    ].map(([variant, title, divider], index) => ({
+      ['overlay', 'Hero buttons', true, { description: undefined }],
+      ['split', 'Hero greeting', true, { showGreeting: true }],
+    ].map(([variant, title, divider, extra], index) => ({
       _key: `hrd-${index}`,
       _type: 'hero',
       variant,
       title,
       description: 'An introduction under the divider.',
       ctas: [cta('Get started', internal('page-about'))],
+      ...extra,
       ...(variant === 'editorial' ? {} : { backgroundImage: image('') }),
       ...(divider
         ? { dividerDesign: { _type: 'decorativeDivider', style: 'line', width: 'short' } }

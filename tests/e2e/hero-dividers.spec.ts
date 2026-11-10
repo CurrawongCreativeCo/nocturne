@@ -6,9 +6,10 @@ import { test } from './fixtures/test'
 /**
  * A divider under a hero's title (README, "Decorative dividers"): `/hero-dividers` has a hero in each layout
  * with one, and a Full background hero with none. It checks where the divider sits, that the space around it
- * is the divider's own (the intro's top margin collapses into it, read from the computed layout), that it
- * follows each layout's alignment, that its colour differs from what is behind it, and that nothing scrolls
- * sideways. The greeting needs a returning visitor's cookie and is covered by the unit tests.
+ * is the divider's own (what follows it gives up its top margin, so the gaps are 24px with or without
+ * margin collapsing, read from the computed layout) with an intro, with buttons alone and under a
+ * returning visitor's greeting, that it follows each layout's alignment, that its colour differs from what is
+ * behind it, and that nothing scrolls sideways.
  */
 
 const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
@@ -36,11 +37,36 @@ test.describe('hero dividers', () => {
       const rule = await divider(root).boundingBox()
       const text = await root.getByText('An introduction under the divider.').boundingBox()
       if (!heading || !rule || !text) throw new Error('Missing boxes')
-      // The divider's own 1.5rem above and below, once each: the intro's `mt-6` collapses into it.
+      // The divider's own 1.5rem above and below, once each: the intro's top margin is 0 beside it.
       expect(Math.round(rule.y - (heading.y + heading.height))).toBe(24)
       expect(Math.round(text.y - (rule.y + rule.height))).toBe(24)
     })
   }
+
+  test('is 24px from the buttons when there is no intro', async ({ page }) => {
+    const root = hero(page, 'Hero buttons')
+    const rule = await divider(root).boundingBox()
+    const button = await root.getByRole('link', { name: 'Get started' }).boundingBox()
+    if (!rule || !button) throw new Error('Missing boxes')
+    expect(Math.round(button.y - (rule.y + rule.height))).toBe(24)
+  })
+
+  test('puts the greeting 24px under the divider and the intro 24px under the greeting', async ({
+    page,
+    context,
+    baseURL,
+  }) => {
+    // A returning visitor sees the greeting; the page is requested again with the cookie.
+    await context.addCookies([{ name: 'visited', value: '1', url: baseURL ?? '' }])
+    await page.goto('/hero-dividers')
+    const root = hero(page, 'Hero greeting')
+    const rule = await divider(root).boundingBox()
+    const greeting = await root.getByText('Welcome back!').boundingBox()
+    const text = await root.getByText('An introduction under the divider.').boundingBox()
+    if (!rule || !greeting || !text) throw new Error('Missing boxes')
+    expect(Math.round(greeting.y - (rule.y + rule.height))).toBe(24)
+    expect(Math.round(text.y - (greeting.y + greeting.height))).toBe(24)
+  })
 
   test('a hero with none chosen draws none and keeps its usual space under the title', async ({
     page,
