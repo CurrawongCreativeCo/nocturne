@@ -18,6 +18,8 @@ import {
   experimentRunning,
   footerSocialOn,
   blogSettingsDesigned,
+  buttonStyleDesign,
+  withButtonStyle,
   blogSettingsLifted,
   markerUnset,
   navigationNested,
@@ -61,6 +63,9 @@ let blogSettingsPatch = null
 /** Whether the header menu has dropdowns; switched by POST /__fixture/navigation/<flat|nested>. */
 let navigationPatch = null
 
+/** Whether the site-wide button style is on (task 148); switched by POST /__fixture/button-style/<on|off>. */
+let buttonStyleOn = false
+
 /** How many queries the lake has served, for GET /__fixture/query-count. */
 let queryCount = 0
 
@@ -76,10 +81,12 @@ const BASE_ID = /^versions.[^.]+./
  */
 function datasetFor(perspective, variant) {
   // A served palette replaces the fixture's own designSettings (gradients only), like a real edit.
+  const served = designPatch ?? (buttonStyleOn ? buttonStyleDesign : null)
   const published = [
-    ...(designPatch ? documents.filter((doc) => doc._id !== designPatch._id) : documents),
-    ...(designPatch ? [designPatch] : []),
+    ...(served ? documents.filter((doc) => doc._id !== served._id) : documents),
+    ...(served ? [served] : []),
   ]
+    .map((doc) => (buttonStyleOn ? withButtonStyle(doc) : doc))
     .map((doc) =>
       settingsPatch && doc._id === 'siteIdentity' ? { ...doc, ...settingsPatch } : doc,
     )
@@ -152,6 +159,12 @@ createServer(async (req, res) => {
         : blogSettings === 'lift'
           ? blogSettingsLifted
           : null
+    res.writeHead(204).end()
+    return
+  }
+  const buttonStyle = /^\/__fixture\/button-style\/(on|off)$/.exec(url.pathname)?.[1]
+  if (req.method === 'POST' && buttonStyle) {
+    buttonStyleOn = buttonStyle === 'on'
     res.writeHead(204).end()
     return
   }

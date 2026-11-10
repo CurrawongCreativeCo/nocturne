@@ -80,6 +80,8 @@ describe('embed section', () => {
       'url',
       'height',
       'headerDesign',
+      // Styling only (task 148): a fill, border and shadow for the facade card.
+      'cardDesign',
       'access',
       'style',
       'customHeight',

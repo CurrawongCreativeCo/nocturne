@@ -40,6 +40,8 @@ describe('SERVICE_QUERY', () => {
   })
 
   it('reads the enquiry button, so a missing one is simply absent', () => {
-    expect(SERVICE_QUERY).toContain('enquiry { label, variant, link {')
+    expect(SERVICE_QUERY).toContain(
+      'enquiry { label, variant, actionStyle, actionMotion, actionColour { colour, hex }, link {',
+    )
   })
 })

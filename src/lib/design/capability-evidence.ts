@@ -101,6 +101,14 @@ export const PICTURE = {
   asset: { _type: 'reference', _ref: '$picture' },
 } as const
 
+/** One button, which a section with a call to action has: the trigger of the action pair. */
+const BUTTON = {
+  _key: 'button',
+  label: 'Book a call',
+  variant: 'primary',
+  link: { linkType: 'external', url: 'https://example.com/book' },
+} as const
+
 const CROPPED = { _type: 'sanity.imageCrop', top: 0.2, bottom: 0.2, left: 0.2, right: 0.2 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -366,6 +374,51 @@ function cardFamilyEvidence(config: CardFamilyEvidence): CapabilityEvidence[] {
         [probeOf(scope, 'mark.text')]: 'Thanks',
       },
     })),
+  ]
+}
+
+/**
+ * The surface and depth of a section that draws one card (task 148): a form or a signup form, which draws
+ * no card until the section chooses a surface or a depth (so the probe makes the card appear), and an embed,
+ * whose facade is a card already (so the probe changes it). The Cards box is the shared one (task 156's
+ * surface fields, task 146's depth fields); a chosen surface and a chosen depth each have their own case.
+ */
+function sectionCardEvidence(config: {
+  component: string
+  render: string
+  /** The card's element. It must match with the capability unset and with the probe when `change` is attributes. */
+  target: string
+  change: 'appears' | 'attributes'
+}): CapabilityEvidence[] {
+  const { component, render, target, change } = config
+  return [
+    {
+      id: `${component}.surface.card`,
+      component,
+      capability: 'surface',
+      scope: 'card',
+      field: 'cardDesign.border',
+      resolvers: [
+        { module: '@/lib/sanity/surface-options', export: 'resolveSurface' },
+        { module: '@/lib/sanity/surface-options', export: 'ringSurfaceLook' },
+      ],
+      render,
+      target,
+      change,
+      probe: { 'cardDesign.border': 'thick' },
+    },
+    {
+      id: `${component}.depth.card`,
+      component,
+      capability: 'depth',
+      scope: 'card',
+      field: 'cardDesign.shadow',
+      resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolveCardDepth' }],
+      render,
+      target,
+      change,
+      probe: { 'cardDesign.shadow': 'floating' },
+    },
   ]
 }
 
@@ -897,6 +950,31 @@ export const EVIDENCE: readonly Evidence[] = [
     base: {},
     probe: { 'settings.cardDesign.actionStyle': 'arrow' },
   },
+  // The trailing indicator on a button (task 148): the shared action fields on the `cta` object, drawn by
+  // CtaLink through ActionIndicator. None until a button chooses one, so the probe makes it appear.
+  ...(
+    [
+      ['hero', ['overlay', 'split', 'editorial', 'full-bleed']],
+      ['mediaText', ['side', 'stacked', 'overlay']],
+      ['ctaBanner', undefined],
+    ] as const
+  ).map(([component, layouts]): CapabilityEvidence => ({
+    id: `${component}.action.item`,
+    component,
+    capability: 'action',
+    scope: 'item',
+    ...(layouts ? { layouts } : {}),
+    field: 'ctas[].actionStyle',
+    resolvers: [
+      { module: '@/lib/sanity/card-action', export: 'resolveCardAction' },
+      { module: '@/components/ui/action-indicator', export: 'ActionIndicator' },
+    ],
+    render: 'src/components/ui/cta-link.tsx',
+    target: 'a [data-link-arrow]',
+    change: 'appears',
+    base: { ctas: [BUTTON] },
+    probe: { 'ctas.0.actionStyle': 'arrow' },
+  })),
   ...frameEvidence('hero', {
     mark: ['overlay', 'split', 'editorial', 'full-bleed'],
     glass: ['overlay', 'split', 'editorial'],
@@ -1261,6 +1339,12 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
   }),
+  ...sectionCardEvidence({
+    component: 'formSection',
+    render: 'src/features/pages/components/sections/form-card.tsx',
+    target: '[data-form-card]',
+    change: 'appears',
+  }),
   ...frameEvidence('formSection', {
     mark: true,
     overlay: true,
@@ -1328,6 +1412,12 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Updates', text: 'An intro.' },
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
+  ...sectionCardEvidence({
+    component: 'newsletterSignup',
+    render: 'src/features/pages/components/sections/form-card.tsx',
+    target: '[data-form-card]',
+    change: 'appears',
   }),
   ...frameEvidence('newsletterSignup', {
     mark: true,
@@ -1509,6 +1599,12 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Book', text: 'An intro.' },
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+  }),
+  ...sectionCardEvidence({
+    component: 'embed',
+    render: 'src/features/pages/components/sections/embed.tsx',
+    target: 'div.flex.flex-col.items-center.justify-center.rounded-card',
+    change: 'attributes',
   }),
   ...frameEvidence('embed', { overlay: true, glass: true, edge: true, motion: true }),
   ...cardFamilyEvidence({

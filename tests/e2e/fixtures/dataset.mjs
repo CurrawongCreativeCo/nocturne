@@ -1462,6 +1462,61 @@ export const designSettingsVariants = {
 }
 
 /**
+ * The site-wide button style (task 148, tests/e2e/button-style.spec.ts): Brand colours → Buttons with a mid-tone
+ * gradient (it reads against both the page and the inverse background), Raised depth, Strong glow and a Soft
+ * secondary. Served as the `designSettings` singleton, replacing the fixture's own, like any palette.
+ */
+export const buttonStyleDesign = {
+  _id: 'designSettings',
+  _type: 'designSettings',
+  buttonFill: 'gradient',
+  buttonGradient: 'clear',
+  buttonDepth: 'raised',
+  buttonGlow: 'strong',
+  secondaryButton: 'soft',
+  gradients: [{ _key: 'g1', name: 'Clear', angle: 135, stops: ['#2563eb', '#7c3aed'] }],
+  _updatedAt: UPDATED,
+}
+
+/**
+ * What the same spec changes in the pages while the style is on: the home hero's buttons gain an arrow that
+ * nudges (so two neighbours each have an indicator), the contact form a card with a Raised depth alone, the
+ * newsletter a transparent card with a Floating depth (which draws no shadow), and the embed page's first embed
+ * a thick border with a Raised depth. Everything else, the gallery's forms included, keeps no card.
+ */
+export function withButtonStyle(doc) {
+  const first = (change) => ({
+    ...doc,
+    pageBuilder: doc.pageBuilder.map((s, i) => (i === 0 ? change(s) : s)),
+  })
+  switch (doc._id) {
+    case 'page-home':
+      return first((hero) => ({
+        ...hero,
+        ctas: hero.ctas.map((c) => ({ ...c, actionStyle: 'arrow', actionMotion: 'nudge' })),
+      }))
+    case 'page-contact':
+      return first((section) => ({ ...section, cardDesign: { shadow: 'raised' } }))
+    case 'page-newsletter':
+      return first((section) => ({
+        ...section,
+        cardDesign: { background: { colour: 'transparent' }, shadow: 'floating' },
+      }))
+    case 'page-embed':
+      return {
+        ...doc,
+        pageBuilder: doc.pageBuilder.map((s) =>
+          s._key === 'embed-typeform'
+            ? { ...s, cardDesign: { border: 'thick', shadow: 'raised' } }
+            : s,
+        ),
+      }
+    default:
+      return doc
+  }
+}
+
+/**
  * Field changes the fake Content Lake can apply to the published Name, logo & icon document while it runs
  * (tests/e2e/ai-crawlers.spec.ts): the fixture above allows AI crawlers, this one switches them off.
  */

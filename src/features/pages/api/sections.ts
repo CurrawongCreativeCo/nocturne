@@ -279,6 +279,7 @@ export const formSectionFragment = /* groq */ `
     "headingPlain": pt::text(heading),
     ${headerDesignProjection},
     text,
+    cardDesign { ${surfaceProjection}, ${depthProjection} },
     form-> { _id, ${formFields} }
   }
 `
@@ -317,6 +318,7 @@ export const newsletterSignupFragment = /* groq */ `
     "headingPlain": pt::text(heading),
     ${headerDesignProjection},
     text,
+    cardDesign { ${surfaceProjection}, ${depthProjection} },
     submitLabel,
     successMessage
   }
@@ -474,6 +476,7 @@ export const embedFragment = /* groq */ `
     "headingPlain": pt::text(heading),
     ${headerDesignProjection},
     text,
+    cardDesign { ${surfaceProjection}, ${depthProjection} },
     provider,
     url,
     height,

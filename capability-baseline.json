@@ -190,20 +190,6 @@
     },
     {
       "component": "formSection",
-      "capability": "surface",
-      "scope": "card",
-      "layouts": [null],
-      "closingTask": 148
-    },
-    {
-      "component": "formSection",
-      "capability": "depth",
-      "scope": "card",
-      "layouts": [null],
-      "closingTask": 148
-    },
-    {
-      "component": "formSection",
       "capability": "divider",
       "scope": "section",
       "layouts": [null],
@@ -215,20 +201,6 @@
       "scope": "section",
       "layouts": [null],
       "closingTask": 151
-    },
-    {
-      "component": "newsletterSignup",
-      "capability": "surface",
-      "scope": "card",
-      "layouts": [null],
-      "closingTask": 148
-    },
-    {
-      "component": "newsletterSignup",
-      "capability": "depth",
-      "scope": "card",
-      "layouts": [null],
-      "closingTask": 148
     },
     {
       "component": "newsletterSignup",
@@ -308,20 +280,6 @@
       "scope": "section",
       "layouts": ["vertical", "alternating"],
       "closingTask": 151
-    },
-    {
-      "component": "embed",
-      "capability": "surface",
-      "scope": "card",
-      "layouts": [null],
-      "closingTask": 148
-    },
-    {
-      "component": "embed",
-      "capability": "depth",
-      "scope": "card",
-      "layouts": [null],
-      "closingTask": 148
     },
     {
       "component": "embed",
@@ -538,13 +496,6 @@
   "conditional": [
     {
       "component": "hero",
-      "capability": "action",
-      "scope": "item",
-      "layouts": ["overlay", "split", "editorial", "full-bleed"],
-      "closingTask": 148
-    },
-    {
-      "component": "hero",
       "capability": "framing",
       "scope": "section",
       "part": "background",
@@ -558,13 +509,6 @@
       "part": "background",
       "layouts": [null],
       "closingTask": 177
-    },
-    {
-      "component": "mediaText",
-      "capability": "action",
-      "scope": "item",
-      "layouts": ["side", "stacked", "overlay"],
-      "closingTask": 148
     },
     {
       "component": "mediaText",
@@ -640,13 +584,6 @@
       "part": "background",
       "layouts": [null],
       "closingTask": 177
-    },
-    {
-      "component": "ctaBanner",
-      "capability": "action",
-      "scope": "item",
-      "layouts": [null],
-      "closingTask": 148
     },
     {
       "component": "ctaBanner",

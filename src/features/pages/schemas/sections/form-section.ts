@@ -9,6 +9,7 @@ import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
 
+import { formCardField } from './form-card-field'
 import { formSectionCapabilities } from './form-section-capabilities'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
@@ -54,6 +55,12 @@ export const formSection = defineType({
         validation: (rule) => rule.required(),
       }),
       headerDesignField(),
+      formCardField({
+        subject: 'the form',
+        unset:
+          'Empty draws no card: the form sits on the section. Choosing a fill, border or shadow draws one.',
+        colour: 'ink',
+      }),
       accessField,
     ],
     { align: 'start' },

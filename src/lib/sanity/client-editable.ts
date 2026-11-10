@@ -247,7 +247,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   formSection: {
     editable: ['eyebrow', 'heading', 'title', 'text', 'form'],
-    agencyOnly: ['headerDesign', 'access', 'style'],
+    agencyOnly: ['headerDesign', 'cardDesign', 'access', 'style'],
   },
   pricingTable: {
     editable: ['eyebrow', 'heading', 'title', 'intro', 'plans'],
@@ -255,7 +255,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   newsletterSignup: {
     editable: ['eyebrow', 'heading', 'title', 'text', 'submitLabel', 'successMessage'],
-    agencyOnly: ['headerDesign', 'access', 'style'],
+    agencyOnly: ['headerDesign', 'cardDesign', 'access', 'style'],
   },
   stats: {
     editable: ['eyebrow', 'heading', 'title', 'intro', 'items'],
@@ -313,7 +313,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   embed: {
     editable: ['eyebrow', 'heading', 'title', 'text', 'provider', 'url', 'height'],
-    agencyOnly: ['headerDesign', 'access', 'style', 'customHeight'],
+    agencyOnly: ['headerDesign', 'cardDesign', 'access', 'style', 'customHeight'],
   },
   linkList: {
     editable: [
@@ -381,7 +381,8 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   cta: {
     editable: ['label', 'link', 'variant'],
-    agencyOnly: [],
+    // The shared action fields (task 148): hidden from clients in Studio.
+    agencyOnly: ['actionStyle', 'actionMotion', 'actionColour'],
   },
   seo: {
     editable: ['metaTitle', 'metaDescription', 'ogImage'],

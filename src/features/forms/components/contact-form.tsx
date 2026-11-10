@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useId, useRef, useState, type ReactNode } from 'react'
 
+import { ctaClassName } from '@/components/ui/button-style'
 import { trackEvent } from '@/lib/analytics/track-event'
 
 import { TurnstileWidget } from './turnstile-widget'
@@ -267,7 +268,7 @@ export function ContactForm({
           onClick={(event) => {
             if (pending) event.preventDefault()
           }}
-          className="inline-flex items-center justify-center rounded-button bg-cta px-6 py-3 text-small font-semibold text-cta-ink transition-colors hover:bg-cta/85"
+          className={ctaClassName('light')}
         >
           {submitLabel}
         </button>

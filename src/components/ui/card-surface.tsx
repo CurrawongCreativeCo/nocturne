@@ -1,4 +1,4 @@
-import { createElement, type ElementType, type ReactNode } from 'react'
+import { createElement, type CSSProperties, type ElementType, type ReactNode } from 'react'
 
 import { DecorativeMark, type DecorativeMarkProps } from '@/components/ui/decorative-mark'
 import { resolveDecorativeMark } from '@/lib/sanity/decorative-mark-options'
@@ -9,6 +9,56 @@ import {
   type SurfaceDesign,
 } from '@/lib/sanity/surface-options'
 import { swapClasses } from '@/lib/sanity/swap-classes'
+
+/** What the card's element is given (`cardSurfaceProps`), for a caller that draws the element itself. */
+export interface CardSurfaceProps {
+  className: string
+  style: CSSProperties | undefined
+}
+
+interface SurfaceConfig {
+  className: string
+  own: OwnRingSurface
+  shadow?: string
+  depth?: ElementDepth
+  drawnClass?: string
+  design: SurfaceDesign
+  /** The card holds a mark, which sits behind its content. */
+  hasMark?: boolean
+}
+
+/**
+ * The classes and style of a card (task 156): `CardSurface` draws them on its own element. A caller whose
+ * element is drawn elsewhere (a client component, which would otherwise import this one) takes just these.
+ * Only the classes for chosen properties are replaced, so with nothing chosen it is exactly `className`.
+ */
+export function cardSurfaceProps({
+  className,
+  own,
+  shadow = '',
+  depth,
+  drawnClass,
+  design,
+  hasMark = false,
+}: SurfaceConfig): CardSurfaceProps {
+  const look = ringSurfaceLook(design, own)
+  const swapped = swapClasses(
+    className,
+    `${own.background} ${own.border}`,
+    look.style ? look.className : `${own.background} ${own.border}`,
+  )
+  const transparent = design.background === 'transparent'
+  const lifted = depth && !transparent ? depth : undefined
+  const surface = transparent
+    ? swapClasses(swapped, shadow, '')
+    : lifted
+      ? swapClasses(swapped, shadow, lifted.className)
+      : swapped
+  return {
+    className: `${surface}${look.style && drawnClass ? ` ${drawnClass}` : ''}${hasMark ? ' relative isolate' : ''}`,
+    style: lifted ? { ...look.style, ...lifted.style } : look.style,
+  }
+}
 
 /**
  * A card family's own element, with a chosen fill and border (task 156): only the classes for chosen
@@ -48,24 +98,8 @@ export function CardSurface({
   mark?: Omit<DecorativeMarkProps, 'nested'>
   children: ReactNode
 }) {
-  const look = ringSurfaceLook(design, own)
   const hasMark = resolveDecorativeMark(mark?.input) !== null
-  const swapped = swapClasses(
-    className,
-    `${own.background} ${own.border}`,
-    look.style ? look.className : `${own.background} ${own.border}`,
-  )
-  const transparent = design.background === 'transparent'
-  const lifted = depth && !transparent ? depth : undefined
-  const surface = transparent
-    ? swapClasses(swapped, shadow, '')
-    : lifted
-      ? swapClasses(swapped, shadow, lifted.className)
-      : swapped
-  const props = {
-    className: `${surface}${look.style && drawnClass ? ` ${drawnClass}` : ''}${hasMark ? ' relative isolate' : ''}`,
-    style: lifted ? { ...look.style, ...lifted.style } : look.style,
-  }
+  const props = cardSurfaceProps({ className, own, shadow, depth, drawnClass, design, hasMark })
   // Only present with a mark: an empty slot would shift every useId inside the card.
   const card =
     mark && hasMark

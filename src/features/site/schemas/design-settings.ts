@@ -4,6 +4,18 @@ import { defineField, defineType, type StringRule } from 'sanity'
 import { HEX_PATTERN } from '@/lib/color/oklch'
 import { resolveDesignTokens, type DesignOverrides } from '@/lib/color/resolve-design-tokens'
 import {
+  BUTTON_DEPTHS,
+  BUTTON_DEPTH_DESCRIPTIONS,
+  BUTTON_DEPTH_TITLES,
+  BUTTON_FILLS,
+  BUTTON_FILL_DESCRIPTIONS,
+  BUTTON_FILL_TITLES,
+  BUTTON_GLOWS,
+  BUTTON_GLOW_DESCRIPTIONS,
+  BUTTON_GLOW_TITLES,
+  SECONDARY_BUTTONS,
+  SECONDARY_BUTTON_DESCRIPTIONS,
+  SECONDARY_BUTTON_TITLES,
   EDITORIAL_FONT_NOTE,
   HEADING_STYLE_DESCRIPTIONS,
   HEADING_STYLE_OPTIONS,
@@ -19,6 +31,16 @@ import { SHADOW_DESCRIPTIONS, SHADOW_LEVELS, SHADOW_TITLES } from '@/lib/sanity/
 import { hiddenFromClients } from '@/lib/sanity/roles'
 import { presetField } from '@/lib/sanity/schema/preset-field'
 import {
+  ButtonDepthFlatThumbnail,
+  ButtonDepthRaisedThumbnail,
+  ButtonDepthSoftThumbnail,
+  ButtonFillGradientThumbnail,
+  ButtonFillSolidThumbnail,
+  ButtonGlowOffThumbnail,
+  ButtonGlowSoftThumbnail,
+  ButtonGlowStrongThumbnail,
+  SecondaryOutlineThumbnail,
+  SecondarySoftThumbnail,
   HeadingClassicThumbnail,
   HeadingEditorialThumbnail,
   HeadingModernThumbnail,
@@ -89,6 +111,13 @@ export const designSettings = defineType({
   options: { spacingUsage: true },
   components: { input: DesignSettingsInput },
   fieldsets: [
+    {
+      name: 'buttons',
+      title: 'Buttons',
+      description:
+        'How buttons look across the whole site (agency only). Leave a choice empty to keep the buttons the site has now. Only the main button takes a gradient, depth and glow; the secondary button never glows.',
+      options: { collapsible: true, collapsed: true },
+    },
     {
       name: 'advanced',
       title: 'Advanced',
@@ -197,6 +226,109 @@ export const designSettings = defineType({
           value: level,
         })),
       },
+    }),
+    presetField({
+      name: 'buttonFill',
+      title: 'Main button fill',
+      description:
+        'Solid is the Primary colour (or the near-black default). Brand gradient fills the button from one of the gradients under Advanced; if its text cannot be read along the whole gradient, or the gradient is removed, the button stays Solid and this field says why.',
+      fieldset: 'buttons',
+      options: BUTTON_FILLS.map((value) => ({
+        value,
+        title: BUTTON_FILL_TITLES[value],
+        description: BUTTON_FILL_DESCRIPTIONS[value],
+        thumbnail: {
+          solid: ButtonFillSolidThumbnail,
+          gradient: ButtonFillGradientThumbnail,
+        }[value],
+      })),
+      initialValue: null,
+      required: false,
+      defaultValue: () => 'solid',
+      hidden: hiddenFromClients,
+      validation: (rule) =>
+        rule
+          .custom((_value, { document }) => {
+            const warning = resolveDesignTokens(
+              document as DesignOverrides | undefined,
+            ).warnings.find((item) => item.field === 'buttonGradient')
+            return warning ? warning.message : true
+          })
+          .warning(),
+    }),
+    defineField({
+      name: 'buttonGradient',
+      title: 'Main button gradient',
+      type: 'string',
+      description:
+        'One of the gradients from Advanced. Shown once the fill is Brand gradient and Advanced has a gradient to choose.',
+      fieldset: 'buttons',
+      options: { documentGradients: true },
+      hidden: (context) =>
+        hiddenFromClients(context) ||
+        (context.document as { buttonFill?: string } | undefined)?.buttonFill !== 'gradient',
+    }),
+    presetField({
+      name: 'buttonDepth',
+      title: 'Main button depth',
+      description:
+        'The shadow under the main button, from the same scale as cards. Leave it empty for no shadow.',
+      fieldset: 'buttons',
+      options: BUTTON_DEPTHS.map((value) => ({
+        value,
+        title: BUTTON_DEPTH_TITLES[value],
+        description: BUTTON_DEPTH_DESCRIPTIONS[value],
+        thumbnail: {
+          flat: ButtonDepthFlatThumbnail,
+          soft: ButtonDepthSoftThumbnail,
+          raised: ButtonDepthRaisedThumbnail,
+        }[value],
+      })),
+      initialValue: null,
+      required: false,
+      defaultValue: () => 'flat',
+      hidden: hiddenFromClients,
+    }),
+    presetField({
+      name: 'buttonGlow',
+      title: 'Main button glow',
+      description:
+        'A halo of the Primary colour around the main button only. Decorative, and strongest on a dark section. Leave it empty for no glow.',
+      fieldset: 'buttons',
+      options: BUTTON_GLOWS.map((value) => ({
+        value,
+        title: BUTTON_GLOW_TITLES[value],
+        description: BUTTON_GLOW_DESCRIPTIONS[value],
+        thumbnail: {
+          off: ButtonGlowOffThumbnail,
+          soft: ButtonGlowSoftThumbnail,
+          strong: ButtonGlowStrongThumbnail,
+        }[value],
+      })),
+      initialValue: null,
+      required: false,
+      defaultValue: () => 'off',
+      hidden: hiddenFromClients,
+    }),
+    presetField({
+      name: 'secondaryButton',
+      title: 'Secondary button style',
+      description:
+        'The button beside the main one. Outline is a thin line; Soft fill is a light tint. It never has a shadow or glow. If a tint would take text under 4.5:1 on a background, the buttons stay Outline and this field says so. Leave it empty for the outline.',
+      fieldset: 'buttons',
+      options: SECONDARY_BUTTONS.map((value) => ({
+        value,
+        title: SECONDARY_BUTTON_TITLES[value],
+        description: SECONDARY_BUTTON_DESCRIPTIONS[value],
+        thumbnail: {
+          outline: SecondaryOutlineThumbnail,
+          soft: SecondarySoftThumbnail,
+        }[value],
+      })),
+      initialValue: null,
+      required: false,
+      defaultValue: () => 'outline',
+      hidden: hiddenFromClients,
     }),
     colourField('surface', 'Background', 'The page background.', 'advanced'),
     colourField(

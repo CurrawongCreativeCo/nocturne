@@ -4,7 +4,12 @@ import { defineQuery } from 'next-sanity'
 import { servicePath } from '@/config/paths'
 import { hasLocations, hasServices } from '@/config/profile'
 import { siteUrl } from '@/config/site-url'
-import { imageFields, linkFields, portableTextFields } from '@/lib/sanity/fragments'
+import {
+  ctaIndicatorFields,
+  imageFields,
+  linkFields,
+  portableTextFields,
+} from '@/lib/sanity/fragments'
 import { urlFor } from '@/lib/sanity/image'
 import { cachedSanityFetch, PUBLISHED, TAGS, type FetchMode } from '@/lib/sanity/live'
 
@@ -31,7 +36,7 @@ export const SERVICE_QUERY = defineQuery(/* groq */ `
     faqs[] { _key, question, answer },
     "hasSections": count(sections[access != "members"]) > 0,
     "hasFaqSections": count(sections[_type == "faq" && access != "members" && count(items) > 0]) > 0,
-    enquiry { label, variant, link { ${linkFields} } },
+    enquiry { label, variant, ${ctaIndicatorFields}, link { ${linkFields} } },
     locations[defined(@->slug.current)]->{ _id, name, kind, "slug": slug.current },
     evidence[defined(@->slug.current) && @->access != "members"]->{ _id, _type, title, "slug": slug.current },
     "people": *[_type == "teamMember" && references(^._id)]
