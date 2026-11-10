@@ -5,7 +5,12 @@ import { siteLanguage } from '@/config/env'
 import { formatDate } from '@/lib/format-date'
 import { plainTextParagraphs } from '@/lib/plain-text'
 import { resolveCardDesign } from '@/lib/sanity/card-design'
-import { CARD_SHADOW_CLASS, OWN_SHADOW, resolveCardDepth } from '@/lib/sanity/depth-options'
+import {
+  CARD_SHADOW_CLASS,
+  OWN_SHADOW,
+  resolveCardDepth,
+  resolvePictureDepth,
+} from '@/lib/sanity/depth-options'
 import { resolveAvatar } from '@/lib/sanity/profile-image-options'
 import { highlightLook, textRoleProps } from '@/lib/sanity/text-role'
 import { themeColourCss } from '@/lib/sanity/theme-colour'
@@ -42,11 +47,14 @@ const OWN_SMALL = { size: 'text-small', weight: 'regular', colour: 'text-ink-mut
 export function QuoteCard({
   item,
   avatarDesign,
+  pictureDepth,
   cardDesign,
   tone,
 }: {
   item: Item
   avatarDesign?: Data['avatarDesign']
+  /** The section's `pictureDepthDesign`: a shadow and glow on the avatar (task 147). */
+  pictureDepth?: Data['pictureDepthDesign']
   cardDesign?: Data['cardDesign']
   /** The section's tone, which the card's mark is measured against. */
   tone?: string
@@ -100,6 +108,7 @@ export function QuoteCard({
           design={resolveAvatar(avatarDesign, 'circle')}
           scale={AVATAR_SCALE}
           colour={themeColourCss(avatarDesign?.ringColour)}
+          depth={resolvePictureDepth(pictureDepth)}
           className="shrink-0"
         />
         <div>

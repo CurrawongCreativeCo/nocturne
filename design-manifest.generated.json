@@ -8368,6 +8368,104 @@
           "clientEditable": false
         },
         {
+          "path": "pictureDepthDesign",
+          "kind": "object",
+          "required": false,
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.shadow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "raised",
+              "title": "Raised"
+            },
+            {
+              "value": "floating",
+              "title": "Floating"
+            }
+          ],
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glow",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "off",
+              "title": "Off"
+            },
+            {
+              "value": "soft",
+              "title": "Soft"
+            },
+            {
+              "value": "strong",
+              "title": "Strong"
+            }
+          ],
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour",
+          "kind": "object",
+          "required": false,
+          "capability": "pictureDepth",
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour.colour",
+          "kind": "string",
+          "required": false,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "pictureDepthDesign.glowColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -8847,14 +8945,30 @@
               "policy": "required",
               "scope": "card",
               "closingTask": 147,
-              "fields": [],
+              "fields": [
+                "pictureDepthDesign.shadow"
+              ],
               "availability": {
-                "grid": "pending",
-                "slider": "pending"
+                "grid": "verified",
+                "slider": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "testimonials.pictureDepth.card",
+              "field": "pictureDepthDesign.shadow",
+              "resolvers": [
+                "@/lib/sanity/depth-options#resolvePictureDepth"
+              ],
+              "render": "src/features/pages/components/sections/testimonials/quote-card.tsx",
+              "target": "[data-profile-image]",
+              "cases": [
+                "testimonials.pictureDepth.card@grid",
+                "testimonials.pictureDepth.card@slider"
+              ]
+            }
+          ]
         },
         "overlay": {
           "policies": [

@@ -3440,6 +3440,51 @@ documents.push({
 })
 
 /**
+ * Picture depth on the Testimonials' avatars (tests/e2e/picture-depth-testimonials.spec.ts): a grid and a
+ * slider, each with nothing chosen and with Floating on a large, ringed avatar, plus the other levels.
+ */
+const depthQuotes = (id, count) => sliderQuotes(id).slice(0, count)
+const depthTestimonials = (id, title, variant, extra = {}) => ({
+  _key: id,
+  _type: 'testimonials',
+  variant,
+  title,
+  items: depthQuotes(id, variant === 'slider' ? 6 : 3),
+  ...extra,
+})
+documents.push({
+  _id: 'page-picture-depth-testimonials',
+  _type: 'page',
+  title: 'Picture depth, testimonials',
+  slug: { _type: 'slug', current: 'picture-depth-testimonials' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    depthText(1),
+    depthTestimonials('depth-t-grid-none', 'Grid nothing chosen', 'grid'),
+    depthTestimonials('depth-t-grid-floating', 'Grid floating', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'soft' }),
+    }),
+    depthTestimonials('depth-t-grid-flat', 'Grid flat and glow off', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthTestimonials('depth-t-grid-raised', 'Grid raised ring', 'grid', {
+      avatarDesign: { _type: 'object', size: 'large', ring: 'line' },
+      pictureDepthDesign: pictureDepth({ shadow: 'raised' }),
+    }),
+    depthTestimonials('depth-t-grid-glow', 'Grid glow only', 'grid', {
+      pictureDepthDesign: pictureDepth({ glow: 'strong' }),
+    }),
+    depthText(2),
+    depthTestimonials('depth-t-slider-none', 'Slider nothing chosen', 'slider'),
+    depthTestimonials('depth-t-slider-floating', 'Slider floating', 'slider', {
+      avatarDesign: { _type: 'object', size: 'large', ring: 'gradient' },
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(3),
+  ],
+})
+
+/**
  * The same long page twice, once with no picture depth and once with Floating on every parallax picture,
  * for the scrolling comparison (tests/e2e/picture-depth-performance.spec.ts). Fake Content Lake only; not indexed.
  */

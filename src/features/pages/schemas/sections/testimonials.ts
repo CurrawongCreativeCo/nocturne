@@ -13,6 +13,7 @@ import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
+import { pictureDepthFields } from '@/lib/sanity/schema/surface-design'
 import {
   TESTIMONIAL_CARD_PRESETS,
   TESTIMONIAL_ROLE_COLOURS,
@@ -194,6 +195,8 @@ export const testimonials = defineType({
         title: 'Avatar',
         description: 'Size and ring for the author’s picture. Medium with no ring is the default.',
       }),
+      // A shadow and glow on the author's picture (task 147), beside Avatar so it never changes its size or ring.
+      pictureDepthFields({}),
       accessField,
       // Shown first in the Content tab.
       variantField(TESTIMONIALS_VARIANTS),

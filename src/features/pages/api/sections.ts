@@ -223,6 +223,7 @@ export const testimonialsFragment = /* groq */ `
       mark { ${decorativeMarkFields} }
     },
     avatarDesign { ${avatarDesignFields} },
+    ${pictureDepthProjection},
     items[] {
       _key,
       quote,

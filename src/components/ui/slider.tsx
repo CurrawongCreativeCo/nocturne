@@ -57,6 +57,12 @@ interface Props {
    * down to close) isn't also dragging this one sideways. Off by default.
    */
   directionLock?: boolean
+  /**
+   * More room below the slides for a shadow that reaches past the 12px every slider allows (picture depth,
+   * task 147). The viewport grows by the same amount it is pulled back by, so the slides' width, the
+   * scroll distances and the page's layout are exactly what they were. Off by default.
+   */
+  bleed?: boolean
   ref?: Ref<SliderHandle>
   className?: string
   /** One child per slide. */
@@ -142,6 +148,7 @@ export function Slider({
   onIndexChange,
   dots = true,
   directionLock = false,
+  bleed = false,
   ref,
   className = '',
   children,
@@ -355,7 +362,7 @@ export function Slider({
         role={ready ? undefined : 'group'}
         aria-label={ready ? undefined : label}
         tabIndex={ready ? undefined : 0}
-        className={`-m-3 [scrollbar-width:none] p-3 [&::-webkit-scrollbar]:hidden ${
+        className={`${bleed ? '-mx-3 -mt-3 -mb-6' : '-m-3'} [scrollbar-width:none] ${bleed ? 'px-3 pt-3 pb-6' : 'p-3'} [&::-webkit-scrollbar]:hidden ${
           ready ? 'overflow-hidden' : 'snap-x snap-mandatory scroll-px-3 overflow-x-auto'
         }`}
       >

@@ -1158,6 +1158,27 @@ export const EVIDENCE: readonly Evidence[] = [
     base: TESTIMONIAL_CONTENT,
     probe: { 'cardDesign.border': 'thick' },
   },
+  // A shadow and glow on the author's picture (task 147): the avatar's outer element, at both layouts.
+  {
+    id: 'testimonials.pictureDepth.card',
+    component: 'testimonials',
+    capability: 'pictureDepth',
+    scope: 'card',
+    layouts: TESTIMONIAL_LAYOUTS,
+    field: 'pictureDepthDesign.shadow',
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolvePictureDepth' }],
+    render: 'src/features/pages/components/sections/testimonials/quote-card.tsx',
+    target: '[data-profile-image]',
+    change: 'attributes',
+    base: {
+      ...TESTIMONIAL_CONTENT,
+      items: (TESTIMONIAL_CONTENT.items as Record<string, unknown>[]).map((item) => ({
+        ...item,
+        avatar: PICTURE,
+      })),
+    },
+    probe: { 'pictureDepthDesign.shadow': 'floating' },
+  },
   {
     id: 'testimonials.depth.card',
     component: 'testimonials',

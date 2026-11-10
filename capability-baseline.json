@@ -134,13 +134,6 @@
     },
     {
       "component": "testimonials",
-      "capability": "pictureDepth",
-      "scope": "card",
-      "layouts": ["grid", "slider"],
-      "closingTask": 147
-    },
-    {
-      "component": "testimonials",
       "capability": "divider",
       "scope": "section",
       "layouts": ["grid", "slider"],

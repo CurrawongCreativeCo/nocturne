@@ -2676,6 +2676,18 @@ exports[`design capability evidence > testimonials.overlay.section@slider: the p
 ]
 `;
 
+exports[`design capability evidence > testimonials.pictureDepth.card@grid: the probe changes the registered target 1`] = `
+[
+  "<span class="block w-fit shrink-0" data-profile-image="circle">",
+]
+`;
+
+exports[`design capability evidence > testimonials.pictureDepth.card@slider: the probe changes the registered target 1`] = `
+[
+  "<span class="block w-fit shrink-0" data-profile-image="circle">",
+]
+`;
+
 exports[`design capability evidence > testimonials.surface.card@grid: the probe changes the registered target 1`] = `
 [
   "<figure class="flex h-full w-full flex-col rounded-card bg-surface p-8 shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line">",

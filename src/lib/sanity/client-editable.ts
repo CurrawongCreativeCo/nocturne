@@ -244,7 +244,15 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   testimonials: {
     editable: ['eyebrow', 'heading', 'title', 'intro', 'items'],
-    agencyOnly: ['variant', 'cardDesign', 'headerDesign', 'avatarDesign', 'access', 'style'],
+    agencyOnly: [
+      'variant',
+      'cardDesign',
+      'headerDesign',
+      'avatarDesign',
+      'pictureDepthDesign',
+      'access',
+      'style',
+    ],
   },
   faq: {
     editable: ['eyebrow', 'heading', 'title', 'intro', 'items'],

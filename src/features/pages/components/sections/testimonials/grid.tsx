@@ -17,6 +17,7 @@ export function TestimonialsGrid({ data, isFirst }: SectionProps<'testimonials'>
             <QuoteCard
               item={item}
               avatarDesign={data.avatarDesign}
+              pictureDepth={data.pictureDepthDesign}
               cardDesign={data.cardDesign}
               tone={tone}
             />
