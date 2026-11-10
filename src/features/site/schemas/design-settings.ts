@@ -314,7 +314,7 @@ export const designSettings = defineType({
       name: 'secondaryButton',
       title: 'Secondary button style',
       description:
-        'The button beside the main one. Outline is a thin line; Soft fill is a light tint. It never has a shadow or glow. Leave it empty for the outline.',
+        'The button beside the main one. Outline is a thin line; Soft fill is a light tint. It never has a shadow or glow. If a tint would take text under 4.5:1 on a background, the buttons stay Outline and this field says so. Leave it empty for the outline.',
       fieldset: 'buttons',
       options: SECONDARY_BUTTONS.map((value) => ({
         value,

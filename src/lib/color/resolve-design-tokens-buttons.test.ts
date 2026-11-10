@@ -216,3 +216,97 @@ describe('Brand gradient fill', () => {
     expect(rest).toEqual(solid.vars)
   })
 })
+
+describe('Soft fill falls back to Outline where it would lower the text under 4.5:1', () => {
+  const SOFT = { secondaryButton: 'soft' } as const
+  const secondaryVars = (vars: Record<string, string>) =>
+    Object.keys(vars).filter((name) => name.startsWith('--button-secondary-'))
+  const softWarnings = (resolved: ReturnType<typeof resolveDesignTokens>) =>
+    resolved.warnings.filter((warning) => warning.field === 'secondaryButton')
+  /** What the pressed state paints behind the text: `currentColor` at 26% over the background. */
+  const pressed = (background: string, ink: string, alpha = 0.26) => {
+    const mix = (a: number, b: number) => Math.round(a + (b - a) * alpha)
+    const [r, g, b] = [1, 3, 5].map((at) =>
+      mix(
+        Number.parseInt(background.slice(at, at + 2), 16),
+        Number.parseInt(ink.slice(at, at + 2), 16),
+      ),
+    )
+    return `#${[r, g, b].map((channel) => (channel ?? 0).toString(16).padStart(2, '0')).join('')}`
+  }
+
+  it('reproduces the audit’s pair: #767676 on white is 4.54:1 before Soft fill and under 4.5:1 with it', () => {
+    expect(contrastRatio('#767676', '#ffffff')).toBeGreaterThanOrEqual(4.5)
+    expect(contrastRatio('#767676', pressed('#ffffff', '#767676'))).toBeLessThan(4.5)
+    // Even the resting 10% tint takes it to about 4.0:1.
+    expect(contrastRatio('#767676', pressed('#ffffff', '#767676', 0.1))).toBeCloseTo(4.02, 1)
+    const resolved = resolveDesignTokens({ ...SOFT, ink: '#767676', surface: '#ffffff' })
+    expect(secondaryVars(resolved.vars)).toEqual([])
+    expect(resolved.errors).toEqual([])
+    const [warning] = softWarnings(resolved)
+    expect(warning?.message).toContain('Text on the background from 4.5:1 to')
+    expect(warning?.message).toContain('secondary buttons stay Outline')
+  })
+
+  it('does the same on the Alternate background', () => {
+    const colours = { ink: '#6b6b6b', surface: '#ffffff', surfaceAlt: '#f3f3f3' }
+    expect(contrastRatio(colours.ink, colours.surfaceAlt)).toBeGreaterThanOrEqual(4.5)
+    expect(contrastRatio(colours.ink, pressed(colours.surfaceAlt, colours.ink))).toBeLessThan(4.5)
+    const resolved = resolveDesignTokens({ ...SOFT, ...colours })
+    expect(secondaryVars(resolved.vars)).toEqual([])
+    expect(softWarnings(resolved)[0]?.message).toContain('Text on the alternate background')
+  })
+
+  it('does the same for Inverse text on the Inverse background', () => {
+    // Inverse text is derived from the background, so a mid-tone Inverse background is the close case.
+    const resolved = resolveDesignTokens({ ...SOFT, surfaceInverse: '#767676' })
+    const { inkInverse, surfaceInverse } = resolved.colours
+    expect(contrastRatio(inkInverse, surfaceInverse)).toBeGreaterThanOrEqual(4.5)
+    expect(contrastRatio(inkInverse, pressed(surfaceInverse, inkInverse))).toBeLessThan(4.5)
+    expect(secondaryVars(resolved.vars)).toEqual([])
+    expect(softWarnings(resolved)[0]?.message).toContain('Inverse text on the inverse background')
+  })
+
+  it('keeps Soft fill when every tone still reads, even close to the threshold', () => {
+    // #595959 on white: 7:1 before, about 4.7:1 at the strongest tint.
+    const near = { ink: '#595959', surface: '#ffffff', surfaceAlt: '#ffffff' }
+    expect(contrastRatio(near.ink, pressed(near.surface, near.ink))).toBeGreaterThanOrEqual(4.5)
+    const resolved = resolveDesignTokens({ ...SOFT, ...near })
+    expect(secondaryVars(resolved.vars).sort()).toEqual([
+      '--button-secondary-fill',
+      '--button-secondary-fill-active',
+      '--button-secondary-fill-hover',
+      '--button-secondary-ring',
+    ])
+    expect(softWarnings(resolved)).toEqual([])
+  })
+
+  it('keeps Soft fill on the default colours, a Primary and the dark appearance', () => {
+    for (const extra of [{}, { primary: '#0b6e4f' }, { appearance: 'dark' }]) {
+      const resolved = resolveDesignTokens({ ...SOFT, ...extra })
+      expect(secondaryVars(resolved.vars)).toHaveLength(4)
+      expect(softWarnings(resolved)).toEqual([])
+    }
+  })
+
+  it('changes nothing for Outline or an unset choice, whatever the colours', () => {
+    for (const secondaryButton of ['outline', undefined]) {
+      const resolved = resolveDesignTokens({ secondaryButton, ink: '#767676', surface: '#ffffff' })
+      expect(secondaryVars(resolved.vars)).toEqual([])
+      expect(softWarnings(resolved)).toEqual([])
+    }
+  })
+
+  it('leaves the other button variables alone when it falls back', () => {
+    const resolved = resolveDesignTokens({
+      ...SOFT,
+      buttonDepth: 'raised',
+      buttonGlow: 'soft',
+      ink: '#767676',
+      surface: '#ffffff',
+    })
+    expect(resolved.vars['--button-depth']).toBe('var(--shadow-raised)')
+    expect(resolved.vars['--button-shadow']).toContain('var(--shadow-raised)')
+    expect(secondaryVars(resolved.vars)).toEqual([])
+  })
+})

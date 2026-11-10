@@ -5,7 +5,7 @@ import { siteDecisionVars, type SiteDecisionInput } from '@/lib/design/site-deci
 
 import { adjustLightnessForContrast, contrastRatio } from './contrast'
 import { brandGradients, gradientInk, gradientSamples, type GradientInput } from './gradients'
-import { HEX_PATTERN, hexToOklch, oklchToHex } from './oklch'
+import { HEX_PATTERN, hexToOklch, hexToRgb, oklchToHex, rgbToHex } from './oklch'
 
 /** The generated token colours, camelCase hex (what `colorHex` in tokens.generated.ts holds). */
 export type BaseColours = Readonly<Record<keyof typeof colorHex, string>>
@@ -428,6 +428,21 @@ export function resolveDesignTokens(
   Object.assign(vars, siteDecisionVars(input))
   // The main button's depth and glow are one box-shadow list, so the button reads a single variable
   // (and, while neither is chosen, none: the rule then hands back to the button's own classes).
+  // Soft fill tints the secondary towards its own text, which can only lower the text's contrast. Where that
+  // would take a tone's text under 4.5:1 (checked at the strongest tint, the pressed state), the secondary
+  // stays Outline everywhere rather than carry a fill that fails somewhere: the variables are not emitted.
+  if (input.secondaryButton === 'soft' && vars['--button-secondary-fill'] !== undefined) {
+    const failing = softFillFailures(colours)
+    if (failing.length > 0) {
+      for (const name of Object.keys(vars)) {
+        if (name.startsWith('--button-secondary-')) Reflect.deleteProperty(vars, name)
+      }
+      warnings.push({
+        field: 'secondaryButton',
+        message: `Soft fill would take ${failing.join('; ')}, so secondary buttons stay Outline. Choose a darker Text or a lighter Background (or the reverse on the inverse sections), or keep Outline.`,
+      })
+    }
+  }
   const buttonShadows = [vars['--button-depth'], vars['--button-glow']].filter(Boolean)
   if (buttonShadows.length > 0) vars['--button-shadow'] = buttonShadows.join(', ')
 
@@ -469,6 +484,36 @@ export function resolveDesignTokens(
     colours,
     accent: { background: colours.accent, foreground: colours.accentInk },
   }
+}
+
+/** The strongest tint of Soft fill: the pressed state (`--button-secondary-fill-active`, `currentColor` 26%). */
+const SOFT_FILL_STRONGEST = 0.26
+
+/** `ink` laid over `background` at `alpha`: what `color-mix(in srgb, currentColor <alpha>, transparent)` paints. */
+function tinted(background: string, ink: string, alpha: number): string {
+  const [bg, fg] = [hexToRgb(background), hexToRgb(ink)]
+  return rgbToHex(bg.map((channel, index) => channel + ((fg[index] ?? channel) - channel) * alpha))
+}
+
+/**
+ * The tones whose secondary text Soft fill would take under 4.5:1 at its strongest tint, as words. The
+ * secondary's text is Text on the page and Alternate backgrounds and Inverse text on the Inverse background;
+ * a section in the Primary colour keeps its outline (globals.css), so it is not measured here.
+ */
+function softFillFailures(colours: BaseColours): string[] {
+  const pairs = [
+    ['Text on the background', colours.ink, colours.surface],
+    ['Text on the alternate background', colours.ink, colours.surfaceAlt],
+    ['Inverse text on the inverse background', colours.inkInverse, colours.surfaceInverse],
+  ] as const
+  return pairs.flatMap(([label, ink, background]) => {
+    const after = contrastRatio(ink, tinted(background, ink, SOFT_FILL_STRONGEST))
+    return after < TEXT_RATIO
+      ? [
+          `${label} from ${contrastRatio(ink, background).toFixed(1)}:1 to ${after.toFixed(1)}:1 when pressed`,
+        ]
+      : []
+  })
 }
 
 /** Whether a surface reads as dark (decides which way its tints and borders step). */
