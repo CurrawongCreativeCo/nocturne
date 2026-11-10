@@ -193,7 +193,7 @@ exports[`the design capability contract > gallery: reports what it offers today 
     "framing conditional section/background @masonry: pending (177)",
     "framing conditional section/background @slider: pending (177)",
     "pictureDepth required card @grid: verified",
-    "pictureDepth required card @masonry: pending (147)",
+    "pictureDepth required card @masonry: verified",
     "pictureDepth required card @slider: verified",
     "overlay required section @grid: verified",
     "overlay required section @masonry: verified",

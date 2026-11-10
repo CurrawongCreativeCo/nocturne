@@ -18972,12 +18972,24 @@
               ],
               "availability": {
                 "grid": "verified",
-                "masonry": "pending",
+                "masonry": "verified",
                 "slider": "verified"
               }
             }
           ],
           "evidence": [
+            {
+              "id": "gallery.pictureDepth.masonry",
+              "field": "pictureDepthDesign.shadow",
+              "resolvers": [
+                "@/lib/sanity/depth-options#resolvePictureDepth"
+              ],
+              "render": "src/features/pages/components/sections/gallery/shared.tsx",
+              "target": "button[aria-haspopup=\"dialog\"]",
+              "cases": [
+                "gallery.pictureDepth.masonry@masonry"
+              ]
+            },
             {
               "id": "gallery.pictureDepth.card",
               "field": "pictureDepthDesign.shadow",

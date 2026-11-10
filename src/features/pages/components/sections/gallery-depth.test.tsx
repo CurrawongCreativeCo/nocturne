@@ -188,11 +188,76 @@ describe('Gallery slider: the room for the shadow', () => {
   })
 })
 
-describe('Gallery masonry: picture depth is not drawn yet', () => {
-  it('ignores a stored picture depth, so the layout is exactly as it was', async () => {
+describe('Gallery masonry: picture depth', () => {
+  const tileButtons = (document: Document) => buttons(document)
+
+  it('is drawn exactly as before while nothing is chosen, however it is stored empty', async () => {
     const base = await draw('masonry')
-    const stored = await draw('masonry', { pictureDepthDesign: FLOATING })
-    expect(stored.html).toBe(base.html)
-    expect(stored.html).not.toContain('depth-filter')
+    expect(tileButtons(base.document).length).toBeGreaterThan(0)
+    expect(base.html).not.toContain('depth-filter')
+    for (const stored of UNSET) {
+      const same = await draw('masonry', { pictureDepthDesign: stored })
+      expect(same.html, JSON.stringify(stored)).toBe(base.html)
+    }
+  })
+
+  it('puts the filter on each tile’s button, which is its outline, and nowhere inside it', async () => {
+    const { document } = await draw('masonry', { pictureDepthDesign: FLOATING })
+    const all = tileButtons(document)
+    expect(all.length).toBeGreaterThan(0)
+    for (const button of all) {
+      expect(button.className).toContain('[filter:var(--depth-filter)]')
+      expect(button.getAttribute('style')).toContain('--depth-picture-floating')
+      for (const inner of button.querySelectorAll('*')) {
+        expect(inner.className).not.toContain('depth-filter')
+      }
+    }
+    // The button keeps the classes that clip and round the picture, in the order it had them.
+    expect(all[0]?.className).toMatch(
+      /^group block w-full overflow-hidden rounded-card bg-surface-alt \[filter:var\(--depth-filter\)\]$/,
+    )
+  })
+
+  it('changes nothing about the button’s name, its role, the picture or the order', async () => {
+    const before = await draw('masonry')
+    const after = await draw('masonry', { pictureDepthDesign: FLOATING })
+    const describeTiles = (document: Document) =>
+      [...document.querySelectorAll('ul > li')].map((li) => {
+        const button = li.querySelector('button')
+        const img = li.querySelector('img')
+        return [
+          li.className,
+          button?.getAttribute('aria-label'),
+          button?.getAttribute('aria-haspopup'),
+          button?.getAttribute('type'),
+          img?.className,
+          img?.getAttribute('alt'),
+          img?.getAttribute('src'),
+        ]
+      })
+    expect(describeTiles(after.document)).toEqual(describeTiles(before.document))
+    expect(describeTiles(after.document).length).toBeGreaterThan(0)
+  })
+
+  it('draws each level through the shared tokens, a glow alone, and a glow colour', async () => {
+    const styleOf = async (stored: Record<string, unknown>) =>
+      tileButtons(
+        (await draw('masonry', { pictureDepthDesign: stored })).document,
+      )[0]?.getAttribute('style')
+    expect(await styleOf({ shadow: 'soft' })).toBe('--depth-filter:var(--depth-picture-soft)')
+    expect(await styleOf({ shadow: 'raised' })).toBe('--depth-filter:var(--depth-picture-raised)')
+    expect(await styleOf({ shadow: 'floating' })).toBe(
+      '--depth-filter:var(--depth-picture-floating)',
+    )
+    expect(await styleOf({ glow: 'strong' })).toMatch(/^--depth-filter:drop-shadow\(0 0 14px/)
+    expect(
+      await styleOf({ shadow: 'soft', glow: 'soft', glowColour: { colour: 'highlight' } }),
+    ).toContain('var(--color-highlight')
+  })
+
+  it('ignores an Image design stored on it: Masonry keeps every picture’s own shape', async () => {
+    const plain = await draw('masonry', { pictureDepthDesign: FLOATING })
+    const designed = await draw('masonry', { imageDesign: CIRCLE, pictureDepthDesign: FLOATING })
+    expect(designed.html).toBe(plain.html)
   })
 })

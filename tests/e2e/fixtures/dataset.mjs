@@ -3589,6 +3589,30 @@ documents.push({
       ],
       pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
     }),
+    depthGallery('depth-g-masonry-none', 'Gallery masonry nothing chosen', 'masonry'),
+    depthGallery('depth-g-masonry-floating', 'Gallery masonry floating', 'masonry', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthGallery('depth-g-masonry-glow', 'Gallery masonry floating strong glow', 'masonry', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthGallery('depth-g-masonry-flat', 'Gallery masonry flat and glow off', 'masonry', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthGallery('depth-g-masonry-odd', 'Gallery masonry transparent and cropped', 'masonry', {
+      images: [
+        { ...pattern(), _key: 'modd-transparent', alt: 'A transparent picture' },
+        {
+          _type: 'image',
+          _key: 'modd-cropped',
+          alt: 'A cropped picture',
+          asset: ref(IMAGE_ASSET_ID),
+          crop: { _type: 'sanity.imageCrop', top: 0.1, bottom: 0.1, left: 0.2, right: 0.2 },
+        },
+        ...galleryImages('depth-g-modd', 1),
+      ],
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
     depthText(2),
     depthGallery('depth-g-slider-none', 'Gallery slider nothing chosen', 'slider'),
     depthGallery('depth-g-slider-glow', 'Gallery slider floating strong glow', 'slider', {

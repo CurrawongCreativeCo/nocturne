@@ -80,7 +80,7 @@ export function Thumbnail({
   /** Crop to a 4:3 box (the shape, motion and frame of the section's `imageDesign`); otherwise the picture keeps its own shape. */
   fill?: boolean
   design?: GalleryData['imageDesign']
-  /** Picture depth (task 147, `resolvePictureDepth`): a shadow and glow on the tile's still box. */
+  /** Picture depth (task 147, `resolvePictureDepth`): a shadow and glow on the tile's still box (Masonry: its button). */
   depth?: ElementDepth | undefined
 }) {
   const alt = stegaClean(image.alt)
@@ -88,7 +88,15 @@ export function Thumbnail({
   const loading = eager ? 'eager' : 'lazy'
 
   return (
-    <OpenImageButton index={index} label={label} className={className}>
+    // Masonry draws a plain picture inside its button, which is the tile's outline (it clips and rounds the picture),
+    // so the depth goes on the button: a filter is not cut by the element's own overflow. Grid and Slider put it on
+    // the still box inside the button instead (FramedImage), so the button there is as it always was.
+    <OpenImageButton
+      index={index}
+      label={label}
+      className={!fill && depth ? `${className} ${depth.className}` : className}
+      style={!fill ? depth?.style : undefined}
+    >
       {fill ? (
         // `clip` keeps the hover zoom inside the picture's shape, even with no design set.
         <FramedImage

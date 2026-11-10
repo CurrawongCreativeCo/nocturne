@@ -113,11 +113,9 @@ export const gallery = defineType({
       imageDesignField({
         hidden: ({ parent }) => (parent as { variant?: string } | undefined)?.variant === 'masonry',
       }),
-      // A shadow and glow on every tile (task 147), beside Image design so it never moves with it. Masonry draws its
-      // tiles another way and adopts it separately.
-      pictureDepthFields({
-        hidden: ({ parent }) => (parent as { variant?: string } | undefined)?.variant === 'masonry',
-      }),
+      // A shadow and glow on every tile (task 147), beside Image design so it never moves with it: on every layout,
+      // Masonry too (which has no Image design to hold it).
+      pictureDepthFields({}),
       headerDesignField(),
       accessField,
       // Shown first in the Content tab.

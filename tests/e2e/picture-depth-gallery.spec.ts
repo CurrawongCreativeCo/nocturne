@@ -395,6 +395,192 @@ test.describe('slider', () => {
   })
 })
 
+test.describe('masonry', () => {
+  test.use({ reducedMotion: 'reduce' })
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto(PAGE)
+    await page.waitForLoadState('networkidle')
+    await page.evaluate(() => document.fonts.ready)
+  })
+
+  const NAMES = (scope: Locator) =>
+    buttons(scope).evaluateAll((all) =>
+      all.map((button) => button.getAttribute('aria-label')?.replace(/: .*/, '') ?? ''),
+    )
+  const RECTS = (scope: Locator) =>
+    buttons(scope).evaluateAll((all) =>
+      all.map((button) => {
+        const { x, y, width, height } = button.getBoundingClientRect()
+        return [
+          Math.round(x * 10) / 10,
+          Math.round(y * 10) / 10,
+          Math.round(width * 10) / 10,
+          Math.round(height * 10) / 10,
+        ]
+      }),
+    )
+  const offsetOf = async (scope: Locator) => (await scope.boundingBox())?.y ?? 0
+
+  test('nothing chosen draws no filter on any tile', async ({ page }) => {
+    for (const heading of ['Gallery masonry nothing chosen', 'Gallery masonry flat and glow off']) {
+      const all = await buttons(section(page, heading)).all()
+      expect(all.length, heading).toBeGreaterThan(0)
+      for (const button of all) expect(await filterOf(button), heading).toBe('none')
+    }
+  })
+
+  test('Floating and Floating with a Strong glow put the shadow on every tile’s button', async ({
+    page,
+  }) => {
+    for (const [heading, expected] of [
+      ['Gallery masonry floating', '0px 20px 28px'],
+      ['Gallery masonry floating strong glow', '0px 0px 14px'],
+    ] as const) {
+      const all = await buttons(section(page, heading)).all()
+      expect(all).toHaveLength(6)
+      for (const button of all) expect(await filterOf(button), heading).toContain(expected)
+    }
+  })
+
+  test('the columns, the order and every tile’s size and place are exactly what they were', async ({
+    page,
+  }) => {
+    const plain = section(page, 'Gallery masonry nothing chosen')
+    const depth = section(page, 'Gallery masonry floating strong glow')
+    expect(await NAMES(depth)).toEqual(await NAMES(plain))
+    // Same content, same width: each tile sits where the unset one does, relative to its section.
+    const [a, b] = [await RECTS(plain), await RECTS(depth)]
+    const [ay, by] = [await offsetOf(plain), await offsetOf(depth)]
+    expect(b.length).toBe(a.length)
+    for (const [i, rect] of b.entries()) {
+      const was = a[i] ?? []
+      expect(rect[0], `tile ${i + 1} x`).toBeCloseTo(was[0] ?? 0, 0)
+      expect(rect[2], `tile ${i + 1} width`).toBeCloseTo(was[2] ?? 0, 0)
+      expect(rect[3], `tile ${i + 1} height`).toBeCloseTo(was[3] ?? 0, 0)
+      expect((rect[1] ?? 0) - by, `tile ${i + 1} y`).toBeCloseTo((was[1] ?? 0) - ay, 0)
+    }
+  })
+
+  test('the filter changes neither the layout nor the page', async ({ page }) => {
+    const scope = section(page, 'Gallery masonry floating strong glow')
+    const read = () =>
+      scope.evaluate((el) => ({
+        tiles: [...el.querySelectorAll('button')].map((b) => {
+          const { x, y, width, height } = b.getBoundingClientRect()
+          return [x, y, width, height]
+        }),
+        height: el.getBoundingClientRect().height,
+        page: document.documentElement.scrollHeight,
+      }))
+    const before = await read()
+    await scope.evaluate((el) => {
+      for (const b of el.querySelectorAll<HTMLElement>('button')) {
+        b.style.setProperty('filter', 'none', 'important')
+      }
+    })
+    expect(await read()).toEqual(before)
+  })
+
+  test('each tile is still one button with its own name, and its focus ring is as visible as before', async ({
+    page,
+  }, testInfo) => {
+    const ring = (b: Locator) =>
+      b.evaluate((el) => {
+        const css = getComputedStyle(el)
+        return [css.outlineStyle, css.outlineWidth, css.outlineOffset, css.outlineColor]
+      })
+    const plain = buttons(section(page, 'Gallery masonry nothing chosen')).first()
+    const depth = buttons(section(page, 'Gallery masonry floating strong glow')).first()
+    await expect(depth).toHaveAccessibleName(/^Open image 1 of 6/)
+    await expect(depth).toHaveRole('button')
+    // Each button's ring is read while it has the focus.
+    const rings: string[][] = []
+    for (const button of [plain, depth]) {
+      await button.scrollIntoViewIfNeeded()
+      await button.focus()
+      await page.keyboard.press('Shift+Tab')
+      await page.keyboard.press('Tab')
+      await expect(button).toBeFocused()
+      expect(await button.evaluate((el) => el.matches(':focus-visible'))).toBe(true)
+      rings.push(await ring(button))
+    }
+    // The same ring (style, width, offset and colour) drawn on a filtered button as on a plain one.
+    expect(rings[0]?.[0]).not.toBe('none')
+    expect(rings[1]).toEqual(rings[0])
+    await attach(testInfo, 'masonry focus ring, floating strong glow', depth)
+  })
+
+  test('clicking or pressing Enter on a tile opens that picture in the lightbox, which has no tile shadow', async ({
+    page,
+  }) => {
+    const scope = section(page, 'Gallery masonry floating strong glow')
+    const third = buttons(scope).nth(2)
+    await third.scrollIntoViewIfNeeded()
+    await third.click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toBeVisible()
+    expect(
+      await dialog.evaluate(
+        (el) => el.querySelectorAll('[style*="depth-filter"], [class*="depth-filter"]').length,
+      ),
+    ).toBe(0)
+    await page.keyboard.press('Escape')
+    await expect(dialog).toBeHidden()
+    await expect(third).toBeFocused()
+    await page.keyboard.press('Enter')
+    await expect(dialog).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(third).toBeFocused()
+  })
+
+  test('a tile’s shadow is not cut off by anything that clips, and a transparent or cropped picture’s follows its box', async ({
+    page,
+  }, testInfo) => {
+    const scope = section(page, 'Gallery masonry floating strong glow')
+    for (const index of [0, 1, 3, 5]) {
+      const { clippedBy, edge, strongest, where } = await clipReading(
+        page,
+        buttons(scope).nth(index),
+      )
+      expect(clippedBy, 'nothing around a masonry tile clips').toBe('')
+      expect(edge, where).toBeLessThan(Math.max(8, strongest * 0.25))
+    }
+    const odd = section(page, 'Gallery masonry transparent and cropped')
+    const all = await buttons(odd).all()
+    expect(all).toHaveLength(3)
+    for (const button of all) {
+      expect(await filterOf(button)).toContain('0px 0px 14px')
+      // The button has its own background: the shadow follows the tile, not the circle drawn on it.
+      expect(await button.evaluate((el) => getComputedStyle(el).backgroundColor)).not.toBe(
+        'rgba(0, 0, 0, 0)',
+      )
+    }
+    await attach(testInfo, 'masonry floating strong glow', scope)
+    await attach(testInfo, 'masonry transparent and cropped', odd)
+  })
+
+  test('the same reading sees a cut-off shadow when a tile is clipped (control)', async ({
+    page,
+  }) => {
+    const scope = section(page, 'Gallery masonry floating strong glow')
+    const first = buttons(scope).first()
+    await first.scrollIntoViewIfNeeded()
+    // Clip the tile to 8px around it, as an overflow-hidden parent would: far less than its shadow needs.
+    await first.locator('..').evaluate((li) => {
+      li.style.overflow = 'hidden'
+      li.style.padding = '8px'
+    })
+    const { clippedBy, edge, strongest } = await clipReading(page, first)
+    expect(clippedBy).toContain('li.')
+    expect(strongest).toBeGreaterThan(12)
+    expect(
+      edge,
+      'a cut-off shadow is about as strong at the edge as the shadow itself',
+    ).toBeGreaterThan(strongest * 0.5)
+  })
+})
+
 test.describe('server markup', () => {
   test.use({ javaScriptEnabled: false })
 

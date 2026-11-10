@@ -1510,8 +1510,24 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
   }),
+  // Masonry draws a plain picture inside its button, which is the tile's outline: the filter goes on the button
+  // (the tile's own hook, `aria-haspopup`, is what every tile has and nothing else does).
+  {
+    id: 'gallery.pictureDepth.masonry',
+    component: 'gallery',
+    capability: 'pictureDepth',
+    scope: 'card',
+    layouts: ['masonry'],
+    field: 'pictureDepthDesign.shadow',
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolvePictureDepth' }],
+    render: 'src/features/pages/components/sections/gallery/shared.tsx',
+    target: 'button[aria-haspopup="dialog"]',
+    change: 'attributes',
+    base: { eyebrow: 'Our work', intro: 'An intro.' },
+    probe: { 'pictureDepthDesign.shadow': 'floating' },
+  },
   // A shadow and glow on every tile (task 147). Grid and Slider draw each tile through FramedImage, whose still box
-  // (`data-framed-image`) carries the filter; Masonry draws a plain picture in its button and has its own entry.
+  // (`data-framed-image`) carries the filter; Masonry has its own entry below.
   {
     id: 'gallery.pictureDepth.card',
     component: 'gallery',

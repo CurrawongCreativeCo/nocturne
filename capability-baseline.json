@@ -205,13 +205,6 @@
     },
     {
       "component": "gallery",
-      "capability": "pictureDepth",
-      "scope": "card",
-      "layouts": ["masonry"],
-      "closingTask": 147
-    },
-    {
-      "component": "gallery",
       "capability": "divider",
       "scope": "section",
       "layouts": ["grid", "masonry", "slider"],
