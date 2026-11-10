@@ -5608,6 +5608,43 @@ documents.push(
     })),
   },
   {
+    // A divider between Image + text's heading and its body (tests/e2e/media-text-dividers.spec.ts): in
+    // each layout, with a body that opens with a heading, and one with none chosen to compare spacing against.
+    _id: 'page-media-text-dividers',
+    _type: 'page',
+    title: 'Image and text dividers',
+    slug: { _type: 'slug', current: 'media-text-dividers' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      ['side', 'Side divider', true, undefined],
+      ['stacked', 'Stacked divider', true, undefined],
+      ['overlay', 'Overlay divider', true, undefined],
+      ['side', 'Heading first divider', true, { heading: true }],
+      ['side', 'Centred divider', true, { align: 'center' }],
+      ['side', 'No divider', false, undefined],
+    ].map(([variant, title, divider, extra], index) => ({
+      _key: `mtd-${index}`,
+      _type: 'mediaText',
+      variant,
+      title,
+      body: extra?.heading
+        ? [block(['Opening heading'], { style: 'h2' }), block(['Body text under the divider.'])]
+        : [block(['Body text under the divider.'])],
+      image: image('Picture'),
+      imagePosition: 'right',
+      ...(extra?.align ? { style: { _type: 'sectionStyle', align: extra.align } } : {}),
+      ...(divider
+        ? {
+            headerDesign: {
+              _type: 'object',
+              divider: { _type: 'decorativeDivider', style: 'line', width: 'short' },
+            },
+          }
+        : {}),
+    })),
+  },
+  {
     // The blur preview is only for opaque pictures (tests/e2e/image-placeholder.spec.ts): a transparent
     // logo as the profile picture and as a wordmark, and an opaque photo as a picture.
     _id: 'page-image-placeholders',

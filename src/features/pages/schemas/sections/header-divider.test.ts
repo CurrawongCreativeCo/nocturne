@@ -30,7 +30,7 @@ interface Field {
   fields?: Field[]
 }
 
-/** The sections whose header `SectionHeader` draws, and so offer the divider (task 151). */
+/** The sections that offer the header divider (task 151): those `SectionHeader` draws, and Image + text, which draws its own. */
 const WITH_DIVIDER = [
   'featuresGrid',
   'logoCloud',
@@ -48,6 +48,7 @@ const WITH_DIVIDER = [
   'process',
   'embed',
   'events',
+  'mediaText',
 ]
 const headerOf = (type: SchemaTypeDefinition) =>
   (type as { fields?: Field[] }).fields?.find((field) => field.name === 'headerDesign')
@@ -95,8 +96,8 @@ describe('the section header’s divider', () => {
     expect(isClientEditable(name, 'headerDesign')).toBe(false)
   })
 
-  it('is not offered where the section draws its own header (Image + text, Link list)', () => {
-    for (const name of ['mediaText', 'linkList']) {
+  it('is not offered by the Link list, whose header is a wordmark or heading it lays out itself', () => {
+    for (const name of ['linkList']) {
       expect((headerOf(section(name))?.fields ?? []).map((field) => field.name)).not.toContain(
         'divider',
       )

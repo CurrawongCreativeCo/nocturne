@@ -2541,7 +2541,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | ---------------------------------------- | ------- | ---- | ------ | ---- | ----- | ---- | ------ | ------- | ---------- | ------- | ----- | ------- | ---- | ------ | ----- |
 | Hero (`hero`), 4 layouts                 | –       | R…   | R…     | R✓   | –     | –    | C✓     | R…*     | R✓*        | R…*     | R✓*   | R✓      | R✓   | R✓     | R◐    |
 | Rich text (`richText`)                   | –       | –    | –      | R✓   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Image + text (`mediaText`), 3 layouts    | –       | –    | R✓     | R✓   | –     | –    | C✓     | C…*     | R✓*        | R✓*     | R✓    | R…      | R✓   | R✓     | R✓    |
+| Image + text (`mediaText`), 3 layouts    | –       | –    | R✓     | R✓   | –     | –    | C✓     | C…*     | R✓*        | R✓*     | R✓    | R✓      | R✓   | R✓     | R✓    |
 | Features grid (`featuresGrid`)           | C…      | R…   | R✓     | R✓   | C…    | R✓   | C…     | C…      | –          | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
 | Logo strip (`logoCloud`), 2 layouts      | –       | –    | R✓     | R✓   | –     | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
 | Testimonials (`testimonials`), 2 layouts | R✓      | R✓   | R✓     | R✓   | R✓    | –    | –      | R…      | R✓         | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
@@ -2574,14 +2574,14 @@ The tables below are generated from the declarations and the evidence by `npm ru
 
 | Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
 | -------------------------------------------------------- | -------- | --------------- | ------- |
-| Required                                                 | 270      | 0               | 44      |
+| Required                                                 | 271      | 0               | 43      |
 | Conditional                                              | 13       | 0               | 31      |
 
 A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
 
 | Closing task | Required pending | Conditional pending |
 | ------------ | ---------------- | ------------------- |
-| 151          | 5                | 0                   |
+| 151          | 4                | 0                   |
 | 157          | 1                | 0                   |
 | 159          | 3                | 8                   |
 | 177          | 9                | 20                  |
@@ -2589,7 +2589,7 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | 276          | 2                | 3                   |
 | 280          | 17               | 0                   |
 
-**Evidence.** 298 capability entries, 557 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
+**Evidence.** 299 capability entries, 560 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
 **Capabilities and their owners**
 

@@ -1086,6 +1086,7 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
     headerRender: 'src/features/pages/components/sections/media-text.tsx',
+    headerDivider: true,
   }),
   ...frameEvidence('mediaText', {
     mark: ['side', 'stacked', 'overlay'],

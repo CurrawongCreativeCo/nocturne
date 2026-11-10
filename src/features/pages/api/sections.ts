@@ -122,7 +122,8 @@ export const mediaTextFragment = /* groq */ `
     headerDesign {
       eyebrow { ${roleStyleProjection} },
       heading { ${roleStyleProjection} },
-      intro { ${roleStyleProjection} }
+      intro { ${roleStyleProjection} },
+      divider { ${decorativeDividerFields} }
     },
     body[] { ${portableTextFields} },
     ctas[] { ${ctaFields} },

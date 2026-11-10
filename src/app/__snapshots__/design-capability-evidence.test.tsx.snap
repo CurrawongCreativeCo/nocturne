@@ -1716,6 +1716,12 @@ exports[`design capability evidence > mediaText.action.item@side: the probe chan
 
 exports[`design capability evidence > mediaText.action.item@stacked: the probe changes the registered target 1`] = `[]`;
 
+exports[`design capability evidence > mediaText.divider.section@overlay: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > mediaText.divider.section@side: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > mediaText.divider.section@stacked: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > mediaText.edge.section@overlay: the probe changes the registered target 1`] = `
 [
   "<body>",
