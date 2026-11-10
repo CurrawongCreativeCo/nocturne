@@ -206,6 +206,29 @@ export function depthFilter(input: DepthLookInput): ElementDepth | undefined {
     : undefined
 }
 
+/** A picture's stored `pictureDepthDesign` object as a query returns it (task 147): untrusted, so every value is checked. */
+export interface PictureDepthInput {
+  shadow?: string | null
+  glow?: string | null
+  glowColour?: ThemeColourInput | null
+}
+
+/**
+ * A framed picture's depth (Image + text, Hero, Team, Gallery, Testimonials, Location, Events, post
+ * cards): the shared filter, from the picture's own `pictureDepthDesign`. There is no level above it, so the
+ * site's Card depth never reaches a picture. Undefined while neither a shadow nor a glow is chosen, so
+ * the picture is drawn exactly as it was; an unknown or legacy value is the same as unset.
+ */
+export function resolvePictureDepth(
+  input: PictureDepthInput | null | undefined,
+): ElementDepth | undefined {
+  return depthFilter({
+    level: shadowLevelOf(input?.shadow),
+    glow: glowChoiceOf(input?.glow),
+    glowColour: input?.glowColour,
+  })
+}
+
 /**
  * Turns the Depth and glow box into what each element draws. Box elements are functions of the
  * shadow they draw on their own (`OWN_SHADOW`), kept when only a glow is set.

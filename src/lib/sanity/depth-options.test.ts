@@ -9,6 +9,7 @@ import {
   resolveCardDepth,
   resolveCardLift,
   resolveDepth,
+  resolvePictureDepth,
 } from './depth-options'
 
 const shadowOf = (depth: ReturnType<ReturnType<typeof resolveDepth>['links']>) =>
@@ -194,5 +195,59 @@ describe('resolveCardLift', () => {
     expect(resolveCardLift([{ lift: 'lift' }])).toBe('lift')
     expect(resolveCardLift([{ lift: 'none' }, { lift: 'lift' }])).toBe('none')
     expect(resolveCardLift([{}, { lift: 'lift' }])).toBe('lift')
+  })
+})
+
+describe('resolvePictureDepth', () => {
+  it('is undefined while nothing is chosen, so the picture is drawn as it was', () => {
+    expect(resolvePictureDepth(undefined)).toBeUndefined()
+    expect(resolvePictureDepth(null)).toBeUndefined()
+    expect(resolvePictureDepth({})).toBeUndefined()
+    expect(resolvePictureDepth({ glowColour: { colour: 'highlight' } })).toBeUndefined()
+  })
+
+  it('treats Flat, Glow Off and values the schema does not offer as unset', () => {
+    expect(resolvePictureDepth({ shadow: 'flat' })).toBeUndefined()
+    expect(resolvePictureDepth({ glow: 'off' })).toBeUndefined()
+    expect(resolvePictureDepth({ shadow: 'flat', glow: 'off' })).toBeUndefined()
+    expect(resolvePictureDepth({ shadow: 'enormous', glow: 'blazing' })).toBeUndefined()
+  })
+
+  it('draws each level through the shared picture-shadow tokens', () => {
+    for (const level of ['soft', 'raised', 'floating'] as const) {
+      const depth = resolvePictureDepth({ shadow: level })
+      expect(depth?.className).toBe('[filter:var(--depth-filter)]')
+      expect(depth?.style).toEqual({ '--depth-filter': `var(--depth-picture-${level})` })
+    }
+  })
+
+  it('draws a glow with no shadow, and a shadow with no glow', () => {
+    const glowOnly = resolvePictureDepth({ glow: 'strong' })
+    expect(String(glowOnly?.style['--depth-filter' as keyof typeof glowOnly.style])).toMatch(
+      /^drop-shadow\(0 0 14px color-mix\(in oklch, .+ var\(--depth-glow-strong-strength\), transparent\)\)$/,
+    )
+    const shadowOnly = resolvePictureDepth({ shadow: 'raised', glow: 'off' })
+    expect(shadowOnly?.style).toEqual({ '--depth-filter': 'var(--depth-picture-raised)' })
+  })
+
+  it('puts the shadow first and the glow after it, in the glow colour chosen', () => {
+    const depth = resolvePictureDepth({
+      shadow: 'floating',
+      glow: 'soft',
+      glowColour: { colour: 'highlight' },
+    })
+    const filter = String(depth?.style['--depth-filter' as keyof typeof depth.style])
+    expect(filter.startsWith('var(--depth-picture-floating) drop-shadow(0 0 9px')).toBe(true)
+    expect(filter).toContain('highlight')
+  })
+
+  it('reads the same as the Link list’s picture for the same choice', () => {
+    expect(resolvePictureDepth({ shadow: 'raised', glow: 'soft' })).toEqual(
+      resolveDepth({ pictureShadow: 'raised', glow: 'soft', glowTargets: ['picture'] }).picture,
+    )
+  })
+
+  it('ignores the site’s Card depth and any card level: nothing above it exists', () => {
+    expect(resolvePictureDepth({ shadow: 'soft' })?.style).not.toHaveProperty('--card-depth')
   })
 })
