@@ -787,6 +787,12 @@ exports[`design capability evidence > hero.motion.section@split: the probe chang
 ]
 `;
 
+exports[`design capability evidence > hero.pictureDepth.section@split: the probe changes the registered target 1`] = `
+[
+  "<div class="relative aspect-[4/3] w-full max-h-96 lg:max-h-none" data-framed-image="framed">",
+]
+`;
+
 exports[`design capability evidence > hero.slots.supporting@editorial: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > hero.slots.supporting@full-bleed: the probe changes the registered target 1`] = `[]`;

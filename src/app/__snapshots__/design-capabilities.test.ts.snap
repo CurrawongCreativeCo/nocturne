@@ -237,7 +237,7 @@ exports[`the design capability contract > hero: reports what it offers today 1`]
     "framing required section/picture @split: pending (177)",
     "framing conditional section/background @overlay: pending (177)",
     "framing conditional section/background @full-bleed: pending (177)",
-    "pictureDepth required section @split: pending (147)",
+    "pictureDepth required section @split: verified",
     "overlay required section @overlay: pending (157)",
     "overlay required section @full-bleed: pending (157)",
     "glass required section @overlay: verified",

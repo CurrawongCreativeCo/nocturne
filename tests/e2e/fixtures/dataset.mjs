@@ -3385,6 +3385,61 @@ documents.push({
 })
 
 /**
+ * Picture depth on the Hero's Split layout (tests/e2e/picture-depth-hero.spec.ts): nothing chosen, a plain
+ * picture, an entrance, a moving picture and the hero's own parallax, then the layouts that must ignore it.
+ */
+const depthHero = (id, title, extra) =>
+  galleryHero(id, { variant: 'split', title, ctas: [], heading: undefined, ...extra })
+documents.push({
+  _id: 'page-picture-depth-hero',
+  _type: 'page',
+  title: 'Picture depth, hero',
+  slug: { _type: 'slug', current: 'picture-depth-hero' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    depthText(1),
+    depthHero('depth-hero-none', 'Hero nothing chosen'),
+    depthText(2),
+    depthHero('depth-hero-plain', 'Hero floating plain', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'soft' }),
+    }),
+    depthText(3),
+    depthHero('depth-hero-flat', 'Hero flat and glow off', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthText(4),
+    depthHero('depth-hero-entrance', 'Hero floating entrance', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+      partMotion: { enabled: true, imagePreset: 'rise' },
+    }),
+    depthText(5),
+    depthHero('depth-hero-moving', 'Hero floating moving', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+      imageDesign: imageDesign({ appearance: 'rounded', motion: 'medium' }),
+    }),
+    depthText(6),
+    depthHero('depth-hero-parallax', 'Hero floating parallax', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+      partMotion: { enabled: true, imagePreset: 'parallax' },
+    }),
+    depthText(7),
+    galleryHero('depth-hero-overlay', {
+      variant: 'overlay',
+      title: 'Hero overlay ignores it',
+      ctas: [],
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    galleryHero('depth-hero-editorial', {
+      variant: 'editorial',
+      title: 'Hero editorial ignores it',
+      ctas: [],
+      secondaryImage: image('Small picture'),
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+  ],
+})
+
+/**
  * The same long page twice, once with no picture depth and once with Floating on every parallax picture,
  * for the scrolling comparison (tests/e2e/picture-depth-performance.spec.ts). Fake Content Lake only; not indexed.
  */

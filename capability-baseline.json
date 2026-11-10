@@ -60,13 +60,6 @@
     },
     {
       "component": "hero",
-      "capability": "pictureDepth",
-      "scope": "section",
-      "layouts": ["split"],
-      "closingTask": 147
-    },
-    {
-      "component": "hero",
       "capability": "overlay",
       "scope": "section",
       "layouts": ["overlay", "full-bleed"],

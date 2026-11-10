@@ -174,6 +174,7 @@ test.describe('reduced motion', () => {
 
   test('keeps the shadow on a picture that no longer moves', async ({ page }) => {
     await page.goto(PAGE)
+    await page.waitForLoadState('networkidle')
     const scope = section(page, 'Floating on a moving picture')
     expect(
       await scope.locator('[data-framed-image]').evaluate((el) => getComputedStyle(el).filter),

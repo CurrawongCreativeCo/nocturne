@@ -981,6 +981,22 @@ export const EVIDENCE: readonly Evidence[] = [
     edge: ['overlay', 'split', 'editorial', 'full-bleed'],
     motion: ['overlay', 'split', 'editorial', 'full-bleed'],
   }),
+  // A shadow and glow on Split's picture (task 147). A decorative frame gives the picture the still outer
+  // box (`data-framed-image`) the filter goes on; the probe chooses Floating.
+  {
+    id: 'hero.pictureDepth.section',
+    component: 'hero',
+    capability: 'pictureDepth',
+    scope: 'section',
+    layouts: ['split'],
+    field: 'pictureDepthDesign.shadow',
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolvePictureDepth' }],
+    render: 'src/features/pages/components/sections/hero/hero-picture.tsx',
+    target: '[data-framed-image]',
+    change: 'attributes',
+    base: { backgroundImage: PICTURE, imageDesign: { appearance: 'framed' } },
+    probe: { 'pictureDepthDesign.shadow': 'floating' },
+  },
   {
     id: 'hero.slots.supporting',
     component: 'hero',

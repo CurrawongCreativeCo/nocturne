@@ -52,6 +52,9 @@ const headerDesignProjection = /* groq */ `
   }
 `
 
+/** A framed picture's shadow level and glow (pictureDepthFields, task 147). */
+const pictureDepthProjection = /* groq */ `pictureDepthDesign { shadow, glow, glowColour { colour, hex } }`
+
 export const heroFragment = /* groq */ `
   _type == "hero" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
@@ -73,6 +76,7 @@ export const heroFragment = /* groq */ `
     proportion,
     imageShape,
     imageDesign { ${imageDesignFields} },
+    ${pictureDepthProjection},
     secondaryImage { ${imageFields} },
     supporting[] { ${heroSupportingFields} },
     showGreeting,
@@ -95,9 +99,6 @@ export const richTextFragment = /* groq */ `
     body[] { ${portableTextFields} }
   }
 `
-
-/** A framed picture's shadow level and glow (pictureDepthFields, task 147). */
-const pictureDepthProjection = /* groq */ `pictureDepthDesign { shadow, glow, glowColour { colour, hex } }`
 
 export const mediaTextFragment = /* groq */ `
   _type == "mediaText" && (access != "members" || $members) => {
