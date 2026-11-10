@@ -3533,6 +3533,72 @@ documents.push({
 })
 
 /**
+ * Picture depth on the Gallery (tests/e2e/picture-depth-gallery.spec.ts): grids and sliders of six pictures with
+ * nothing chosen and at each depth level, and a section of a transparent picture and a cropped one.
+ */
+const depthGallery = (id, title, variant, extra = {}) => ({
+  _key: id,
+  _type: 'gallery',
+  variant,
+  title,
+  images: galleryImages(id, 6),
+  ...extra,
+})
+documents.push({
+  _id: 'page-picture-depth-gallery',
+  _type: 'page',
+  title: 'Picture depth, gallery',
+  slug: { _type: 'slug', current: 'picture-depth-gallery' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    depthText(1),
+    depthGallery('depth-g-none', 'Gallery nothing chosen', 'grid'),
+    depthGallery('depth-g-soft', 'Gallery soft', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'soft' }),
+    }),
+    depthGallery('depth-g-raised', 'Gallery raised', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'raised' }),
+    }),
+    depthGallery('depth-g-floating', 'Gallery floating', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthGallery('depth-g-glow', 'Gallery floating strong glow', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthGallery('depth-g-glow-only', 'Gallery strong glow only', 'grid', {
+      pictureDepthDesign: pictureDepth({ glow: 'strong' }),
+    }),
+    depthGallery('depth-g-flat', 'Gallery flat and glow off', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthGallery('depth-g-circle', 'Gallery circle floating', 'grid', {
+      imageDesign: imageDesign({ appearance: 'circle' }),
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthGallery('depth-g-odd', 'Gallery transparent and cropped', 'grid', {
+      images: [
+        { ...pattern(), _key: 'odd-transparent', alt: 'A transparent picture' },
+        {
+          _type: 'image',
+          _key: 'odd-cropped',
+          alt: 'A cropped picture',
+          asset: ref(IMAGE_ASSET_ID),
+          crop: { _type: 'sanity.imageCrop', top: 0.1, bottom: 0.1, left: 0.2, right: 0.2 },
+        },
+        ...galleryImages('depth-g-odd', 1),
+      ],
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(2),
+    depthGallery('depth-g-slider-none', 'Gallery slider nothing chosen', 'slider'),
+    depthGallery('depth-g-slider-glow', 'Gallery slider floating strong glow', 'slider', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(3),
+  ],
+})
+
+/**
  * The same long page twice, once with no picture depth and once with Floating on every parallax picture,
  * for the scrolling comparison (tests/e2e/picture-depth-performance.spec.ts). Fake Content Lake only; not indexed.
  */

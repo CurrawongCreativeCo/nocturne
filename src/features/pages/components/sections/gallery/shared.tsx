@@ -4,6 +4,7 @@ import { FramedImage } from '@/components/ui/framed-image'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import type { ElementDepth } from '@/lib/sanity/depth-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveTextRoles } from '@/lib/sanity/text-role'
 
@@ -67,6 +68,7 @@ export function Thumbnail({
   sizes,
   fill,
   design,
+  depth,
 }: {
   image: GalleryImage
   index: number
@@ -78,6 +80,8 @@ export function Thumbnail({
   /** Crop to a 4:3 box (the shape, motion and frame of the section's `imageDesign`); otherwise the picture keeps its own shape. */
   fill?: boolean
   design?: GalleryData['imageDesign']
+  /** Picture depth (task 147, `resolvePictureDepth`): a shadow and glow on the tile's still box. */
+  depth?: ElementDepth | undefined
 }) {
   const alt = stegaClean(image.alt)
   const label = `Open image ${index + 1} of ${total}${alt ? `: ${alt}` : ''}`
@@ -91,6 +95,7 @@ export function Thumbnail({
           image={image}
           alt=""
           design={design}
+          depth={depth}
           clip
           aspect="4/3"
           sizes={sizes}

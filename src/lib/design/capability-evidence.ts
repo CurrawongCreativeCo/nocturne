@@ -1510,6 +1510,22 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
   }),
+  // A shadow and glow on every tile (task 147). Grid and Slider draw each tile through FramedImage, whose still box
+  // (`data-framed-image`) carries the filter; Masonry draws a plain picture in its button and has its own entry.
+  {
+    id: 'gallery.pictureDepth.card',
+    component: 'gallery',
+    capability: 'pictureDepth',
+    scope: 'card',
+    layouts: ['grid', 'slider'],
+    field: 'pictureDepthDesign.shadow',
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolvePictureDepth' }],
+    render: 'src/features/pages/components/sections/gallery/shared.tsx',
+    target: '[data-framed-image]',
+    change: 'attributes',
+    base: { eyebrow: 'Our work', intro: 'An intro.' },
+    probe: { 'pictureDepthDesign.shadow': 'floating' },
+  },
   ...frameEvidence('gallery', {
     mark: ['grid', 'masonry', 'slider'],
     overlay: ['grid', 'masonry', 'slider'],

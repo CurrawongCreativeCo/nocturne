@@ -207,7 +207,7 @@
       "component": "gallery",
       "capability": "pictureDepth",
       "scope": "card",
-      "layouts": ["grid", "masonry", "slider"],
+      "layouts": ["masonry"],
       "closingTask": 147
     },
     {

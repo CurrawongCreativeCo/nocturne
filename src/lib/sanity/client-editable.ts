@@ -280,7 +280,15 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   gallery: {
     editable: ['eyebrow', 'heading', 'title', 'intro', 'images'],
-    agencyOnly: ['headerDesign', 'variant', 'imageDesign', 'access', 'style', 'columns'],
+    agencyOnly: [
+      'headerDesign',
+      'variant',
+      'imageDesign',
+      'pictureDepthDesign',
+      'access',
+      'style',
+      'columns',
+    ],
   },
   location: {
     editable: [

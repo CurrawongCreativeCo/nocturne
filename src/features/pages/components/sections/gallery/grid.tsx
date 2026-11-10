@@ -1,4 +1,5 @@
 import { SectionFrame } from '@/components/ui/section-frame'
+import { resolvePictureDepth } from '@/lib/sanity/depth-options'
 
 import { LightboxProvider } from './lightbox-provider'
 import {
@@ -21,6 +22,7 @@ const columnClasses = {
 export function GalleryGrid({ data, isFirst }: SectionProps<'gallery'>) {
   const { images } = data
   const columns = columnCount(data)
+  const depth = resolvePictureDepth(data.pictureDepthDesign)
 
   return (
     <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst}>
@@ -37,6 +39,7 @@ export function GalleryGrid({ data, isFirst }: SectionProps<'gallery'>) {
                 eager={isFirst && i < columns}
                 sizes={columnSizes(columns)}
                 design={data.imageDesign}
+                depth={depth}
                 className="group relative block w-full"
               />
             </li>

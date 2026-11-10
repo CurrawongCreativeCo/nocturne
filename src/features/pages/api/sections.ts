@@ -361,6 +361,7 @@ export const galleryFragment = /* groq */ `
     ${headerDesignProjection},
     columns,
     imageDesign { ${imageDesignFields} },
+    ${pictureDepthProjection},
     images[] { _key, caption, ${imageFields} }
   }
 `

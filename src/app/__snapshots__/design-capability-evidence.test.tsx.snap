@@ -711,6 +711,34 @@ exports[`design capability evidence > gallery.overlay.section@slider: the probe 
 ]
 `;
 
+exports[`design capability evidence > gallery.pictureDepth.card@grid: the probe changes the registered target 1`] = `
+[
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+]
+`;
+
+exports[`design capability evidence > gallery.pictureDepth.card@slider: the probe changes the registered target 1`] = `
+[
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+  "<div class="relative aspect-[4/3]" data-framed-image="standard">",
+]
+`;
+
 exports[`design capability evidence > hero.action.item@editorial: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > hero.action.item@full-bleed: the probe changes the registered target 1`] = `[]`;

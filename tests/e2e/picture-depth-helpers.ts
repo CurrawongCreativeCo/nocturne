@@ -134,3 +134,154 @@ export const edgeReading = async (page: Page, card: Locator) => {
     ] as const,
   )
 }
+
+export interface ClipReading {
+  /** The clipping ancestor the tile sits in (the slider's viewport), or '' when nothing clips it. */
+  clippedBy: string
+  /** The strongest the shadow is, just beside the tile: what a fade should be a small part of. */
+  strongest: number
+  /** The most shadow left in the first pixels inside a clipping edge near the tile (0 where nothing clips). */
+  edge: number
+  where: string
+  /** The most shadow left inside each clipping edge near the tile, so a failure says which edge cuts it. */
+  edges: { left: number; right: number; top: number; bottom: number }
+}
+
+/**
+ * Whether anything that clips cuts the tile's shadow off, read from two screenshots of the clipping ancestor, one
+ * with the tile's filter and one without: their difference is the shadow itself, with no guess at a background.
+ * A shadow that has faded out before an edge leaves almost nothing in the first pixels inside it; one the edge
+ * cuts off leaves about as much as the shadow is strong. Only edges within `reach` px of the tile count: a tile in
+ * the middle of a slider is nowhere near its sides. Fixed and sticky elements are hidden while it reads.
+ */
+export const clipReading = async (page: Page, tile: Locator, reach = 70): Promise<ClipReading> => {
+  const probe = await tile.evaluate((el) => {
+    el.scrollIntoView({ block: 'center', inline: 'nearest' })
+    for (const node of document.body.querySelectorAll<HTMLElement>('*')) {
+      const position = getComputedStyle(node).position
+      if ((position === 'fixed' || position === 'sticky') && !node.contains(el)) {
+        node.dataset.pictureDepthHidden = node.style.visibility
+        node.style.visibility = 'hidden'
+      }
+    }
+    for (let up = el.parentElement; up && up !== document.body; up = up.parentElement) {
+      const style = getComputedStyle(up)
+      if (style.overflowX !== 'visible' || style.overflowY !== 'visible') {
+        up.dataset.pictureDepthClip = ''
+        return `${up.tagName.toLowerCase()}.${up.className.slice(0, 50)}`
+      }
+    }
+    return ''
+  })
+  await page.waitForTimeout(100)
+  try {
+    if (!probe)
+      return {
+        clippedBy: '',
+        strongest: 0,
+        edge: 0,
+        where: '',
+        edges: { left: 0, right: 0, top: 0, bottom: 0 },
+      }
+    const clip = page.locator('[data-picture-depth-clip]')
+    const shot = async () => (await clip.screenshot()).toString('base64')
+    const withShadow = await shot()
+    await tile.evaluate((el) => {
+      el.dataset.pictureDepthWas = el.style.filter
+      el.style.setProperty('filter', 'none', 'important')
+    })
+    const without = await shot()
+    await tile.evaluate((el) => {
+      el.style.removeProperty('filter')
+      delete el.dataset.pictureDepthWas
+    })
+    const rects = await tile.evaluate((el) => {
+      const up = document.querySelector('[data-picture-depth-clip]')
+      const t = el.getBoundingClientRect()
+      const c = up?.getBoundingClientRect()
+      return {
+        x: t.x - (c?.x ?? 0),
+        y: t.y - (c?.y ?? 0),
+        w: t.width,
+        h: t.height,
+        cw: c?.width ?? 0,
+        ch: c?.height ?? 0,
+      }
+    })
+    const reading = await page.evaluate(
+      async ([a, b, r, far]) => {
+        const load = async (data: string) => {
+          const image = new Image()
+          image.src = `data:image/png;base64,${data}`
+          await image.decode()
+          const canvas = document.createElement('canvas')
+          canvas.width = image.width
+          canvas.height = image.height
+          const ctx = canvas.getContext('2d')
+          if (!ctx) throw new Error('no canvas')
+          ctx.drawImage(image, 0, 0)
+          return { ctx, width: image.width, height: image.height }
+        }
+        const [on, off] = [await load(a), await load(b)]
+        const scale = on.width / r.cw
+        const diff = (x: number, y: number) => {
+          const px = Math.min(on.width - 1, Math.max(0, Math.round(x * scale)))
+          const py = Math.min(on.height - 1, Math.max(0, Math.round(y * scale)))
+          const p = on.ctx.getImageData(px, py, 1, 1).data
+          const q = off.ctx.getImageData(px, py, 1, 1).data
+          return Math.max(
+            Math.abs((p[0] ?? 0) - (q[0] ?? 0)),
+            Math.abs((p[1] ?? 0) - (q[1] ?? 0)),
+            Math.abs((p[2] ?? 0) - (q[2] ?? 0)),
+          )
+        }
+        // The strongest the shadow is: just below the tile along its middle (or just beside it).
+        let strongest = 0
+        for (let d = 1; d <= 8; d++) {
+          for (let x = r.x + r.w * 0.3; x <= r.x + r.w * 0.7; x += 6) {
+            if (r.y + r.h + d < r.ch) strongest = Math.max(strongest, diff(x, r.y + r.h + d))
+          }
+        }
+        // The edges within reach of the tile, in the first pixels inside them.
+        let edge = 0
+        let where = ''
+        const edges = { left: 0, right: 0, top: 0, bottom: 0 }
+        const note = (value: number, label: string) => {
+          const side = label.split(',')[0] as keyof typeof edges
+          edges[side] = Math.max(edges[side], value)
+          if (value > edge) {
+            edge = value
+            where = label
+          }
+        }
+        const spanX = [r.x, r.x + r.w]
+        const spanY = [r.y, r.y + r.h]
+        if (r.x < far)
+          for (let y = spanY[0] ?? 0; y <= (spanY[1] ?? 0); y += 6)
+            note(diff(1, y), `left, y=${Math.round(y)}`)
+        if (r.cw - (r.x + r.w) < far)
+          for (let y = spanY[0] ?? 0; y <= (spanY[1] ?? 0); y += 6)
+            note(diff(r.cw - 2, y), `right, y=${Math.round(y)}`)
+        if (r.y < far)
+          for (let x = spanX[0] ?? 0; x <= (spanX[1] ?? 0); x += 6)
+            note(diff(x, 1), `top, x=${Math.round(x)}`)
+        if (r.ch - (r.y + r.h) < far)
+          for (let x = spanX[0] ?? 0; x <= (spanX[1] ?? 0); x += 6)
+            note(diff(x, r.ch - 2), `bottom, x=${Math.round(x)}`)
+        return { strongest, edge, where, edges }
+      },
+      [withShadow, without, rects, reach] as const,
+    )
+    return { clippedBy: probe, ...reading }
+  } finally {
+    await page.evaluate(() => {
+      for (const node of document.querySelectorAll<HTMLElement>('[data-picture-depth-hidden]')) {
+        node.style.visibility = node.dataset.pictureDepthHidden ?? ''
+        delete node.dataset.pictureDepthHidden
+      }
+      for (const node of document.querySelectorAll<HTMLElement>('[data-picture-depth-clip]')) {
+        delete node.dataset.pictureDepthClip
+      }
+    })
+  }
+}
