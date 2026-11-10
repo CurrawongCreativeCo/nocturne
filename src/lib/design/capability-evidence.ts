@@ -1017,6 +1017,23 @@ export const EVIDENCE: readonly Evidence[] = [
     edge: ['side', 'stacked', 'overlay'],
     motion: ['side', 'stacked', 'overlay'],
   }),
+  // A shadow and glow on the section's picture (task 147). The design gives it a decorative frame, so the
+  // picture has the still outer box (`data-framed-image`) the filter goes on, with the frame inside it;
+  // the probe chooses Floating. A plain picture, which has no box, is covered by framed-image.test.ts.
+  {
+    id: 'mediaText.pictureDepth.section',
+    component: 'mediaText',
+    capability: 'pictureDepth',
+    scope: 'section',
+    layouts: ['side', 'stacked'],
+    field: 'pictureDepthDesign.shadow',
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolvePictureDepth' }],
+    render: 'src/features/pages/components/sections/media-text.tsx',
+    target: '[data-framed-image]',
+    change: 'attributes',
+    base: { media: SLOT_IMAGE, imageDesign: { appearance: 'framed' } },
+    probe: { 'pictureDepthDesign.shadow': 'floating' },
+  },
   {
     id: 'mediaText.slots.media',
     component: 'mediaText',

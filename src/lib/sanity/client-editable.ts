@@ -223,7 +223,15 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
     // The layout (`variant`, set by the presets) and the extra block are the agency's; clients change
     // the words, the buttons and the picture or video in the media slot.
     editable: ['eyebrow', 'heading', 'title', 'body', 'ctas', 'media', 'image', 'imagePosition'],
-    agencyOnly: ['headerDesign', 'variant', 'supporting', 'imageDesign', 'access', 'style'],
+    agencyOnly: [
+      'headerDesign',
+      'variant',
+      'supporting',
+      'imageDesign',
+      'pictureDepthDesign',
+      'access',
+      'style',
+    ],
   },
   featuresGrid: {
     editable: ['eyebrow', 'heading', 'title', 'intro', 'columns', 'items'],

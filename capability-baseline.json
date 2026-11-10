@@ -96,13 +96,6 @@
     },
     {
       "component": "mediaText",
-      "capability": "pictureDepth",
-      "scope": "section",
-      "layouts": ["side", "stacked"],
-      "closingTask": 147
-    },
-    {
-      "component": "mediaText",
       "capability": "divider",
       "scope": "section",
       "layouts": ["side", "stacked", "overlay"],

@@ -1740,6 +1740,18 @@ exports[`design capability evidence > mediaText.overlay.section@stacked: the pro
 ]
 `;
 
+exports[`design capability evidence > mediaText.pictureDepth.section@side: the probe changes the registered target 1`] = `
+[
+  "<div class="relative aspect-[4/3]" data-framed-image="framed">",
+]
+`;
+
+exports[`design capability evidence > mediaText.pictureDepth.section@stacked: the probe changes the registered target 1`] = `
+[
+  "<div class="relative aspect-video" data-framed-image="framed">",
+]
+`;
+
 exports[`design capability evidence > mediaText.slots.media@overlay: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > mediaText.slots.media@side: the probe changes the registered target 1`] = `[]`;

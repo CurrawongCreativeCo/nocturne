@@ -96,6 +96,9 @@ export const richTextFragment = /* groq */ `
   }
 `
 
+/** A framed picture's shadow level and glow (pictureDepthFields, task 147). */
+const pictureDepthProjection = /* groq */ `pictureDepthDesign { shadow, glow, glowColour { colour, hex } }`
+
 export const mediaTextFragment = /* groq */ `
   _type == "mediaText" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
@@ -114,6 +117,7 @@ export const mediaTextFragment = /* groq */ `
     media[] { ${splitMediaFields} },
     supporting[] { ${splitSupportingFields} },
     imageDesign { ${imageDesignFields} },
+    ${pictureDepthProjection},
     imagePosition,
     variant
   }

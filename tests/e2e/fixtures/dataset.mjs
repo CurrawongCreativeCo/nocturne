@@ -3319,6 +3319,105 @@ documents.push({
 })
 
 /**
+ * Picture depth on Image + text (tests/e2e/picture-depth.spec.ts): one section with nothing chosen,
+ * then each level, a glow alone, and a still frame around moving pictures. Not indexed.
+ */
+const depthText = (n) => ({
+  _key: `depth-text-${n}`,
+  _type: 'richText',
+  body: [
+    block([`Depth text ${n}`], { style: 'h2' }),
+    block(['A paragraph of copy so the page is long enough to scroll. '.repeat(8)]),
+  ],
+})
+const depthSection = (id, title, extra) =>
+  galleryMediaText(id, title, {
+    variant: 'side',
+    ctas: [],
+    media: [slotImageItem(id)],
+    ...extra,
+  })
+const pictureDepth = (fields) => ({ _type: 'object', ...fields })
+documents.push({
+  _id: 'page-picture-depth',
+  _type: 'page',
+  title: 'Picture depth',
+  slug: { _type: 'slug', current: 'picture-depth' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    depthSection('depth-none', 'Nothing chosen'),
+    depthText(1),
+    depthSection('depth-floating', 'Floating with a soft glow', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'soft' }),
+    }),
+    depthText(2),
+    {
+      ...depthSection('depth-stacked', 'Raised, stacked and framed', {
+        variant: 'stacked',
+        pictureDepthDesign: pictureDepth({ shadow: 'raised' }),
+        imageDesign: imageDesign({ appearance: 'framed', frame: 'corner-brackets' }),
+      }),
+    },
+    depthText(3),
+    depthSection('depth-glow', 'A strong glow on a circle', {
+      pictureDepthDesign: pictureDepth({
+        glow: 'strong',
+        glowColour: { _type: 'object', colour: 'highlight' },
+      }),
+      imageDesign: imageDesign({ appearance: 'circle' }),
+    }),
+    depthText(4),
+    depthSection('depth-flat', 'Flat and glow off', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthText(5),
+    depthSection('depth-moving', 'Floating on a moving picture', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+      imageDesign: imageDesign({ appearance: 'rounded', motion: 'medium' }),
+    }),
+    depthText(6),
+    depthSection('depth-section-parallax', 'Floating under section parallax', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+      style: { _type: 'sectionStyle', motion: 'parallax' },
+    }),
+    depthText(7),
+  ],
+})
+
+/**
+ * The same long page twice, once with no picture depth and once with Floating on every parallax picture,
+ * for the scrolling comparison (tests/e2e/picture-depth-performance.spec.ts). Fake Content Lake only; not indexed.
+ */
+for (const [slug, floating] of [
+  ['picture-depth-perf-off', false],
+  ['picture-depth-perf-floating', true],
+]) {
+  const depth = floating ? { pictureDepthDesign: pictureDepth({ shadow: 'floating' }) } : {}
+  documents.push({
+    _id: `page-${slug}`,
+    _type: 'page',
+    title: slug,
+    slug: { _type: 'slug', current: slug },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      depthText(1),
+      ...[1, 2, 3].flatMap((n) => [
+        depthSection(`perf-design-${n}`, `Design parallax ${n}`, {
+          ...depth,
+          imageDesign: imageDesign({ appearance: 'rounded', motion: 'medium' }),
+        }),
+        depthText(n + 1),
+        depthSection(`perf-preset-${n}`, `Section parallax ${n}`, {
+          ...depth,
+          style: { _type: 'sectionStyle', motion: 'parallax' },
+        }),
+        depthText(n + 4),
+      ]),
+    ],
+  })
+}
+
+/**
  * Animated hero parts on real pages (tests/e2e/hero-parts.spec.ts), for what the gallery cannot show:
  * a MotionProvider, so the parts really play. The first page's hero is the first section (its heading
  * and picture never start hidden); the second page starts with text, so its hero is further down.
