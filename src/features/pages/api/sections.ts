@@ -423,6 +423,7 @@ export const teamFragment = /* groq */ `
     cardDesign { ${teamCardDesignProjection} },
     imageDesign { ${imageDesignFields} },
     portraitDesign { ${avatarDesignFields} },
+    ${pictureDepthProjection},
     "members": select(
       selection == "picked" => members[defined(@->_id)]->{ ${teamCardFields} },
       *[_type == "teamMember"] | order(coalesce(order, 999999) asc, name asc) [0...60] { ${teamCardFields} }

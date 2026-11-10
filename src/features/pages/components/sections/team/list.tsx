@@ -20,6 +20,7 @@ export function TeamList({ data, isFirst }: SectionProps<'team'>) {
             <TeamRow
               member={member}
               design={data.imageDesign}
+              pictureDepth={data.pictureDepthDesign}
               cardDesign={data.cardDesign}
               tone={tone}
               portrait={data.portraitDesign}

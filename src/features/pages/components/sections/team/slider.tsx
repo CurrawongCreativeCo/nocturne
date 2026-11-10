@@ -22,6 +22,7 @@ export function TeamSlider({ data, isFirst }: SectionProps<'team'>) {
             key={member._id}
             member={member}
             design={data.imageDesign}
+            pictureDepth={data.pictureDepthDesign}
             cardDesign={data.cardDesign}
             tone={tone}
             headingLevel={headingLevelFor(data)}

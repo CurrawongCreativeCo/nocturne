@@ -2446,6 +2446,31 @@ exports[`design capability evidence > team.overlay.section@slider: the probe cha
 ]
 `;
 
+exports[`design capability evidence > team.pictureDepth.card@grid: the probe changes the registered target 1`] = `
+[
+  "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
+  "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
+  "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
+  "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
+]
+`;
+
+exports[`design capability evidence > team.pictureDepth.card@slider: the probe changes the registered target 1`] = `
+[
+  "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
+  "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
+]
+`;
+
+exports[`design capability evidence > team.pictureDepth.row@list: the probe changes the registered target 1`] = `
+[
+  "<span class="block w-fit shrink-0" data-profile-image="rounded">",
+  "<span class="block w-fit shrink-0" data-profile-image="rounded">",
+  "<span class="block w-fit shrink-0" data-profile-image="rounded">",
+  "<span class="block w-fit shrink-0" data-profile-image="rounded">",
+]
+`;
+
 exports[`design capability evidence > team.surface.card@grid: the probe changes the registered target 1`] = `
 [
   "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",

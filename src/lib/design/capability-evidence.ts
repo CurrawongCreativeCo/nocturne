@@ -1563,6 +1563,41 @@ export const EVIDENCE: readonly Evidence[] = [
     headerRoles: ['eyebrow', 'heading', 'intro'],
     depth: true,
   }),
+  // A shadow and glow on the portraits (task 147). The cards and slides draw a flush portrait, which is inset
+  // by the room the depth needs; the list's small portrait is `ProfileImage`, which needs none.
+  {
+    id: 'team.pictureDepth.card',
+    component: 'team',
+    capability: 'pictureDepth',
+    scope: 'card',
+    layouts: ['grid', 'slider'],
+    field: 'pictureDepthDesign.shadow',
+    // The filter, and the room made for it: a flush portrait is inset by `pictureClearance`, which also
+    // takes the card's corners, so the claim is both.
+    resolvers: [
+      { module: '@/lib/sanity/depth-options', export: 'resolvePictureDepth' },
+      { module: '@/lib/sanity/depth-options', export: 'pictureClearance' },
+    ],
+    render: 'src/features/pages/components/sections/team/team-card.tsx',
+    target: 'div.relative.rounded-card img',
+    change: 'attributes',
+    base: { eyebrow: 'Our people', text: 'An intro.' },
+    probe: { 'pictureDepthDesign.shadow': 'floating' },
+  },
+  {
+    id: 'team.pictureDepth.row',
+    component: 'team',
+    capability: 'pictureDepth',
+    scope: 'card',
+    layouts: ['list'],
+    field: 'pictureDepthDesign.shadow',
+    resolvers: [{ module: '@/lib/sanity/depth-options', export: 'resolvePictureDepth' }],
+    render: 'src/features/pages/components/sections/team/team-card.tsx',
+    target: '[data-profile-image]',
+    change: 'attributes',
+    base: { eyebrow: 'Our people', text: 'An intro.' },
+    probe: { 'pictureDepthDesign.shadow': 'floating' },
+  },
   // The glyph at the end of a card or row that links to a member's page (task 137): none until chosen.
   {
     id: 'team.action.card',

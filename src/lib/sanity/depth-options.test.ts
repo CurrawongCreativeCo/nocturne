@@ -9,6 +9,8 @@ import {
   resolveCardDepth,
   resolveCardLift,
   resolveDepth,
+  pictureClearance,
+  pictureInset,
   resolvePictureDepth,
 } from './depth-options'
 
@@ -249,5 +251,82 @@ describe('resolvePictureDepth', () => {
 
   it('ignores the site’s Card depth and any card level: nothing above it exists', () => {
     expect(resolvePictureDepth({ shadow: 'soft' })?.style).not.toHaveProperty('--card-depth')
+  })
+})
+
+describe('pictureClearance and pictureInset', () => {
+  it('is undefined while nothing is chosen, however that is stored', () => {
+    for (const input of [
+      undefined,
+      null,
+      {},
+      { shadow: 'flat' },
+      { glow: 'off' },
+      { shadow: 'flat', glow: 'off' },
+      { shadow: 'enormous', glow: 'blazing' },
+    ]) {
+      expect(pictureClearance(input), JSON.stringify(input)).toBeUndefined()
+    }
+  })
+
+  it('never gives a shadow less than the approved first values', () => {
+    expect(pictureClearance({ shadow: 'soft' })?.side).toBe(8)
+    expect(pictureClearance({ shadow: 'raised' })?.side).toBe(16)
+    expect(pictureClearance({ shadow: 'floating' })?.side).toBe(28)
+    for (const [level, least] of [
+      ['soft', 8],
+      ['raised', 16],
+      ['floating', 28],
+    ] as const) {
+      for (const glow of ['off', 'soft', 'strong']) {
+        expect(
+          pictureClearance({ shadow: level, glow })?.side,
+          `${level} ${glow}`,
+        ).toBeGreaterThanOrEqual(least)
+      }
+    }
+  })
+
+  it('gives a glow alone, and a glow with a shadow, the room measured for that combination', () => {
+    expect(pictureClearance({ glow: 'soft' })).toEqual({ side: 12, top: 12 })
+    expect(pictureClearance({ glow: 'strong' })).toEqual({ side: 22, top: 22 })
+    expect(pictureClearance({ shadow: 'flat', glow: 'strong' })).toEqual({ side: 22, top: 22 })
+    expect(pictureClearance({ shadow: 'floating', glow: 'strong' })).toEqual({ side: 34, top: 24 })
+  })
+
+  it('needs more as the shadow, and then the glow, get stronger', () => {
+    const order = ['soft', 'raised', 'floating'] as const
+    for (const glow of ['off', 'soft', 'strong'] as const) {
+      const sides = order.map((level) => pictureClearance({ shadow: level, glow })?.side ?? 0)
+      expect(sides, glow).toEqual([...sides].sort((a, b) => a - b))
+    }
+    for (const level of order) {
+      const sides = (['off', 'soft', 'strong'] as const).map(
+        (glow) => pictureClearance({ shadow: level, glow })?.side ?? 0,
+      )
+      expect(sides, level).toEqual([...sides].sort((a, b) => a - b))
+    }
+  })
+
+  it('splits the room so a square slot keeps its height: top plus bottom is twice the side', () => {
+    expect(pictureInset({ side: 28, top: 12 })).toEqual({ side: 28, top: 12, bottom: 44 })
+    expect(pictureInset({ side: 8, top: 4 })).toEqual({ side: 8, top: 4, bottom: 12 })
+    for (const level of ['soft', 'raised', 'floating'] as const) {
+      for (const glow of ['off', 'soft', 'strong'] as const) {
+        const room = pictureClearance({ shadow: level, glow })
+        if (!room) continue
+        const { side, top, bottom } = pictureInset(room)
+        expect(top + bottom, `${level} ${glow}`).toBe(2 * side)
+        expect(top, `${level} ${glow}`).toBe(room.top)
+        expect(bottom, `${level} ${glow}`).toBeGreaterThanOrEqual(0)
+      }
+    }
+  })
+
+  it('keeps a wider picture’s ratio, and cuts the top back to what fits', () => {
+    const wide = pictureInset({ side: 28, top: 12 }, 9 / 16)
+    expect(wide.top + wide.bottom).toBe(Math.round(2 * 28 * (9 / 16)))
+    // Little vertical room: the top takes it all, the bottom none, never a negative.
+    expect(pictureInset({ side: 4, top: 12 }, 9 / 16)).toEqual({ side: 4, top: 5, bottom: 0 })
   })
 })

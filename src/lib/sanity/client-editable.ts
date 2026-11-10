@@ -305,6 +305,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
       'cardDesign',
       'imageDesign',
       'portraitDesign',
+      'pictureDepthDesign',
       'access',
       'style',
     ],

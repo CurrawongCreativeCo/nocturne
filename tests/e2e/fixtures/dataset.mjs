@@ -3836,6 +3836,68 @@ const teamMember = (id, name, role, extra = {}) => ({
 })
 const memberSlug = (current) => ({ slug: { _type: 'slug', current } })
 
+/**
+ * Picture depth on Team (tests/e2e/picture-depth-team.spec.ts): a grid, a slider and a list of three members whose
+ * portraits are a real photograph (tests/e2e/fixtures/portrait-photo.jpg: NASA photo S69-31741, public domain,
+ * which the spec serves in place of the fixtures' flat picture), shown with nothing chosen and at each depth level.
+ */
+const depthTeam = (id, title, variant, extra = {}) => ({
+  _key: id,
+  _type: 'team',
+  variant,
+  title,
+  selection: 'picked',
+  // The existing members. A slider needs more than it shows at once (three, from a wide screen), or it has no arrows.
+  members: (variant === 'slider' ? ['ann', 'ben', 'cara', 'dev'] : ['ann', 'ben', 'cara']).map(
+    (m) => ref(`teamMember-${m}`),
+  ),
+  ...extra,
+})
+documents.push({
+  _id: 'page-picture-depth-team',
+  _type: 'page',
+  title: 'Picture depth, team',
+  slug: { _type: 'slug', current: 'picture-depth-team' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    depthText(1),
+    depthTeam('depth-team-none', 'Team nothing chosen', 'grid'),
+    depthTeam('depth-team-soft', 'Team soft', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'soft' }),
+    }),
+    depthTeam('depth-team-raised', 'Team raised', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'raised' }),
+    }),
+    depthTeam('depth-team-floating', 'Team floating', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthTeam('depth-team-glow', 'Team floating strong glow', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthTeam('depth-team-glow-only', 'Team strong glow only', 'grid', {
+      pictureDepthDesign: pictureDepth({ glow: 'strong' }),
+    }),
+    depthTeam('depth-team-flat', 'Team flat and glow off', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthTeam('depth-team-circle', 'Team circle floating', 'grid', {
+      imageDesign: imageDesign({ appearance: 'circle' }),
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthText(2),
+    depthTeam('depth-team-slider-none', 'Team slider nothing chosen', 'slider'),
+    depthTeam('depth-team-slider-glow', 'Team slider floating strong glow', 'slider', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(3),
+    depthTeam('depth-team-list-none', 'Team list nothing chosen', 'list'),
+    depthTeam('depth-team-list-glow', 'Team list floating strong glow', 'list', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(4),
+  ],
+})
+
 documents.push(
   teamMember('ann', 'Ann Lee', 'Principal solicitor', {
     ...memberSlug('ann-lee'),
