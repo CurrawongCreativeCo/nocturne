@@ -44819,11 +44819,26 @@
                 "policy": "required",
                 "scope": "section",
                 "closingTask": 151,
-                "fields": [],
-                "availability": "pending"
+                "fields": [
+                  "settings.dividerDesign"
+                ],
+                "availability": "verified"
               }
             ],
-            "evidence": []
+            "evidence": [
+              {
+                "id": "teamMemberPage.divider.section",
+                "field": "settings.dividerDesign",
+                "resolvers": [
+                  "@/lib/sanity/divider-options#resolveDivider"
+                ],
+                "render": "src/components/ui/decorative-divider.tsx",
+                "target": "[data-decorative-divider]",
+                "cases": [
+                  "teamMemberPage.divider.section"
+                ]
+              }
+            ]
           },
           "edge": {
             "notApplicable": "Not a section, so it has no edge"

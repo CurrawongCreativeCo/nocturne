@@ -714,7 +714,7 @@ exports[`the design capability contract > teamMemberPage: reports what it offers
   "capabilities": [
     "icon required section: verified",
     "framing required section: pending (177)",
-    "divider required section: pending (151)",
+    "divider required section: verified",
   ],
   "sources": [],
 }

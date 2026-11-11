@@ -2693,6 +2693,8 @@ exports[`design capability evidence > team.text.card.title@slider: the probe cha
 ]
 `;
 
+exports[`design capability evidence > teamMemberPage.divider.section: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > teamMemberPage.icon.section: the probe changes the registered target 1`] = `
 [
   "<a aria-label="Ann Lee on LinkedIn" class="inline-flex items-center justify-center transition-colors duration-(--duration-fast) motion-reduce:transition-none size-11 rounded-full bg-surface hover:bg-surface-alt ring-1 ring-inset ring-line text-ink shadow-card" href="https://www.linkedin.com/in/ann-lee-example" rel="noopener">",

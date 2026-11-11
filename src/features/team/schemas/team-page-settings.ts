@@ -1,6 +1,7 @@
 import { CogIcon } from '@sanity/icons/Cog'
-import { defineType } from 'sanity'
+import { defineField, defineType } from 'sanity'
 
+import { hiddenFromClients } from '@/lib/sanity/roles'
 import { iconsDesignField } from '@/lib/sanity/schema/card-design-fields'
 
 /**
@@ -20,6 +21,17 @@ export const teamPageSettings = defineType({
       inherits: 'the default (circles)',
       shapeOf: (context) =>
         (context.parent as { iconShape?: string } | undefined)?.iconShape ?? 'circle',
+    }),
+    // A rule between a member's summary and their biography (task 151). Empty is None, so every page draws
+    // what it always did; it is drawn only for a member who has a biography.
+    defineField({
+      name: 'dividerDesign',
+      title: 'Divider between the summary and the biography',
+      type: 'decorativeDivider',
+      group: 'design',
+      description:
+        'A rule under the member’s summary and above their biography, on every member’s page. Not drawn for a member with no biography.',
+      hidden: hiddenFromClients,
     }),
   ],
   preview: {

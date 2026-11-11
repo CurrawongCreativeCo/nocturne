@@ -17,6 +17,7 @@ import {
   documents,
   experimentRunning,
   footerDividerOn,
+  teamPageDividerOn,
   footerSocialOn,
   blogPostWithoutPicture,
   blogSettingsDesigned,
@@ -59,6 +60,9 @@ let experimentPatch = null
 
 /** Whether the footer's social icons are on; switched by POST /__fixture/footer-social/<on|off>. */
 let footerSocialPatch = null
+
+/** Whether every member's page has a divider under their summary; switched by POST /__fixture/team-divider/<on|off>. */
+let teamDividerOn = false
 
 /** Whether the footer has a divider above its bottom row; switched by POST /__fixture/footer-divider/<on|off>. */
 let footerDividerPatch = null
@@ -112,6 +116,7 @@ function datasetFor(perspective, variant) {
       experimentPatch && doc._type === 'experiment' ? { ...doc, ...experimentPatch } : doc,
     )
   if (blogSettingsPatch) published.push(blogSettingsPatch)
+  if (teamDividerOn) published.push(teamPageDividerOn)
   if (blogExtraPost) published.push(blogExtraPost)
   // Content variants replace the base documents with the same id, like the real Content Lake.
   const variantDocs = variant ? (variantDocuments[variant] ?? []) : []
@@ -161,6 +166,12 @@ createServer(async (req, res) => {
   const footerSocial = /^\/__fixture\/footer-social\/(on|off)$/.exec(url.pathname)?.[1]
   if (req.method === 'POST' && footerSocial) {
     footerSocialPatch = footerSocial === 'on' ? footerSocialOn : null
+    res.writeHead(204).end()
+    return
+  }
+  const teamDivider = /^\/__fixture\/team-divider\/(on|off)$/.exec(url.pathname)?.[1]
+  if (req.method === 'POST' && teamDivider) {
+    teamDividerOn = teamDivider === 'on'
     res.writeHead(204).end()
     return
   }

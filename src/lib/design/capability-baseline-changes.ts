@@ -69,18 +69,6 @@ export const BASELINE_CHANGES: readonly BaselineChange[] = [
   {
     kind: 'admit',
     component: 'teamMemberPage',
-    capability: 'divider',
-    scope: 'section',
-    layouts: [null],
-    reason:
-      'The page’s contact section is set off by a fixed border. Dividers are task 151’s, which gives the page a design to store them in.',
-    reviewer: 'owner',
-    reviewed: '2026-11-08',
-    closingTask: 151,
-  },
-  {
-    kind: 'admit',
-    component: 'teamMemberPage',
     capability: 'framing',
     scope: 'section',
     layouts: [null],

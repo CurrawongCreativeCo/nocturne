@@ -29,6 +29,8 @@ const BLOG_CARD_SPEC = /blog-card-design\.spec\.ts/
 const BUTTON_STYLE_SPEC = /button-style\.spec\.ts/
 // Gives the footer a divider, which every page's footer would show.
 const FOOTER_DIVIDER_SPEC = /footer-divider\.spec\.ts/
+// Gives every team member's page a divider, which every member's page would show.
+const TEAM_DIVIDER_SPEC = /team-divider\.spec\.ts/
 const ISOLATED_SPECS = [
   EXPERIMENTS_SPEC,
   DESIGN_SPEC,
@@ -38,6 +40,7 @@ const ISOLATED_SPECS = [
   BLOG_CARD_SPEC,
   BUTTON_STYLE_SPEC,
   FOOTER_DIVIDER_SPEC,
+  TEAM_DIVIDER_SPEC,
 ]
 
 /**
@@ -146,6 +149,14 @@ export default defineConfig({
       name: 'footer-divider',
       testMatch: FOOTER_DIVIDER_SPEC,
       dependencies: ['button-style'],
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      // A divider under every team member's summary; after `footer-divider` so no other test, and no visual
+      // baseline, ever sees one. It switches the divider off again when it ends.
+      name: 'team-divider',
+      testMatch: TEAM_DIVIDER_SPEC,
+      dependencies: ['footer-divider'],
       use: { ...devices['Desktop Chrome'] },
     },
   ],

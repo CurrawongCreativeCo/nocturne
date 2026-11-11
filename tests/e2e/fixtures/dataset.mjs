@@ -1681,6 +1681,13 @@ export const blogPostWithoutPicture = {
   mainImage: undefined,
 }
 
+/** Team page settings with a divider between a member's summary and biography (tests/e2e/team-divider.spec.ts). */
+export const teamPageDividerOn = {
+  _id: 'teamPageSettings',
+  _type: 'teamPageSettings',
+  dividerDesign: { _type: 'decorativeDivider', style: 'line', width: 'short' },
+}
+
 /** Navigation with a divider above the footer's bottom row (tests/e2e/footer-divider.spec.ts). */
 export const footerDividerOn = {
   footerDividerDesign: { _type: 'decorativeDivider', style: 'line', width: 'short' },

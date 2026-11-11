@@ -2835,6 +2835,7 @@ export type TeamPageSettings = {
       hex?: string
     }
   }
+  dividerDesign?: DecorativeDivider
 }
 
 export type BusinessInfo = {
@@ -34109,7 +34110,7 @@ export type START_HERE_QUERY_RESULT = {
 
 // Source: src/features/team/api/team-member.ts
 // Variable: TEAM_MEMBER_QUERY
-// Query: *[_type == "teamMember" && slug.current == $slug][0] {      _id,  _type,  _updatedAt,  name,  role,  "slug": slug.current,  portrait {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  shortBio,  bio[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },  qualifications,  publicEmail,  phone,  socialLinks[] { _key, platform, url },  socialDisplay,    "pageSettings": *[_id == "teamPageSettings"][0] {   iconDesign {   iconShape,  iconColour { colour, hex },  iconBackground { colour, hex },  iconBackgroundStrength,  iconBorder,  iconBorderColour { colour, hex } } }  }
+// Query: *[_type == "teamMember" && slug.current == $slug][0] {      _id,  _type,  _updatedAt,  name,  role,  "slug": slug.current,  portrait {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  shortBio,  bio[] {   ...,  markDefs[]{    ...,    _type == "link" => {   linkType,  "slug": internal->slug.current,  url,  openInNewTab,  anchor,  "panel": panel->{ "id": _id, title },  fallbackUrl,  bookingUrl }  },  _type == "image" => { caption,   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } } },  qualifications,  publicEmail,  phone,  socialLinks[] { _key, platform, url },  socialDisplay,    "pageSettings": *[_id == "teamPageSettings"][0] {   iconDesign {   iconShape,  iconColour { colour, hex },  iconBackground { colour, hex },  iconBackgroundStrength,  iconBorder,  iconBorderColour { colour, hex } },  dividerDesign {   style,  width,  thickness,  centre,  text,  textCase,  letterSpacing,  icon,  centreSize,  image {   alt,  crop,  hotspot,  asset->{    _id,    metadata { lqip, hasAlpha, dimensions { width, height } }  } },  lineColour { colour, hex },  centreColour { colour, hex } } }  }
 export type TEAM_MEMBER_QUERY_RESULT = {
   _id: string
   _type: 'teamMember'
@@ -34198,6 +34199,7 @@ export type TEAM_MEMBER_QUERY_RESULT = {
   pageSettings:
     | {
         iconDesign: null
+        dividerDesign: null
       }
     | {
         iconDesign: {
@@ -34222,6 +34224,62 @@ export type TEAM_MEMBER_QUERY_RESULT = {
           iconBackgroundStrength: 'light' | 'medium' | 'solid' | 'strong' | 'wash' | null
           iconBorder: 'medium' | 'none' | 'thick' | 'thin' | null
           iconBorderColour: {
+            colour:
+              'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+            hex: string | null
+          } | null
+        } | null
+        dividerDesign: {
+          style: 'dots' | 'fade' | 'line' | 'none' | null
+          width: 'full' | 'long' | 'medium' | 'short' | null
+          thickness: 'bold' | 'thin' | null
+          centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
+          text: string | null
+          textCase: 'normal' | 'uppercase' | null
+          letterSpacing: 'extra-wide' | 'normal' | 'wide' | null
+          icon:
+            | 'award'
+            | 'bolt'
+            | 'calendar'
+            | 'care'
+            | 'check'
+            | 'clock'
+            | 'community'
+            | 'email'
+            | 'gift'
+            | 'heart'
+            | 'leaf'
+            | 'location'
+            | 'lotus'
+            | 'person'
+            | 'phone'
+            | 'shield'
+            | 'star'
+            | 'sun'
+            | null
+          centreSize: 'large' | 'medium' | 'small' | null
+          image: {
+            alt: string | null
+            crop: SanityImageCrop | null
+            hotspot: SanityImageHotspot | null
+            asset: {
+              _id: string
+              metadata: {
+                lqip: string | null
+                hasAlpha: boolean | null
+                dimensions: {
+                  width: number
+                  height: number
+                } | null
+              } | null
+            } | null
+          } | null
+          lineColour: {
+            colour:
+              'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
+            hex: string | null
+          } | null
+          centreColour: {
             colour:
               'accent-2' | 'accent' | 'custom' | 'highlight' | 'inherit' | 'ink' | 'muted' | null
             hex: string | null
@@ -34343,7 +34401,7 @@ declare global {
     '{\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    "pageBuilder": pageBuilder[style.spacing in ["compact", "spacious"]] {\n      _key,\n      _type,\n      title,\n      "style": { "spacing": style.spacing }\n    }\n  },\n  "sharedSections": *[_type == "sharedSection"] {\n    _id,\n    title,\n    "section": select(\n      section.style.spacing in ["compact", "spacious"] => section {\n        _key,\n        _type,\n        title,\n        "style": { "spacing": style.spacing }\n      }\n    )\n  }\n}': SPACING_USAGE_QUERY_RESULT
     '{\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    "slug": slug.current,\n    "metaDescription": seo.metaDescription,\n    pageBuilder\n  },\n  "sharedSections": *[_type == "sharedSection"] {\n    _id,\n    title,\n    section\n  },\n  "panels": *[_type == "panel"] {\n    _id,\n    title\n  },\n  "navigation": *[_id in ["siteNavigation", "drafts.siteNavigation"]] {\n    _id,\n    headerNav,\n    headerCta,\n    footerNav\n  },\n  "redirects": *[_type == "redirect"] {\n    _id,\n    source,\n    destination\n  }\n}': CONTENT_HEALTH_QUERY_RESULT
     '{\n  "recent": *[!(_type match "system.**") && !(_type match "sanity.**") && !(_type match "assist.**")]\n    | order(_updatedAt desc)[0...60] {\n      _id,\n      _type,\n      _updatedAt,\n      "title": coalesce(title, name)\n    },\n  "drafts": *[_id in path("drafts.**") && !(_type match "sanity.**") && !(_type match "assist.**")]\n    | order(_updatedAt asc)[0...200] {\n      _id,\n      _type,\n      _updatedAt,\n      "title": coalesce(title, name)\n    },\n  "pages": *[_type == "page"] {\n    _id,\n    title,\n    "slug": slug.current,\n    pageBuilder\n  },\n  "sharedSections": *[_type == "sharedSection"] {\n    _id,\n    title,\n    section\n  },\n  "enquiries": {\n    "new": count(*[_type == "enquiry" && status == "new"]),\n    "total": count(*[_type == "enquiry"])\n  },\n  "navigation": *[_id in ["siteNavigation", "drafts.siteNavigation"]] {\n    _id,\n    headerNav,\n    headerCta,\n    footerNav\n  }\n}': START_HERE_QUERY_RESULT
-    '\n  *[_type == "teamMember" && slug.current == $slug][0] {\n    \n  _id,\n  _type,\n  _updatedAt,\n  name,\n  role,\n  "slug": slug.current,\n  portrait { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  shortBio,\n  bio[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n  qualifications,\n  publicEmail,\n  phone,\n  socialLinks[] { _key, platform, url },\n  socialDisplay\n,\n    "pageSettings": *[_id == "teamPageSettings"][0] { \n  iconDesign { \n  iconShape,\n  iconColour { colour, hex },\n  iconBackground { colour, hex },\n  iconBackgroundStrength,\n  iconBorder,\n  iconBorderColour { colour, hex }\n }\n }\n  }\n': TEAM_MEMBER_QUERY_RESULT
+    '\n  *[_type == "teamMember" && slug.current == $slug][0] {\n    \n  _id,\n  _type,\n  _updatedAt,\n  name,\n  role,\n  "slug": slug.current,\n  portrait { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  shortBio,\n  bio[] { \n  ...,\n  markDefs[]{\n    ...,\n    _type == "link" => { \n  linkType,\n  "slug": internal->slug.current,\n  url,\n  openInNewTab,\n  anchor,\n  "panel": panel->{ "id": _id, title },\n  fallbackUrl,\n  bookingUrl\n }\n  },\n  _type == "image" => { caption, \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n }\n },\n  qualifications,\n  publicEmail,\n  phone,\n  socialLinks[] { _key, platform, url },\n  socialDisplay\n,\n    "pageSettings": *[_id == "teamPageSettings"][0] { \n  iconDesign { \n  iconShape,\n  iconColour { colour, hex },\n  iconBackground { colour, hex },\n  iconBackgroundStrength,\n  iconBorder,\n  iconBorderColour { colour, hex }\n },\n  dividerDesign { \n  style,\n  width,\n  thickness,\n  centre,\n  text,\n  textCase,\n  letterSpacing,\n  icon,\n  centreSize,\n  image { \n  alt,\n  crop,\n  hotspot,\n  asset->{\n    _id,\n    metadata { lqip, hasAlpha, dimensions { width, height } }\n  }\n },\n  lineColour { colour, hex },\n  centreColour { colour, hex }\n }\n }\n  }\n': TEAM_MEMBER_QUERY_RESULT
     '\n  *[_type == "teamMember" && defined(slug.current)]\n    | order(coalesce(order, 999999) asc, name asc) {\n    "slug": slug.current,\n    _updatedAt\n  }\n': TEAM_INDEX_QUERY_RESULT
     '\n  *[_id == "siteIdentity"][0] { title, description, ogImage }\n': SEO_PREVIEW_SETTINGS_QUERY_RESULT
     '\n  *[_id == "designSettings"][0] {\n    appearance,\n    primary,\n    secondary,\n    highlight,\n    surface,\n    surfaceAlt,\n    surfaceInverse,\n    ink,\n    inkMuted,\n    line,\n    gradients[] { name, angle, stops }\n  }\n': DESIGN_COLOURS_QUERY_RESULT

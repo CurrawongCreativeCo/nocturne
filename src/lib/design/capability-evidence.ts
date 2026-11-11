@@ -958,6 +958,21 @@ export const EVIDENCE: readonly Evidence[] = [
     base: {},
     probe: { 'navigation.footerDividerDesign': { _type: 'decorativeDivider', style: 'line' } },
   },
+  // A member's divider (task 151): `settings.dividerDesign` (Team page settings) is drawn between the
+  // member's summary and their biography, once there is a biography to separate it from.
+  {
+    id: 'teamMemberPage.divider.section',
+    component: 'teamMemberPage',
+    capability: 'divider',
+    scope: 'section',
+    field: 'settings.dividerDesign',
+    resolvers: [{ module: '@/lib/sanity/divider-options', export: 'resolveDivider' }],
+    render: 'src/components/ui/decorative-divider.tsx',
+    target: '[data-decorative-divider]',
+    change: 'appears',
+    base: {},
+    probe: { 'settings.dividerDesign': { _type: 'decorativeDivider', style: 'line' } },
+  },
   iconContainerEvidence({
     component: 'teamMemberPage',
     scope: 'section',

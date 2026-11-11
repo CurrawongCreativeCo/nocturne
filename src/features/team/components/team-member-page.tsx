@@ -1,5 +1,6 @@
 import { stegaClean } from 'next-sanity'
 
+import { DecorativeDivider } from '@/components/ui/decorative-divider'
 import { PlainText } from '@/components/ui/plain-text'
 import { RichText } from '@/components/ui/rich-text'
 import { SanityImage } from '@/components/ui/sanity-image'
@@ -7,6 +8,8 @@ import { SocialLinks } from '@/components/ui/social-links'
 import { WebPageJsonLd } from '@/components/ui/web-page-json-ld'
 import { teamPath } from '@/config/paths'
 import { siteUrl } from '@/config/site-url'
+import { resolveDivider } from '@/lib/sanity/divider-options'
+import { hasHeadingText } from '@/lib/sanity/heading-text'
 import { resolveIconDesign, type IconDesign } from '@/lib/sanity/surface-options'
 import { personId } from '@/lib/structured-data/ids'
 
@@ -22,6 +25,17 @@ const linkClass = 'font-medium text-ink underline underline-offset-4 hover:text-
  * with it). Split from `TeamMemberView` so the capability evidence can draw the real page without a request.
  */
 export function TeamMemberPage({ member }: { member: TeamMemberData }) {
+  // The divider (task 151) separates the summary from the biography: drawn only for a member whose
+  // biography says something (words, or a picture). It owns 24px above and below, so the biography drops
+  // its `mt-12` and so does its first block (a paragraph's `my-4`, a heading's `mt-10`): the gap is 24px
+  // whether or not margins collapse. The contact section's own line is a different rule and is untouched.
+  const divider = resolveDivider(member.pageSettings?.dividerDesign)
+  const showDivider = Boolean(
+    divider &&
+    member.bio &&
+    (hasHeadingText(member.bio) || member.bio.some((item) => stegaClean(item._type) === 'image')),
+  )
+
   return (
     <>
       <WebPageJsonLd
@@ -62,8 +76,12 @@ export function TeamMemberPage({ member }: { member: TeamMemberData }) {
             />
           </header>
         </div>
+        {showDivider && divider ? <DecorativeDivider divider={divider} /> : null}
         {member.bio && member.bio.length > 0 && (
-          <RichText value={member.bio} className="mt-12 max-w-measure text-lead text-ink" />
+          <RichText
+            value={member.bio}
+            className={`${showDivider ? 'mt-0 [&>:first-child]:mt-0!' : 'mt-12'} max-w-measure text-lead text-ink`}
+          />
         )}
         <ContactDetails member={member} icon={resolveIconDesign(member.pageSettings?.iconDesign)} />
       </article>
