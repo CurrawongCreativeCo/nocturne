@@ -26,6 +26,7 @@ import * as imageDesign from '@/lib/sanity/schema/image-design'
 import * as launchDate from '@/lib/sanity/schema/launch-date'
 import * as link from '@/lib/sanity/schema/link'
 import * as logoRow from '@/lib/sanity/schema/logo-row'
+import * as richTextBody from '@/lib/sanity/schema/rich-text-body'
 import { sectionStyle } from '@/lib/sanity/schema/section-style'
 import * as stats from '@/lib/sanity/schema/stats'
 
@@ -59,6 +60,7 @@ const named = [
     launchDate,
     link,
     logoRow,
+    richTextBody,
     stats,
   ].flatMap((module) =>
     Object.values(module).filter(

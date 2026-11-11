@@ -17,7 +17,8 @@ export const richText = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
-      defineField({ name: 'body', type: 'blockContent', validation: (rule) => rule.required() }),
+      // Paragraphs, pictures and, for the agency, dividers (the shared `richTextBody`).
+      defineField({ name: 'body', type: 'richTextBody', validation: (rule) => rule.required() }),
       accessField,
     ],
     { spacing: 'compact', align: 'start' },

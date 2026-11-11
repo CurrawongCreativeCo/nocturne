@@ -2226,6 +2226,8 @@ exports[`design capability evidence > process.text.card.title@vertical: the prob
 ]
 `;
 
+exports[`design capability evidence > richText.divider.section: the probe changes the registered target 1`] = `[]`;
+
 exports[`design capability evidence > richText.edge.section: the probe changes the registered target 1`] = `
 [
   "<body>",

@@ -105,10 +105,16 @@ export const heroFragment = /* groq */ `
   }
 `
 
+/** The Rich text body: the shared blocks, and a divider block resolved to what DecorativeDivider draws (task 151). */
+const richTextBodyFields = /* groq */ `
+  ${portableTextFields},
+  _type == "decorativeDivider" => { ${decorativeDividerFields} }
+`
+
 export const richTextFragment = /* groq */ `
   _type == "richText" && (access != "members" || $members) => {
     style { ${sectionStyleFields} },
-    body[] { ${portableTextFields} }
+    body[] { ${richTextBodyFields} }
   }
 `
 

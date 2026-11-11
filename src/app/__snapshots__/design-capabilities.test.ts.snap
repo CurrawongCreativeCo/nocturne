@@ -563,7 +563,7 @@ exports[`the design capability contract > richText: reports what it offers today
     "framing conditional section/background: pending (177)",
     "overlay required section: verified",
     "glass required section: verified",
-    "divider required section: pending (151)",
+    "divider required section: verified",
     "edge required section: verified",
     "motion required section: verified",
   ],

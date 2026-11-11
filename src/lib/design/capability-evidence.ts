@@ -102,6 +102,17 @@ export const PICTURE = {
 } as const
 
 /** One button, which a section with a call to action has: the trigger of the action pair. */
+/** Two paragraphs of Rich text body (task 151): the divider's evidence puts a divider between them. */
+const paragraphBlock = (key: string, words: string) => ({
+  _type: 'block',
+  _key: key,
+  style: 'normal',
+  markDefs: [],
+  children: [{ _type: 'span', _key: `${key}-span`, text: words, marks: [] }],
+})
+const RICH_TEXT_FIRST = paragraphBlock('rt-first', 'The first paragraph.')
+const RICH_TEXT_SECOND = paragraphBlock('rt-second', 'The second paragraph.')
+
 const BUTTON = {
   _key: 'button',
   label: 'Book a call',
@@ -1382,6 +1393,28 @@ export const EVIDENCE: readonly Evidence[] = [
         ],
       },
     ],
+  },
+  // A divider block in the Rich text body (task 151): `body` holds the blocks, and a `decorativeDivider` between
+  // two paragraphs is drawn by RichText through `resolveDivider`. The probe is the same body with one added, so
+  // the divider appears; unset, nothing is drawn.
+  {
+    id: 'richText.divider.section',
+    component: 'richText',
+    capability: 'divider',
+    scope: 'section',
+    field: 'body',
+    resolvers: [{ module: '@/lib/sanity/divider-options', export: 'resolveDivider' }],
+    render: 'src/components/ui/decorative-divider.tsx',
+    target: '[data-decorative-divider]',
+    change: 'appears',
+    base: { body: [RICH_TEXT_FIRST, RICH_TEXT_SECOND] },
+    probe: {
+      body: [
+        RICH_TEXT_FIRST,
+        { _type: 'decorativeDivider', _key: 'probe-divider', style: 'line' },
+        RICH_TEXT_SECOND,
+      ],
+    },
   },
   ...frameEvidence('richText', {
     mark: true,

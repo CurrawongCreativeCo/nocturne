@@ -51,7 +51,7 @@
         {
           "name": "body",
           "title": "Body",
-          "kind": "Formatted text",
+          "kind": "Other",
           "required": true
         }
       ]

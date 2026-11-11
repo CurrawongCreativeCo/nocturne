@@ -3499,7 +3499,7 @@
       "fields": [
         {
           "path": "body",
-          "kind": "blockContent",
+          "kind": "richTextBody",
           "required": true,
           "max": null,
           "clientEditable": true
@@ -3666,11 +3666,26 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "body"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "richText.divider.section",
+              "field": "body",
+              "resolvers": [
+                "@/lib/sanity/divider-options#resolveDivider"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider]",
+              "cases": [
+                "richText.divider.section"
+              ]
+            }
+          ]
         },
         "edge": {
           "policies": [

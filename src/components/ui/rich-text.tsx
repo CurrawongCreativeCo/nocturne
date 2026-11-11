@@ -1,9 +1,11 @@
 import { PortableText, type PortableTextComponents, type PortableTextProps } from 'next-sanity'
 import type { CSSProperties } from 'react'
 
+import { DecorativeDivider } from '@/components/ui/decorative-divider'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SanityLink, type LinkData } from '@/components/ui/sanity-link'
 import type { TextRole } from '@/lib/design/capabilities'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import type { SanityImageData } from '@/types/sanity'
 
 /**
@@ -60,22 +62,60 @@ const components: PortableTextComponents = {
   },
 }
 
+/**
+ * A divider block in the body (task 151: the Rich text section's `richTextBody`). It owns 24px above and
+ * below (`my-6`), so the block on each side gives up its own margin on that side whatever it is (a paragraph's
+ * `my-4`, a heading's `mt-10`, a figure's `my-8`): the block after it loses its top margin and the block
+ * before it its bottom margin. Every margin beside the divider is then 0 or the divider's 24px, so the gap
+ * is the same whether or not margins collapse. Added only when a divider draws, so a body with none is
+ * unchanged. Full class names, so Tailwind's scanner sees them.
+ */
+const AROUND_DIVIDER =
+  '[&>[data-decorative-divider]+*]:mt-0! [&>*:has(+[data-decorative-divider])]:mb-0!'
+
+interface BodyBlock {
+  _type?: string
+}
+const drawnDivider = (block: BodyBlock) =>
+  block._type === 'decorativeDivider' &&
+  resolveDivider(block as Parameters<typeof resolveDivider>[0])
+
 export function RichText({
   value,
   className,
   style,
   textRole,
+  dividerBlock = '',
 }: {
   value: PortableTextProps['value'] | null | undefined
   className?: string
   style?: CSSProperties
   /** The text role this body draws (lib/design/capabilities.ts). */
   textRole?: TextRole
+  /** From `sectionTraits`: `mx-auto` in a centred section, so a divider block is centred with it. */
+  dividerBlock?: string
 }) {
   if (!value || (Array.isArray(value) && value.length === 0)) return null
+  const hasDivider = (value as BodyBlock[]).some(drawnDivider)
   return (
-    <div className={className} style={style} data-text-role={textRole}>
-      <PortableText value={value} components={components} />
+    <div
+      className={hasDivider ? [className, AROUND_DIVIDER].filter(Boolean).join(' ') : className}
+      style={style}
+      data-text-role={textRole}
+    >
+      <PortableText
+        value={value}
+        components={{
+          ...components,
+          types: {
+            ...components.types,
+            decorativeDivider: ({ value: block }) => {
+              const divider = resolveDivider(block as Parameters<typeof resolveDivider>[0])
+              return divider ? <DecorativeDivider divider={divider} block={dividerBlock} /> : null
+            },
+          },
+        }}
+      />
     </div>
   )
 }

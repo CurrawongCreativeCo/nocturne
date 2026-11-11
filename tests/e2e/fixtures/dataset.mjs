@@ -5657,6 +5657,53 @@ documents.push(
     })),
   },
   {
+    // A divider block in a Rich text body (tests/e2e/rich-text-dividers.spec.ts): between two paragraphs, after a
+    // list and before a heading, in a centred section, and a body with none to compare spacing against.
+    _id: 'page-rich-text-dividers',
+    _type: 'page',
+    title: 'Rich text dividers',
+    slug: { _type: 'slug', current: 'rich-text-dividers' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'rtd-basic',
+        _type: 'richText',
+        body: [
+          block(['Before the first divider.']),
+          { _key: 'rtd-d1', _type: 'decorativeDivider', style: 'line', width: 'short' },
+          block(['After the first divider.']),
+        ],
+      },
+      {
+        _key: 'rtd-mixed',
+        _type: 'richText',
+        body: [
+          block(['A list item'], { listItem: 'bullet', level: 1 }),
+          block(['Another list item'], { listItem: 'bullet', level: 1 }),
+          { _key: 'rtd-d2', _type: 'decorativeDivider', style: 'line', width: 'short' },
+          block(['A heading after the divider'], { style: 'h2' }),
+          block(['Text under the heading.']),
+        ],
+      },
+      {
+        _key: 'rtd-centred',
+        _type: 'richText',
+        style: { _type: 'sectionStyle', align: 'center' },
+        body: [
+          block(['Centred before.']),
+          { _key: 'rtd-d3', _type: 'decorativeDivider', style: 'line', width: 'short' },
+          block(['Centred after.']),
+        ],
+      },
+      {
+        _key: 'rtd-control',
+        _type: 'richText',
+        body: [block(['Control: first paragraph.']), block(['Control: second paragraph.'])],
+      },
+    ],
+  },
+  {
     // The blur preview is only for opaque pictures (tests/e2e/image-placeholder.spec.ts): a transparent
     // logo as the profile picture and as a wordmark, and an opaque photo as a picture.
     _id: 'page-image-placeholders',
