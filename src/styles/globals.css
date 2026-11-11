@@ -75,15 +75,69 @@
   [data-screen-backdrop] {
     clip-path: inset(var(--screen-backdrop-top, 0) 0 var(--screen-backdrop-bottom, 0));
   }
+  /*
+   * "The first (or last) section" is the first (or last) section or wrapper in <main>: a section with a bottom
+   * edge sits in a frame, the one below an edge in a wrapper, and in draft mode every section in an editable
+   * wrapper inside one more, so the section itself is one to three levels down. A section is last only if no
+   * section or wrapper follows it (the footer's colour band is not one).
+   */
   body:has([data-minimal-page]:not([style*='display: none']))
     main
-    > section:first-of-type
+    > section:not(:is(section, div) ~ *)
+    > [data-screen-backdrop],
+  body:has([data-minimal-page]:not([style*='display: none']))
+    main
+    > div:not(:is(section, div) ~ *)
+    > section
+    > [data-screen-backdrop],
+  body:has([data-minimal-page]:not([style*='display: none']))
+    main
+    > div:not(:is(section, div) ~ *)
+    > [data-section-edge-frame]
+    > section
+    > [data-screen-backdrop],
+  body:has([data-minimal-page]:not([style*='display: none']))
+    main
+    > [data-sanity]
+    > div:first-child
+    > section
+    > [data-screen-backdrop],
+  body:has([data-minimal-page]:not([style*='display: none']))
+    main
+    > [data-sanity]
+    > div:first-child
+    > [data-section-edge-frame]
+    > section
     > [data-screen-backdrop] {
     --screen-backdrop-top: -100lvh;
   }
   body:has([data-minimal-page]:not([style*='display: none']))
     main
-    > section:last-of-type
+    > section:not(:has(~ :is(section, div):not([data-edge-backdrop])))
+    > [data-screen-backdrop],
+  body:has([data-minimal-page]:not([style*='display: none']))
+    main
+    > div:not([data-edge-backdrop]):not(:has(~ :is(section, div):not([data-edge-backdrop])))
+    > section
+    > [data-screen-backdrop],
+  body:has([data-minimal-page]:not([style*='display: none']))
+    main
+    > div:not([data-edge-backdrop]):not(:has(~ :is(section, div):not([data-edge-backdrop])))
+    > [data-section-edge-frame]
+    > section
+    > [data-screen-backdrop],
+  body:has([data-minimal-page]:not([style*='display: none']))
+    main
+    > [data-sanity]
+    > div:not([data-edge-backdrop]):not(:has(~ div:not([data-edge-backdrop])))
+    > section
+    > [data-screen-backdrop],
+  body:has([data-minimal-page]:not([style*='display: none']))
+    main
+    > [data-sanity]
+    > div:not([data-edge-backdrop]):not(:has(~ div:not([data-edge-backdrop])))
+    > [data-section-edge-frame]
+    > section
     > [data-screen-backdrop] {
     --screen-backdrop-bottom: -100lvh;
   }
@@ -389,8 +443,21 @@
   padding-bottom: calc(var(--spacing-section-spacious) + var(--edge-h));
 }
 
+/*
+ * What the section below an edge really takes (--edge-live): its own --edge-above while the section above
+ * drew its cut, and none when that section rendered nothing (a form with no form, an empty team, no
+ * plans): a cut that isn't there must not pull the next section up over the last visible one. "Drew its
+ * cut" is read from the markup, not the settings: the section above's wrapper holds a frame, or a pending
+ * boundary that may still fill in (a <template>), so a section that streams in keeps today's behaviour
+ * until it has resolved. A browser without :has() keeps today's behaviour too.
+ */
 [data-edge-above] {
-  margin-top: calc(var(--edge-above) * -1);
+  --edge-live: var(--edge-above);
+  margin-top: calc(var(--edge-live) * -1);
+}
+
+div:not(:has([data-section-edge-frame], template)) + [data-edge-above] {
+  --edge-live: 0px;
 }
 
 /* A section that rendered nothing must not pull the next one up under the edge. */
@@ -399,15 +466,15 @@
 }
 
 [data-edge-above] section[data-spacing='compact'] {
-  padding-top: calc(var(--spacing-section-compact) + var(--edge-above));
+  padding-top: calc(var(--spacing-section-compact) + var(--edge-live));
 }
 
 [data-edge-above] section[data-spacing='default'] {
-  padding-top: calc(var(--spacing-section) + var(--edge-above));
+  padding-top: calc(var(--spacing-section) + var(--edge-live));
 }
 
 [data-edge-above] section[data-spacing='spacious'] {
-  padding-top: calc(var(--spacing-section-spacious) + var(--edge-above));
+  padding-top: calc(var(--spacing-section-spacious) + var(--edge-live));
 }
 
 /*
@@ -423,7 +490,7 @@
 
 /* The sticky header's room (scroll-mt-24) plus the edge, so a link lands with the whole cut in view. */
 [data-edge-above] section[id] {
-  scroll-margin-top: calc(6rem + var(--edge-above));
+  scroll-margin-top: calc(6rem + var(--edge-live));
 }
 
 /* The footer takes the last section's edge like a section: a band of its colour under the cut. */
@@ -433,7 +500,18 @@
   background-color: var(--color-surface-alt);
 }
 
-main:has([data-edge-backdrop]) ~ [data-site-chrome] footer {
+/*
+ * No band where no cut was drawn above it (the last section rendered nothing), and none on a Minimal page,
+ * which has no footer for it to match: the page's own background shows under the cut instead.
+ */
+div:not(:has([data-section-edge-frame], template)) + [data-edge-backdrop],
+body:has([data-minimal-page]:not([style*='display: none'])) [data-edge-backdrop] {
+  display: none;
+}
+
+main:has(div:has([data-section-edge-frame], template) + [data-edge-backdrop])
+  ~ [data-site-chrome]
+  footer {
   border-top-color: transparent;
 }
 

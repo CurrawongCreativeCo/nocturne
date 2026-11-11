@@ -6146,3 +6146,88 @@ documents.push(
     _updatedAt: UPDATED,
   },
 )
+
+// Section edge stability (tests/e2e/section-edge-stability.spec.ts, section-edge-hairlines.spec.ts; task 151).
+/** A form section with no form: it renders nothing, however its style is set. */
+const edgeEmpty = (id, style) => ({
+  _key: id,
+  _type: 'formSection',
+  style: { _type: 'sectionStyle', anchorId: id, ...style },
+})
+/** One pair per shape (and height): an inverse section over an accent one, so a gap shows the page background. */
+const seamPairs = [
+  ['wave', 'medium'],
+  ['curve', 'medium'],
+  ['diagonal', 'medium'],
+  ['arch', 'medium'],
+  ['layered', 'medium'],
+  ['wave', 'small'],
+  ['curve', 'large'],
+].flatMap(([shape, height]) => [
+  edgeSection(`seam-${shape}-${height}`, `Above the ${shape} (${height})`, {
+    tone: 'inverse',
+    edge: shape,
+    edgeHeight: height,
+  }),
+  edgeSection(`seam-${shape}-${height}--below`, 'Below the edge', { tone: 'accent' }),
+])
+documents.push(
+  {
+    // An edge beside a section that draws nothing: it must not pull the next section over the last visible one.
+    _id: 'page-edge-empty',
+    _type: 'page',
+    title: 'Edges beside an empty section',
+    slug: { _type: 'slug', current: 'edge-empty' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      edgeSection('ee-before', 'Before the empty section', { tone: 'surface' }),
+      edgeEmpty('ee-empty', { tone: 'inverse', edge: 'wave', edgeHeight: 'large' }),
+      edgeSection('ee-after', 'After the empty section', { tone: 'alt' }),
+      edgeSection('ee-control-a', 'Control, with a wave', {
+        tone: 'inverse',
+        edge: 'wave',
+        edgeHeight: 'large',
+      }),
+      edgeSection('ee-control-b', 'Control, below the wave', { tone: 'alt' }),
+      edgeEmpty('ee-last', { tone: 'inverse', edge: 'curve', edgeHeight: 'large' }),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    // A Minimal page whose first and last sections cover the screen and have edges: no footer, so no band.
+    _id: 'page-edge-minimal',
+    _type: 'page',
+    title: 'Edges on a Minimal page',
+    slug: { _type: 'slug', current: 'edge-minimal' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      edgeSection('em-first', 'First, covering the screen', {
+        tone: 'inverse',
+        image: image(''),
+        imageSize: 'screen',
+        overlay: 'medium',
+        edge: 'wave',
+      }),
+      edgeSection('em-middle', 'Middle, with a curve', { tone: 'alt', edge: 'curve' }),
+      edgeSection('em-last', 'Last, covering the screen', {
+        tone: 'inverse',
+        image: image(''),
+        imageSize: 'screen',
+        overlay: 'medium',
+        edge: 'curve',
+      }),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    // Every shape over a section whose colour differs from the page's, to measure hairlines at the cut.
+    _id: 'page-edge-seams',
+    _type: 'page',
+    title: 'Edge seams',
+    slug: { _type: 'slug', current: 'edge-seams' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: seamPairs,
+    _updatedAt: UPDATED,
+  },
+)

@@ -100,8 +100,18 @@ interface Props {
   gate?: SectionGate
 }
 
-/** The stacking order of the first edge frame; each later one is a step lower (the header is z-40). */
-const EDGE_Z_START = 30
+/**
+ * The stacking order of the first edge frame; each later frame is one step lower, so every cut sits above
+ * the frames after it. Only a section that draws an edge takes a step (a plain section needs none), so a
+ * long page spends its range only on its edges: 38 edged sections get distinct steps however many sections
+ * the page has. 39 is the highest that stays under the sticky header (z-40), which a cut must never cover;
+ * beyond 38 edges the steps stop at 1 and the later frames tie (in document order), which no real page
+ * reaches. Never derive this from the section count: that can pass the header.
+ */
+export const EDGE_Z_START = 39
+
+/** The z-index of the edge frame that has `before` edge frames above it. */
+export const edgeFrameZ = (before: number) => Math.max(1, EDGE_Z_START - before)
 
 /**
  * The bottom edge a section draws, or undefined. A locked members-only section is a stub with no
@@ -172,6 +182,13 @@ export function SectionRenderer({
 
   // The footer follows the last section, so it takes the edge like a section would (a band of its colour).
   const lastEdge = edgeOf(sections[sections.length - 1], gate)
+  // How many edge frames sit above each section: its frame is that many steps below the first.
+  const edgesAbove: number[] = []
+  let edgeCount = 0
+  for (const section of sections) {
+    edgesAbove.push(edgeCount)
+    if (edgeOf(section, gate)) edgeCount += 1
+  }
 
   const Wrapper = editable ? 'div' : Fragment
   return (
@@ -250,7 +267,7 @@ export function SectionRenderer({
         if (own)
           follower.style = {
             ...follower.style,
-            '--edge-z': Math.max(1, EDGE_Z_START - index),
+            '--edge-z': edgeFrameZ(edgesAbove[index] ?? 0),
           } as CSSProperties
 
         // A shared section's overlay opens the shared document, since that is what an edit changes.
