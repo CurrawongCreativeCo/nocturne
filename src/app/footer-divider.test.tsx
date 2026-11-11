@@ -96,7 +96,7 @@ describe('the footer’s divider', () => {
     expect(document.querySelector('footer > div')?.className).toBe(BUSINESS_RULE)
   })
 
-  it.each(Object.entries(SETUPS))(
+  it.each(Object.entries(SETUPS).filter(([, setup]) => setup.business || setup.social))(
     'sits above the bottom row, once, inside the footer: %s',
     async (_name, setup) => {
       const { document } = await draw(setup, LINE)
@@ -127,10 +127,20 @@ describe('the footer’s divider', () => {
     expect(business.document.querySelector('footer')?.className).toContain(TOP_RULE)
     expect(business.html).not.toContain(BUSINESS_RULE)
 
-    // Nothing above it: the footer's own top line is what it replaces.
-    const bare = await draw(NOTHING_ABOVE, LINE)
-    expect(bare.html).not.toContain(TOP_RULE)
-    expect(bare.html).not.toContain(BUSINESS_RULE)
+    // The footer's top edge, against the page, is never the divider's to replace.
+    for (const setup of [WITH_SOCIAL, BUSINESS_ONLY, NOTHING_ABOVE]) {
+      const { document } = await draw(setup, LINE)
+      expect(document.querySelector('footer')?.className).toContain(TOP_RULE)
+    }
+  })
+
+  it('is not drawn with nothing above the bottom row: there is nothing for it to separate', async () => {
+    const base = await draw(NOTHING_ABOVE)
+    const chosen = await draw(NOTHING_ABOVE, LINE)
+    expect(chosen.html).not.toContain('data-decorative-divider')
+    // Byte-identical to the footer with none chosen, top border included.
+    expect(chosen.html).toBe(base.html)
+    expect(chosen.document.querySelector('footer')?.className).toContain(TOP_RULE)
   })
 
   it('gives the divider its own 24px and leaves the rows around it their padding', async () => {

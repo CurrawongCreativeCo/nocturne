@@ -943,8 +943,8 @@ export const EVIDENCE: readonly Evidence[] = [
     shape: 'square',
   }),
   // The footer's divider (task 151): `navigation.footerDividerDesign` is drawn above its bottom row. The probe
-  // chooses a line; the base has no social row or business details, so the divider replaces the footer's own
-  // top border (the unit tests cover the other two cases).
+  // chooses a line; the drawer's seed has Business info and the social row, so there is content above the
+  // bottom row for the divider to separate it from (the unit tests cover the other setups).
   {
     id: 'siteFooter.divider.section',
     component: 'siteFooter',

@@ -12,9 +12,9 @@ import { test } from './fixtures/test'
  * switches the divider (and the social row) off and expires the cache again when it ends.
  *
  * The fixture has Business info, so the footer's business block is directly above the divider unless the
- * social row is on: then the row sits between them and the block keeps its line. The case with nothing at
- * all above the bottom row (the footer's top line yields) needs no Business info and is covered by the unit
- * tests. It reads computed spacing and borders, not class names.
+ * social row is on: then the row sits between them and the block keeps its line. The footer's own top border,
+ * against the page, always stays. With nothing above the bottom row no divider is drawn; that needs no
+ * Business info, so only the unit tests cover it. It reads computed spacing and borders, not class names.
  */
 test.describe.configure({ mode: 'serial' })
 test.skip(({ isMobile }) => isMobile, 'Desktop only: it sets its own widths')

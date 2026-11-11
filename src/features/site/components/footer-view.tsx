@@ -36,18 +36,19 @@ export function FooterView({
   const business = cleanBusiness(settings?.business)
   const timeZone = business?.timeZone ?? DEFAULT_TIME_ZONE
   const footerIcon = resolveIconDesign(settings?.footerIconDesign)
-  // The divider above the bottom row (task 151) replaces the fixed line directly above it, so the two are
-  // never both drawn: the social row has none, so with it the divider has nothing to replace; else the
-  // business block's bottom border; else (nothing above it) the footer's own top border.
-  const divider = resolveDivider(settings?.footerDividerDesign)
+  // The divider above the bottom row (task 151) separates it from the business details or the social row, so
+  // it is drawn only when one of them is above it (nothing for it to separate otherwise). It replaces the
+  // fixed line directly above it, so the two are never both drawn: the social row has none, so with it the
+  // business block keeps its line; else the business block's bottom border yields. The footer's own top
+  // border is the edge against the page, not a rule between its parts, and always stays.
   const showSocial = Boolean(
     settings?.footerShowSocial && business?.socialLinks?.some((link) => link.url),
   )
+  const divider = business || showSocial ? resolveDivider(settings?.footerDividerDesign) : null
   const replacesBusinessRule = Boolean(divider && business && !showSocial)
-  const replacesTopRule = Boolean(divider && !business && !showSocial)
 
   return (
-    <footer className={replacesTopRule ? 'bg-surface-alt' : 'border-t border-line bg-surface-alt'}>
+    <footer className="border-t border-line bg-surface-alt">
       {business && (
         <BusinessDetails
           business={business}
