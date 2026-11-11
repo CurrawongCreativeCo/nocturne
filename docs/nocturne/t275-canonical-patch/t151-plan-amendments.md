@@ -5,6 +5,19 @@ page dividers are deferred to the standalone-view design work, "only through a f
 **Nothing here has been applied.** The published plan, every task status, the capability baseline and the code
 are unchanged by this document.
 
+## Owner decisions (11 November 2026)
+
+| Decision               | Approved direction                                                                         |
+| ---------------------- | ------------------------------------------------------------------------------------------ |
+| Task 151               | Formally defer the Service page and Event page dividers                                    |
+| Task 280               | Create it as "Standalone view design settings and adoption"                                |
+| Service page           | Transfer its existing divider obligation to task 280                                       |
+| Event page             | Declare it as a standalone view in task 280, separate from the Event details card          |
+| Event divider position | Full width, between the page header and the main content grid                              |
+| New settings documents | Decide during task 280, not task 151                                                       |
+| Capability baseline    | Change only after the live plan amendment is published                                     |
+| Task 151 status        | **Not Done.** Part B (Contour, Tide, Ribbon and the optional measured Drift) still remains |
+
 ## What was checked (11 November 2026)
 
 - **The live plan is version 22 with 279 tasks.** Read from the published page: the last prompt cards are
@@ -109,8 +122,8 @@ REQUIREMENTS
    - drawn only when the page has a body that says something (words or a picture);
    - explicit spacing (the divider owns 24px each side and the adjacent content gives up its margin; no
      reliance on margins collapsing); the existing border-t rules between the service page's groups stay;
-   - the event page's position is decided with the owner: between the header and the grid (full width), or
-     inside the body column above the body;
+   - the event page's divider sits between the page header/summary and the main content grid, spanning the
+     page content width. It is not inserted inside the event details card or the body column;
    - unset output is byte-identical; real evidence for each page, including resolver disconnection, closes
      the servicePage divider pair and the event page's.
 
@@ -126,8 +139,9 @@ Apply only after the plan publishes the task and the owner reviews the row.
 
 1. `src/features/services/schemas/service-page-capabilities.ts`: `divider: { policy: 'required', scope:
 'section', closingTask: 280 }` (the number the plan publishes).
-2. `src/lib/design/capability-baseline-changes.ts`: one reviewed row for the moved pair, with `reviewer` and
-   `reviewed` filled in by the owner's review (they are not set until that happens):
+2. `src/lib/design/capability-baseline-changes.ts`: one reviewed row for the moved pair. `reviewer` and
+   `reviewed` must record an actual owner review of this row and its date: they are never invented or
+   defaulted, and the row is not committed until the owner gives them:
 
    ```ts
    {
@@ -148,3 +162,22 @@ Apply only after the plan publishes the task and the owner reviews the row.
    difference from the base commit must be that one row.
 4. Nothing else changes: no `servicePageSettings` or `eventPageSettings`, no `eventPage` declaration (that is
    requirement 7 of task 280), and no other baseline entry.
+
+## How to apply to the live plan (the owner publishes; not done)
+
+The live plan is a public artifact the assistant has no edit access to, and it stores task progress with the
+page, so **it must be updated in place**: publishing a copy as a new artifact would lose every task's saved
+status. The method is the earlier `*-canonical-patch` folders': read the page, strip the platform skeleton
+(line 1 and the final line), apply each change asserting it matches exactly once, check the data script
+parses, and republish to the same artifact.
+
+1. Recheck that 280 is still the next free number (the plan was last read on 11 November: 279 tasks, version 22,
+   no task 280). If it differs, change the number in the blocks above and in the code named below.
+2. Append the **Task 151 (revision)** block verbatim to task 151's prompt (`p-151`), after its 6 November
+   addition. Task 151's status stays as it is: it is **not** Done.
+3. Add the revised **Task 280** block as a new card (Template, template context, Medium, Later; after tasks 156
+   and 275), and add task 280 to the task list.
+4. Verify both changes are visible in the published version: `p-151` ends with the 11 November revision, and
+   `p-280` exists with requirements 7 and 8.
+5. Only then apply the code-side change below, after the owner reviews the baseline row, and commit it on its
+   own.
