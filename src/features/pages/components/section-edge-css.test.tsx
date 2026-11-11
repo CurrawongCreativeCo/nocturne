@@ -175,6 +175,70 @@ describe('S1 and S2: the footer’s band', () => {
     mount([richText('a'), richText('b', WAVE)], {}, true)
     expect(matched(HIDDEN).has(band())).toBe(true)
   })
+
+  describe('the footer’s top border, hidden only under a drawn band', () => {
+    const rules = selectorsSetting('border-top-color', 'transparent')
+    // What the footer rule asks of <main>: the relative selector inside `main:has(...)`.
+    const inner = rules
+      .map((selector) => /^main:has\((.+)\) ~ \[data-site-chrome\] footer$/.exec(selector)?.[1])
+      .filter((selector) => selector !== undefined)
+    const hidesBorder = () => inner.some((selector) => document.querySelector(selector) !== null)
+
+    it('has exactly one such rule', () => {
+      expect(inner).toHaveLength(1)
+    })
+
+    it('hides it under a drawn band, in draft mode too', () => {
+      mount([richText('a'), richText('b', WAVE)])
+      expect(hidesBorder()).toBe(true)
+      mount([richText('a'), richText('b', WAVE)], { editable: true })
+      expect(hidesBorder()).toBe(true)
+    })
+
+    it('keeps it when the last section rendered nothing, in draft mode too', () => {
+      mount([richText('a'), empty('u', WAVE)])
+      expect(hidesBorder()).toBe(false)
+      mount([richText('a'), empty('u', WAVE)], { editable: true })
+      expect(hidesBorder()).toBe(false)
+    })
+
+    it('hides it while the last section is still streaming in', () => {
+      mount([richText('a'), empty('u', WAVE)])
+      band().previousElementSibling?.insertAdjacentHTML(
+        'beforeend',
+        '<!--$?--><template id="B:0"></template><!--/$-->',
+      )
+      expect(hidesBorder()).toBe(true)
+    })
+
+    it('keeps it on a page with no band', () => {
+      mount([richText('a'), richText('b')])
+      expect(hidesBorder()).toBe(false)
+    })
+  })
+})
+
+describe('globals.css selectors a browser accepts', () => {
+  /** Whether a `:has(` opens inside another `:has(...)`'s argument. */
+  const nestsHas = (selector: string) => {
+    const open: boolean[] = []
+    for (let i = 0; i < selector.length; i++) {
+      if (selector.startsWith(':has(', i)) {
+        if (open.includes(true)) return true
+        open.push(true)
+        i += 4
+      } else if (selector[i] === '(') open.push(false)
+      else if (selector[i] === ')') open.pop()
+    }
+    return false
+  }
+
+  it('never nests :has() inside :has(): browsers drop the whole rule, though jsdom accepts it', () => {
+    const all = [...css.matchAll(/([^{}]+)\{/g)].flatMap(([, list]) => splitSelectors(list ?? ''))
+    expect(nestsHas('main:has(div:has(a) + b)')).toBe(true)
+    expect(nestsHas('body:has(a) main > div:not(:has(~ b))')).toBe(false)
+    expect(all.filter(nestsHas)).toEqual([])
+  })
 })
 
 describe('S3: the first and last section of a Minimal page, through every wrapper', () => {

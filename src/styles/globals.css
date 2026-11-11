@@ -509,9 +509,12 @@ body:has([data-minimal-page]:not([style*='display: none'])) [data-edge-backdrop]
   display: none;
 }
 
-main:has(div:has([data-section-edge-frame], template) + [data-edge-backdrop])
-  ~ [data-site-chrome]
-  footer {
+/*
+ * The footer's top border is hidden only under a drawn band. :has() can't be nested, so "drawn" is read as
+ * "the wrapper above the band is not empty" (an edge section either renders its frame, a pending boundary,
+ * or nothing at all); a wrapper that held something else would hide the border, as before task 151.
+ */
+main:has(div:not(:empty) + [data-edge-backdrop]) ~ [data-site-chrome] footer {
   border-top-color: transparent;
 }
 
