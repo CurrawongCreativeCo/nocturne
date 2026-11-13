@@ -2525,20 +2525,6 @@ const gallerySections = [
     { tone: 'inverse', edge: 'wave', edgeHeight: 'small', spacing: 'spacious' },
     { tone: 'alt', spacing: 'compact' },
   ),
-  // Tide and Contour (task 151): each at its defaults, then with its other colour, Flip and Tide's Large. The
-  // section above has a colour of its own: a plain surface section is see-through under any edge (README).
-  ...edgePair('tide', { tone: 'alt', edge: 'tide' }, { tone: 'surface' }),
-  ...edgePair(
-    'tide-echo-large-flip',
-    { tone: 'inverse', edge: 'tide', edgeTideLayer: 'echo', edgeHeight: 'large', edgeFlip: true },
-    { tone: 'alt' },
-  ),
-  ...edgePair('contour', { tone: 'alt', edge: 'contour' }, { tone: 'inverse' }),
-  ...edgePair(
-    'contour-muted-flip',
-    { tone: 'inverse', edge: 'contour', edgeLineColour: 'muted', edgeFlip: true },
-    { tone: 'surface' },
-  ),
   // Stats (README, "Statistics"): both layouts with the default three figures and the formatting
   // options (grouping, decimals, prefix, suffix), then a dark six-figure grid with animation off.
   {
@@ -2892,6 +2878,21 @@ const gallerySections = [
       }),
     ],
   }),
+  // Tide and Contour (task 151): each at its defaults, then with its other colour, Flip and Tide's Large. The
+  // section above has a colour of its own: a plain surface section is see-through under any edge (README).
+  // At the end, so no section already in the gallery moves down the page (its baseline would change).
+  ...edgePair('tide', { tone: 'alt', edge: 'tide' }, { tone: 'surface' }),
+  ...edgePair(
+    'tide-echo-large-flip',
+    { tone: 'inverse', edge: 'tide', edgeTideLayer: 'echo', edgeHeight: 'large', edgeFlip: true },
+    { tone: 'alt' },
+  ),
+  ...edgePair('contour', { tone: 'alt', edge: 'contour' }, { tone: 'inverse' }),
+  ...edgePair(
+    'contour-muted-flip',
+    { tone: 'inverse', edge: 'contour', edgeLineColour: 'muted', edgeFlip: true },
+    { tone: 'surface' },
+  ),
   // new-section:gallery
 ]
 
