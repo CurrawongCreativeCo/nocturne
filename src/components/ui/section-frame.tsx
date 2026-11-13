@@ -16,12 +16,17 @@ import type { SiteDesign } from '@/lib/sanity/site-design'
 import { DecorativeMark } from './decorative-mark'
 import { SectionBackground } from './section-background'
 import {
+  closeToBottom,
   closeToTop,
+  cutMaskImage,
   edgeBackLine,
+  edgeComposition,
   edgeHeightIsCustom,
   edgeHeightStyle,
   edgeLine,
   edgeMaskImage,
+  type EdgeComposition,
+  type EdgePart,
   type ResolvedEdge,
 } from './section-edges'
 import {
@@ -79,6 +84,61 @@ function EdgeSvg({ children, ...rest }: { children: ReactNode; 'data-edge-layer'
       {children}
     </svg>
   )
+}
+
+/**
+ * A composed edge's parts (new shapes only; today's shapes never reach this): each part its own SVG, named
+ * by where it is drawn and its order (`data-edge-part`: `under-1`, `line-1`, `over-1`), so its CSS can never
+ * match today's back wave or accent line (`data-edge-layer`). A fill covers from its line to the band's far
+ * side; a line keeps its width however the band stretches. Over parts sit at -z-10 inside the section: above
+ * its background and mark, which come before them, and below its content.
+ */
+function EdgeParts({
+  parts,
+  name,
+}: {
+  parts: readonly EdgePart[]
+  name: 'under' | 'line' | 'over'
+}) {
+  const className = name === 'over' ? `${EDGE_SVG_CLASS} -z-10` : EDGE_SVG_CLASS
+  return parts.map((part, index) => {
+    const id = `${name}-${String(index + 1)}`
+    return (
+      <svg
+        key={id}
+        data-edge-part={id}
+        aria-hidden="true"
+        focusable="false"
+        viewBox="0 0 1 1"
+        preserveAspectRatio="none"
+        className={className}
+        style={EDGE_SVG_STYLE}
+      >
+        {part.kind === 'fill' ? (
+          <path
+            d={part.side === 'over' ? closeToBottom(part.line) : closeToTop(part.line)}
+            fill={`var(--color-${part.paint})`}
+            fillOpacity={part.opacity}
+          />
+        ) : (
+          <path
+            d={part.line}
+            fill="none"
+            stroke={`var(--color-${part.paint})`}
+            strokeOpacity={part.opacity}
+            strokeWidth={part.widthPx}
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+        )}
+      </svg>
+    )
+  })
+}
+
+/** A composed edge's over parts, inside the section, where its own mask clips them at the cut. */
+function EdgeOverLayers({ parts }: { parts: readonly EdgePart[] }) {
+  return <EdgeParts parts={parts} name="over" />
 }
 
 /**
@@ -199,7 +259,7 @@ function SectionFrameView({
     </>
   )
   // Only present with a mark: an empty slot would shift every useId below it (the parity snapshots hold this).
-  const backLayers =
+  const behind =
     mark && !markInPanel ? (
       <>
         {background}
@@ -207,6 +267,19 @@ function SectionFrameView({
       </>
     ) : (
       background
+    )
+  // A composed edge is worked out once: the frame draws its under parts, the section its over parts. They
+  // join the slot above only when there are some, for the same reason (section-edge-parity.test.tsx).
+  const composition = resolved.edge ? edgeComposition(resolved.edge) : undefined
+  const overParts = composition?.parts.filter((part) => part.side === 'over') ?? []
+  const backLayers =
+    overParts.length > 0 ? (
+      <>
+        {behind}
+        <EdgeOverLayers parts={overParts} />
+      </>
+    ) : (
+      behind
     )
   const withMark = (inside: ReactNode) =>
     markInContainer ? (
@@ -267,12 +340,33 @@ function SectionFrameView({
     </section>
   )
 
-  return resolved.edge ? <EdgeFrame edge={resolved.edge}>{section}</EdgeFrame> : section
+  return resolved.edge ? (
+    <EdgeFrame edge={resolved.edge} composition={composition}>
+      {section}
+    </EdgeFrame>
+  ) : (
+    section
+  )
 }
 
-function EdgeFrame({ edge, children }: { edge: ResolvedEdge; children: ReactNode }) {
+/**
+ * A composed edge (new shapes only) takes the branches below that read `composition`: its mask from its cut,
+ * its under fills before the section and its under lines after it. Today's shapes have no composition, so
+ * they take the original branches, unchanged, in the same three slots.
+ */
+function EdgeFrame({
+  edge,
+  composition,
+  children,
+}: {
+  edge: ResolvedEdge
+  composition: EdgeComposition | undefined
+  children: ReactNode
+}) {
   const transform = { flip: edge.flip, invert: edge.invert }
   const accent = edge.accent === 'none' ? undefined : `var(--color-${edge.accent})`
+  const under = (kind: EdgePart['kind']) =>
+    composition?.parts.filter((part) => part.side === 'under' && part.kind === kind) ?? []
 
   return (
     <div
@@ -282,11 +376,15 @@ function EdgeFrame({ edge, children }: { edge: ResolvedEdge; children: ReactNode
       style={
         {
           ...edgeHeightStyle(edge.height, '--edge-h'),
-          '--edge-mask': edgeMaskImage(edge.shape, transform),
+          '--edge-mask': composition
+            ? cutMaskImage(composition.cut)
+            : edgeMaskImage(edge.shape, transform),
         } as CSSProperties
       }
     >
-      {edge.shape === 'layered' ? (
+      {composition ? (
+        <EdgeParts parts={under('fill')} name="under" />
+      ) : edge.shape === 'layered' ? (
         <EdgeSvg data-edge-layer="back">
           <path
             d={closeToTop(edgeBackLine(transform))}
@@ -296,7 +394,9 @@ function EdgeFrame({ edge, children }: { edge: ResolvedEdge; children: ReactNode
         </EdgeSvg>
       ) : null}
       {children}
-      {accent ? (
+      {composition ? (
+        <EdgeParts parts={under('stroke')} name="line" />
+      ) : accent ? (
         <EdgeSvg data-edge-layer="line">
           <path
             d={edgeLine(edge.shape, transform)}

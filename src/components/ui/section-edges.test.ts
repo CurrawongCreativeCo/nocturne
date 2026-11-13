@@ -1,14 +1,24 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  SECTION_EDGE_ACCENTS,
+  SECTION_EDGE_HEIGHTS,
+  SECTION_EDGE_LAYERS,
+} from '@/lib/sanity/section-style-options'
+
+import {
   EDGE_HEIGHT_RANGE,
+  closeToBottom,
   closeToTop,
   customEdgeHeight,
+  cutMaskImage,
   edgeBackLine,
+  edgeComposition,
   edgeFill,
   edgeHeightStyle,
   edgeLine,
   edgeMaskImage,
+  type EdgeHeight,
   type EdgeShape,
 } from './section-edges'
 
@@ -127,5 +137,41 @@ describe('edge heights', () => {
     }
     expect(edgeHeightStyle(height, '--edge-h')).toEqual(expected)
     expect(edgeHeightStyle(height, '--edge-above')).toEqual(expected)
+  })
+})
+
+describe('composed edges (task 151, Slice 1: the foundation, no shape uses it yet)', () => {
+  const HEIGHTS: EdgeHeight[] = [
+    ...SECTION_EDGE_HEIGHTS.map((size): EdgeHeight => ({ kind: 'token', size })),
+    { kind: 'custom', mobile: '40px', tablet: '72px', desktop: '120px' },
+  ]
+
+  it.each(SHAPES)(
+    '%s is not a composition, with any option: it keeps its own rendering',
+    (shape) => {
+      for (const flip of [false, true])
+        for (const invert of [false, true])
+          for (const accent of SECTION_EDGE_ACCENTS)
+            for (const layer of SECTION_EDGE_LAYERS)
+              for (const height of HEIGHTS)
+                expect(
+                  edgeComposition({ shape, flip, invert, accent, layer, height }),
+                ).toBeUndefined()
+    },
+  )
+
+  it.each(SHAPES)('%s: a cut line makes exactly the mask its shape makes today', (shape) => {
+    for (const flip of [false, true])
+      for (const invert of [false, true])
+        expect(cutMaskImage(edgeLine(shape, { flip, invert }))).toBe(
+          edgeMaskImage(shape, { flip, invert }),
+        )
+  })
+
+  it('closes a line along the bottom of the band, as closeToTop does along the top', () => {
+    expect(closeToBottom('M0 0.5C0.3 0.2 0.6 0.9 1 0.25')).toBe(
+      'M0 0.5C0.3 0.2 0.6 0.9 1 0.25L1 1L0 1Z',
+    )
+    expect(closeToBottom('M-0.12 0.4L1.12 0.6')).toBe('M-0.12 0.4L1.12 0.6L1.12 1L-0.12 1Z')
   })
 })
