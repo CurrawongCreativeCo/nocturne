@@ -546,6 +546,21 @@ main:has(div:not(:empty) + [data-edge-backdrop]) ~ [data-site-chrome] footer {
   [data-section-edge-frame] > svg {
     display: none;
   }
+
+  /* A composed edge's parts too, wherever they are drawn: its over parts are inside the section. */
+  [data-edge-part] {
+    display: none;
+  }
+}
+
+/*
+ * A composed edge's parts are decoration whose meaning is colour, so forced colours hide them; the cut still
+ * shows the boundary. Only [data-edge-part]: today's back wave and accent line keep their behaviour (task 151).
+ */
+@media (forced-colors: active) {
+  [data-edge-part] {
+    display: none;
+  }
 }
 
 /*

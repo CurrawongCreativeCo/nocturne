@@ -138,6 +138,14 @@ export function closeToTop(line: string): string {
   return `${line}L${round(endX)} 0L${round(startX)} 0Z`
 }
 
+/** The area below a line, closed along the bottom of the band: what a composed edge's over part covers. */
+export function closeToBottom(line: string): string {
+  const numbers = line.match(/-?\d*\.?\d+/g)?.map(Number) ?? []
+  const [startX = 0] = numbers
+  const endX = numbers[numbers.length - 2] ?? 1
+  return `${line}L${round(endX)} 1L${round(startX)} 1Z`
+}
+
 /** What the section keeps, as a path. */
 export function edgeFill(shape: EdgeShape, transform: EdgeTransform = {}): string {
   return closeToTop(edgeLine(shape, transform))
@@ -151,6 +159,49 @@ function svgUrl(path: string): string {
 /** The `mask-image` layer for the band: opaque where the section stays, clear where it is cut. */
 export function edgeMaskImage(shape: EdgeShape, transform: EdgeTransform = {}): string {
   return svgUrl(edgeFill(shape, transform))
+}
+
+/** The `mask-image` layer for a composed edge: built from its cut exactly as `edgeMaskImage` is from a shape. */
+export function cutMaskImage(cut: string): string {
+  return svgUrl(closeToTop(cut))
+}
+
+/** A theme role a composed edge's part is painted in: tone-aware, never a stored colour. */
+export type EdgePaint = 'accent' | 'accent-2' | 'highlight' | 'ink'
+
+/**
+ * One decorative part of a composed edge: a fill or a line on one side of the cut. An `over` part is drawn
+ * inside the section, over its background and under its content, and its own mask clips it at the cut. An
+ * `under` part is drawn in the frame, over the following section, and shows only where the cut removed this
+ * one. A fill covers from its line to the band's far side (the bottom for `over`, the top for `under`).
+ */
+export type EdgePart =
+  | { kind: 'fill'; side: 'over' | 'under'; line: string; paint: EdgePaint; opacity: number }
+  | {
+      kind: 'stroke'
+      side: 'over' | 'under'
+      line: string
+      paint: EdgePaint
+      opacity: number
+      widthPx: number
+    }
+
+/**
+ * A shape drawn as a composition (task 151, Stage 3 section 4): its cut, the open line the mask is built
+ * from, and its parts, back to front within each side. Only new shapes are compositions: today's keep their
+ * own rendering, untouched.
+ */
+export interface EdgeComposition {
+  cut: string
+  parts: readonly EdgePart[]
+}
+
+/** The shapes drawn as compositions, and how. None yet: every shape there is today keeps its own rendering. */
+const COMPOSITIONS: Partial<Record<EdgeShape, (edge: ResolvedEdge) => EdgeComposition>> = {}
+
+/** The composition an edge is drawn as, or undefined for a shape that keeps its own rendering. */
+export function edgeComposition(edge: ResolvedEdge): EdgeComposition | undefined {
+  return COMPOSITIONS[edge.shape]?.(edge)
 }
 
 /** Customised heights run from this many px to this many. Out-of-range input is clamped, not rejected. */

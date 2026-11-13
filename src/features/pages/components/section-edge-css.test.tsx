@@ -5,9 +5,22 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { bump, pathFromFunction } from '@/components/ui/edge-crest'
+import type * as SectionEdges from '@/components/ui/section-edges'
+import type { EdgeComposition, ResolvedEdge } from '@/components/ui/section-edges'
+
 import type { PageSection } from '../types'
 import { SectionRenderer } from './section-renderer'
 
+// A composed edge (task 151, Slice 1): no shape is one yet, so a test stands one in where it asks for it.
+const stub = vi.hoisted(() => ({ composition: undefined as EdgeComposition | undefined }))
+vi.mock('@/components/ui/section-edges', async (importOriginal) => {
+  const actual = await importOriginal<typeof SectionEdges>()
+  return {
+    ...actual,
+    edgeComposition: (edge: ResolvedEdge) => stub.composition ?? actual.edgeComposition(edge),
+  }
+})
 vi.mock('next-sanity/image', () => ({ Image: () => null }))
 vi.mock('server-only', () => ({}))
 vi.mock('@/config/env', () => ({
@@ -301,5 +314,89 @@ describe('S3: the first and last section of a Minimal page, through every wrappe
     mount([richText('a'), richText('b')], {}, false)
     expect(matched(FIRST).size).toBe(0)
     expect(matched(LAST).size).toBe(0)
+  })
+})
+
+describe('a composed edge’s parts: hidden without mask support and in forced colours, and nothing else is', () => {
+  /** Every rule inside the at-rule blocks whose prelude matches, found by matching braces. */
+  const rulesInside = (prelude: RegExp) =>
+    [...css.matchAll(/@(?:media|supports)[^{]*\{/g)]
+      .filter(([opening]) => prelude.test(opening))
+      .flatMap((match) => {
+        const start = match.index + match[0].length
+        let depth = 1
+        let end = start
+        while (depth > 0 && end < css.length) {
+          if (css[end] === '{') depth += 1
+          if (css[end] === '}') depth -= 1
+          end += 1
+        }
+        return [...css.slice(start, end - 1).matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+      })
+      .filter(([, , body]) => /(^|[;\s])display:\s*none/.test(body ?? ''))
+      .flatMap(([, selectors]) => splitSelectors(selectors ?? ''))
+  const NO_MASK = rulesInside(
+    /^@supports not \(\(mask-image: none\) or \(-webkit-mask-image: none\)\)/,
+  )
+  const FORCED = rulesInside(/^@media \(forced-colors: active\)/).filter((selector) =>
+    selector.includes('data-edge'),
+  )
+
+  const crest = (x: number) => 0.5 - 0.3 * bump(x, 0.6, 0.3, 0.2)
+  const line = (offset: number) => pathFromFunction((x) => crest(x) + offset)
+  const COMPOSITION: EdgeComposition = {
+    cut: line(0),
+    parts: [
+      { kind: 'fill', side: 'under', line: line(0.2), paint: 'accent', opacity: 0.25 },
+      { kind: 'stroke', side: 'under', line: line(0.1), paint: 'ink', opacity: 0.65, widthPx: 1.5 },
+      { kind: 'fill', side: 'over', line: line(-0.2), paint: 'accent-2', opacity: 0.3 },
+      {
+        kind: 'stroke',
+        side: 'over',
+        line: line(-0.1),
+        paint: 'highlight',
+        opacity: 1,
+        widthPx: 1,
+      },
+    ],
+  }
+  const mountComposed = () => {
+    stub.composition = COMPOSITION
+    try {
+      mount([richText('a', WAVE), richText('b')])
+    } finally {
+      stub.composition = undefined
+    }
+  }
+
+  it('keeps today’s no-mask rule as it was, and adds one for the parts beside it', () => {
+    expect(NO_MASK).toEqual(['[data-section-edge-frame] > svg', '[data-edge-part]'])
+  })
+
+  it('hides only the parts in forced colours', () => {
+    expect(FORCED).toEqual(['[data-edge-part]'])
+  })
+
+  it('reaches every part of a composed edge with both, the over parts inside the section included', () => {
+    mountComposed()
+    const parts = new Set(document.querySelectorAll('[data-edge-part]'))
+    expect(parts.size).toBe(4)
+    expect(document.querySelectorAll('section > [data-edge-part]')).toHaveLength(2)
+    expect(matched(FORCED)).toEqual(parts)
+    for (const part of parts) expect(matched(NO_MASK).has(part)).toBe(true)
+  })
+
+  it('reaches nothing of today’s edges with the new rules: the back wave and accent lines keep their behaviour', () => {
+    mount([
+      richText('a', { edge: 'layered', edgeAccent: 'accent' }),
+      richText('b', { edge: 'wave', edgeAccent: 'highlight' }),
+      richText('c'),
+    ])
+    const today = new Set(document.querySelectorAll('[data-edge-layer]'))
+    expect(today.size).toBe(3)
+    expect(matched(FORCED).size).toBe(0)
+    expect(matched(['[data-edge-part]']).size).toBe(0)
+    // Without mask support, today's rule hides them exactly as before.
+    expect(matched(NO_MASK)).toEqual(today)
   })
 })
