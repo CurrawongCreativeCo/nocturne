@@ -8,6 +8,7 @@ import {
   resolveSectionStyle,
   sectionMotion,
   sectionTraits,
+  type SectionStyleInput,
 } from './section-style'
 
 describe('resolveSectionStyle', () => {
@@ -189,6 +190,8 @@ describe('resolveEdge', () => {
       height: { kind: 'token', size: 'medium' },
       accent: 'none',
       layer: 'accent-2',
+      tideLayer: 'accent',
+      lineColour: 'accent',
     })
   })
 
@@ -209,6 +212,8 @@ describe('resolveEdge', () => {
       height: { kind: 'token', size: 'large' },
       accent: 'highlight',
       layer: 'highlight',
+      tideLayer: 'accent',
+      lineColour: 'accent',
     })
   })
 
@@ -229,6 +234,52 @@ describe('resolveEdge', () => {
       mobile: 'var(--edge-height-medium)',
       tablet: 'var(--edge-height-medium)',
       desktop: '120px',
+    })
+  })
+
+  describe('Tide and Contour (task 151)', () => {
+    it('start at Primary, with Flip offered and no accent line or Invert, whatever is stored', () => {
+      for (const edge of ['tide', 'contour']) {
+        const resolved = resolveEdge({
+          edge,
+          edgeFlip: true,
+          edgeInvert: true,
+          edgeAccent: 'highlight',
+        })
+        expect(resolved).toMatchObject({
+          shape: edge,
+          flip: true,
+          invert: false,
+          accent: 'none',
+          tideLayer: 'accent',
+          lineColour: 'accent',
+        })
+      }
+    })
+
+    it('read Tide’s crest colour and Contour’s line colour', () => {
+      expect(resolveEdge({ edge: 'tide', edgeTideLayer: 'accent-2' })?.tideLayer).toBe('accent-2')
+      expect(resolveEdge({ edge: 'tide', edgeTideLayer: 'echo' })?.tideLayer).toBe('echo')
+      expect(resolveEdge({ edge: 'contour', edgeLineColour: 'muted' })?.lineColour).toBe('muted')
+      // A value from a newer dataset falls back to the default.
+      expect(resolveEdge({ edge: 'tide', edgeTideLayer: 'gold' })?.tideLayer).toBe('accent')
+    })
+
+    it('draw Echo’s crest as Primary over a picture or a gradient, which have no single colour to echo', () => {
+      const echo = { edge: 'tide', edgeTideLayer: 'echo' }
+      expect(resolveEdge({ ...echo, gradient: 'forest-dusk' })?.tideLayer).toBe('accent')
+      expect(
+        resolveEdge({ ...echo, image: { asset: { _id: 'image-a-1x1-png' } } })?.tideLayer,
+      ).toBe('accent')
+      // A picture with no asset, or a gradient that isn't a slug, draws nothing: Echo stays.
+      expect(resolveEdge({ ...echo, gradient: 'not a slug!' })?.tideLayer).toBe('echo')
+      const noAsset = { ...echo, image: {} } as unknown as SectionStyleInput
+      expect(resolveEdge(noAsset)?.tideLayer).toBe('echo')
+    })
+
+    it('keep today’s shapes exactly as they were: the accent line still follows them', () => {
+      for (const edge of ['diagonal', 'wave', 'curve', 'arch', 'layered'])
+        expect(resolveEdge({ edge, edgeAccent: 'accent-2' })?.accent).toBe('accent-2')
     })
   })
 

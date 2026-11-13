@@ -19,10 +19,12 @@ import {
   edgeLine,
   edgeMaskImage,
   type EdgeHeight,
-  type EdgeShape,
+  type LineShape,
+  type ResolvedEdge,
 } from './section-edges'
 
-const SHAPES: EdgeShape[] = ['diagonal', 'wave', 'curve', 'arch', 'layered']
+/** Today's shapes, drawn from their lines; Tide and Contour are compositions (edge-fixed.test.ts). */
+const SHAPES: LineShape[] = ['diagonal', 'wave', 'curve', 'arch', 'layered']
 
 /** Every coordinate in a path (letters dropped), as numbers. */
 const numbers = (path: string) => (path.match(/-?\d*\.?\d+/g) ?? []).map(Number)
@@ -140,7 +142,7 @@ describe('edge heights', () => {
   })
 })
 
-describe('composed edges (task 151, Slice 1: the foundation, no shape uses it yet)', () => {
+describe('composed edges (task 151): today’s shapes are not compositions, Tide and Contour are', () => {
   const HEIGHTS: EdgeHeight[] = [
     ...SECTION_EDGE_HEIGHTS.map((size): EdgeHeight => ({ kind: 'token', size })),
     { kind: 'custom', mobile: '40px', tablet: '72px', desktop: '120px' },
@@ -155,10 +157,36 @@ describe('composed edges (task 151, Slice 1: the foundation, no shape uses it ye
             for (const layer of SECTION_EDGE_LAYERS)
               for (const height of HEIGHTS)
                 expect(
-                  edgeComposition({ shape, flip, invert, accent, layer, height }),
+                  edgeComposition({
+                    shape,
+                    flip,
+                    invert,
+                    accent,
+                    layer,
+                    height,
+                    tideLayer: 'accent',
+                    lineColour: 'accent',
+                  }),
                 ).toBeUndefined()
     },
   )
+
+  it.each(['tide', 'contour'] as const)('%s is a composition, cut along its own line', (shape) => {
+    const edge: ResolvedEdge = {
+      shape,
+      flip: false,
+      invert: false,
+      accent: 'none',
+      layer: 'accent-2',
+      height: { kind: 'token', size: 'medium' },
+      tideLayer: 'accent',
+      lineColour: 'accent',
+    }
+    const composition = edgeComposition(edge)
+    expect(composition?.cut).toMatch(/^M0 [\d.]+C/)
+    expect(composition?.parts.length).toBeGreaterThan(0)
+    expect(composition?.parts.every((part) => part.side === 'under')).toBe(true)
+  })
 
   it.each(SHAPES)('%s: a cut line makes exactly the mask its shape makes today', (shape) => {
     for (const flip of [false, true])

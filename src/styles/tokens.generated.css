@@ -155,6 +155,51 @@
 }
 
 @layer base {
+  div:has(+ [data-edge-above] > section[data-tone='inverse']) [data-section-edge-frame] > [data-edge-part],
+  div:has(+ [data-edge-above] > [data-section-edge-frame] > section[data-tone='inverse']) [data-section-edge-frame] > [data-edge-part] {
+    --color-surface: var(--color-surface-inverse);
+    --color-surface-alt: color-mix(in oklab, var(--color-surface-inverse) 88%, var(--color-ink-inverse));
+    --color-ink: var(--color-ink-inverse);
+    --color-ink-muted: var(--color-ink-inverse-muted);
+    --color-line: color-mix(in oklab, var(--color-ink-inverse) 20%, transparent);
+    --color-line-strong: var(--color-ink-inverse-muted);
+    --color-accent: color-mix(in oklab, var(--tone-accent) 55%, var(--color-ink-inverse));
+    --color-accent-text: var(--color-accent);
+    --color-focus: var(--color-ink-inverse);
+  }
+
+  div:has(+ [data-edge-above] > section[data-tone='accent']) [data-section-edge-frame] > [data-edge-part],
+  div:has(+ [data-edge-above] > [data-section-edge-frame] > section[data-tone='accent']) [data-section-edge-frame] > [data-edge-part] {
+    --color-surface: var(--tone-accent);
+    --color-surface-alt: color-mix(in oklab, var(--tone-accent-ink) 12%, var(--tone-accent));
+    --color-ink: var(--tone-accent-ink);
+    --color-ink-muted: var(--tone-accent-ink);
+    --color-line: color-mix(in oklab, var(--tone-accent-ink) 35%, transparent);
+    --color-line-strong: var(--tone-accent-ink);
+    --color-accent: var(--tone-accent-ink);
+    --color-accent-text: var(--tone-accent-ink);
+    --color-accent-ink: var(--tone-accent);
+    --color-focus: var(--tone-accent-ink);
+  }
+
+  [data-edge-echo='surface'] {
+    --edge-echo: var(--color-surface);
+  }
+
+  [data-edge-echo='alt'] {
+    --edge-echo: var(--color-surface-alt);
+  }
+
+  [data-edge-echo='inverse'] {
+    --edge-echo: var(--color-surface-inverse);
+  }
+
+  [data-edge-echo='accent'] {
+    --edge-echo: var(--tone-accent);
+  }
+}
+
+@layer base {
   .glass-row {
     --glass-solid: color-mix(in oklch, var(--color-surface) 95%, transparent);
     --glass-border: color-mix(in oklch, var(--color-ink-inverse) 40%, transparent);

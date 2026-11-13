@@ -2525,6 +2525,20 @@ const gallerySections = [
     { tone: 'inverse', edge: 'wave', edgeHeight: 'small', spacing: 'spacious' },
     { tone: 'alt', spacing: 'compact' },
   ),
+  // Tide and Contour (task 151): each at its defaults, then with its other colour, Flip and Tide's Large. The
+  // section above has a colour of its own: a plain surface section is see-through under any edge (README).
+  ...edgePair('tide', { tone: 'alt', edge: 'tide' }, { tone: 'surface' }),
+  ...edgePair(
+    'tide-echo-large-flip',
+    { tone: 'inverse', edge: 'tide', edgeTideLayer: 'echo', edgeHeight: 'large', edgeFlip: true },
+    { tone: 'alt' },
+  ),
+  ...edgePair('contour', { tone: 'alt', edge: 'contour' }, { tone: 'inverse' }),
+  ...edgePair(
+    'contour-muted-flip',
+    { tone: 'inverse', edge: 'contour', edgeLineColour: 'muted', edgeFlip: true },
+    { tone: 'surface' },
+  ),
   // Stats (README, "Statistics"): both layouts with the default three figures and the formatting
   // options (grouping, decimals, prefix, suffix), then a dark six-figure grid with animation off.
   {
@@ -6154,7 +6168,11 @@ const edgeEmpty = (id, style) => ({
   _type: 'formSection',
   style: { _type: 'sectionStyle', anchorId: id, ...style },
 })
-/** One pair per shape (and height): an inverse section over an accent one, so a gap shows the page background. */
+/**
+ * One pair per shape (and height): an inverse section over an accent one, so a gap shows the page background.
+ * Contour's lines take the section below's tone, which over an accent section is nearly the page's white, so
+ * its pair is over an inverse section instead: still nothing the page's background could be mistaken for.
+ */
 const seamPairs = [
   ['wave', 'medium'],
   ['curve', 'medium'],
@@ -6163,13 +6181,16 @@ const seamPairs = [
   ['layered', 'medium'],
   ['wave', 'small'],
   ['curve', 'large'],
-].flatMap(([shape, height]) => [
+  ['tide', 'medium'],
+  ['tide', 'large'],
+  ['contour', 'medium', 'inverse'],
+].flatMap(([shape, height, below = 'accent']) => [
   edgeSection(`seam-${shape}-${height}`, `Above the ${shape} (${height})`, {
     tone: 'inverse',
     edge: shape,
     edgeHeight: height,
   }),
-  edgeSection(`seam-${shape}-${height}--below`, 'Below the edge', { tone: 'accent' }),
+  edgeSection(`seam-${shape}-${height}--below`, 'Below the edge', { tone: below }),
 ])
 documents.push(
   {
@@ -6243,6 +6264,52 @@ documents.push(
         image: image(''),
         imageSize: 'screen',
         overlay: 'medium',
+      }),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    // Tide and Contour in a real browser (section-edge-composed.spec.ts, task 151): each over a known section,
+    // under one with a colour of its own (a plain surface section is see-through under any edge).
+    _id: 'page-edge-composed',
+    _type: 'page',
+    title: 'Composed edges',
+    slug: { _type: 'slug', current: 'edge-composed' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      edgeSection('ct-tide', 'Tide at its defaults', { tone: 'alt', edge: 'tide' }),
+      edgeSection('ct-tide-below', 'Below Tide, surface', { tone: 'surface' }),
+      edgeSection('ct-tide-large', 'Tide, Large', {
+        tone: 'alt',
+        edge: 'tide',
+        edgeHeight: 'large',
+      }),
+      edgeSection('ct-tide-large-below', 'Below Tide, inverse', { tone: 'inverse' }),
+      edgeSection('ct-echo', 'Tide with Echo', {
+        tone: 'inverse',
+        edge: 'tide',
+        edgeTideLayer: 'echo',
+        edgeHeight: 'large',
+      }),
+      edgeSection('ct-echo-below', 'Below the echo, alternate', { tone: 'alt' }),
+      edgeSection('ct-contour', 'Contour', { tone: 'alt', edge: 'contour', edgeHeight: 'large' }),
+      edgeSection('ct-contour-below', 'Below Contour, inverse, with an edge of its own', {
+        tone: 'inverse',
+        edge: 'wave',
+      }),
+      edgeSection('ct-classic', 'Classic, with an accent line', {
+        tone: 'alt',
+        edge: 'layered',
+        edgeAccent: 'accent',
+        edgeHeight: 'large',
+      }),
+      edgeSection('ct-classic-below', 'Below Classic, inverse', { tone: 'inverse' }),
+      edgeEmpty('ct-empty', { tone: 'inverse', edge: 'tide', edgeHeight: 'large' }),
+      edgeSection('ct-after-empty', 'After an empty Tide', { tone: 'alt' }),
+      edgeSection('ct-last', 'Last, with Contour over the footer', {
+        tone: 'accent',
+        edge: 'contour',
+        edgeLineColour: 'muted',
       }),
     ],
     _updatedAt: UPDATED,

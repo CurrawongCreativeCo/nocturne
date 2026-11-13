@@ -1,4 +1,12 @@
-import { closeToTop, edgeBackLine, edgeFill } from '@/components/ui/section-edges'
+import {
+  closeToTop,
+  edgeBackLine,
+  edgeComposition,
+  edgeFill,
+  isLineShape,
+  type EdgePaint,
+  type EdgePart,
+} from '@/components/ui/section-edges'
 import { colorHex } from '@/config/tokens.generated'
 
 import type { SectionEdge } from '../../section-style-options'
@@ -9,13 +17,47 @@ import { HEIGHT, WIDTH } from './wireframe'
 const BAND_TOP = 54
 const BAND_HEIGHT = 44
 
+/** A composed edge's colours, as the picture's dark section over a light one shows them. */
+const PAINT_HEX: Record<EdgePaint, string> = {
+  accent: colorHex.accent,
+  'accent-2': colorHex.accent2,
+  highlight: colorHex.highlight,
+  ink: colorHex.ink,
+  'ink-muted': colorHex.inkMuted,
+  // Echo is the upper section's own colour.
+  echo: colorHex.surfaceInverse,
+}
+
 /**
  * Two sections one above the other: a dark one on top, cut to the shape, and a light one showing
  * through the cut below. Drawn from the real paths (components/ui/section-edges.ts), so the picture
- * is the edge the site draws. In the site's colours, as the tone thumbnails are.
+ * is the edge the site draws: a new shape from its composition, with its default settings. In the
+ * site's colours, as the tone thumbnails are.
  */
 function EdgeThumbnail({ edge }: { edge: SectionEdge }) {
   const band = `translate(0 ${BAND_TOP}) scale(${WIDTH} ${BAND_HEIGHT})`
+  const composition =
+    edge === 'none' || isLineShape(edge)
+      ? undefined
+      : edgeComposition({
+          shape: edge,
+          flip: false,
+          invert: false,
+          height: { kind: 'token', size: 'medium' },
+          accent: 'none',
+          layer: 'accent-2',
+          tideLayer: 'accent',
+          lineColour: 'accent',
+        })
+  // What the dark section keeps: today's shapes from their line, a new one from its composition's cut.
+  const outline =
+    edge === 'none'
+      ? undefined
+      : isLineShape(edge)
+        ? edgeFill(edge)
+        : composition && closeToTop(composition.cut)
+  const parts = (kind: EdgePart['kind']) =>
+    composition?.parts.filter((part) => part.side === 'under' && part.kind === kind) ?? []
   return (
     <svg
       viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
@@ -51,14 +93,33 @@ function EdgeThumbnail({ edge }: { edge: SectionEdge }) {
           fillOpacity={0.55}
         />
       ) : null}
+      {parts('fill').map((part) => (
+        <path
+          key={part.line}
+          d={closeToTop(part.line)}
+          transform={band}
+          fill={PAINT_HEX[part.paint]}
+          fillOpacity={part.opacity}
+        />
+      ))}
       <rect
         width={WIDTH}
         height={BAND_TOP + (edge === 'none' ? BAND_HEIGHT / 2 : 0)}
         fill={colorHex.surfaceInverse}
       />
-      {edge === 'none' ? null : (
-        <path d={edgeFill(edge)} transform={band} fill={colorHex.surfaceInverse} />
-      )}
+      {outline ? <path d={outline} transform={band} fill={colorHex.surfaceInverse} /> : null}
+      {parts('stroke').map((part) => (
+        <path
+          key={part.line}
+          d={part.line}
+          transform={band}
+          fill="none"
+          stroke={PAINT_HEX[part.paint]}
+          strokeOpacity={part.opacity}
+          strokeWidth={part.kind === 'stroke' ? part.widthPx : undefined}
+          vectorEffect="non-scaling-stroke"
+        />
+      ))}
       <rect x={32} y={16} width={96} height={9} rx={2} fill={colorHex.inkInverse} />
       <rect x={44} y={31} width={72} height={3} rx={1.5} fill={colorHex.inkInverseMuted} />
     </svg>
@@ -74,4 +135,8 @@ export const EdgeCurveThumbnail = (_props: PresetThumbnailProps) => <EdgeThumbna
 export const EdgeArchThumbnail = (_props: PresetThumbnailProps) => <EdgeThumbnail edge="arch" />
 export const EdgeLayeredThumbnail = (_props: PresetThumbnailProps) => (
   <EdgeThumbnail edge="layered" />
+)
+export const EdgeTideThumbnail = (_props: PresetThumbnailProps) => <EdgeThumbnail edge="tide" />
+export const EdgeContourThumbnail = (_props: PresetThumbnailProps) => (
+  <EdgeThumbnail edge="contour" />
 )

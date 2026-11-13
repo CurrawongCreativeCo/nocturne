@@ -233,7 +233,16 @@ export function defaultOverlayFor(tone: string | null | undefined): 'light' | 'm
  * The shape of a section's bottom edge (README, "Section dividers"). The upper section owns the
  * edge: its background is cut to the shape and the section below shows through the cut.
  */
-export const SECTION_EDGES = ['none', 'diagonal', 'wave', 'curve', 'arch', 'layered'] as const
+export const SECTION_EDGES = [
+  'none',
+  'diagonal',
+  'wave',
+  'curve',
+  'arch',
+  'layered',
+  'tide',
+  'contour',
+] as const
 export type SectionEdge = (typeof SECTION_EDGES)[number]
 
 export const SECTION_EDGE_TITLES: Record<SectionEdge, string> = {
@@ -243,6 +252,8 @@ export const SECTION_EDGE_TITLES: Record<SectionEdge, string> = {
   curve: 'Curve',
   arch: 'Arch',
   layered: 'Layered wave',
+  tide: 'Tide',
+  contour: 'Contour',
 }
 
 /** Heights are tokens (`edge` in tokens.json), smaller on phones; "custom" is the Advanced override. */
@@ -269,17 +280,56 @@ export const SECTION_EDGE_LAYER_TITLES: Record<(typeof SECTION_EDGE_LAYERS)[numb
   highlight: 'Highlight',
 }
 
+/**
+ * Tide's back crest (task 151, Tide v2): Primary at 25% (the default), Echo at 40% (the section's own colour,
+ * echoed below the cut) or Secondary at 25%.
+ */
+export const SECTION_EDGE_TIDE_LAYERS = ['accent', 'echo', 'accent-2'] as const
+export const SECTION_EDGE_TIDE_LAYER_TITLES: Record<
+  (typeof SECTION_EDGE_TIDE_LAYERS)[number],
+  string
+> = {
+  accent: 'Primary',
+  echo: 'Echo',
+  'accent-2': 'Secondary',
+}
+
+/** The colour of Contour's three lines (task 151). */
+export const SECTION_EDGE_LINE_COLOURS = ['accent', 'muted'] as const
+export const SECTION_EDGE_LINE_COLOUR_TITLES: Record<
+  (typeof SECTION_EDGE_LINE_COLOURS)[number],
+  string
+> = {
+  accent: 'Primary',
+  muted: 'Muted text',
+}
+
 /** The custom height range, in px, the Advanced fields accept. */
 export const EDGE_CUSTOM_MIN = 16
 export const EDGE_CUSTOM_MAX = 320
 
 /** Curve and Arch are symmetrical, so mirroring them would change nothing: Flip is not offered. */
 export const edgeAllowsFlip = (edge: string | null | undefined) =>
-  edge === 'diagonal' || edge === 'wave' || edge === 'layered'
+  edge === 'diagonal' ||
+  edge === 'wave' ||
+  edge === 'layered' ||
+  edge === 'tide' ||
+  edge === 'contour'
 
-/** A diagonal turned upside down is the same line mirrored, so only the curved shapes offer Invert. */
+/**
+ * A diagonal turned upside down is the same line mirrored, so only the curved shapes offer Invert. Tide and
+ * Contour don't: inverting them would put their layers on the wrong side of the cut.
+ */
 export const edgeAllowsInvert = (edge: string | null | undefined) =>
   edge === 'wave' || edge === 'curve' || edge === 'arch' || edge === 'layered'
+
+/** The thin accent line follows today's shapes only: Contour's lines and Tide's crest are their own ornament. */
+export const edgeAllowsAccent = (edge: string | null | undefined) =>
+  edge === 'diagonal' ||
+  edge === 'wave' ||
+  edge === 'curve' ||
+  edge === 'arch' ||
+  edge === 'layered'
 
 /** Ids the site itself uses (the skip link's target), so an anchor can't collide with them. */
 export const RESERVED_ANCHORS: readonly string[] = ['main-content']

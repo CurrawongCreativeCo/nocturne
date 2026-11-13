@@ -39,7 +39,10 @@ vi.mock('@/config/env', () => ({
  * What the browser then draws is checked in tests/e2e/section-edge-stability.spec.ts.
  */
 
-const css = readFileSync('src/styles/globals.css', 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
+const read = (path: string) => readFileSync(path, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
+const css = read('src/styles/globals.css')
+/** The tones, and the composed edges' follower-tone and Echo rules generated beside them (task 151). */
+const tokensCss = read('src/styles/tokens.generated.css')
 
 /** Splits a selector list on its top-level commas. */
 function splitSelectors(list: string): string[] {
@@ -59,9 +62,9 @@ function splitSelectors(list: string): string[] {
 }
 
 /** The selectors of every rule that sets `property` (to `value`, when given). */
-function selectorsSetting(property: string, value?: string): string[] {
+function selectorsSetting(property: string, value?: string, source = css): string[] {
   const found: string[] = []
-  for (const [, selectors, body] of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+  for (const [, selectors, body] of source.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
     const pattern = new RegExp(`(^|[;\\s])${property}:\\s*${value ?? ''}`)
     if (pattern.test(body ?? '')) found.push(...splitSelectors(selectors ?? ''))
   }
@@ -257,7 +260,9 @@ describe('globals.css selectors a browser accepts', () => {
   }
 
   it('never nests :has() inside :has(): browsers drop the whole rule, though jsdom accepts it', () => {
-    const all = [...css.matchAll(/([^{}]+)\{/g)].flatMap(([, list]) => splitSelectors(list ?? ''))
+    const all = [css, tokensCss].flatMap((source) =>
+      [...source.matchAll(/([^{}]+)\{/g)].flatMap(([, list]) => splitSelectors(list ?? '')),
+    )
     expect(nestsHas('main:has(div:has(a) + b)')).toBe(true)
     expect(nestsHas('body:has(a) main > div:not(:has(~ b))')).toBe(false)
     expect(all.filter(nestsHas)).toEqual([])
@@ -398,5 +403,122 @@ describe('a composed edge’s parts: hidden without mask support and in forced c
     expect(matched(['[data-edge-part]']).size).toBe(0)
     // Without mask support, today's rule hides them exactly as before.
     expect(matched(NO_MASK)).toEqual(today)
+  })
+})
+
+describe('a composed edge’s parts in its frame take the tone of the section below (task 151, Slice 2)', () => {
+  const below = (pattern: string) =>
+    selectorsSetting('--color-accent', pattern, tokensCss).filter((selector) =>
+      selector.includes('data-edge-part'),
+    )
+  const INVERSE = below('color-mix\\(in oklab, var\\(--tone-accent\\) 55%')
+  const ACCENT = below('var\\(--tone-accent-ink\\)')
+  const ECHO = selectorsSetting('--edge-echo', undefined, tokensCss)
+  const TIDE = { edge: 'tide', edgeHeight: 'large' }
+
+  /** The parts in the frame of the section with this key (the ones over the section below). */
+  const partsOf = (key: string) =>
+    new Set(wrapperOf(key).querySelectorAll(':scope [data-section-edge-frame] > [data-edge-part]'))
+  const toneOf = (key: string) => {
+    const parts = partsOf(key)
+    expect(parts.size).toBeGreaterThan(0)
+    const inverse = [...parts].every((part) => matched(INVERSE).has(part))
+    const accent = [...parts].every((part) => matched(ACCENT).has(part))
+    const none = [...parts].every((part) => !matched([...INVERSE, ...ACCENT]).has(part))
+    return inverse && !accent ? 'inverse' : accent && !inverse ? 'accent' : none ? 'page' : 'mixed'
+  }
+
+  it('is generated for the two tones that recolour their contents, one :has() each', () => {
+    expect(INVERSE).toHaveLength(2)
+    expect(ACCENT).toHaveLength(2)
+  })
+
+  it('follows a plain section below, in its tone', () => {
+    mount([richText('a', TIDE), richText('b', { tone: 'inverse' })])
+    expect(toneOf('a')).toBe('inverse')
+    mount([richText('a', TIDE), richText('b', { tone: 'accent' })])
+    expect(toneOf('a')).toBe('accent')
+  })
+
+  it('keeps the page’s colours over a surface or alternate section, which recolour nothing', () => {
+    for (const tone of ['surface', 'alt']) {
+      mount([richText('a', TIDE), richText('b', { tone })])
+      expect(toneOf('a')).toBe('page')
+    }
+  })
+
+  it('follows a section below that has an edge of its own, in its own frame', () => {
+    mount([richText('a', TIDE), richText('b', { tone: 'inverse', edge: 'contour' }), richText('c')])
+    expect(toneOf('a')).toBe('inverse')
+    // The lower edge's own parts follow the section below it, not the one above.
+    expect(toneOf('b')).toBe('page')
+  })
+
+  it('does the same in draft mode, where every section sits in an editable wrapper', () => {
+    mount([richText('a', TIDE), richText('b', { tone: 'inverse' })], { editable: true })
+    expect(toneOf('a')).toBe('inverse')
+  })
+
+  it('keeps the page’s colours with no section below: an empty one, the footer’s band, a Minimal page', () => {
+    mount([richText('a', TIDE), empty('u', { tone: 'inverse' })])
+    expect(toneOf('a')).toBe('page')
+    mount([richText('a'), richText('b', TIDE)])
+    expect(document.querySelector('[data-edge-backdrop]')).toBeTruthy()
+    expect(toneOf('b')).toBe('page')
+    mount([richText('a'), richText('b', TIDE)], {}, true)
+    expect(toneOf('b')).toBe('page')
+  })
+
+  it('keeps the page’s colours while the section below is still streaming in, then follows it', () => {
+    mount([richText('a', TIDE), richText('b', { tone: 'inverse' })])
+    const follower = wrapperOf('b')
+    const section = follower.firstElementChild
+    section?.remove()
+    follower.insertAdjacentHTML('beforeend', '<!--$?--><template id="B:0"></template><!--/$-->')
+    expect(toneOf('a')).toBe('page')
+    if (section) follower.append(section)
+    expect(toneOf('a')).toBe('inverse')
+  })
+
+  it('reaches nothing of today’s edges: the back wave and accent line keep the page’s colours', () => {
+    mount([
+      richText('a', { edge: 'layered', edgeAccent: 'accent' }),
+      richText('b', { tone: 'inverse' }),
+    ])
+    expect(document.querySelectorAll('[data-edge-layer]')).toHaveLength(2)
+    expect(matched([...INVERSE, ...ACCENT]).size).toBe(0)
+  })
+
+  it('reaches no part inside a section, which takes that section’s own tone', () => {
+    stub.composition = {
+      cut: 'M0 0.5L1 0.5',
+      parts: [
+        { kind: 'fill', side: 'over', line: 'M0 0.3L1 0.3', paint: 'accent', opacity: 0.3 },
+        { kind: 'fill', side: 'under', line: 'M0 0.7L1 0.7', paint: 'accent', opacity: 0.3 },
+      ],
+    }
+    try {
+      mount([richText('a', { edge: 'wave' }), richText('b', { tone: 'inverse' })])
+    } finally {
+      stub.composition = undefined
+    }
+    const over = document.querySelector('section [data-edge-part="over-1"]')
+    const under = document.querySelector('[data-section-edge-frame] > [data-edge-part="under-1"]')
+    if (!over || !under) throw new Error('The composed parts were not drawn.')
+    expect(matched(INVERSE).has(over)).toBe(false)
+    expect(matched(INVERSE).has(under)).toBe(true)
+  })
+
+  it('resolves Echo on the frame, from the tone of the section the edge belongs to', () => {
+    expect(ECHO).toEqual([
+      "[data-edge-echo='surface']",
+      "[data-edge-echo='alt']",
+      "[data-edge-echo='inverse']",
+      "[data-edge-echo='accent']",
+    ])
+    mount([richText('a', { ...TIDE, tone: 'alt', edgeTideLayer: 'echo' }), richText('b')])
+    const frame = document.querySelector('[data-section-edge-frame]')
+    expect(frame?.getAttribute('data-edge-echo')).toBe('alt')
+    expect(matched(ECHO)).toEqual(new Set([frame]))
   })
 })

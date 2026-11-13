@@ -2,7 +2,11 @@ import type {
   SECTION_EDGE_ACCENTS,
   SECTION_EDGE_HEIGHTS,
   SECTION_EDGE_LAYERS,
+  SECTION_EDGE_LINE_COLOURS,
+  SECTION_EDGE_TIDE_LAYERS,
 } from '@/lib/sanity/section-style-options'
+
+import { contourComposition, tideComposition } from './edge-fixed'
 
 /**
  * Section dividers (README, "Section dividers"): the shapes, and the spacing maths that keeps the next
@@ -14,10 +18,16 @@ import type {
  * above it and cut away below it, so the next section shows through underneath.
  */
 
-export type EdgeShape = 'diagonal' | 'wave' | 'curve' | 'arch' | 'layered'
+/** Today's shapes, each drawn from its line (`LINES`). */
+export type LineShape = 'diagonal' | 'wave' | 'curve' | 'arch' | 'layered'
+/** New shapes (task 151), each drawn as a composition (`edgeComposition`). */
+export type ComposedShape = 'tide' | 'contour'
+export type EdgeShape = LineShape | ComposedShape
 export type EdgeHeightSize = (typeof SECTION_EDGE_HEIGHTS)[number]
 export type EdgeAccent = (typeof SECTION_EDGE_ACCENTS)[number]
 export type EdgeLayer = (typeof SECTION_EDGE_LAYERS)[number]
+export type EdgeTideLayer = (typeof SECTION_EDGE_TIDE_LAYERS)[number]
+export type EdgeLineColour = (typeof SECTION_EDGE_LINE_COLOURS)[number]
 
 /** How tall the edge is: a token size (responsive: see `edge` in tokens.json), or the Advanced override. */
 export type EdgeHeight =
@@ -34,6 +44,10 @@ export interface ResolvedEdge {
   accent: EdgeAccent
   /** The back wave's colour; meaningful only for the layered wave. */
   layer: EdgeLayer
+  /** Tide's back crest colour; meaningful only for Tide. */
+  tideLayer: EdgeTideLayer
+  /** Contour's line colour; meaningful only for Contour. */
+  lineColour: EdgeLineColour
 }
 
 type Command = 'M' | 'L' | 'C' | 'Q'
@@ -70,7 +84,7 @@ function wave(mean: number, amplitude: number, periods: number, phase: number): 
  */
 const WAVE_PHASE = 0.6 * Math.PI
 
-const LINES: Record<EdgeShape, Segment[]> = {
+const LINES: Record<LineShape, Segment[]> = {
   // Ends level with the top of the band on the left and the bottom on the right.
   diagonal: [
     ['M', 0, 0],
@@ -94,6 +108,9 @@ const LINES: Record<EdgeShape, Segment[]> = {
   // The front wave is the cut; the back one is drawn behind it (see `edgeBackLine`).
   layered: wave(0.42, 0.3, 1, WAVE_PHASE),
 }
+
+/** Whether a shape is one of today's, drawn from its line. */
+export const isLineShape = (shape: EdgeShape): shape is LineShape => shape in LINES
 
 /** The layered wave's back wave: lower and a little out of step with the front one. */
 const BACK_LINE: Segment[] = wave(0.64, 0.3, 1, WAVE_PHASE + 0.9)
@@ -121,7 +138,7 @@ function serialise(segments: readonly Segment[], { flip, invert }: EdgeTransform
 }
 
 /** The open path along the edge, from one side of the band to the other. */
-export function edgeLine(shape: EdgeShape, transform: EdgeTransform = {}): string {
+export function edgeLine(shape: LineShape, transform: EdgeTransform = {}): string {
   return serialise(LINES[shape], transform)
 }
 
@@ -147,7 +164,7 @@ export function closeToBottom(line: string): string {
 }
 
 /** What the section keeps, as a path. */
-export function edgeFill(shape: EdgeShape, transform: EdgeTransform = {}): string {
+export function edgeFill(shape: LineShape, transform: EdgeTransform = {}): string {
   return closeToTop(edgeLine(shape, transform))
 }
 
@@ -157,7 +174,7 @@ function svgUrl(path: string): string {
 }
 
 /** The `mask-image` layer for the band: opaque where the section stays, clear where it is cut. */
-export function edgeMaskImage(shape: EdgeShape, transform: EdgeTransform = {}): string {
+export function edgeMaskImage(shape: LineShape, transform: EdgeTransform = {}): string {
   return svgUrl(edgeFill(shape, transform))
 }
 
@@ -166,8 +183,11 @@ export function cutMaskImage(cut: string): string {
   return svgUrl(closeToTop(cut))
 }
 
-/** A theme role a composed edge's part is painted in: tone-aware, never a stored colour. */
-export type EdgePaint = 'accent' | 'accent-2' | 'highlight' | 'ink'
+/**
+ * A theme role a composed edge's part is painted in: tone-aware, never a stored colour. `echo` is the colour
+ * of the section the edge belongs to (Tide's Echo), set on the frame from its tone (`data-edge-echo`).
+ */
+export type EdgePaint = 'accent' | 'accent-2' | 'highlight' | 'ink' | 'ink-muted' | 'echo'
 
 /**
  * One decorative part of a composed edge: a fill or a line on one side of the cut. An `over` part is drawn
@@ -196,12 +216,15 @@ export interface EdgeComposition {
   parts: readonly EdgePart[]
 }
 
-/** The shapes drawn as compositions, and how. None yet: every shape there is today keeps its own rendering. */
-const COMPOSITIONS: Partial<Record<EdgeShape, (edge: ResolvedEdge) => EdgeComposition>> = {}
+/** The shapes drawn as compositions, and how (edge-fixed.ts). Today's shapes keep their own rendering. */
+const COMPOSITIONS: Record<ComposedShape, (edge: ResolvedEdge) => EdgeComposition> = {
+  tide: tideComposition,
+  contour: contourComposition,
+}
 
 /** The composition an edge is drawn as, or undefined for a shape that keeps its own rendering. */
 export function edgeComposition(edge: ResolvedEdge): EdgeComposition | undefined {
-  return COMPOSITIONS[edge.shape]?.(edge)
+  return isLineShape(edge.shape) ? undefined : COMPOSITIONS[edge.shape](edge)
 }
 
 /** Customised heights run from this many px to this many. Out-of-range input is clamped, not rejected. */

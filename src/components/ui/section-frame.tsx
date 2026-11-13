@@ -25,7 +25,9 @@ import {
   edgeHeightStyle,
   edgeLine,
   edgeMaskImage,
+  isLineShape,
   type EdgeComposition,
+  type EdgePaint,
   type EdgePart,
   type ResolvedEdge,
 } from './section-edges'
@@ -117,14 +119,14 @@ function EdgeParts({
         {part.kind === 'fill' ? (
           <path
             d={part.side === 'over' ? closeToBottom(part.line) : closeToTop(part.line)}
-            fill={`var(--color-${part.paint})`}
+            fill={paintOf(part.paint)}
             fillOpacity={part.opacity}
           />
         ) : (
           <path
             d={part.line}
             fill="none"
-            stroke={`var(--color-${part.paint})`}
+            stroke={paintOf(part.paint)}
             strokeOpacity={part.opacity}
             strokeWidth={part.widthPx}
             strokeLinejoin="round"
@@ -135,6 +137,14 @@ function EdgeParts({
     )
   })
 }
+
+/**
+ * A part's colour: a theme role, or Echo, the colour of the section the edge belongs to. Echo is resolved on
+ * the frame (`data-edge-echo`, tokens.generated.css), so a part over the next section can't read that
+ * section's tone for it.
+ */
+const paintOf = (paint: EdgePaint) =>
+  paint === 'echo' ? 'var(--edge-echo)' : `var(--color-${paint})`
 
 /** A composed edge's over parts, inside the section, where its own mask clips them at the cut. */
 function EdgeOverLayers({ parts }: { parts: readonly EdgePart[] }) {
@@ -341,7 +351,7 @@ function SectionFrameView({
   )
 
   return resolved.edge ? (
-    <EdgeFrame edge={resolved.edge} composition={composition}>
+    <EdgeFrame edge={resolved.edge} composition={composition} tone={resolved.tone}>
       {section}
     </EdgeFrame>
   ) : (
@@ -351,20 +361,27 @@ function SectionFrameView({
 
 /**
  * A composed edge (new shapes only) takes the branches below that read `composition`: its mask from its cut,
- * its under fills before the section and its under lines after it. Today's shapes have no composition, so
- * they take the original branches, unchanged, in the same three slots.
+ * its under fills before the section and its under lines after it, and Echo's colour from the section's
+ * tone. Today's shapes have no composition, so they take the original branches, unchanged, in the same
+ * three slots.
  */
 function EdgeFrame({
   edge,
   composition,
+  tone,
   children,
 }: {
   edge: ResolvedEdge
   composition: EdgeComposition | undefined
+  /** The section's tone, whose colour Echo is. */
+  tone: string
   children: ReactNode
 }) {
   const transform = { flip: edge.flip, invert: edge.invert }
   const accent = edge.accent === 'none' ? undefined : `var(--color-${edge.accent})`
+  // Today's shapes are drawn from their line; a new one only from its composition.
+  const line = isLineShape(edge.shape) ? edge.shape : undefined
+  const echoes = composition?.parts.some((part) => part.paint === 'echo') ?? false
   const under = (kind: EdgePart['kind']) =>
     composition?.parts.filter((part) => part.side === 'under' && part.kind === kind) ?? []
 
@@ -372,13 +389,14 @@ function EdgeFrame({
     <div
       data-section-edge-frame={edge.shape}
       data-edge-custom={edgeHeightIsCustom(edge.height) ? '' : undefined}
+      data-edge-echo={echoes ? tone : undefined}
       className="relative"
       style={
         {
           ...edgeHeightStyle(edge.height, '--edge-h'),
           '--edge-mask': composition
             ? cutMaskImage(composition.cut)
-            : edgeMaskImage(edge.shape, transform),
+            : line && edgeMaskImage(line, transform),
         } as CSSProperties
       }
     >
@@ -396,10 +414,10 @@ function EdgeFrame({
       {children}
       {composition ? (
         <EdgeParts parts={under('stroke')} name="line" />
-      ) : accent ? (
+      ) : accent && line ? (
         <EdgeSvg data-edge-layer="line">
           <path
-            d={edgeLine(edge.shape, transform)}
+            d={edgeLine(line, transform)}
             fill="none"
             stroke={accent}
             strokeWidth={3}

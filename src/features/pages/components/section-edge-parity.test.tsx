@@ -11,7 +11,6 @@ import {
   SECTION_EDGE_ACCENTS,
   SECTION_EDGE_HEIGHTS,
   SECTION_EDGE_LAYERS,
-  SECTION_EDGES,
 } from '@/lib/sanity/section-style-options'
 
 import type { PageSection, SectionGate } from '../types'
@@ -70,7 +69,11 @@ const frame = (style: SectionStyleInput, extra: { background?: ReactNode } = {})
   </SectionFrame>
 )
 
-const SHAPES = SECTION_EDGES.filter((shape) => shape !== 'none')
+/**
+ * The shapes there were when this snapshot was captured (5a2b964). A new shape is drawn its own way and
+ * tested in its own files; adding it here would only ask this snapshot for keys it never had.
+ */
+const SHAPES = ['diagonal', 'wave', 'curve', 'arch', 'layered'] as const
 const FLIPS = [false, true] as const
 const INVERTS = [false, true] as const
 /** Every token height, a full custom set and a phone-only custom set (the others fall back to it). */

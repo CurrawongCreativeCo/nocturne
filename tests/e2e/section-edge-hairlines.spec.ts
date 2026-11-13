@@ -27,6 +27,9 @@ const PAIRS = [
   'layered-medium',
   'wave-small',
   'curve-large',
+  'tide-medium',
+  'tide-large',
+  'contour-medium',
 ]
 
 /** The control's pair, widths and gap: a 1px column of the section below made see-through. */

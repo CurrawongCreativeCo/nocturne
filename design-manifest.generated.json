@@ -35867,6 +35867,14 @@
           {
             "value": "layered",
             "title": "Layered wave"
+          },
+          {
+            "value": "tide",
+            "title": "Tide"
+          },
+          {
+            "value": "contour",
+            "title": "Contour"
           }
         ],
         "capability": "edge",
@@ -35937,6 +35945,44 @@
           {
             "value": "highlight",
             "title": "Highlight"
+          }
+        ],
+        "capability": "edge",
+        "clientEditable": false
+      },
+      {
+        "path": "edgeTideLayer",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "accent",
+            "title": "Primary"
+          },
+          {
+            "value": "echo",
+            "title": "Echo"
+          },
+          {
+            "value": "accent-2",
+            "title": "Secondary"
+          }
+        ],
+        "capability": "edge",
+        "clientEditable": false
+      },
+      {
+        "path": "edgeLineColour",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "accent",
+            "title": "Primary"
+          },
+          {
+            "value": "muted",
+            "title": "Muted text"
           }
         ],
         "capability": "edge",

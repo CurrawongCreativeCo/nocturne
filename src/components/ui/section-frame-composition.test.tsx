@@ -2,7 +2,7 @@ import { useId } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { parseHtml, renderToHtml } from '@/lib/design/capability-harness'
-import { SECTION_EDGE_ACCENTS, SECTION_EDGES } from '@/lib/sanity/section-style-options'
+import { SECTION_EDGE_ACCENTS } from '@/lib/sanity/section-style-options'
 
 import { bump, pathFromFunction } from './edge-crest'
 import {
@@ -200,8 +200,44 @@ describe('a composed edge in SectionFrame', () => {
   })
 })
 
+describe('Tide and Contour, drawn as compositions (task 151, Slice 2)', () => {
+  it('draws Tide’s crest before the section and no line, with no Echo on the frame unless chosen', async () => {
+    const frame = await draw({ tone: 'inverse', edge: 'tide', edgeAccent: 'highlight' })
+    expect([...frame.children].map(label)).toEqual(['under-1', 'section'])
+    expect(frame.hasAttribute('data-edge-echo')).toBe(false)
+    const crest = frame.querySelector('[data-edge-part="under-1"] path')
+    expect(crest?.getAttribute('fill')).toBe('var(--color-accent)')
+    expect(crest?.getAttribute('fill-opacity')).toBe('0.25')
+  })
+
+  it('paints Echo from the frame, which carries the section’s tone', async () => {
+    const frame = await draw({ tone: 'alt', edge: 'tide', edgeTideLayer: 'echo' })
+    expect(frame.getAttribute('data-edge-echo')).toBe('alt')
+    const crest = frame.querySelector('[data-edge-part="under-1"] path')
+    expect(crest?.getAttribute('fill')).toBe('var(--edge-echo)')
+    expect(crest?.getAttribute('fill-opacity')).toBe('0.4')
+  })
+
+  it('draws Contour’s three lines after the section, in Primary or the muted text colour', async () => {
+    for (const [edgeLineColour, paint] of [
+      [undefined, 'var(--color-accent)'],
+      ['muted', 'var(--color-ink-muted)'],
+    ] as const) {
+      const frame = await draw({ tone: 'surface', edge: 'contour', edgeLineColour })
+      expect([...frame.children].map(label)).toEqual(['section', 'line-1', 'line-2', 'line-3'])
+      for (const line of frame.querySelectorAll('[data-edge-part] path')) {
+        expect(line.getAttribute('stroke')).toBe(paint)
+        expect(line.getAttribute('stroke-width')).toBe('1.5')
+      }
+    }
+  })
+})
+
+/** Today's shapes, drawn from their lines. */
+const LINE_SHAPES = ['diagonal', 'wave', 'curve', 'arch', 'layered'] as const
+
 describe('today’s shapes', () => {
-  it.each(SECTION_EDGES.filter((shape) => shape !== 'none'))(
+  it.each(LINE_SHAPES)(
     '%s takes its original branches with every accent: no composed part is drawn',
     async (shape) => {
       for (const edgeAccent of SECTION_EDGE_ACCENTS) {
