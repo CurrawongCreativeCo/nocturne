@@ -127,6 +127,16 @@ describe('S1: the section below an edge is pulled up only under a cut that was d
     expect(matched(NONE).has(wrapperOf('c'))).toBe(true)
   })
 
+  it('takes it away under an empty edge section right below a drawn edge: that cut shows the page, though a third section follows', () => {
+    mount([richText('a', WAVE), empty('u', WAVE), richText('c')])
+    const [, emptyWrapper] = document.querySelectorAll('main > div')
+    if (!emptyWrapper) throw new Error('No wrapper for the empty section.')
+    // The empty section takes nothing either (it has nothing to pull up), so nothing sits under a's cut.
+    expect(emptyWrapper.innerHTML).toBe('')
+    expect(matched(selectorsSetting('margin-top', '0')).has(emptyWrapper)).toBe(true)
+    expect(matched(NONE).has(wrapperOf('c'))).toBe(true)
+  })
+
   it('does the same in draft mode, where every section sits in an editable wrapper', () => {
     mount([richText('a'), empty('u', WAVE), richText('c')], { editable: true })
     expect(matched(NONE).has(wrapperOf('c'))).toBe(true)

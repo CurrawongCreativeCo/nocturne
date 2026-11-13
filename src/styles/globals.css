@@ -79,7 +79,9 @@
    * "The first (or last) section" is the first (or last) section or wrapper in <main>: a section with a bottom
    * edge sits in a frame, the one below an edge in a wrapper, and in draft mode every section in an editable
    * wrapper inside one more, so the section itself is one to three levels down. A section is last only if no
-   * section or wrapper follows it (the footer's colour band is not one).
+   * section or wrapper follows it (the footer's colour band is not one). A section in its own edge frame is
+   * matched too, but the frame's mask clips its picture to its box, so there the clip reaches nothing (an
+   * open follow-up for a first section with a bottom edge; README, "Section dividers").
    */
   body:has([data-minimal-page]:not([style*='display: none']))
     main

@@ -6189,6 +6189,14 @@ documents.push(
         edgeHeight: 'large',
       }),
       edgeSection('ee-control-b', 'Control, below the wave', { tone: 'alt' }),
+      // An edge right above an empty edge section: its cut shows the page, though a third section follows.
+      edgeSection('ee-mid-top', 'Above an empty edge section', {
+        tone: 'inverse',
+        edge: 'wave',
+        edgeHeight: 'large',
+      }),
+      edgeEmpty('ee-mid-empty', { tone: 'accent', edge: 'curve', edgeHeight: 'large' }),
+      edgeSection('ee-mid-after', 'After the empty edge section', { tone: 'alt' }),
       edgeEmpty('ee-last', { tone: 'inverse', edge: 'curve', edgeHeight: 'large' }),
     ],
     _updatedAt: UPDATED,
@@ -6216,6 +6224,25 @@ documents.push(
         imageSize: 'screen',
         overlay: 'medium',
         edge: 'curve',
+      }),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    // A Minimal page whose last section covers the screen under an edge but has no edge, so no mask, of its own.
+    _id: 'page-edge-minimal-follower',
+    _type: 'page',
+    title: 'Minimal page ending under an edge',
+    slug: { _type: 'slug', current: 'edge-minimal-follower' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      edgeSection('emf-above', 'Above the edge', { tone: 'alt', edge: 'wave' }),
+      edgeSection('emf-last', 'Last, covering the screen under the wave', {
+        tone: 'inverse',
+        image: image(''),
+        imageSize: 'screen',
+        overlay: 'medium',
       }),
     ],
     _updatedAt: UPDATED,
