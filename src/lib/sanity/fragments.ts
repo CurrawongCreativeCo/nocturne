@@ -280,6 +280,8 @@ export const sectionStyleFields = /* groq */ `
   edgeFlip,
   edgeAccent,
   edgeLayer,
+  edgeTideLayer,
+  edgeLineColour,
   edgeInvert,
   edgeHeightMobile,
   edgeHeightTablet,

@@ -58,6 +58,10 @@ import {
   SECTION_EDGE_HEIGHT_TITLES,
   SECTION_EDGE_LAYERS,
   SECTION_EDGE_LAYER_TITLES,
+  SECTION_EDGE_LINE_COLOURS,
+  SECTION_EDGE_LINE_COLOUR_TITLES,
+  SECTION_EDGE_TIDE_LAYERS,
+  SECTION_EDGE_TIDE_LAYER_TITLES,
   SECTION_EDGE_TITLES,
   imageStrengthOpacity,
   SECTION_IMAGE_HORIZONTAL_TITLES,
@@ -87,10 +91,13 @@ import {
   backgroundImageHidden,
   imageOptionHidden,
   staleImageOptionMessage,
+  edgeAccentHidden,
   edgeFlipHidden,
   edgeInvertHidden,
   edgeLayerHidden,
+  edgeLineColourHidden,
   edgeOptionsHidden,
+  edgeTideLayerHidden,
   motionCustomHidden,
   motionOptionHidden,
   overlayHidden,
@@ -120,10 +127,12 @@ import {
 } from './thumbnails/background-image-thumbnails'
 import {
   EdgeArchThumbnail,
+  EdgeContourThumbnail,
   EdgeCurveThumbnail,
   EdgeDiagonalThumbnail,
   EdgeLayeredThumbnail,
   EdgeNoneThumbnail,
+  EdgeTideThumbnail,
   EdgeWaveThumbnail,
 } from './thumbnails/edge-thumbnails'
 import {
@@ -328,6 +337,8 @@ const CAPABILITY_FIELDS: Readonly<Record<string, CapabilityId>> = {
   edgeFlip: 'edge',
   edgeAccent: 'edge',
   edgeLayer: 'edge',
+  edgeTideLayer: 'edge',
+  edgeLineColour: 'edge',
   edgeInvert: 'edge',
 }
 
@@ -1035,6 +1046,18 @@ export const sectionStyle = defineType({
           description: 'Two waves, one behind the other.',
           thumbnail: EdgeLayeredThumbnail,
         },
+        {
+          value: 'tide',
+          title: SECTION_EDGE_TITLES.tide,
+          description: 'One rising crest, with a softer crest behind it.',
+          thumbnail: EdgeTideThumbnail,
+        },
+        {
+          value: 'contour',
+          title: SECTION_EDGE_TITLES.contour,
+          description: 'A sweeping cut, followed by three fine lines.',
+          thumbnail: EdgeContourThumbnail,
+        },
       ],
       initialValue: 'none',
     }),
@@ -1062,7 +1085,7 @@ export const sectionStyle = defineType({
       type: 'string',
       initialValue: 'none',
       options: radio(SECTION_EDGE_ACCENTS, SECTION_EDGE_ACCENT_TITLES),
-      hidden: edgeOptionsHidden,
+      hidden: edgeAccentHidden,
     }),
     defineField({
       name: 'edgeLayer',
@@ -1072,6 +1095,24 @@ export const sectionStyle = defineType({
       initialValue: 'accent-2',
       options: radio(SECTION_EDGE_LAYERS, SECTION_EDGE_LAYER_TITLES),
       hidden: edgeLayerHidden,
+    }),
+    defineField({
+      name: 'edgeTideLayer',
+      title: 'Crest colour',
+      description:
+        'The softer crest behind the edge: Primary (the default) or Secondary, lightly, or Echo, this section’s own colour. A picture or a gradient has no single colour to echo, so over one the crest is Primary.',
+      type: 'string',
+      options: radio(SECTION_EDGE_TIDE_LAYERS, SECTION_EDGE_TIDE_LAYER_TITLES),
+      hidden: edgeTideLayerHidden,
+    }),
+    defineField({
+      name: 'edgeLineColour',
+      title: 'Line colour',
+      description:
+        'The three lines below the cut, in the colours of the section below: Primary (the default) or its muted text colour.',
+      type: 'string',
+      options: radio(SECTION_EDGE_LINE_COLOURS, SECTION_EDGE_LINE_COLOUR_TITLES),
+      hidden: edgeLineColourHidden,
     }),
     defineField({
       name: 'edgeInvert',

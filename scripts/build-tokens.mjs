@@ -273,44 +273,117 @@ export function parseBezier(value) {
  * re-skins the tones too. `--tone-accent` and `--tone-accent-ink` keep the real accent pair at :root, since
  * a tone can't read the variable it is redefining. Dark tones switch the focus outline to a contrasting ink.
  */
+/**
+ * Each tone's declarations: the colour variables it redefines, then its own background and text colour.
+ * `surface` is the page itself, so it declares nothing.
+ */
+const TONES = {
+  surface: { vars: [] },
+  alt: { vars: [], background: 'var(--color-surface-alt)' },
+  inverse: {
+    vars: [
+      ['--color-surface', 'var(--color-surface-inverse)'],
+      [
+        '--color-surface-alt',
+        'color-mix(in oklab, var(--color-surface-inverse) 88%, var(--color-ink-inverse))',
+      ],
+      ['--color-ink', 'var(--color-ink-inverse)'],
+      ['--color-ink-muted', 'var(--color-ink-inverse-muted)'],
+      ['--color-line', 'color-mix(in oklab, var(--color-ink-inverse) 20%, transparent)'],
+      ['--color-line-strong', 'var(--color-ink-inverse-muted)'],
+      ['--color-accent', 'color-mix(in oklab, var(--tone-accent) 55%, var(--color-ink-inverse))'],
+      ['--color-accent-text', 'var(--color-accent)'],
+      ['--color-focus', 'var(--color-ink-inverse)'],
+    ],
+    background: 'var(--color-surface)',
+    color: 'var(--color-ink)',
+  },
+  accent: {
+    vars: [
+      ['--color-surface', 'var(--tone-accent)'],
+      [
+        '--color-surface-alt',
+        'color-mix(in oklab, var(--tone-accent-ink) 12%, var(--tone-accent))',
+      ],
+      ['--color-ink', 'var(--tone-accent-ink)'],
+      ['--color-ink-muted', 'var(--tone-accent-ink)'],
+      ['--color-line', 'color-mix(in oklab, var(--tone-accent-ink) 35%, transparent)'],
+      ['--color-line-strong', 'var(--tone-accent-ink)'],
+      ['--color-accent', 'var(--tone-accent-ink)'],
+      ['--color-accent-text', 'var(--tone-accent-ink)'],
+      ['--color-accent-ink', 'var(--tone-accent)'],
+      ['--color-focus', 'var(--tone-accent-ink)'],
+    ],
+    background: 'var(--color-surface)',
+    color: 'var(--color-ink)',
+  },
+}
+
+/** A rule, indented one level inside its @layer block. */
+const rule = (selectors, declarations) =>
+  [`  ${selectors.join(',\n  ')} {`, ...declarations.map((line) => `    ${line};`), '  }'].join(
+    '\n',
+  )
+
+const toneBlocks = Object.entries(TONES)
+  .filter(([, tone]) => tone.vars.length > 0 || tone.background)
+  .map(([name, tone]) =>
+    rule(
+      [`[data-tone='${name}']`],
+      [
+        ...tone.vars.map(([variable, value]) => `${variable}: ${value}`),
+        ...(tone.background ? [`background-color: ${tone.background}`] : []),
+        ...(tone.color ? [`color: ${tone.color}`] : []),
+      ],
+    ),
+  )
+
+/** A tone's own background colour, as it resolves outside the tone (where its variables aren't redefined). */
+const toneBackground = (tone) =>
+  tone.vars.find(([variable]) => variable === '--color-surface')?.[1] ??
+  tone.background ??
+  'var(--color-surface)'
+
+/**
+ * Composed section edges (task 151; README, "Section dividers"). A composed edge's parts in its frame are
+ * drawn over the section below the edge, so they take that section's tone, as anything inside it would: the
+ * same variables, from the same table as the tones above. The section below is found from the markup, as
+ * globals.css finds a drawn cut: the wrapper after the edge's own is `[data-edge-above]`, and its section is
+ * plain or in a frame of its own. One `:has()` each, never nested (browsers drop such a rule). With no
+ * section below, or no `:has()`, the parts keep the page's colours. Only `[data-edge-part]`: today's back
+ * wave and accent line (`data-edge-layer`) keep theirs.
+ *
+ * Echo is the colour of the section the edge belongs to. It is resolved on the frame (`data-edge-echo`, its
+ * tone), before the parts inherit it, so their own remapping can't turn it into the section below's colour.
+ */
+const edgeBlocks = [
+  ...Object.entries(TONES)
+    .filter(([, tone]) => tone.vars.length > 0)
+    .map(([name, tone]) =>
+      rule(
+        [
+          `div:has(+ [data-edge-above] > section[data-tone='${name}']) [data-section-edge-frame] > [data-edge-part]`,
+          `div:has(+ [data-edge-above] > [data-section-edge-frame] > section[data-tone='${name}']) [data-section-edge-frame] > [data-edge-part]`,
+        ],
+        tone.vars.map(([variable, value]) => `${variable}: ${value}`),
+      ),
+    ),
+  ...Object.entries(TONES).map(([name, tone]) =>
+    rule([`[data-edge-echo='${name}']`], [`--edge-echo: ${toneBackground(tone)}`]),
+  ),
+]
+
 const toneCss = `:root {
   --tone-accent: var(--color-accent);
   --tone-accent-ink: var(--color-accent-ink);
 }
 
 @layer base {
-  [data-tone='alt'] {
-    background-color: var(--color-surface-alt);
-  }
+${toneBlocks.join('\n\n')}
+}
 
-  [data-tone='inverse'] {
-    --color-surface: var(--color-surface-inverse);
-    --color-surface-alt: color-mix(in oklab, var(--color-surface-inverse) 88%, var(--color-ink-inverse));
-    --color-ink: var(--color-ink-inverse);
-    --color-ink-muted: var(--color-ink-inverse-muted);
-    --color-line: color-mix(in oklab, var(--color-ink-inverse) 20%, transparent);
-    --color-line-strong: var(--color-ink-inverse-muted);
-    --color-accent: color-mix(in oklab, var(--tone-accent) 55%, var(--color-ink-inverse));
-    --color-accent-text: var(--color-accent);
-    --color-focus: var(--color-ink-inverse);
-    background-color: var(--color-surface);
-    color: var(--color-ink);
-  }
-
-  [data-tone='accent'] {
-    --color-surface: var(--tone-accent);
-    --color-surface-alt: color-mix(in oklab, var(--tone-accent-ink) 12%, var(--tone-accent));
-    --color-ink: var(--tone-accent-ink);
-    --color-ink-muted: var(--tone-accent-ink);
-    --color-line: color-mix(in oklab, var(--tone-accent-ink) 35%, transparent);
-    --color-line-strong: var(--tone-accent-ink);
-    --color-accent: var(--tone-accent-ink);
-    --color-accent-text: var(--tone-accent-ink);
-    --color-accent-ink: var(--tone-accent);
-    --color-focus: var(--tone-accent-ink);
-    background-color: var(--color-surface);
-    color: var(--color-ink);
-  }
+@layer base {
+${edgeBlocks.join('\n\n')}
 }
 `
 

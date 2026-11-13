@@ -101,6 +101,8 @@ describe('sectionStyle', () => {
       'edgeFlip',
       'edgeAccent',
       'edgeLayer',
+      'edgeTideLayer',
+      'edgeLineColour',
       'edgeInvert',
       'edgeHeightMobile',
       'edgeHeightTablet',
@@ -221,7 +223,7 @@ describe('the bottom edge', () => {
   const hidden = (name: string, parent: unknown) =>
     (field(name)?.hidden as (c: never) => boolean)({ parent } as never)
 
-  it('offers the five shapes and None, with None first so the default is no edge', () => {
+  it('offers every shape and None, with None first so the default is no edge', () => {
     const list = field('edge')?.options?.list as { value: string }[]
     expect(list.map((option) => option.value)).toEqual([...SECTION_EDGES])
     expect(list[0]?.value).toBe('none')
@@ -244,6 +246,34 @@ describe('the bottom edge', () => {
     expect(hidden('edgeInvert', { edge: 'diagonal' })).toBe(true)
     expect(hidden('edgeLayer', { edge: 'layered' })).toBe(false)
     expect(hidden('edgeLayer', { edge: 'wave' })).toBe(true)
+  })
+
+  it('offers Tide and Contour Flip and their own colour, and neither Invert nor the accent line (task 151)', () => {
+    for (const edge of ['tide', 'contour']) {
+      expect(hidden('edgeFlip', { edge })).toBe(false)
+      expect(hidden('edgeHeight', { edge })).toBe(false)
+      expect(hidden('edgeHeightMobile', { edge })).toBe(false)
+      expect(hidden('edgeInvert', { edge })).toBe(true)
+      expect(hidden('edgeAccent', { edge })).toBe(true)
+      expect(hidden('edgeLayer', { edge })).toBe(true)
+    }
+    expect(hidden('edgeTideLayer', { edge: 'tide' })).toBe(false)
+    expect(hidden('edgeLineColour', { edge: 'contour' })).toBe(false)
+    expect(hidden('edgeTideLayer', { edge: 'contour' })).toBe(true)
+    expect(hidden('edgeLineColour', { edge: 'tide' })).toBe(true)
+    // Today's shapes keep their accent line and show neither new colour.
+    for (const edge of ['diagonal', 'wave', 'curve', 'arch', 'layered']) {
+      expect(hidden('edgeAccent', { edge })).toBe(false)
+      expect(hidden('edgeTideLayer', { edge })).toBe(true)
+      expect(hidden('edgeLineColour', { edge })).toBe(true)
+    }
+  })
+
+  it('leaves Tide’s and Contour’s colours unset, so an unset one is the default, Primary', () => {
+    for (const name of ['edgeTideLayer', 'edgeLineColour']) {
+      expect(field(name)).not.toHaveProperty('initialValue')
+      expect((field(name)?.options?.list as { value: string }[])[0]?.value).toBe('accent')
+    }
   })
 
   it('keeps Invert and the custom heights in the collapsed Advanced fieldset', () => {

@@ -24,12 +24,15 @@ import {
   SECTION_EDGE_ACCENTS,
   SECTION_EDGE_HEIGHTS,
   SECTION_EDGE_LAYERS,
+  SECTION_EDGE_LINE_COLOURS,
+  SECTION_EDGE_TIDE_LAYERS,
   SECTION_MOTIONS,
   SECTION_OVERLAYS,
   SECTION_SPACINGS,
   SECTION_TONES,
   SECTION_WIDTHS,
   defaultOverlayFor,
+  edgeAllowsAccent,
   edgeAllowsFlip,
   edgeAllowsInvert,
 } from '@/lib/sanity/section-style-options'
@@ -101,6 +104,10 @@ export interface SectionStyleInput {
   edgeFlip?: boolean | null
   edgeAccent?: string | null
   edgeLayer?: string | null
+  /** Tide's back crest colour (task 151); unset is Primary. */
+  edgeTideLayer?: string | null
+  /** Contour's line colour (task 151); unset is Primary. */
+  edgeLineColour?: string | null
   edgeInvert?: boolean | null
   edgeHeightMobile?: number | null
   edgeHeightTablet?: number | null
@@ -278,8 +285,10 @@ function pick<T extends string>(
 
 /**
  * A section's bottom edge. Options that don't apply to the chosen shape (Flip on a symmetrical curve,
- * Invert on a diagonal, a back-wave colour on anything but the layered wave) are ignored, so a value
- * left behind after the editor changed shape can't produce a nonsensical edge.
+ * Invert on a diagonal, a back-wave colour on anything but the layered wave, an accent line on Tide or
+ * Contour) are ignored, so a value left behind after the editor changed shape can't produce a nonsensical
+ * edge. Tide's Echo is the section's own colour, which a picture or a gradient doesn't have: over one,
+ * Tide draws its default, Primary, instead.
  */
 export function resolveEdge(style: SectionStyleInput | null | undefined): ResolvedEdge | undefined {
   const edge = pick(SECTION_EDGES, style?.edge)
@@ -290,15 +299,26 @@ export function resolveEdge(style: SectionStyleInput | null | undefined): Resolv
     tablet: style?.edgeHeightTablet,
     desktop: style?.edgeHeightDesktop,
   })
+  const tideLayer = pick(SECTION_EDGE_TIDE_LAYERS, style?.edgeTideLayer)
 
   return {
     shape: edge,
     flip: edgeAllowsFlip(edge) && style?.edgeFlip === true,
     invert: edgeAllowsInvert(edge) && style?.edgeInvert === true,
     height: custom ?? { kind: 'token', size },
-    accent: pick(SECTION_EDGE_ACCENTS, style?.edgeAccent) ?? 'none',
+    accent: edgeAllowsAccent(edge)
+      ? (pick(SECTION_EDGE_ACCENTS, style?.edgeAccent) ?? 'none')
+      : 'none',
     layer: pick(SECTION_EDGE_LAYERS, style?.edgeLayer) ?? 'accent-2',
+    tideLayer: tideLayer === 'echo' && hasBackdrop(style) ? 'accent' : (tideLayer ?? 'accent'),
+    lineColour: pick(SECTION_EDGE_LINE_COLOURS, style?.edgeLineColour) ?? 'accent',
   }
+}
+
+/** Whether a section is drawn over a picture or a brand gradient, as resolveSectionStyle reads them. */
+function hasBackdrop(style: SectionStyleInput | null | undefined): boolean {
+  const gradient = stegaClean(style?.gradient)
+  return Boolean(style?.image?.asset) || Boolean(gradient && GRADIENT_SLUG_PATTERN.test(gradient))
 }
 
 /** The stored Advanced animation options, cleaned of edit markers. */

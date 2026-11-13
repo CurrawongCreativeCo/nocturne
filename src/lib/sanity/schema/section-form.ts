@@ -11,6 +11,7 @@ import {
 
 import {
   SECTION_MOTIONS,
+  edgeAllowsAccent,
   edgeAllowsFlip,
   edgeAllowsInvert,
   imageSizeUsesFixed,
@@ -268,3 +269,15 @@ export const edgeInvertHidden: ConditionalPropertyCallback = ({ parent }) =>
 /** Only the layered wave has a back wave to colour. */
 export const edgeLayerHidden: ConditionalPropertyCallback = ({ parent }) =>
   edgeOf(parent) !== 'layered'
+
+/** The accent line is for today's shapes: Tide and Contour bring their own ornament. */
+export const edgeAccentHidden: ConditionalPropertyCallback = ({ parent }) =>
+  !edgeAllowsAccent(edgeOf(parent))
+
+/** Only Tide has a back crest to colour. */
+export const edgeTideLayerHidden: ConditionalPropertyCallback = ({ parent }) =>
+  edgeOf(parent) !== 'tide'
+
+/** Only Contour has lines to colour. */
+export const edgeLineColourHidden: ConditionalPropertyCallback = ({ parent }) =>
+  edgeOf(parent) !== 'contour'

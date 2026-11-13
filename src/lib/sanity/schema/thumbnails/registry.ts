@@ -17,10 +17,12 @@ import {
 } from './animation-thumbnails'
 import {
   EdgeArchThumbnail,
+  EdgeContourThumbnail,
   EdgeCurveThumbnail,
   EdgeDiagonalThumbnail,
   EdgeLayeredThumbnail,
   EdgeNoneThumbnail,
+  EdgeTideThumbnail,
   EdgeWaveThumbnail,
 } from './edge-thumbnails'
 import {
@@ -194,6 +196,8 @@ export const edgeThumbnails: Record<(typeof SECTION_EDGES)[number], Thumbnail> =
   curve: EdgeCurveThumbnail,
   arch: EdgeArchThumbnail,
   layered: EdgeLayeredThumbnail,
+  tide: EdgeTideThumbnail,
+  contour: EdgeContourThumbnail,
 }
 
 /** The shared `imageDesign` object's three pickers: Appearance, Motion and Frame. */

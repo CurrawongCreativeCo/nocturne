@@ -380,3 +380,39 @@ test.describe('on a Minimal page ending under an edge (S3)', () => {
     expect(violations.map(({ id, nodes }) => `${id}: ${nodes.length}`)).toEqual([])
   })
 })
+
+test.describe('with a composed edge (task 151, Slice 2: Tide and Contour)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/edge-composed')
+  })
+
+  test('on a section that renders nothing: no frame, no parts, and the next section is not pulled up', async ({
+    page,
+  }) => {
+    // `ct-empty` is a form section with no form and a Tide edge: it draws nothing at all.
+    await expect(page.locator('section#ct-empty')).toHaveCount(0)
+    const after = section(page, 'ct-after-empty')
+    expect(await computed(after.locator('xpath=..'), 'margin-top')).toBe('0px')
+    const previous = await after
+      .locator('xpath=..')
+      .evaluate(
+        (el) => el.previousElementSibling?.querySelectorAll('[data-edge-part]').length ?? -1,
+      )
+    expect(previous).toBe(0)
+  })
+
+  test('on the last section: the footer’s band is drawn under the cut and takes the footer’s border', async ({
+    page,
+  }) => {
+    const band = page.locator('[data-edge-backdrop]')
+    await expect(band).toHaveCount(1)
+    expect(await computed(band, 'display')).not.toBe('none')
+    expect(await computed(page.getByRole('contentinfo'), 'border-top-color')).toBe(
+      'rgba(0, 0, 0, 0)',
+    )
+    // Contour's lines are drawn over the band.
+    await expect(
+      section(page, 'ct-last').locator('xpath=..').locator('[data-edge-part^="line"]'),
+    ).toHaveCount(3)
+  })
+})
