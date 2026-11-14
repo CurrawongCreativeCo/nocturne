@@ -23,3 +23,23 @@ export async function edgeVisibilityFor(
   const state = await fetchBrandColourState(client)
   return edgeVisibility({ style, site: state.known ? state.colours : null })
 }
+
+/**
+ * The two checks the Colours field carries (section-style.ts), as functions: a warning for a faint layer, and a note
+ * for a scene that cannot be judged. At most one has anything to say, so the form shows one advisory.
+ */
+export async function faintLayerWarning(
+  style: SectionStyleInput | null | undefined,
+  client: ColourClient,
+): Promise<string | true> {
+  const result = await edgeVisibilityFor(style, client)
+  return result.state === 'faint' ? (result.message ?? true) : true
+}
+
+export async function uncheckedSceneNote(
+  style: SectionStyleInput | null | undefined,
+  client: ColourClient,
+): Promise<string | true> {
+  const result = await edgeVisibilityFor(style, client)
+  return result.state === 'unchecked' ? (result.message ?? true) : true
+}

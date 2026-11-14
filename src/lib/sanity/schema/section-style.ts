@@ -93,7 +93,7 @@ import {
 import { fetchBrandColours } from './brand-colours'
 import { fetchBrandGradientState, gradientFieldWarning } from './brand-gradients'
 import { builtBy, builtOptions } from './capability-marker'
-import { edgeVisibilityFor } from './edge-visibility-validation'
+import { faintLayerWarning, uncheckedSceneNote } from './edge-visibility-validation'
 import { imageField } from './image-field'
 import { presetField } from './preset-field'
 import {
@@ -1216,22 +1216,20 @@ export const sectionStyle = defineType({
                 // Task 151, Slice 5: is each layer above the edge visible on this section? One advisory, beside
                 // the edge controls: a warning for a faint layer, a note where the scene can't be judged.
                 rule
-                  .custom(async (_value, { getClient, parent }) => {
-                    const result = await edgeVisibilityFor(
+                  .custom((_value, { getClient, parent }) =>
+                    faintLayerWarning(
                       parent as SectionStyleInput | undefined,
                       getClient({ apiVersion: '2025-01-01' }),
-                    )
-                    return result.state === 'faint' ? (result.message ?? true) : true
-                  })
+                    ),
+                  )
                   .warning(),
                 rule
-                  .custom(async (_value, { getClient, parent }) => {
-                    const result = await edgeVisibilityFor(
+                  .custom((_value, { getClient, parent }) =>
+                    uncheckedSceneNote(
                       parent as SectionStyleInput | undefined,
                       getClient({ apiVersion: '2025-01-01' }),
-                    )
-                    return result.state === 'unchecked' ? (result.message ?? true) : true
-                  })
+                    ),
+                  )
                   .info(),
               ]
             : rule
