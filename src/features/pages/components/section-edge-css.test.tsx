@@ -378,8 +378,8 @@ describe('a composed edge’s parts: hidden without mask support and in forced c
     expect(NO_MASK).toEqual(['[data-section-edge-frame] > svg', '[data-edge-part]'])
   })
 
-  it('hides only the parts in forced colours', () => {
-    expect(FORCED).toEqual(['[data-edge-part]'])
+  it('hides only the parts, and Elevated’s shadow, in forced colours', () => {
+    expect(FORCED).toEqual(['[data-edge-part]', '[data-edge-shadow]'])
   })
 
   it('reaches every part of a composed edge with both, the over parts inside the section included', () => {

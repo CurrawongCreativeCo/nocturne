@@ -28,6 +28,7 @@ import {
   SECTION_EDGE_LAYERS,
   SECTION_EDGE_LINE_COLOURS,
   SECTION_EDGE_PALETTES,
+  SECTION_EDGE_SHADOWS,
   SECTION_EDGE_STRENGTHS,
   SECTION_EDGE_TIDE_LAYERS,
   GENERATED_EDGE_HEIGHTS,
@@ -116,6 +117,8 @@ export interface SectionStyleInput {
   edgeTideLayer?: string | null
   /** Contour's line colour (task 151); unset is Primary. */
   edgeLineColour?: string | null
+  /** Elevated's shadow (task 151, Slice 6); unset is Soft. */
+  edgeShadow?: string | null
   /** The generated shapes' stepped controls (task 151, Slice 3); unset is each preset's default. */
   edgeCrest?: string | null
   edgeDepth?: string | null
@@ -338,6 +341,10 @@ export function resolveEdge(style: SectionStyleInput | null | undefined): Resolv
     layer: pick(SECTION_EDGE_LAYERS, style?.edgeLayer) ?? 'accent-2',
     tideLayer: tideLayer === 'echo' && hasBackdrop(style) ? 'accent' : (tideLayer ?? 'accent'),
     lineColour: pick(SECTION_EDGE_LINE_COLOURS, style?.edgeLineColour) ?? 'accent',
+    // Only Elevated has a shadow; the others' resolved edge is exactly what it was.
+    ...(edge === 'elevated'
+      ? { shadow: pick(SECTION_EDGE_SHADOWS, style?.edgeShadow) ?? 'soft' }
+      : {}),
     ...(generated ? { layered: resolveLayered(edge, style) } : {}),
   }
 }

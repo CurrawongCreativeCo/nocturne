@@ -2946,6 +2946,14 @@ const gallerySections = [
     },
     { tone: 'inverse' },
   ),
+  // Elevated (task 151, Slice 6): a straight boundary with a shadow below it, over a light follower (Soft) and
+  // over a dark one (Deep, where the shadow all but disappears). At the end, so no section already in the gallery moves.
+  ...edgePair('elevated', { tone: 'alt', edge: 'elevated' }, { tone: 'surface' }),
+  ...edgePair(
+    'elevated-deep-dark',
+    { tone: 'alt', edge: 'elevated', edgeShadow: 'deep' },
+    { tone: 'inverse' },
+  ),
   // new-section:gallery
 ]
 
@@ -6562,6 +6570,107 @@ documents.push(
         edgeHeight: 'large',
       }),
       edgeSection('lr-lagoon-flip-below', 'Below the flip, inverse', { tone: 'inverse' }),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    // Elevated in a real browser (section-edge-elevated.spec.ts, task 151, Slice 6): over a light follower and a
+    // dark one, on a section that clips its overflow, twice in a row, and right after a shaped edge. Each
+    // upper section has a colour of its own, so the boundary and the shadow can be told from the follower.
+    _id: 'page-edge-elevated',
+    _type: 'page',
+    title: 'Elevated edges',
+    slug: { _type: 'slug', current: 'edge-elevated' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      edgeSection('ev-light', 'Elevated over a light section', {
+        tone: 'inverse',
+        edge: 'elevated',
+      }),
+      edgeSection('ev-light-below', 'The light follower', { tone: 'surface' }),
+      edgeSection('ev-dark', 'Elevated, Deep, over a dark section', {
+        tone: 'alt',
+        edge: 'elevated',
+        edgeShadow: 'deep',
+      }),
+      edgeSection('ev-dark-below', 'The dark follower', { tone: 'inverse' }),
+      {
+        // A layout that clips its own overflow (text over media): the shadow is outside it.
+        _key: 'ev-clip',
+        _type: 'mediaText',
+        variant: 'overlay',
+        title: 'Elevated on a section that clips',
+        body: [block(['A paragraph of copy under the heading.'])],
+        image: image(''),
+        style: { _type: 'sectionStyle', anchorId: 'ev-clip', tone: 'inverse', edge: 'elevated' },
+      },
+      edgeSection('ev-clip-below', 'Below the clipping section', { tone: 'surface' }),
+      edgeSection('ev-chain-1', 'First of two in a row', { tone: 'inverse', edge: 'elevated' }),
+      edgeSection('ev-chain-2', 'Second of two in a row', {
+        tone: 'alt',
+        edge: 'elevated',
+        edgeShadow: 'deep',
+      }),
+      edgeSection('ev-chain-below', 'Below the pair', { tone: 'surface' }),
+      edgeSection('ev-shaped', 'A shaped edge, then Elevated', {
+        tone: 'inverse',
+        edge: 'wave',
+        edgeHeight: 'large',
+      }),
+      edgeSection('ev-after-shaped', 'Elevated right after the wave', {
+        tone: 'alt',
+        edge: 'elevated',
+      }),
+      edgeSection('ev-after-elevated', 'After Elevated that followed the wave', {
+        tone: 'surface',
+      }),
+      // Stale settings of a cut, stored under Elevated: ignored, and the section is drawn as Elevated.
+      edgeSection('ev-stale', 'Elevated with stored settings of another shape', {
+        tone: 'inverse',
+        edge: 'elevated',
+        edgeFlip: true,
+        edgeInvert: true,
+        edgeAccent: 'accent',
+        edgeHeight: 'large',
+        edgeHeightDesktop: 160,
+        edgeCrest: 'shifted',
+        edgeLayerBelow: true,
+      }),
+      edgeSection('ev-stale-below', 'After the stale settings', { tone: 'surface' }),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    // The last section of a normal page is Elevated: its shadow falls on the footer, with no band.
+    _id: 'page-edge-elevated-last',
+    _type: 'page',
+    title: 'Elevated last section',
+    slug: { _type: 'slug', current: 'edge-elevated-last' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      edgeSection('evl-first', 'First, plain', { tone: 'alt' }),
+      edgeSection('evl-last', 'Last, Elevated', { tone: 'inverse', edge: 'elevated' }),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    // The last section of a Minimal page (no header or footer) is Elevated and covers the screen; so is one in the middle.
+    _id: 'page-edge-elevated-minimal',
+    _type: 'page',
+    title: 'Elevated on a Minimal page',
+    slug: { _type: 'slug', current: 'edge-elevated-minimal' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      edgeSection('evm-first', 'First, plain', { tone: 'alt' }),
+      edgeSection('evm-middle', 'Middle, Elevated', { tone: 'inverse', edge: 'elevated' }),
+      edgeSection('evm-last', 'Last, covering the screen, Elevated', {
+        tone: 'inverse',
+        image: image(''),
+        imageSize: 'screen',
+        overlay: 'medium',
+        edge: 'elevated',
+      }),
     ],
     _updatedAt: UPDATED,
   },

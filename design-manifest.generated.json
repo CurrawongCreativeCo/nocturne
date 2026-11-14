@@ -35865,6 +35865,10 @@
             "title": "Arch"
           },
           {
+            "value": "elevated",
+            "title": "Elevated"
+          },
+          {
             "value": "layered",
             "title": "Layered wave"
           },
@@ -35996,6 +36000,23 @@
           {
             "value": "muted",
             "title": "Muted text"
+          }
+        ],
+        "capability": "edge",
+        "clientEditable": false
+      },
+      {
+        "path": "edgeShadow",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "soft",
+            "title": "Soft"
+          },
+          {
+            "value": "deep",
+            "title": "Deep"
           }
         ],
         "capability": "edge",

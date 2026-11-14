@@ -3,6 +3,7 @@ import type {
   SECTION_EDGE_HEIGHTS,
   SECTION_EDGE_LAYERS,
   SECTION_EDGE_LINE_COLOURS,
+  SECTION_EDGE_SHADOWS,
   SECTION_EDGE_TIDE_LAYERS,
 } from '@/lib/sanity/section-style-options'
 
@@ -24,12 +25,14 @@ import type { LayeredSettings } from './edge-presets'
 export type LineShape = 'diagonal' | 'wave' | 'curve' | 'arch' | 'layered'
 /** New shapes (task 151), each drawn as a composition (`edgeComposition`). */
 export type ComposedShape = 'tide' | 'contour' | 'still-water' | 'lagoon' | 'reef'
-export type EdgeShape = LineShape | ComposedShape
+/** Elevated is neither: a straight boundary with a shadow below it, drawn with no mask and no composition. */
+export type EdgeShape = LineShape | ComposedShape | 'elevated'
 export type EdgeHeightSize = (typeof SECTION_EDGE_HEIGHTS)[number]
 export type EdgeAccent = (typeof SECTION_EDGE_ACCENTS)[number]
 export type EdgeLayer = (typeof SECTION_EDGE_LAYERS)[number]
 export type EdgeTideLayer = (typeof SECTION_EDGE_TIDE_LAYERS)[number]
 export type EdgeLineColour = (typeof SECTION_EDGE_LINE_COLOURS)[number]
+export type EdgeShadow = (typeof SECTION_EDGE_SHADOWS)[number]
 
 /** How tall the edge is: a token size (responsive: see `edge` in tokens.json), or the Advanced override. */
 export type EdgeHeight =
@@ -50,6 +53,8 @@ export interface ResolvedEdge {
   tideLayer: EdgeTideLayer
   /** Contour's line colour; meaningful only for Contour. */
   lineColour: EdgeLineColour
+  /** Elevated's shadow; meaningful only for Elevated, and Soft when left out. */
+  shadow?: EdgeShadow
   /** A generated shape's stepped controls (edge-presets.ts); present for the generated shapes. */
   layered?: LayeredSettings
 }
@@ -231,7 +236,9 @@ const COMPOSITIONS: Record<ComposedShape, (edge: ResolvedEdge) => EdgeCompositio
 
 /** The composition an edge is drawn as, or undefined for a shape that keeps its own rendering. */
 export function edgeComposition(edge: ResolvedEdge): EdgeComposition | undefined {
-  return isLineShape(edge.shape) ? undefined : COMPOSITIONS[edge.shape](edge)
+  return isLineShape(edge.shape) || edge.shape === 'elevated'
+    ? undefined
+    : COMPOSITIONS[edge.shape](edge)
 }
 
 /** Customised heights run from this many px to this many. Out-of-range input is clamped, not rejected. */

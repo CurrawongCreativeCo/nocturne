@@ -76,10 +76,14 @@ test.describe('the gallery', () => {
       ).toEqual([])
     })
 
-    for (const [name, viewport] of [
-      ['a phone', PHONE],
-      ['a desktop', DESKTOP],
-    ] as const) {
+    // Elevated cuts nothing away: no band to pull the section below up under, so this contract is the reverse of
+    // its own (it is held by section-edge-elevated.spec.ts).
+    for (const [name, viewport] of id.startsWith('edge-elevated')
+      ? []
+      : ([
+          ['a phone', PHONE],
+          ['a desktop', DESKTOP],
+        ] as const)) {
       test(`${id}: the section below is not covered, on ${name}`, async ({ page }) => {
         await page.setViewportSize(viewport)
         await page.goto(GALLERY)
