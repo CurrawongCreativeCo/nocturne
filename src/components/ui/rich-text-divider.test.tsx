@@ -1,9 +1,22 @@
+import type * as NextSanity from 'next-sanity'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 
 import { RichText } from './rich-text'
 
+// Records what PortableText is given, so a test can see it is the caller's own value, not a copy.
+const given = vi.hoisted(() => ({ values: [] as unknown[] }))
+vi.mock('next-sanity', async (importOriginal) => {
+  const actual = await importOriginal<typeof NextSanity>()
+  return {
+    ...actual,
+    PortableText: (props: Parameters<typeof actual.PortableText>[0]) => {
+      given.values.push(props.value)
+      return actual.PortableText(props)
+    },
+  }
+})
 vi.mock('@/components/ui/sanity-image', () => ({
   SanityImage: () => createElement('img', { alt: '' }),
 }))
@@ -144,5 +157,62 @@ describe('a Rich text body with a divider', () => {
     const coloured = draw([rule({ lineColour: { colour: 'custom', hex: '#aa5500' } })])
     expect(coloured).toContain('color:')
     expect(coloured).not.toContain('text-line-strong')
+  })
+})
+
+/**
+ * PortableText accepts one block as well as a list, and a body given as one block rendered before the divider
+ * work (task 151 Part A). Divider detection reads the body as a list; the value PortableText is given stays the
+ * caller's own, so the markup it draws for any body is what it always was.
+ */
+describe('a Rich text body given a single block, not a list', () => {
+  const drawOne = (value: unknown, props: Record<string, unknown> = {}) =>
+    renderToStaticMarkup(createElement(RichText, { value: value as never, ...props }))
+      .replaceAll('&amp;', '&')
+      .replaceAll('&gt;', '>')
+      .replaceAll('&lt;', '<')
+
+  it('draws a single paragraph exactly as it did before dividers: the same as a list of one', () => {
+    const html = drawOne(paragraph('One', 'a'))
+    expect(html).toBe('<div><p class="my-4 leading-relaxed">One</p></div>')
+    expect(html).toBe(draw([paragraph('One', 'a')]))
+  })
+
+  it('keeps the caller’s class and role on a single paragraph, with no divider rule added', () => {
+    expect(drawOne(paragraph('One', 'a'), { className: 'mt-12', textRole: 'intro' })).toBe(
+      '<div class="mt-12" data-text-role="intro"><p class="my-4 leading-relaxed">One</p></div>',
+    )
+  })
+
+  it('draws a single divider, with the rule for its neighbours, the same as a list of one', () => {
+    const html = drawOne(rule())
+    expect(drawn(html)).toBe(1)
+    expect(html).toContain(AFTER)
+    expect(html).toContain(BEFORE)
+    expect(html).toBe(draw([rule()]))
+  })
+
+  it('draws nothing for a single divider that draws nothing, with no rule added', () => {
+    // The body's own wrapper is still drawn, as for any non-empty body; nothing is in it, and no rule is on it.
+    expect(drawOne(rule({ style: 'none' }))).toBe('<div></div>')
+    expect(drawOne({ _type: 'decorativeDivider', style: null })).toBe('<div></div>')
+  })
+
+  it('still reads a list: one divider among blocks, and an empty list or no body', () => {
+    expect(drawn(draw([paragraph('One', 'a'), rule(), paragraph('Two', 'b')]))).toBe(1)
+    expect(draw([])).toBe('')
+    expect(draw([rule({ style: 'none' })])).toBe('<div></div>')
+    expect(drawOne(null)).toBe('')
+    expect(drawOne(undefined)).toBe('')
+  })
+
+  it('gives PortableText the caller’s own value: the same object, or the same list', () => {
+    const one = paragraph('One', 'a')
+    const list = [paragraph('One', 'a'), rule()]
+    given.values.length = 0
+    drawOne(one)
+    drawOne(list)
+    expect(given.values[0]).toBe(one)
+    expect(given.values[1]).toBe(list)
   })
 })

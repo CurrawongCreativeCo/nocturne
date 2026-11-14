@@ -96,7 +96,10 @@ export function RichText({
   dividerBlock?: string
 }) {
   if (!value || (Array.isArray(value) && value.length === 0)) return null
-  const hasDivider = (value as BodyBlock[]).some(drawnDivider)
+  // PortableText takes one block as well as a list, so detection reads the body as a list. Only detection:
+  // `value` itself, the caller's own, is what PortableText is given, as it always was.
+  const blocks = (Array.isArray(value) ? value : [value]) as BodyBlock[]
+  const hasDivider = blocks.some(drawnDivider)
   return (
     <div
       className={hasDivider ? [className, AROUND_DIVIDER].filter(Boolean).join(' ') : className}
