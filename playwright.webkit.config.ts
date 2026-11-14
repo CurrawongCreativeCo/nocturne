@@ -15,6 +15,7 @@ export default defineConfig({
       testMatch: [
         /section-edge-composed\.spec\.ts/,
         /section-edge-layered\.spec\.ts/,
+        /section-edge-lagoon-reef\.spec\.ts/,
         /section-edge-stability\.spec\.ts/,
         /section-edge-hairlines\.spec\.ts/,
         /section-edges\.spec\.ts/,

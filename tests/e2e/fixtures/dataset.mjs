@@ -2916,6 +2916,36 @@ const gallerySections = [
     },
     { tone: 'inverse' },
   ),
+  // Lagoon and Reef (task 151, Slice 4): each at its defaults (Medium, the 40 px phone band), then at Large
+  // with Flip, Strong and another recipe. Each upper section has a colour of its own. Lagoon's layers are
+  // Secondary and Ink, so its upper section is light; Reef's are Secondary and Primary, so its is dark.
+  // At the end, so no section already in the gallery moves.
+  ...edgePair('lagoon', { tone: 'alt', edge: 'lagoon' }, { tone: 'accent' }),
+  ...edgePair('reef', { tone: 'inverse', edge: 'reef' }, { tone: 'alt' }),
+  ...edgePair(
+    'lagoon-large-flip',
+    {
+      tone: 'inverse',
+      edge: 'lagoon',
+      edgePalette: 'highlight',
+      edgeStrength: 'strong',
+      edgeFlip: true,
+      edgeHeight: 'large',
+    },
+    { tone: 'alt' },
+  ),
+  ...edgePair(
+    'reef-large-flip',
+    {
+      tone: 'alt',
+      edge: 'reef',
+      edgePalette: 'ink',
+      edgeStrength: 'light',
+      edgeFlip: true,
+      edgeHeight: 'large',
+    },
+    { tone: 'inverse' },
+  ),
   // new-section:gallery
 ]
 
@@ -6210,6 +6240,10 @@ const seamPairs = [
   ['contour', 'medium', 'inverse'],
   ['still-water', 'medium'],
   ['still-water', 'large'],
+  ['lagoon', 'medium'],
+  ['lagoon', 'large'],
+  ['reef', 'medium'],
+  ['reef', 'large'],
 ].flatMap(([shape, height, below = 'accent']) => [
   edgeSection(`seam-${shape}-${height}`, `Above the ${shape} (${height})`, {
     tone: 'inverse',
@@ -6434,6 +6468,100 @@ documents.push(
         edgeHeight: 'large',
       }),
       edgeSection('ls-flip-below', 'Below the flip, inverse', { tone: 'inverse' }),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    // Lagoon and Reef in a real browser (section-edge-lagoon-reef.spec.ts, task 151, Slice 4). Each upper
+    // section has a colour of its own and the layers contrast with it, so a pixel can tell each fill, and where
+    // two overlap, from the section. Strong, so the blends are far enough apart to read through a screenshot.
+    _id: 'page-edge-lagoon-reef',
+    _type: 'page',
+    title: 'Lagoon and Reef edges',
+    slug: { _type: 'slug', current: 'edge-lagoon-reef' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      // The defaults, Medium (the 40 px phone band and a 320 px window).
+      edgeSection('lr-lagoon-default', 'Lagoon at its defaults', { tone: 'alt', edge: 'lagoon' }),
+      edgeSection('lr-lagoon-default-below', 'Below Lagoon, Primary', { tone: 'accent' }),
+      edgeSection('lr-reef-default', 'Reef at its defaults', { tone: 'inverse', edge: 'reef' }),
+      edgeSection('lr-reef-default-below', 'Below Reef, alternate', { tone: 'alt' }),
+      // Large and Strong: the contrasting fixture the pixel checks read.
+      edgeSection('lr-lagoon', 'Lagoon, Strong at Large', {
+        tone: 'alt',
+        edge: 'lagoon',
+        edgeStrength: 'strong',
+        edgeHeight: 'large',
+      }),
+      edgeSection('lr-lagoon-below', 'Below Lagoon, inverse', { tone: 'inverse' }),
+      edgeSection('lr-reef', 'Reef, Strong at Large', {
+        tone: 'inverse',
+        edge: 'reef',
+        edgeStrength: 'strong',
+        edgeHeight: 'large',
+      }),
+      edgeSection('lr-reef-below', 'Below Reef, alternate', { tone: 'alt' }),
+      // Stored steps the shapes do not offer: drawn as the defaults, and kept.
+      edgeSection('lr-lagoon-stale', 'Lagoon with stored steps', {
+        tone: 'alt',
+        edge: 'lagoon',
+        edgeCrest: 'shifted',
+        edgeDepth: 'shallow',
+        edgeLayerBelow: true,
+      }),
+      edgeSection('lr-lagoon-stale-below', 'Below stale Lagoon, Primary', { tone: 'accent' }),
+      edgeSection('lr-reef-stale', 'Reef with stored steps', {
+        tone: 'inverse',
+        edge: 'reef',
+        edgeCrest: 'centred',
+        edgeDepth: 'deep',
+        edgeLayerBelow: false,
+      }),
+      edgeSection('lr-reef-stale-below', 'Below stale Reef, alternate', { tone: 'alt' }),
+      // Custom heights stored out of range: held to 40-64, 40-120 and 40-160 px.
+      edgeSection('lr-lagoon-custom', 'Lagoon, custom heights', {
+        tone: 'alt',
+        edge: 'lagoon',
+        edgeHeightMobile: 20,
+        edgeHeightTablet: 300,
+        edgeHeightDesktop: 999,
+      }),
+      edgeSection('lr-lagoon-custom-below', 'Below Lagoon custom, Primary', { tone: 'accent' }),
+      edgeSection('lr-reef-custom', 'Reef, custom heights', {
+        tone: 'inverse',
+        edge: 'reef',
+        edgeHeightMobile: 20,
+        edgeHeightTablet: 300,
+        edgeHeightDesktop: 999,
+      }),
+      edgeSection('lr-reef-custom-below', 'Below Reef custom, alternate', { tone: 'alt' }),
+      // Over a mark and a picture, to read paint order.
+      edgeSection('lr-lagoon-mark', 'Lagoon over a mark', {
+        tone: 'alt',
+        edge: 'lagoon',
+        edgeStrength: 'strong',
+        edgeHeight: 'large',
+        mark: { kind: 'icon', icon: 'heart' },
+      }),
+      edgeSection('lr-lagoon-mark-below', 'Below the mark, inverse', { tone: 'inverse' }),
+      edgeSection('lr-reef-picture', 'Reef over a picture', {
+        tone: 'inverse',
+        edge: 'reef',
+        edgeStrength: 'strong',
+        edgeHeight: 'large',
+        image: image(''),
+        imageSize: 'cover',
+        overlay: 'medium',
+      }),
+      edgeSection('lr-reef-picture-below', 'Below the picture, alternate', { tone: 'alt' }),
+      edgeSection('lr-lagoon-flip', 'Lagoon, flipped', {
+        tone: 'alt',
+        edge: 'lagoon',
+        edgeStrength: 'strong',
+        edgeFlip: true,
+        edgeHeight: 'large',
+      }),
+      edgeSection('lr-lagoon-flip-below', 'Below the flip, inverse', { tone: 'inverse' }),
     ],
     _updatedAt: UPDATED,
   },

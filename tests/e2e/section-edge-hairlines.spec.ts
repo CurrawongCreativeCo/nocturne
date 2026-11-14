@@ -32,6 +32,10 @@ const PAIRS = [
   'contour-medium',
   'still-water-medium',
   'still-water-large',
+  'lagoon-medium',
+  'lagoon-large',
+  'reef-medium',
+  'reef-large',
 ]
 
 /** The control's pair, widths and gap: a 1px column of the section below made see-through. */

@@ -1,3 +1,4 @@
+import { LAYERED_PRESETS } from '@/components/ui/edge-presets'
 import {
   closeToBottom,
   closeToTop,
@@ -10,7 +11,7 @@ import {
 } from '@/components/ui/section-edges'
 import { colorHex } from '@/config/tokens.generated'
 
-import type { SectionEdge } from '../../section-style-options'
+import { isGeneratedEdge, type SectionEdge } from '../../section-style-options'
 import type { PresetThumbnailProps } from '../preset-field'
 import { HEIGHT, WIDTH } from './wireframe'
 
@@ -50,14 +51,15 @@ function EdgeThumbnail({ edge }: { edge: SectionEdge }) {
           tideLayer: 'accent',
           lineColour: 'accent',
           // A generated shape's default steps.
-          ...(edge === 'still-water'
+          ...(isGeneratedEdge(edge)
             ? {
                 layered: {
                   crest: 'standard',
                   depth: 'standard',
                   strength: 'standard',
                   palette: 'tint',
-                  below: false,
+                  // Reef's layer below is part of its shape.
+                  below: LAYERED_PRESETS[edge].layerBelow === 'always',
                 },
               }
             : {}),
@@ -178,3 +180,5 @@ export const EdgeContourThumbnail = (_props: PresetThumbnailProps) => (
 export const EdgeStillWaterThumbnail = (_props: PresetThumbnailProps) => (
   <EdgeThumbnail edge="still-water" />
 )
+export const EdgeLagoonThumbnail = (_props: PresetThumbnailProps) => <EdgeThumbnail edge="lagoon" />
+export const EdgeReefThumbnail = (_props: PresetThumbnailProps) => <EdgeThumbnail edge="reef" />

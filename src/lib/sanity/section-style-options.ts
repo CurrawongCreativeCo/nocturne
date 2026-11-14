@@ -243,6 +243,8 @@ export const SECTION_EDGES = [
   'tide',
   'contour',
   'still-water',
+  'lagoon',
+  'reef',
 ] as const
 export type SectionEdge = (typeof SECTION_EDGES)[number]
 
@@ -256,6 +258,8 @@ export const SECTION_EDGE_TITLES: Record<SectionEdge, string> = {
   tide: 'Tide',
   contour: 'Contour',
   'still-water': 'Still water',
+  lagoon: 'Lagoon',
+  reef: 'Reef',
 }
 
 /** Heights are tokens (`edge` in tokens.json), smaller on phones; "custom" is the Advanced override. */
@@ -314,7 +318,7 @@ export const EDGE_CUSTOM_MAX = 320
  * The shapes the layered-edge generator draws (task 151, Slice 3): a shape's geometry is generated from a
  * preset row and a few stepped controls (components/ui/edge-presets.ts), never from stored numbers.
  */
-export const GENERATED_EDGES = ['still-water'] as const
+export const GENERATED_EDGES = ['still-water', 'lagoon', 'reef'] as const
 export type GeneratedEdge = (typeof GENERATED_EDGES)[number]
 export const isGeneratedEdge = (edge: string | null | undefined): edge is GeneratedEdge =>
   GENERATED_EDGES.some((generated) => generated === edge)
@@ -374,7 +378,7 @@ export const edgeAllowsFlip = (edge: string | null | undefined) =>
   edge === 'layered' ||
   edge === 'tide' ||
   edge === 'contour' ||
-  edge === 'still-water'
+  isGeneratedEdge(edge)
 
 /**
  * A diagonal turned upside down is the same line mirrored, so only the curved shapes offer Invert. Tide,

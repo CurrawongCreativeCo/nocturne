@@ -35879,6 +35879,14 @@
           {
             "value": "still-water",
             "title": "Still water"
+          },
+          {
+            "value": "lagoon",
+            "title": "Lagoon"
+          },
+          {
+            "value": "reef",
+            "title": "Reef"
           }
         ],
         "capability": "edge",

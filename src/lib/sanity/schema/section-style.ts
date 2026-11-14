@@ -102,10 +102,12 @@ import {
   edgeAccentHidden,
   edgeFlipHidden,
   edgeGeneratedOptionHidden,
+  edgeStepHidden,
   edgeLayerBelowHidden,
   generatedCustomHeightMessage,
   generatedHeightMessage,
   staleGeneratedOptionMessage,
+  staleStepMessage,
   staleLayerBelowMessage,
   edgeInvertHidden,
   edgeLayerHidden,
@@ -146,6 +148,8 @@ import {
   EdgeDiagonalThumbnail,
   EdgeLayeredThumbnail,
   EdgeNoneThumbnail,
+  EdgeLagoonThumbnail,
+  EdgeReefThumbnail,
   EdgeStillWaterThumbnail,
   EdgeTideThumbnail,
   EdgeWaveThumbnail,
@@ -1085,6 +1089,20 @@ export const sectionStyle = defineType({
             'One calm crest with a soft layer above it, and an optional layer below. Medium or Large; Large is the one to start from.',
           thumbnail: EdgeStillWaterThumbnail,
         },
+        {
+          value: 'lagoon',
+          title: SECTION_EDGE_TITLES.lagoon,
+          description:
+            'Two soft layers above the edge that trade places across the width. Medium or Large; Large is the one to start from.',
+          thumbnail: EdgeLagoonThumbnail,
+        },
+        {
+          value: 'reef',
+          title: SECTION_EDGE_TITLES.reef,
+          description:
+            'Two layers above the edge and one below it: the boldest of the layered shapes. Medium or Large; Large is the one to start from.',
+          thumbnail: EdgeReefThumbnail,
+        },
       ],
       initialValue: 'none',
     }),
@@ -1168,7 +1186,7 @@ export const sectionStyle = defineType({
         [
           'edgePalette',
           'Colours',
-          'Which brand colours the layers are drawn in: Tint (Primary), Ink (text over Primary) or Highlight (Highlight over Secondary).',
+          'Which brand colours the layers are drawn in: Tint (Primary and Secondary), Ink (text colour over Primary) or Highlight (Highlight over Secondary). Each shape draws its own take on them.',
           SECTION_EDGE_PALETTES,
           SECTION_EDGE_PALETTE_TITLES,
         ],
@@ -1180,16 +1198,30 @@ export const sectionStyle = defineType({
         description,
         type: 'string',
         options: radio(values, titles as Record<(typeof values)[number], string>),
-        hidden: edgeGeneratedOptionHidden,
+        // Crest position and depth are offered only where a shape has a choice; strength and colours always.
+        hidden:
+          name === 'edgeCrest'
+            ? edgeStepHidden('crest')
+            : name === 'edgeDepth'
+              ? edgeStepHidden('depth')
+              : edgeGeneratedOptionHidden,
         validation: (rule) =>
-          rule.custom((value, context) => staleGeneratedOptionMessage(value, context)).warning(),
+          rule
+            .custom((value, context) =>
+              name === 'edgeCrest'
+                ? staleStepMessage('crest')(value, context)
+                : name === 'edgeDepth'
+                  ? staleStepMessage('depth')(value, context)
+                  : staleGeneratedOptionMessage(value, context),
+            )
+            .warning(),
       }),
     ),
     defineField({
       name: 'edgeLayerBelow',
       title: 'Layer below',
       description:
-        'A second soft layer below the edge, over the section that follows. Not offered at Shallow depth.',
+        'A second soft layer below the edge, over the section that follows. Still water only; not offered at Shallow depth.',
       type: 'boolean',
       hidden: edgeLayerBelowHidden,
       validation: (rule) =>
@@ -1214,7 +1246,7 @@ export const sectionStyle = defineType({
       defineField({
         name,
         title,
-        description: `In pixels, ${EDGE_CUSTOM_MIN} to ${EDGE_CUSTOM_MAX}. Leave empty to use the edge height above (a screen size left empty keeps the smaller one’s). Still water takes 40 to 64 px on phones, 40 to 120 on tablets and 40 to 160 on desktops.`,
+        description: `In pixels, ${EDGE_CUSTOM_MIN} to ${EDGE_CUSTOM_MAX}. Leave empty to use the edge height above (a screen size left empty keeps the smaller one’s). Still water, Lagoon and Reef take 40 to 64 px on phones, 40 to 120 on tablets and 40 to 160 on desktops.`,
         type: 'number',
         fieldset: 'edgeAdvanced',
         hidden: edgeOptionsHidden,

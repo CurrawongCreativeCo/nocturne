@@ -45,7 +45,7 @@ import {
 } from '@/lib/sanity/section-style-options'
 import type { SanityImageData } from '@/types/sanity'
 
-import { LAYERED_PRESETS, allowsLayerBelow, type LayeredSettings } from './edge-presets'
+import { LAYERED_PRESETS, drawsLayerBelow, type LayeredSettings } from './edge-presets'
 import { customEdgeHeight, type ResolvedEdge } from './section-edges'
 
 /**
@@ -356,21 +356,36 @@ function clampedHeight(
 }
 
 /**
- * A generated shape's stepped controls: each unset or unknown value is the preset's default. A layer below
- * that the depth does not offer (Shallow) is not drawn, whatever is stored: the saved value is kept, and
- * Studio says it is ignored.
+ * A generated shape's stepped controls: each unset, unknown or not-offered value is the preset's default. A shape
+ * offers only some steps (Lagoon and Reef offer one crest and one depth), so a step stored under another shape
+ * is not drawn and not deleted: Studio says it is ignored. A layer below follows the preset: Reef always has
+ * one, Lagoon never, Still water when the switch is on and the depth offers it.
  */
 function resolveLayered(
   edge: keyof typeof LAYERED_PRESETS,
   style: SectionStyleInput | null | undefined,
 ): LayeredSettings {
-  const depth = pick(SECTION_EDGE_DEPTHS, style?.edgeDepth) ?? 'standard'
+  const preset = LAYERED_PRESETS[edge]
+  const offered = <T extends string>(
+    options: readonly T[],
+    value: T | undefined,
+    fallback: T,
+  ): T => (value !== undefined && options.includes(value) ? value : fallback)
+  const depth = offered(
+    preset.depthOptions,
+    pick(SECTION_EDGE_DEPTHS, style?.edgeDepth),
+    preset.depthOptions[0] ?? 'standard',
+  )
   return {
-    crest: pick(SECTION_EDGE_CRESTS, style?.edgeCrest) ?? 'standard',
+    crest: offered(
+      preset.crestOptions,
+      pick(SECTION_EDGE_CRESTS, style?.edgeCrest),
+      preset.crestOptions[0] ?? 'standard',
+    ),
     depth,
     strength: pick(SECTION_EDGE_STRENGTHS, style?.edgeStrength) ?? 'standard',
-    palette: pick(SECTION_EDGE_PALETTES, style?.edgePalette) ?? 'tint',
-    below: style?.edgeLayerBelow === true && allowsLayerBelow(LAYERED_PRESETS[edge], depth),
+    palette: pick(SECTION_EDGE_PALETTES, style?.edgePalette) ?? preset.defaultPalette,
+    below: drawsLayerBelow(preset, depth, style?.edgeLayerBelow === true),
   }
 }
 
