@@ -38,8 +38,10 @@ const PAINT_HEX: Record<EdgePaint, string> = {
  */
 function EdgeThumbnail({ edge }: { edge: SectionEdge }) {
   const band = `translate(0 ${BAND_TOP}) scale(${WIDTH} ${BAND_HEIGHT})`
+  // Neither none nor Elevated has a cut: a straight boundary, which Elevated gives a shadow.
+  const straight = edge === 'none' || edge === 'elevated'
   const composition =
-    edge === 'none' || isLineShape(edge)
+    straight || isLineShape(edge)
       ? undefined
       : edgeComposition({
           shape: edge,
@@ -50,6 +52,7 @@ function EdgeThumbnail({ edge }: { edge: SectionEdge }) {
           layer: 'accent-2',
           tideLayer: 'accent',
           lineColour: 'accent',
+          shadow: 'soft',
           // A generated shape's default steps.
           ...(isGeneratedEdge(edge)
             ? {
@@ -65,12 +68,11 @@ function EdgeThumbnail({ edge }: { edge: SectionEdge }) {
             : {}),
         })
   // What the dark section keeps: today's shapes from their line, a new one from its composition's cut.
-  const outline =
-    edge === 'none'
-      ? undefined
-      : isLineShape(edge)
-        ? edgeFill(edge)
-        : composition && closeToTop(composition.cut)
+  const outline = straight
+    ? undefined
+    : isLineShape(edge)
+      ? edgeFill(edge)
+      : composition && closeToTop(composition.cut)
   const parts = (kind: EdgePart['kind']) =>
     composition?.parts.filter((part) => part.side === 'under' && part.kind === kind) ?? []
   // A layer above the cut is drawn inside the dark section, clipped to it.
@@ -123,10 +125,26 @@ function EdgeThumbnail({ edge }: { edge: SectionEdge }) {
       ))}
       <rect
         width={WIDTH}
-        height={BAND_TOP + (edge === 'none' ? BAND_HEIGHT / 2 : 0)}
+        height={BAND_TOP + (straight ? BAND_HEIGHT / 2 : 0)}
         fill={colorHex.surfaceInverse}
       />
       {outline ? <path d={outline} transform={band} fill={colorHex.surfaceInverse} /> : null}
+      {edge === 'elevated' ? (
+        <>
+          {/* The shadow, drawn stronger than the site's (16%) so it reads at this size. */}
+          <linearGradient id="edge-thumbnail-shadow" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor={colorHex.ink} stopOpacity={0.32} />
+            <stop offset="0.4" stopColor={colorHex.ink} stopOpacity={0.11} />
+            <stop offset="1" stopColor={colorHex.ink} stopOpacity={0} />
+          </linearGradient>
+          <rect
+            y={BAND_TOP + BAND_HEIGHT / 2}
+            width={WIDTH}
+            height={12}
+            fill="url(#edge-thumbnail-shadow)"
+          />
+        </>
+      ) : null}
       {outline && overFills.length > 0 ? (
         <>
           <clipPath id={clipId}>
@@ -182,3 +200,6 @@ export const EdgeStillWaterThumbnail = (_props: PresetThumbnailProps) => (
 )
 export const EdgeLagoonThumbnail = (_props: PresetThumbnailProps) => <EdgeThumbnail edge="lagoon" />
 export const EdgeReefThumbnail = (_props: PresetThumbnailProps) => <EdgeThumbnail edge="reef" />
+export const EdgeElevatedThumbnail = (_props: PresetThumbnailProps) => (
+  <EdgeThumbnail edge="elevated" />
+)

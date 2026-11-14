@@ -156,7 +156,8 @@
 
 @layer base {
   div:has(+ [data-edge-above] > section[data-tone='inverse']) [data-section-edge-frame] > [data-edge-part],
-  div:has(+ [data-edge-above] > [data-section-edge-frame] > section[data-tone='inverse']) [data-section-edge-frame] > [data-edge-part] {
+  div:has(+ [data-edge-above] > [data-section-edge-frame] > section[data-tone='inverse']) [data-section-edge-frame] > [data-edge-part],
+  div:has(+ [data-edge-above] > [data-section-elevated] > section[data-tone='inverse']) [data-section-edge-frame] > [data-edge-part] {
     --color-surface: var(--color-surface-inverse);
     --color-surface-alt: color-mix(in oklab, var(--color-surface-inverse) 88%, var(--color-ink-inverse));
     --color-ink: var(--color-ink-inverse);
@@ -169,7 +170,8 @@
   }
 
   div:has(+ [data-edge-above] > section[data-tone='accent']) [data-section-edge-frame] > [data-edge-part],
-  div:has(+ [data-edge-above] > [data-section-edge-frame] > section[data-tone='accent']) [data-section-edge-frame] > [data-edge-part] {
+  div:has(+ [data-edge-above] > [data-section-edge-frame] > section[data-tone='accent']) [data-section-edge-frame] > [data-edge-part],
+  div:has(+ [data-edge-above] > [data-section-elevated] > section[data-tone='accent']) [data-section-edge-frame] > [data-edge-part] {
     --color-surface: var(--tone-accent);
     --color-surface-alt: color-mix(in oklab, var(--tone-accent-ink) 12%, var(--tone-accent));
     --color-ink: var(--tone-accent-ink);

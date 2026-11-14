@@ -239,6 +239,7 @@ export const SECTION_EDGES = [
   'wave',
   'curve',
   'arch',
+  'elevated',
   'layered',
   'tide',
   'contour',
@@ -260,6 +261,7 @@ export const SECTION_EDGE_TITLES: Record<SectionEdge, string> = {
   'still-water': 'Still water',
   lagoon: 'Lagoon',
   reef: 'Reef',
+  elevated: 'Elevated',
 }
 
 /** Heights are tokens (`edge` in tokens.json), smaller on phones; "custom" is the Advanced override. */
@@ -308,6 +310,16 @@ export const SECTION_EDGE_LINE_COLOUR_TITLES: Record<
 > = {
   accent: 'Primary',
   muted: 'Muted text',
+}
+
+/**
+ * Elevated's shadow (task 151, Slice 6): how far, and how strongly, the straight edge casts onto the section below.
+ * Soft is the Lab's own default (18 px at 16%); Deep is a stronger one inside the Lab's slider limits (8-32 px, 6-30%).
+ */
+export const SECTION_EDGE_SHADOWS = ['soft', 'deep'] as const
+export const SECTION_EDGE_SHADOW_TITLES: Record<(typeof SECTION_EDGE_SHADOWS)[number], string> = {
+  soft: 'Soft',
+  deep: 'Deep',
 }
 
 /** The custom height range, in px, the Advanced fields accept. */

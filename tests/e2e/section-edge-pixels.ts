@@ -110,7 +110,7 @@ async function scrollToBand(frame: Locator, height: number) {
 }
 
 /** The pixels of the window's screenshot, decoded in the page, as a function of a list of CSS px points. */
-const pixelsAt = (page: Page, png: Buffer, at: { x: number; y: number }[]) =>
+export const pixelsAt = (page: Page, png: Buffer, at: { x: number; y: number }[]) =>
   page.evaluate(
     async ({ base64, at }) => {
       const image = new Image()

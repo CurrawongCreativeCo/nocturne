@@ -138,7 +138,8 @@ function followerProps(edge: ResolvedEdge | undefined): {
   'data-edge-above-custom'?: string
   style?: CSSProperties
 } {
-  if (!edge) return {}
+  // Elevated is a straight boundary: nothing is cut away, so the section below is not pulled up.
+  if (!edge || edge.shape === 'elevated') return {}
   return {
     'data-edge-above': '',
     'data-edge-above-custom': edgeHeightIsCustom(edge.height) ? '' : undefined,
@@ -181,7 +182,9 @@ export function SectionRenderer({
     : undefined
 
   // The footer follows the last section, so it takes the edge like a section would (a band of its colour).
-  const lastEdge = edgeOf(sections[sections.length - 1], gate)
+  // An Elevated last section has no cut to match, so no band: its shadow falls on the footer itself.
+  const last = edgeOf(sections[sections.length - 1], gate)
+  const lastEdge = last?.shape === 'elevated' ? undefined : last
   // How many edge frames sit above each section: its frame is that many steps below the first.
   const edgesAbove: number[] = []
   let edgeCount = 0

@@ -65,6 +65,8 @@ import {
   SECTION_EDGE_DEPTH_TITLES,
   SECTION_EDGE_DEPTHS,
   SECTION_EDGE_LINE_COLOUR_TITLES,
+  SECTION_EDGE_SHADOW_TITLES,
+  SECTION_EDGE_SHADOWS,
   SECTION_EDGE_PALETTE_TITLES,
   SECTION_EDGE_PALETTES,
   SECTION_EDGE_STRENGTH_TITLES,
@@ -114,6 +116,7 @@ import {
   edgeInvertHidden,
   edgeLayerHidden,
   edgeLineColourHidden,
+  edgeShadowHidden,
   edgeOptionsHidden,
   edgeTideLayerHidden,
   motionCustomHidden,
@@ -148,6 +151,7 @@ import {
   EdgeContourThumbnail,
   EdgeCurveThumbnail,
   EdgeDiagonalThumbnail,
+  EdgeElevatedThumbnail,
   EdgeLayeredThumbnail,
   EdgeNoneThumbnail,
   EdgeLagoonThumbnail,
@@ -360,6 +364,7 @@ const CAPABILITY_FIELDS: Readonly<Record<string, CapabilityId>> = {
   edgeLayer: 'edge',
   edgeTideLayer: 'edge',
   edgeLineColour: 'edge',
+  edgeShadow: 'edge',
   edgeCrest: 'edge',
   edgeDepth: 'edge',
   edgeStrength: 'edge',
@@ -810,7 +815,7 @@ export const sectionStyle = defineType({
                 site: colours,
                 hasOwnBackground: sectionHasOwnBackground(section),
                 overlaps:
-                  Boolean(style?.edge && style.edge !== 'none') ||
+                  Boolean(style?.edge && style.edge !== 'none' && style.edge !== 'elevated') ||
                   style?.motion === 'parallax' ||
                   style?.motion === 'float',
               }) ?? true
@@ -1067,6 +1072,13 @@ export const sectionStyle = defineType({
           thumbnail: EdgeArchThumbnail,
         },
         {
+          value: 'elevated',
+          title: SECTION_EDGE_TITLES.elevated,
+          description:
+            'A straight edge that casts a soft shadow onto the section below. Nothing is cut away, and it takes no room.',
+          thumbnail: EdgeElevatedThumbnail,
+        },
+        {
           value: 'layered',
           title: SECTION_EDGE_TITLES.layered,
           description: 'Two waves, one behind the other.',
@@ -1161,6 +1173,15 @@ export const sectionStyle = defineType({
       type: 'string',
       options: radio(SECTION_EDGE_LINE_COLOURS, SECTION_EDGE_LINE_COLOUR_TITLES),
       hidden: edgeLineColourHidden,
+    }),
+    defineField({
+      name: 'edgeShadow',
+      title: 'Shadow',
+      description:
+        'How far the shadow reaches onto the section below, and how dark it is. Soft is the default; Deep is stronger and reaches further. It is a decoration over the next section, so it takes no room and never covers its content.',
+      type: 'string',
+      options: radio(SECTION_EDGE_SHADOWS, SECTION_EDGE_SHADOW_TITLES),
+      hidden: edgeShadowHidden,
     }),
     ...(
       [

@@ -23,6 +23,7 @@ import {
   EdgeReefThumbnail,
   EdgeCurveThumbnail,
   EdgeDiagonalThumbnail,
+  EdgeElevatedThumbnail,
   EdgeLayeredThumbnail,
   EdgeNoneThumbnail,
   EdgeTideThumbnail,
@@ -204,6 +205,7 @@ export const edgeThumbnails: Record<(typeof SECTION_EDGES)[number], Thumbnail> =
   'still-water': EdgeStillWaterThumbnail,
   lagoon: EdgeLagoonThumbnail,
   reef: EdgeReefThumbnail,
+  elevated: EdgeElevatedThumbnail,
 }
 
 /** The shared `imageDesign` object's three pickers: Appearance, Motion and Frame. */

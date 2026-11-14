@@ -262,9 +262,17 @@ interface EdgeParent {
 const edgeOf = (parent: unknown) => (parent as EdgeParent | undefined)?.edge
 const hasEdge = (edge: string | undefined) => !!edge && edge !== 'none'
 
-/** The edge's options mean nothing until a shape is chosen. */
+/**
+ * The edge's options mean nothing until a shape is chosen, and Elevated has none of the cut's: it is a straight
+ * boundary with a shadow, so a height, custom heights, Flip and the rest stored from another shape are not shown
+ * and not drawn (and not deleted: choosing another shape brings them back).
+ */
 export const edgeOptionsHidden: ConditionalPropertyCallback = ({ parent }) =>
-  !hasEdge(edgeOf(parent))
+  !hasEdge(edgeOf(parent)) || edgeOf(parent) === 'elevated'
+
+/** Only Elevated has a shadow to choose. */
+export const edgeShadowHidden: ConditionalPropertyCallback = ({ parent }) =>
+  edgeOf(parent) !== 'elevated'
 
 /** Curve and Arch are symmetrical, so mirroring them would change nothing. */
 export const edgeFlipHidden: ConditionalPropertyCallback = ({ parent }) =>
