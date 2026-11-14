@@ -56,17 +56,24 @@ const copyright = (page: Page) => footer(page).getByText('©')
 const style = (locator: Locator, property: string) =>
   locator.evaluate((node, name) => getComputedStyle(node).getPropertyValue(name), property)
 
-/** The first request after an expiry may still get the old copy while the new one renders. */
-const settled = async (page: Page, drawn: boolean) => {
+/**
+ * The first request after an expiry may still get the old copy while the new one renders, so wait for the page to
+ * show BOTH things the test switched: the divider, and the social row (which the divider's presence alone cannot
+ * tell: a test that only turns the social row on sees a divider in the old copy too). A test that does not turn
+ * the row on waits for it to be absent, so it never reads a copy from an earlier state.
+ */
+const settled = async (page: Page, drawn: boolean, social = false) => {
   await expect
     .poll(
       async () => {
         await page.goto('/')
-        return divider(page).count()
+        const dividers = await divider(page).count()
+        const rows = await footer(page).locator('[data-social-style]').count()
+        return `divider ${String(dividers)}, social row ${String(rows)}`
       },
       { timeout: 30_000, intervals: [250, 500, 1000] },
     )
-    .toBe(drawn ? 1 : 0)
+    .toBe(`divider ${drawn ? 1 : 0}, social row ${social ? 1 : 0}`)
 }
 
 test.afterAll(async ({ request }) => {
@@ -146,7 +153,7 @@ test('with the social row between, the divider sits under it and the business bl
   request,
 }) => {
   await use(request, { divider: 'on', social: 'on' })
-  await settled(page, true)
+  await settled(page, true, true)
   expect(await style(footer(page).locator('> div').first(), 'border-bottom-width')).toBe('1px')
   const icons = await footer(page).locator('[data-social-style]').boundingBox()
   const rule = await divider(page).boundingBox()
