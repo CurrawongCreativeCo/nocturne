@@ -6337,6 +6337,31 @@ documents.push(
     _updatedAt: UPDATED,
   },
   {
+    // Tide and Contour immediately before an Elevated section (section-edge-composed.spec.ts, task 151, Slice 6): the
+    // section below is Elevated, with a frame of its own between its wrapper and its section, and a tone of its own.
+    _id: 'page-edge-composed-elevated',
+    _type: 'page',
+    title: 'Composed edges before Elevated',
+    slug: { _type: 'slug', current: 'edge-composed-elevated' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      edgeSection('ce-tide', 'Tide, before Elevated', {
+        tone: 'alt',
+        edge: 'tide',
+        edgeHeight: 'large',
+      }),
+      edgeSection('ce-tide-below', 'Elevated, Contrast', { tone: 'inverse', edge: 'elevated' }),
+      edgeSection('ce-contour', 'Contour, before Elevated', {
+        tone: 'alt',
+        edge: 'contour',
+        edgeHeight: 'large',
+      }),
+      edgeSection('ce-contour-below', 'Elevated, Primary', { tone: 'accent', edge: 'elevated' }),
+      edgeSection('ce-end', 'After the Elevated sections', { tone: 'surface' }),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
     // Tide and Contour in a real browser (section-edge-composed.spec.ts, task 151): each over a known section,
     // under one with a colour of its own (a plain surface section is see-through under any edge).
     _id: 'page-edge-composed',

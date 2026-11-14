@@ -429,8 +429,18 @@ describe('a composed edge’s parts in its frame take the tone of the section be
   }
 
   it('is generated for the two tones that recolour their contents, one :has() each', () => {
-    expect(INVERSE).toHaveLength(2)
-    expect(ACCENT).toHaveLength(2)
+    // A plain section below, one in an edge's frame, and (Slice 6) one in Elevated's frame.
+    expect(INVERSE).toHaveLength(3)
+    expect(ACCENT).toHaveLength(3)
+    // The two that were there are exactly as they were.
+    for (const selectors of [INVERSE, ACCENT]) {
+      expect(
+        selectors.filter((selector) => !selector.includes('data-section-elevated')),
+      ).toHaveLength(2)
+      expect(
+        selectors.filter((selector) => selector.includes('data-section-elevated')),
+      ).toHaveLength(1)
+    }
   })
 
   it('follows a plain section below, in its tone', () => {
@@ -438,6 +448,41 @@ describe('a composed edge’s parts in its frame take the tone of the section be
     expect(toneOf('a')).toBe('inverse')
     mount([richText('a', TIDE), richText('b', { tone: 'accent' })])
     expect(toneOf('a')).toBe('accent')
+  })
+
+  it('follows an Elevated section below, whose frame sits between its wrapper and its section (task 151, Slice 6)', () => {
+    // Tide and Contour before Elevated, over Contrast (inverse) and Primary (accent): the parts take the
+    // Elevated section's tone, as they would a plain section's.
+    for (const shape of ['tide', 'contour']) {
+      for (const [tone, expected] of [
+        ['inverse', 'inverse'],
+        ['accent', 'accent'],
+      ] as const) {
+        mount([
+          richText('a', { edge: shape, edgeHeight: 'large' }),
+          richText('b', { tone, edge: 'elevated' }),
+          richText('c'),
+        ])
+        expect(toneOf('a'), `${shape} before Elevated, ${tone}`).toBe(expected)
+        // Draft mode wraps every section once more: the same.
+        mount(
+          [
+            richText('a', { edge: shape, edgeHeight: 'large' }),
+            richText('b', { tone, edge: 'elevated' }),
+            richText('c'),
+          ],
+          { editable: true },
+        )
+        expect(toneOf('a'), `${shape} before Elevated, ${tone}, draft mode`).toBe(expected)
+      }
+    }
+  })
+
+  it('keeps the page’s colours before an Elevated section that recolours nothing', () => {
+    for (const tone of ['surface', 'alt']) {
+      mount([richText('a', TIDE), richText('b', { tone, edge: 'elevated' })])
+      expect(toneOf('a')).toBe('page')
+    }
   })
 
   it('keeps the page’s colours over a surface or alternate section, which recolour nothing', () => {
