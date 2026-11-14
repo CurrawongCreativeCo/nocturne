@@ -30,16 +30,17 @@ const DARK_LAGOON: SectionStyleInput = {
 }
 
 describe('a faint layer', () => {
-  it('names the second layer of the dark Large / Flip Lagoon with Highlight / Strong, with its ratio and a fix', () => {
+  it('names the second layer of the dark Large / Flip Lagoon with Highlight / Strong, in plain words, with a fix', () => {
     const result = advise(DARK_LAGOON)
     expect(result.state).toBe('faint')
     expect(result.faint.map((layer) => layer.index)).toEqual([1])
-    expect(result.message).toMatch(/Lagoon’s second layer above the edge/)
-    expect(result.message).toMatch(/\(Secondary, 18% opacity\) is 1\.14:1/)
-    expect(result.message).toMatch(/under the 1\.20:1/)
-    // Already at the strongest strength, so the way out is another recipe, not "stronger".
-    expect(result.message).toMatch(/Try the Tint colours\./)
-    expect(result.message).not.toMatch(/Strong strength/)
+    expect(result.message).toBe(
+      'Lagoon’s second layer may be hard to see on this background. Try Tint, or check it in Preview.',
+    )
+    // The numbers are in what was measured, not in the message.
+    expect(result.faint[0]?.ratio).toBeCloseTo(1.14, 2)
+    expect(Math.round((result.faint[0]?.opacity ?? 0) * 100)).toBe(18)
+    expect(result.message).not.toMatch(/\d:1|%|opacity/)
   })
 
   it('measures what the page draws: the composition’s paint and opacity, blended over the tone’s background', () => {
@@ -62,19 +63,19 @@ describe('a faint layer', () => {
     const result = advise({ tone: 'inverse', edge: 'lagoon' })
     expect(result.state).toBe('faint')
     expect(result.faint.map((layer) => layer.index)).toEqual([0])
-    expect(result.message).toMatch(
-      /first layer above the edge \(Secondary, 22% opacity\) is 1\.18:1/,
+    expect(result.faint[0]?.ratio).toBeCloseTo(1.18, 2)
+    expect(result.message).toBe(
+      'Lagoon’s first layer may be hard to see on this background. Try Strong strength, or check it in Preview.',
     )
-    expect(result.message).toMatch(/Try Strong strength\./)
   })
 
   it('suggests only a change that brings every layer to the bar, and otherwise says to look in Preview', () => {
     // Reef on Brand: no recipe or strength lifts the first layer clear of the Primary background.
     const result = advise({ tone: 'accent', edge: 'reef', edgeStrength: 'strong' })
     expect(result.state).toBe('faint')
-    expect(result.message).toMatch(/No other colours or strength fix it on this background/)
-    expect(result.message).toMatch(/Preview/)
-    expect(result.message).not.toMatch(/Try /)
+    expect(result.message).toBe(
+      'Reef’s first layer may be hard to see on this background. Check it in Preview.',
+    )
   })
 
   it('says every suggestion it makes passes: applying it clears the same scene', () => {
@@ -86,8 +87,10 @@ describe('a faint layer', () => {
     ] satisfies SectionStyleInput[]) {
       const first = advise(style)
       expect(first.state).toBe('faint')
-      const palette = /the (\w+) colours/.exec(first.message ?? '')?.[1]?.toLowerCase()
-      const strength = /(\w+) strength/.exec(first.message ?? '')?.[1]?.toLowerCase()
+      const palette = /Try (Tint|Ink|Highlight)\b/.exec(first.message ?? '')?.[1]?.toLowerCase()
+      const strength = /(Light|Standard|Strong) strength/
+        .exec(first.message ?? '')?.[1]
+        ?.toLowerCase()
       const applied = {
         ...style,
         ...(palette && { edgePalette: palette }),
@@ -97,14 +100,22 @@ describe('a faint layer', () => {
     }
   })
 
-  it('does not judge the layer below the edge, and says so beside a Reef warning', () => {
+  it('names two faint layers together', () => {
+    // Lagoon on Brand with Tint: both layers are close to the Primary background.
+    const result = advise({ tone: 'accent', edge: 'lagoon', edgeStrength: 'light' })
+    expect(result.faint.map((layer) => layer.index)).toEqual([0, 1])
+    expect(result.message).toMatch(
+      /^Lagoon’s first and second layers may be hard to see on this background\./,
+    )
+  })
+
+  it('does not judge the layer below the edge', () => {
     const faint = advise({ tone: 'alt', edge: 'reef', edgePalette: 'highlight' })
     expect(faint.state).toBe('faint')
     // Only the two layers above the edge are measured.
     expect(faint.layers.map((layer) => layer.index)).toEqual([0, 1])
-    expect(faint.message).toMatch(
-      /layer below the edge is over the next section and is not checked here/,
-    )
+    // Nothing about it in the message: it is over the next section, which is not looked up.
+    expect(faint.message).not.toMatch(/below/)
   })
 })
 
@@ -162,8 +173,8 @@ describe('a scene that is not known', () => {
       /background picture/,
     ],
     ['a gradient', { tone: 'alt', gradient: 'forest-dusk' }, /gradient/],
-    ['a Page (Surface) section', { tone: 'surface' }, /Page background is see-through/],
-    ['a tone the section type sets', {}, /set by its type/],
+    ['a Page (Surface) section', { tone: 'surface' }, /Page background shows the next section/],
+    ['a tone the section type sets', {}, /set by the section type/],
   ]
 
   for (const [name, extra, reason] of REASONS)
@@ -184,9 +195,22 @@ describe('a scene that is not known', () => {
   it('skips the number when the site’s colours could not be read, however faint the layer would be', () => {
     const result = advise(DARK_LAGOON, null)
     expect(result.state).toBe('unchecked')
-    expect(result.message).toMatch(/colours could not be read/)
+    expect(result.message).toMatch(/site colours could not be read/)
     expect(result.message).toMatch(/Preview/)
     expect(result.message).not.toMatch(/\d:1/)
+  })
+
+  it('skips the number for a section that draws its own picture or video, even with an explicit Contrast tone', () => {
+    const result = edgeVisibility({ style: DARK_LAGOON, site, hasOwnBackground: true })
+    expect(result.state).toBe('unchecked')
+    expect(result.message).toBe(
+      'Lagoon’s layers can’t be checked here: this section draws its own picture or video. Look at it in Preview.',
+    )
+    expect(result.layers).toEqual([])
+    // The same style on a plain section keeps its verdict.
+    expect(edgeVisibility({ style: DARK_LAGOON, site, hasOwnBackground: false }).state).toBe(
+      'faint',
+    )
   })
 
   it('does not look at a picture or a gradient to decide: a picture wins over a solid tone', () => {

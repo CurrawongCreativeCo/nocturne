@@ -1216,18 +1216,30 @@ export const sectionStyle = defineType({
                 // Task 151, Slice 5: is each layer above the edge visible on this section? One advisory, beside
                 // the edge controls: a warning for a faint layer, a note where the scene can't be judged.
                 rule
-                  .custom((_value, { getClient, parent }) =>
+                  .custom((_value, { getClient, parent, document, path }) =>
                     faintLayerWarning(
                       parent as SectionStyleInput | undefined,
                       getClient({ apiVersion: '2025-01-01' }),
+                      // The section's own layout: a hero's picture is what the layers sit on, not the style's.
+                      {
+                        hasOwnBackground: sectionHasOwnBackground(
+                          sectionAtStylePath(document, path),
+                        ),
+                      },
                     ),
                   )
                   .warning(),
                 rule
-                  .custom((_value, { getClient, parent }) =>
+                  .custom((_value, { getClient, parent, document, path }) =>
                     uncheckedSceneNote(
                       parent as SectionStyleInput | undefined,
                       getClient({ apiVersion: '2025-01-01' }),
+                      // The section's own layout: a hero's picture is what the layers sit on, not the style's.
+                      {
+                        hasOwnBackground: sectionHasOwnBackground(
+                          sectionAtStylePath(document, path),
+                        ),
+                      },
                     ),
                   )
                   .info(),

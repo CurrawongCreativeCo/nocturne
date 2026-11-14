@@ -22,7 +22,8 @@ describe('the Studio’s visibility advisory', () => {
   it('measures a faint layer against the site’s colours', async () => {
     const result = await edgeVisibilityFor(DARK_LAGOON, reading().client)
     expect(result.state).toBe('faint')
-    expect(result.message).toMatch(/1\.14:1/)
+    expect(result.faint[0]?.ratio).toBeCloseTo(1.14, 2)
+    expect(result.message).toMatch(/second layer may be hard to see/)
   })
 
   it('gives no number when the colour read fails, and points to Preview', async () => {
@@ -33,7 +34,7 @@ describe('the Studio’s visibility advisory', () => {
     await new Promise((resolve) => setTimeout(resolve, 3100))
     const result = await edgeVisibilityFor(DARK_LAGOON, failing)
     expect(result.state).toBe('unchecked')
-    expect(result.message).toMatch(/could not be read/)
+    expect(result.message).toMatch(/site colours could not be read/)
     expect(result.message).toMatch(/Preview/)
     expect(result.message).not.toMatch(/\d:1/)
   }, 10000)
@@ -93,7 +94,7 @@ describe('the Colours field’s validation', async () => {
       await note?.check(undefined, context(parent)),
     ]
     const [warn, quiet] = await run(DARK_LAGOON)
-    expect(warn).toMatch(/second layer above the edge/)
+    expect(warn).toMatch(/second layer may be hard to see/)
     expect(quiet).toBe(true)
     const [noWarn, info] = await run({ ...DARK_LAGOON, gradient: 'forest-dusk' })
     expect(noWarn).toBe(true)

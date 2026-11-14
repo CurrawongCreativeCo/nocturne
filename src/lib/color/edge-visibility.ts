@@ -9,7 +9,6 @@ import {
   SECTION_EDGE_STRENGTHS,
   SECTION_EDGE_STRENGTH_TITLES,
   SECTION_EDGE_TITLES,
-  SECTION_TONE_TITLES,
   isGeneratedEdge,
 } from '@/lib/sanity/section-style-options'
 
@@ -41,24 +40,16 @@ export const MIN_LAYER_VISIBILITY = 1.2
 /** Tones with a solid colour of their own, which Studio can name without looking at anything else. */
 const SOLID_TONES = ['alt', 'inverse', 'accent'] as const
 
-const PAINT_TITLES: Record<EdgePaint, string> = {
-  accent: 'Primary',
-  'accent-2': 'Secondary',
-  highlight: 'Highlight',
-  ink: 'Text colour',
-  'ink-muted': 'Muted text colour',
-  echo: 'the section’s own colour',
-}
-
 /** Why a layer's visibility is not judged. */
-export type Unchecked = 'picture' | 'gradient' | 'surface' | 'tone' | 'colours'
+export type Unchecked = 'own' | 'picture' | 'gradient' | 'surface' | 'tone' | 'colours'
 
 const UNCHECKED_REASON: Record<Unchecked, string> = {
-  picture: 'the section has a background picture',
-  gradient: 'the section has a gradient',
-  surface: 'a Page background is see-through under an edge, so what shows is the next section',
-  tone: 'the section’s background is set by its type, not here',
-  colours: 'the site’s colours could not be read',
+  own: 'this section draws its own picture or video',
+  picture: 'it has a background picture',
+  gradient: 'it has a gradient',
+  surface: 'a Page background shows the next section through the edge',
+  tone: 'its background is set by the section type',
+  colours: 'the site colours could not be read',
 }
 
 export interface LayerVisibility {
@@ -85,6 +76,11 @@ export interface EdgeVisibilityInput {
   style: SectionStyleInput | null | undefined
   /** The site's colours; null when they could not be read. */
   site: ColourSet | null
+  /**
+   * Whether the section's layout draws a picture or video of its own behind its content (a hero's background):
+   * the style's own background is then not what the layers sit on. From `sectionHasOwnBackground`.
+   */
+  hasOwnBackground?: boolean
 }
 
 const NONE: EdgeVisibility = { state: 'none', layers: [], faint: [] }
@@ -93,7 +89,9 @@ const NONE: EdgeVisibility = { state: 'none', layers: [], faint: [] }
 function uncheckedReason(
   style: SectionStyleInput,
   site: ColourSet | null,
+  hasOwnBackground: boolean,
 ): { reason: Unchecked; tone?: undefined } | { reason: null; tone: (typeof SOLID_TONES)[number] } {
+  if (hasOwnBackground) return { reason: 'own' }
   if (style.image?.asset) return { reason: 'picture' }
   if (style.gradient && GRADIENT_SLUG_PATTERN.test(style.gradient)) return { reason: 'gradient' }
   const tone = SOLID_TONES.find((solid) => solid === style.tone)
@@ -128,17 +126,18 @@ function measure(
   return found
 }
 
-const ratioText = (ratio: number) => `${ratio.toFixed(2)}:1`
-
-function layerName(shape: ResolvedEdge['shape'], layer: LayerVisibility): string {
-  if (!isGeneratedEdge(shape) || LAYERED_PRESETS[shape].uppers === 1) return 'layer above the edge'
-  return `${layer.index === 0 ? 'first' : 'second'} layer above the edge`
-}
+/** "first", "second", or nothing for a shape with one layer above the edge. */
+const ordinal = (shape: ResolvedEdge['shape'], layer: LayerVisibility): string =>
+  isGeneratedEdge(shape) && LAYERED_PRESETS[shape].uppers === 2
+    ? layer.index === 0
+      ? 'first'
+      : 'second'
+    : ''
 
 /**
  * The smallest change to the same shape, on the same scene, that brings every layer above the edge to the bar:
  * a stronger strength first, then another recipe at the same strength, then both. Null when none does, so the
- * advisory never suggests a change that does not help.
+ * advisory never suggests a change that does not help. Returns the change in words ("Tint", "Strong strength").
  */
 function suggest(
   edge: ResolvedEdge,
@@ -159,31 +158,34 @@ function suggest(
     const candidate: ResolvedEdge = { ...edge, layered: { ...settings, ...attempt } }
     if (measure(candidate, tone, site).every((layer) => layer.ratio >= MIN_LAYER_VISIBILITY)) {
       const changes = [
-        attempt.palette !== settings.palette &&
-          `the ${SECTION_EDGE_PALETTE_TITLES[attempt.palette]} colours`,
+        attempt.palette !== settings.palette && SECTION_EDGE_PALETTE_TITLES[attempt.palette],
         attempt.strength !== settings.strength &&
           `${SECTION_EDGE_STRENGTH_TITLES[attempt.strength]} strength`,
       ].filter(Boolean)
-      return `Try ${changes.join(' at ')}.`
+      return changes.join(' at ')
     }
   }
   return null
 }
 
 /** The advisory for a section's generated edge, from its style and the site's colours. */
-export function edgeVisibility({ style, site }: EdgeVisibilityInput): EdgeVisibility {
+export function edgeVisibility({
+  style,
+  site,
+  hasOwnBackground = false,
+}: EdgeVisibilityInput): EdgeVisibility {
   const edge = resolveEdge(style)
   if (!style || !edge?.layered || !isGeneratedEdge(edge.shape)) return NONE
   const preset = LAYERED_PRESETS[edge.shape]
   const title = SECTION_EDGE_TITLES[edge.shape]
-  const scene = uncheckedReason(style, site)
+  const scene = uncheckedReason(style, site, hasOwnBackground)
 
   if (scene.reason !== null) {
     return {
       state: 'unchecked',
       layers: [],
       faint: [],
-      message: `Whether ${title}’s ${preset.uppers === 2 ? 'layers' : 'layer'} above the edge show can’t be checked here (${UNCHECKED_REASON[scene.reason]}). Look at it in Preview.`,
+      message: `${title}’s ${preset.uppers === 2 ? 'layers' : 'layer'} can’t be checked here: ${UNCHECKED_REASON[scene.reason]}. Look at it in Preview.`,
     }
   }
 
@@ -195,21 +197,12 @@ export function edgeVisibility({ style, site }: EdgeVisibilityInput): EdgeVisibi
   const faint = layers.filter((layer) => layer.ratio < MIN_LAYER_VISIBILITY)
   if (faint.length === 0) return { state: 'clear', layers, faint }
 
-  const named = faint
-    .map(
-      (layer) =>
-        `${layerName(edge.shape, layer)} (${PAINT_TITLES[layer.paint]}, ${String(Math.round(layer.opacity * 100))}% opacity) is ${ratioText(layer.ratio)}`,
-    )
-    .join(' and ')
+  // Plain words in the form; the ratios stay in `layers` and `faint`, for tests and tuning, not in the message.
+  const ordinals = faint.map((layer) => ordinal(edge.shape, layer)).filter(Boolean)
+  const named = `${ordinals.join(' and ')}${ordinals.length > 0 ? ' ' : ''}layer${ordinals.length > 1 ? 's' : ''}`
   const suggestion = suggest(edge, tone, colours)
-  const unjudged = preset.layerBelow === 'always'
-  const message = [
-    `On the ${SECTION_TONE_TITLES[tone]} background, ${title}’s ${named} against the background, under the ${ratioText(MIN_LAYER_VISIBILITY)} this check looks for, so ${faint.length === 1 ? 'it is' : 'they are'} faint.`,
-    suggestion ??
-      'No other colours or strength fix it on this background: check how it looks in Preview.',
-    unjudged ? 'The layer below the edge is over the next section and is not checked here.' : null,
-  ]
-    .filter(Boolean)
-    .join(' ')
+  const message = `${title}’s ${named} may be hard to see on this background. ${
+    suggestion ? `Try ${suggestion}, or check it in Preview.` : 'Check it in Preview.'
+  }`
   return { state: 'faint', layers, faint, message }
 }
