@@ -23,7 +23,7 @@ import type { LayeredSettings } from './edge-presets'
 /** Today's shapes, each drawn from its line (`LINES`). */
 export type LineShape = 'diagonal' | 'wave' | 'curve' | 'arch' | 'layered'
 /** New shapes (task 151), each drawn as a composition (`edgeComposition`). */
-export type ComposedShape = 'tide' | 'contour' | 'still-water'
+export type ComposedShape = 'tide' | 'contour' | 'still-water' | 'lagoon' | 'reef'
 export type EdgeShape = LineShape | ComposedShape
 export type EdgeHeightSize = (typeof SECTION_EDGE_HEIGHTS)[number]
 export type EdgeAccent = (typeof SECTION_EDGE_ACCENTS)[number]
@@ -50,7 +50,7 @@ export interface ResolvedEdge {
   tideLayer: EdgeTideLayer
   /** Contour's line colour; meaningful only for Contour. */
   lineColour: EdgeLineColour
-  /** A generated shape's stepped controls (edge-presets.ts); present for Still water only. */
+  /** A generated shape's stepped controls (edge-presets.ts); present for the generated shapes. */
   layered?: LayeredSettings
 }
 
@@ -225,6 +225,8 @@ const COMPOSITIONS: Record<ComposedShape, (edge: ResolvedEdge) => EdgeCompositio
   tide: tideComposition,
   contour: contourComposition,
   'still-water': layeredComposition,
+  lagoon: layeredComposition,
+  reef: layeredComposition,
 }
 
 /** The composition an edge is drawn as, or undefined for a shape that keeps its own rendering. */

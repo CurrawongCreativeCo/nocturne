@@ -1,8 +1,11 @@
+import { isGeneratedEdge } from '@/lib/sanity/section-style-options'
+
 import { bump, flipCurve, normalise, pathFromFunction, type EdgeCurve } from './edge-crest'
 import {
   BELOW_OPACITY,
   LAYERED_PRESETS,
-  allowsLayerBelow,
+  SECOND_OPACITY,
+  drawsLayerBelow,
   opacityOf,
   separationOf,
   type LayeredShape,
@@ -41,16 +44,46 @@ export const LAYER_SEGMENTS = 32
 
 /**
  * A layer's depth repaired in the band's final units: no near misses against the cut, no wedge at either edge,
- * no long shallow taper. The Lab's own repair, for a layer with no second layer on its side (Still water has
- * none), so the pass that keeps two same-side layers apart is not here.
+ * no long shallow taper, and, for a second layer on the same side (`other` is the first one's repaired depth),
+ * no stretch where the two run together as a double line. The Lab's own repair, pass for pass. With no `other`
+ * the extra pass does nothing, so a single upper layer (Still water) is repaired exactly as it was before.
  */
-function repairDepth(depth: EdgeCurve, floor: number): EdgeCurve {
+function repairDepth(depth: EdgeCurve, floor: number, other: EdgeCurve | null = null): EdgeCurve {
   const N = 360
   const fixes: { a: number; c: number; w: number }[] = []
   const get = (x: number) =>
     depth(x) + fixes.reduce((sum, fix) => sum + fix.a * bump(x, fix.c, fix.w, fix.w), 0)
+  const o = other ? Array.from({ length: N + 1 }, (_, i) => other(i / N)) : null
   for (let pass = 0; pass < 10; pass++) {
     let changed = false
+    if (o) {
+      const t = Array.from({ length: N + 1 }, (_, i) => get(i / N))
+      let run = 0
+      for (let k = 0; k <= N; k++) {
+        const close =
+          (t[k] ?? 0) > floor &&
+          (o[k] ?? 0) > floor &&
+          Math.abs((t[k] ?? 0) - (o[k] ?? 0)) < floor * 0.9
+        if (close) run++
+        if ((!close || k === N) && run > 0) {
+          const a = k - run
+          const b = k - 1
+          if (run > N * 0.02 || a === 0 || b === N) {
+            fixes.push({ a: -floor * 1.6, c: (a + b) / 2 / N, w: Math.max(0.04, (run / N) * 0.7) })
+            changed = true
+          }
+          run = 0
+        }
+      }
+      for (const [k, c] of [
+        [0, 0],
+        [N, 1],
+      ] as const)
+        if ((t[k] ?? 0) > 0 && (o[k] ?? 0) > 0 && Math.abs((t[k] ?? 0) - (o[k] ?? 0)) < 0.035) {
+          fixes.push({ a: -0.05, c, w: 0.06 })
+          changed = true
+        }
+    }
     const v = Array.from({ length: N + 1 }, (_, i) => get(i / N))
     for (const [k, c] of [
       [0, 0],
@@ -107,7 +140,9 @@ export interface LayeredInput {
   crest: number
   /** The separation of the layers from the cut. */
   separation: number
-  /** Draw a second layer below the cut. */
+  /** One upper layer (the default), or two that trade places. */
+  uppers?: 1 | 2
+  /** Draw a layer below the cut. */
   below: boolean
   flip: boolean
 }
@@ -131,11 +166,18 @@ export interface LayeredGeometry {
  * to its line.
  */
 export function layeredGeometry(input: LayeredInput): LayeredGeometry {
-  const { shape: p, crest: c1, separation: sep, below, flip } = input
+  const { shape: p, crest: c1, separation: sep, uppers = 1, below, flip } = input
   const floor = LAYER_FLOOR
   const wl = p.width * p.asym
   const wr = p.width
-  const crestShape = normalise((x) => bump(x, c1, wl, wr) + p.tilt * x)
+  // The second crest, away from the first (the Lab's): none when `second` is 0, which adds exactly nothing.
+  const c2 = Math.min(0.86, Math.max(0.14, c1 >= 0.5 ? c1 - 0.6 : c1 + 0.6))
+  const crestShape = normalise(
+    (x) =>
+      bump(x, c1, wl, wr) +
+      p.second * bump(x, c2, p.width * 0.9 * p.asym, p.width * 0.9) +
+      p.tilt * x,
+  )
   const roomAbove = sep * 0.7 + 0.06
   // The lower layer needs at least the repair's minimum depth below the cut, or a short band runs out of room.
   const roomBelow = below ? Math.max(sep * 0.75, 1.5 * (floor + LAYER_HEADROOM)) + 0.05 : 0.04
@@ -143,18 +185,33 @@ export function layeredGeometry(input: LayeredInput): LayeredGeometry {
   const amplitude = p.amp * (cutBottom - roomAbove)
   const rawCut: EdgeCurve = (x) => cutBottom - amplitude * crestShape(x)
   // A layer's depth below or above the cut: the cut's crest, offset, with a crest of its own, diving behind the cut.
-  const depthOf = (k: number, shift: number, ownAt: number, max: number): EdgeCurve => {
+  // `valley` is where a layer rises where the cut dips instead of with its crests (the Lab's arrangement).
+  const depthOf = (
+    k: number,
+    shift: number,
+    ownAt: number,
+    max: number,
+    valley = false,
+  ): EdgeCurve => {
     const g = normalise(
       (x) =>
-        crestShape(x - shift) + p.own * bump(x, ownAt, 0.11, 0.15) + 0.18 * (k % 2 ? x : 1 - x),
+        (valley ? 1 - crestShape(x - shift) : crestShape(x - shift)) +
+        p.own * bump(x, ownAt, 0.11, 0.15) +
+        0.18 * (k % 2 ? x : 1 - x),
     )
     const dive = 0.3
     return (x) => (max * (g(x) - dive)) / (1 - dive)
   }
-  const upperDepth = depthOf(0, p.spread, (c1 + 0.38) % 1, sep)
+  const phase = { crests: [false, false], valleys: [true, true], mixed: [false, true] }[p.arrange]
+  const upperDepth = depthOf(0, p.spread, (c1 + 0.38) % 1, sep, phase[0])
   const raw: { side: 'over' | 'under'; line: EdgeCurve }[] = [
     { side: 'over', line: (x) => rawCut(x) - upperDepth(x) },
   ]
+  if (uppers === 2) {
+    const reach = sep * (0.5 + 0.45 * p.overlap)
+    const secondDepth = depthOf(1, -p.spread, (c1 + 0.7) % 1, reach, phase[1])
+    raw.push({ side: 'over', line: (x) => rawCut(x) - secondDepth(x) })
+  }
   if (below) {
     const lowerDepth = depthOf(2, p.spread * 0.6, (c1 + 0.55) % 1, sep * 0.75)
     raw.push({ side: 'under', line: (x) => rawCut(x) + lowerDepth(x) })
@@ -182,10 +239,17 @@ export function layeredGeometry(input: LayeredInput): LayeredGeometry {
           ? (y) => y - (high - bottom)
           : (y) => y
   const cut: EdgeCurve = (x) => fit(rawCut(x))
-  // Repaired in the band's final units, where the floor is measured, with headroom kept above it.
+  // Repaired in the band's final units, where the floor is measured, with headroom kept above it. A second
+  // upper layer is also kept apart from the first (as repaired), as the Lab does.
+  let firstOver: EdgeCurve | null = null
   const layers = raw.map(({ side, line }) => {
     const sign = side === 'over' ? 1 : -1
-    const depth = repairDepth((x) => sign * (cut(x) - fit(line(x))), floor + LAYER_HEADROOM)
+    const depth = repairDepth(
+      (x) => sign * (cut(x) - fit(line(x))),
+      floor + LAYER_HEADROOM,
+      side === 'over' ? firstOver : null,
+    )
+    if (side === 'over' && !firstOver) firstOver = depth
     return { side, line: (x: number) => cut(x) - sign * depth(x) }
   })
   return {
@@ -196,38 +260,54 @@ export function layeredGeometry(input: LayeredInput): LayeredGeometry {
 
 /**
  * The geometry a generated edge is drawn from, or undefined for a shape that is not generated. The resolver has
- * already dropped a layer below that the depth does not offer, but it is held to here as well, so no caller can
- * draw one.
+ * already settled the layer below, but it is held to here as well, so no caller can draw one the preset does
+ * not have.
  */
 export function layeredGeometryOf(edge: ResolvedEdge): LayeredGeometry | undefined {
   const settings = edge.layered
-  if (edge.shape !== 'still-water' || !settings) return undefined
+  if (!isGeneratedEdge(edge.shape) || !settings) return undefined
   const preset = LAYERED_PRESETS[edge.shape]
   return layeredGeometry({
     shape: preset.shape,
     crest: preset.crests[settings.crest],
     separation: separationOf(preset, settings.depth),
-    below: settings.below && allowsLayerBelow(preset, settings.depth),
+    uppers: preset.uppers,
+    below: drawsLayerBelow(preset, settings.depth, settings.below),
     flip: edge.flip,
   })
 }
 
 /**
- * A generated edge as a composition: the cut, the layer above it (inside the section, clipped by the cut) and,
- * when the steps ask for one, the layer below (over the section that follows).
+ * A generated edge as a composition: the cut, the layer(s) above it (inside the section, clipped by the cut) and,
+ * when the shape has one, the layer below (over the section that follows). The first upper layer is drawn first
+ * and the second over it, at 60% of its opacity.
  */
 export function layeredComposition(edge: ResolvedEdge): EdgeComposition {
   const geometry = layeredGeometryOf(edge)
-  if (!geometry || edge.shape !== 'still-water' || !edge.layered) return { cut: '', parts: [] }
+  if (!geometry || !isGeneratedEdge(edge.shape) || !edge.layered) return { cut: '', parts: [] }
   const preset = LAYERED_PRESETS[edge.shape]
   const recipe = preset.recipes[edge.layered.palette]
   const opacity = opacityOf(preset, edge.layered.strength)
-  const parts: EdgePart[] = geometry.layers.map((layer) => ({
-    kind: 'fill',
-    side: layer.side,
-    line: pathFromFunction(layer.line, 0, 1, LAYER_SEGMENTS),
-    paint: layer.side === 'over' ? recipe.over : recipe.under,
-    opacity: layer.side === 'over' ? opacity : opacity * BELOW_OPACITY,
-  }))
+  let upper = 0
+  const parts: EdgePart[] = geometry.layers.map((layer) => {
+    const second = layer.side === 'over' && upper++ === 1
+    return {
+      kind: 'fill',
+      side: layer.side,
+      line: pathFromFunction(layer.line, 0, 1, LAYER_SEGMENTS),
+      paint:
+        layer.side === 'under'
+          ? recipe.under
+          : second
+            ? (recipe.over2 ?? recipe.over)
+            : recipe.over,
+      opacity:
+        layer.side === 'under'
+          ? opacity * BELOW_OPACITY
+          : second
+            ? opacity * SECOND_OPACITY
+            : opacity,
+    }
+  })
   return { cut: pathFromFunction(geometry.cut, 0, 1, LAYER_SEGMENTS), parts }
 }

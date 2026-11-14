@@ -13,6 +13,9 @@ import {
   staleMotionMessage,
   generatedCustomHeightMessage,
   generatedHeightMessage,
+  edgeLayerBelowHidden,
+  edgeStepHidden,
+  staleStepMessage,
   staleGeneratedOptionMessage,
   staleLayerBelowMessage,
   motionCustomHidden,
@@ -252,5 +255,77 @@ describe('the generated shapes’ Studio rules (task 151, Slice 3)', () => {
     expect(staleGeneratedOptionMessage('ink', { parent: { edge: 'wave' } })).toMatch(/Still water/)
     expect(staleGeneratedOptionMessage('ink', still())).toBe(true)
     expect(staleGeneratedOptionMessage(undefined, { parent: { edge: 'wave' } })).toBe(true)
+  })
+})
+
+describe('Lagoon and Reef’s Studio rules (task 151, Slice 4)', () => {
+  const shape = (edge: string, extra = {}) => ({ edge, ...extra })
+  const hiddenStep = (step: 'crest' | 'depth', parent: object, value?: string) =>
+    (edgeStepHidden(step) as (args: { parent: object; value?: string }) => boolean)({
+      parent,
+      value,
+    })
+  const hiddenBelow = (parent: object, value?: boolean) =>
+    (edgeLayerBelowHidden as (args: { parent: object; value?: boolean }) => boolean)({
+      parent,
+      value,
+    })
+
+  it('offers crest position and depth only where a shape has a choice: Still water, not Lagoon or Reef', () => {
+    for (const step of ['crest', 'depth'] as const) {
+      expect(hiddenStep(step, shape('still-water'))).toBe(false)
+      expect(hiddenStep(step, shape('lagoon'))).toBe(true)
+      expect(hiddenStep(step, shape('reef'))).toBe(true)
+      // Another shape with nothing stored: nothing to show.
+      expect(hiddenStep(step, shape('wave'))).toBe(true)
+    }
+  })
+
+  it('keeps a stored step the shape does not offer visible, with a warning, and says nothing for the default', () => {
+    // Shifted and Deep were Still water's; under Lagoon or Reef they are not drawn.
+    expect(hiddenStep('crest', shape('lagoon'), 'shifted')).toBe(false)
+    expect(hiddenStep('depth', shape('reef'), 'deep')).toBe(false)
+    expect(hiddenStep('crest', shape('lagoon'), 'standard')).toBe(true)
+    expect(staleStepMessage('crest')('shifted', { parent: shape('lagoon') })).toMatch(
+      /Lagoon draws one crest position only/,
+    )
+    expect(staleStepMessage('depth')('deep', { parent: shape('reef') })).toMatch(
+      /Reef draws one depth only/,
+    )
+    expect(staleStepMessage('depth')('standard', { parent: shape('reef') })).toBe(true)
+    expect(staleStepMessage('depth')('shallow', { parent: shape('still-water') })).toBe(true)
+    expect(staleStepMessage('crest')(undefined, { parent: shape('lagoon') })).toBe(true)
+    // Left on a shape that has no steps at all, it gets the shared warning.
+    expect(staleStepMessage('crest')('shifted', { parent: shape('wave') })).toMatch(/Still water/)
+  })
+
+  it('does not offer the layer-below switch: Reef always has one and Lagoon never does', () => {
+    expect(hiddenBelow(shape('lagoon'))).toBe(true)
+    expect(hiddenBelow(shape('reef'))).toBe(true)
+    expect(hiddenBelow(shape('still-water'))).toBe(false)
+  })
+
+  it('keeps a stored layer-below switch visible with a warning that names the shape, and keeps the value', () => {
+    expect(hiddenBelow(shape('lagoon'), true)).toBe(false)
+    expect(staleLayerBelowMessage(true, { parent: shape('lagoon') })).toMatch(
+      /Lagoon has no layer below/,
+    )
+    expect(staleLayerBelowMessage(true, { parent: shape('reef') })).toMatch(
+      /Reef always draws its layer below/,
+    )
+    expect(staleLayerBelowMessage(false, { parent: shape('reef') })).toBe(true)
+  })
+
+  it('names the shape when it refuses Small or a custom height', () => {
+    expect(generatedHeightMessage('small', { parent: shape('lagoon') })).toMatch(
+      /^Lagoon is not drawn at Small/,
+    )
+    expect(generatedHeightMessage('small', { parent: shape('reef') })).toMatch(
+      /^Reef is not drawn at Small/,
+    )
+    expect(generatedCustomHeightMessage('mobile', 100, { parent: shape('reef') })).toMatch(
+      /^Reef is drawn between 40 and 64 px/,
+    )
+    expect(generatedCustomHeightMessage('desktop', 160, { parent: shape('lagoon') })).toBe(true)
   })
 })

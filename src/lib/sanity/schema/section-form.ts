@@ -15,6 +15,7 @@ import {
   GENERATED_EDGE_HEIGHTS,
   SECTION_EDGE_DEPTHS,
   SECTION_EDGE_HEIGHTS,
+  SECTION_EDGE_TITLES,
   SECTION_MOTIONS,
   type GeneratedEdgeScreen,
   isGeneratedEdge,
@@ -311,8 +312,42 @@ export function staleGeneratedOptionMessage(
   context: { parent?: unknown },
 ): string | true {
   if (!value || isGeneratedEdge(edgeOf(context.parent))) return true
-  return 'This choice belongs to Still water and is ignored by the shape chosen above. Clear it from the field menu.'
+  return 'This choice belongs to Still water, Lagoon and Reef and is ignored by the shape chosen above. Clear it from the field menu.'
 }
+
+type EdgeStep = 'crest' | 'depth'
+
+/** The steps a generated shape offers for crest position or depth; the first is its default. */
+const stepsOffered = (edge: string, step: EdgeStep): readonly string[] =>
+  isGeneratedEdge(edge)
+    ? LAYERED_PRESETS[edge][step === 'crest' ? 'crestOptions' : 'depthOptions']
+    : []
+
+/**
+ * Crest position and depth are offered only where the shape has a choice (Still water: three of each; Lagoon and
+ * Reef: one, curated). A value stored under a shape that does not offer it stays visible, so the editor can
+ * read the warning below and clear it; it is never deleted.
+ */
+export const edgeStepHidden =
+  (step: EdgeStep): ConditionalPropertyCallback =>
+  ({ parent, value }) => {
+    const edge = edgeOf(parent)
+    if (!isGeneratedEdge(edge)) return !value
+    const offered = stepsOffered(edge, step)
+    return offered.length < 2 && (!value || (typeof value === 'string' && offered.includes(value)))
+  }
+
+/** The warning for a crest position or depth that the shape chosen does not offer; true when there is nothing to say. */
+export const staleStepMessage =
+  (step: EdgeStep) =>
+  (value: unknown, context: { parent?: unknown }): string | true => {
+    if (!value) return true
+    const edge = edgeOf(context.parent)
+    if (!isGeneratedEdge(edge)) return staleGeneratedOptionMessage(value, context)
+    if (typeof value === 'string' && stepsOffered(edge, step).includes(value)) return true
+    const title = SECTION_EDGE_TITLES[edge]
+    return `${title} draws one ${step === 'crest' ? 'crest position' : 'depth'} only, so this is ignored. Clear it from the field menu.`
+  }
 
 const depthOf = (parent: unknown) => {
   const depth = (parent as GeneratedEdgeParent | undefined)?.edgeDepth
@@ -337,8 +372,14 @@ export function staleLayerBelowMessage(
   value: unknown,
   context: { parent?: unknown },
 ): string | true {
-  if (value !== true || !isGeneratedEdge(edgeOf(context.parent))) return true
+  const edge = edgeOf(context.parent)
+  if (value !== true || !isGeneratedEdge(edge)) return true
   if (offersLayerBelow(context.parent)) return true
+  const { layerBelow } = LAYERED_PRESETS[edge]
+  if (layerBelow === 'always')
+    return `${SECTION_EDGE_TITLES[edge]} always draws its layer below, so this switch is ignored. Clear it from the field menu.`
+  if (layerBelow === 'never')
+    return `${SECTION_EDGE_TITLES[edge]} has no layer below, so this is ignored. Clear it from the field menu.`
   return 'A layer below is not drawn at Shallow depth, so this is ignored. Choose Standard or Deep to show it, or turn it off.'
 }
 
@@ -347,10 +388,11 @@ export function generatedHeightMessage(
   value: unknown,
   context: { parent?: unknown },
 ): string | true {
-  if (!isGeneratedEdge(edgeOf(context.parent))) return true
+  const edge = edgeOf(context.parent)
+  if (!isGeneratedEdge(edge)) return true
   const allowed = GENERATED_EDGE_HEIGHTS as readonly unknown[]
   if (!SECTION_EDGE_HEIGHTS.some((size) => size === value) || allowed.includes(value)) return true
-  return 'Still water is not drawn at Small: its layers need a taller band to read. Choose Medium or Large. Until then it is drawn at Medium.'
+  return `${SECTION_EDGE_TITLES[edge]} is not drawn at Small: its layers need a taller band to read. Choose Medium or Large. Until then it is drawn at Medium.`
 }
 
 /** A custom height of a generated shape must sit within what that screen size is proven for. */
@@ -359,8 +401,9 @@ export function generatedCustomHeightMessage(
   value: unknown,
   context: { parent?: unknown },
 ): string | true {
-  if (typeof value !== 'number' || !isGeneratedEdge(edgeOf(context.parent))) return true
+  const edge = edgeOf(context.parent)
+  if (typeof value !== 'number' || !isGeneratedEdge(edge)) return true
   const { min, max } = GENERATED_EDGE_HEIGHT_BOUNDS[screen]
   if (value >= min && value <= max) return true
-  return `Still water is drawn between ${String(min)} and ${String(max)} px on this screen size. Until this is changed it is drawn at the nearest one.`
+  return `${SECTION_EDGE_TITLES[edge]} is drawn between ${String(min)} and ${String(max)} px on this screen size. Until this is changed it is drawn at the nearest one.`
 }

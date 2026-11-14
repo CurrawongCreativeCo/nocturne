@@ -4704,16 +4704,16 @@ None of them draws a see-through surface of its own that the panel checks would 
 
 ### Section dividers
 
-A section can end in a shape instead of a straight line: a diagonal, a wave, a curve, an arch, a layered wave, Tide, Contour or
-Still water. The section below shows through the cut, whatever its background is (a flat tone, a gradient or a picture), and moves up to
+A section can end in a shape instead of a straight line: a diagonal, a wave, a curve, an arch, a layered wave, Tide, Contour,
+Still water, Lagoon or Reef. The section below shows through the cut, whatever its background is (a flat tone, a gradient or a picture), and moves up to
 meet it, so the colours and spacing come out right without anything to configure.
 
 **For editors** (Design tab, agency only). Under _Bottom edge_ pick a picture: None (the default, a straight edge),
-Diagonal, Wave, Curve, Arch, Layered wave, Tide, Contour or Still water. Then, as they apply to the shape:
+Diagonal, Wave, Curve, Arch, Layered wave, Tide, Contour, Still water, Lagoon or Reef. Then, as they apply to the shape:
 
-- **Edge height**: Small, Medium or Large. Smaller on phones. Still water is not drawn at Small: Studio refuses it, and a
+- **Edge height**: Small, Medium or Large. Smaller on phones. Still water, Lagoon and Reef are not drawn at Small: Studio refuses it, and a
   Small saved before the shape was chosen is drawn at Medium.
-- **Flip**: mirror the shape left to right (Diagonal, Wave, Layered wave, Tide, Contour and Still water; Curve and Arch are
+- **Flip**: mirror the shape left to right (Diagonal, Wave, Layered wave, Tide, Contour, Still water, Lagoon and Reef; Curve and Arch are
   symmetrical, so it is not offered).
 - **Accent line**: none, or a thin line along the edge in Primary, Secondary or Highlight. Not for Tide or Contour, whose
   crest and lines are their own ornament.
@@ -4730,10 +4730,18 @@ Diagonal, Wave, Curve, Arch, Layered wave, Tide, Contour or Still water. Then, a
   the layer is too thin to read; if one was saved before Shallow was chosen it is kept, not drawn, and the field says so.
   Left empty, each is the shape's own default (Standard, Tint, no layer below). Still water offers neither Invert nor the
   accent line.
+- **Lagoon and Reef only**: the two bolder layered shapes, each with **two layers above the cut** that trade places across
+  the width (one rises with the crests, the other in the valleys), so each shows alone in places and the two overlap in
+  others. Lagoon (the Leap Frog composition, corrected: no slivers, no pinch at the edges) has nothing below the cut; Reef
+  adds a layer below it, over the section that follows. Their crest position, depth and layer below are fixed (Standard
+  depth, one arrangement; Shallow with two upper layers is not offered), so Studio offers only **Flip**, **Layer strength**
+  (Light, Standard, Strong) and **Colours** (Tint: Secondary with Ink, or Secondary with Primary for Reef; Ink: text colour
+  led; Highlight: Highlight led). A crest position, depth or layer-below switch saved under another shape is kept, not
+  drawn, and the field says so. Reef has no hairline in this first pass.
 - **Advanced: edge** (collapsed): **Invert** (the shape bulges into the next section instead; not offered for Diagonal,
   where it is the same as Flip) and a **custom height** for phones, tablets (from 768 px) and desktops (from 1024 px), in
-  pixels from 16 to 320. A screen size left empty keeps the smaller one's height; the phone falls back to Medium. Still water
-  takes 40 to 64 px on phones, 40 to 120 on tablets and 40 to 160 on desktops, each on its own; a stored value outside them
+  pixels from 16 to 320. A screen size left empty keeps the smaller one's height; the phone falls back to Medium. Still water,
+  Lagoon and Reef take 40 to 64 px on phones, 40 to 120 on tablets and 40 to 160 on desktops, each on its own; a stored value outside them
   is drawn at the nearest one (Studio shows an error).
 
 The edge belongs to the **upper** section: one owner per boundary, it moves with its section when reordered, and a shared
@@ -4802,6 +4810,15 @@ section carries its own edge wherever it is used. To change a boundary, edit the
   every token band from 320 to 2560 px wide; slope is checked at the narrowest and widest width of each screen size, where
   height over width is greatest and least. The first failure going down is at 32 px, so 40 px has real margin. Checksums of
   all 30 shapes are frozen in a snapshot, so a later slice cannot change Still water unseen.
+- _Lagoon and Reef_ (task 151, Slice 4) are two more rows of the same preset table, drawn by the same generator with its
+  second upper layer and a same-side repair pass (the Lab's own, which keeps two layers on one side from running together).
+  Each has two geometries, the shape and its mirror. They are held to the contract above unchanged, plus a **same-side
+  separation** rule: of two fills on one side of the cut, each must stand alone, reaching 3 px beyond the other, over at least
+  10% of the width. Presence from the cut cannot tell two nested fills from two layers (a fill that always sits inside
+  another clears 3 px everywhere and adds only a darker strip), so it is a separate check, with a regression case. The
+  bounds of Still water held for both (zero failures at every band from 40 to 160 px and every token band; the first failure
+  going down is at 30 px for Lagoon and 31.75 px for Reef), so no row narrows its heights. Reef is the Lab's shape without
+  its hairline, which reserves room above the cut, so Reef's cut sits a little differently from the Lab's.
 
 **Edge cases.**
 
@@ -4847,6 +4864,10 @@ bounds, Shallow without a layer below), the schema tests (which fields show, and
 `tests/e2e/section-edge-layered.spec.ts` (`/edge-layered`): the layers' pixels, paint order over a mark, a gradient and a
 picture, clipping at the cut, the 3 px floor on a 40 px phone band, stored heights, the 390 px comparison with the Lab, the
 sticky header and the fallbacks. It runs in WebKit locally too.
+Lagoon and Reef: `edge-lagoon-reef.test.ts` (every reachable combination, the contract, the separation rule and its regression, the
+Lab, parts and paint, frozen checksums) and `tests/e2e/section-edge-lagoon-reef.spec.ts` (`/edge-lagoon-reef`): that each fill
+makes a visible contribution after clipping and overlap (three zone colours, each the browser's own blend, each painted 3 px
+deep over a tenth of the width), paint order, clipping, stored steps and heights, Flip and the fallbacks.
 
 Tide and Contour: `edge-fixed.test.ts` compares their paths with the Lab's own definitions (copied verbatim into the test)
 and holds them as exact strings; `section-frame-composition.test.tsx` checks how `SectionFrame` draws a composition (order,

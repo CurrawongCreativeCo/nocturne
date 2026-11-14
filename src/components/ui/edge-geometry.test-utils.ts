@@ -264,6 +264,14 @@ export const MAX_SLOPE = 1.2
 /** A layer must clear 3 px over at least this share of the width, after the band clips it. */
 export const MIN_PRESENCE = 0.1
 
+/**
+ * Two fills on one side of the cut must each stand apart from the other: there is somewhere they alone reach
+ * 3 px beyond the other, over at least this share of the width. Presence (3 px from the CUT) cannot tell two
+ * nested fills from two layers: a fill that always sits inside the other clears it everywhere and still adds
+ * nothing but a slightly darker strip.
+ */
+export const MIN_SEPARATION = 0.1
+
 export interface SampledLayer {
   side: 'over' | 'under'
   /** y at each sample, in band units. */
@@ -318,6 +326,26 @@ export function presenceOf(layer: SampledLayer, bandPx: number): number {
   let shown = 0
   for (const depth of layer.depth) if (depth * bandPx >= 3) shown++
   return shown / (SAMPLES + 1)
+}
+
+/**
+ * How two fills on the same side of the cut divide the band, as shares of the width, at a band `bandPx` tall:
+ * where the first alone reaches 3 px beyond the second, where the second alone does, and where both show 3 px
+ * (the overlap, a third tone). Depths are clipped to the band, as they paint.
+ */
+export function separationShares(a: SampledLayer, b: SampledLayer, bandPx: number) {
+  let onlyA = 0
+  let onlyB = 0
+  let both = 0
+  for (let i = 0; i <= SAMPLES; i++) {
+    const da = (a.depth[i] ?? 0) * bandPx
+    const db = (b.depth[i] ?? 0) * bandPx
+    if (da - db >= 3) onlyA++
+    if (db - da >= 3) onlyB++
+    if (Math.min(da, db) >= 3) both++
+  }
+  const n = SAMPLES + 1
+  return { onlyA: onlyA / n, onlyB: onlyB / n, both: both / n }
 }
 
 /**
@@ -395,6 +423,11 @@ export function validate(sampled: SampledGeometry, bandPx: number): string[] {
       }
       if (longest > N * 0.04) failures.push('layers run together')
       if (cross > 4) failures.push(`layers cross ${String(cross)} times`)
+      const shares = separationShares(la, lb, bandPx)
+      if (shares.onlyA < MIN_SEPARATION || shares.onlyB < MIN_SEPARATION)
+        failures.push(
+          `layers ${String(a + 1)} and ${String(b + 1)} are not distinct: alone beyond the other over ${(shares.onlyA * 100).toFixed(1)}% and ${(shares.onlyB * 100).toFixed(1)}% of the width`,
+        )
     }
   return failures
 }
