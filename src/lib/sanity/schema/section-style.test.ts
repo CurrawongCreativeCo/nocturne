@@ -103,6 +103,11 @@ describe('sectionStyle', () => {
       'edgeLayer',
       'edgeTideLayer',
       'edgeLineColour',
+      'edgeCrest',
+      'edgeDepth',
+      'edgeStrength',
+      'edgePalette',
+      'edgeLayerBelow',
       'edgeInvert',
       'edgeHeightMobile',
       'edgeHeightTablet',
@@ -267,6 +272,51 @@ describe('the bottom edge', () => {
       expect(hidden('edgeTideLayer', { edge })).toBe(true)
       expect(hidden('edgeLineColour', { edge })).toBe(true)
     }
+  })
+
+  it('offers Still water Flip, its stepped controls and the height fields, and neither Invert nor the accent line (task 151, Slice 3)', () => {
+    const steps = ['edgeCrest', 'edgeDepth', 'edgeStrength', 'edgePalette', 'edgeLayerBelow']
+    for (const name of ['edgeFlip', 'edgeHeight', 'edgeHeightMobile', ...steps])
+      expect(hidden(name, { edge: 'still-water' })).toBe(false)
+    for (const name of ['edgeInvert', 'edgeAccent', 'edgeLayer', 'edgeTideLayer', 'edgeLineColour'])
+      expect(hidden(name, { edge: 'still-water' })).toBe(true)
+    // Every other shape, and no shape, hides the stepped controls while nothing is stored in them.
+    for (const edge of [undefined, 'none', 'wave', 'layered', 'tide', 'contour'])
+      for (const name of steps) expect(hidden(name, { edge })).toBe(true)
+  })
+
+  it('keeps a stepped control left over on another shape visible, so its warning can be read and cleared', () => {
+    const style = { edge: 'wave' }
+    const shown = (name: string, value: unknown) =>
+      (field(name)?.hidden as (c: never) => boolean)({ parent: style, value } as never)
+    expect(shown('edgeCrest', 'centred')).toBe(false)
+    expect(shown('edgePalette', 'ink')).toBe(false)
+    expect(shown('edgeCrest', undefined)).toBe(true)
+  })
+
+  it('does not offer Layer below at Shallow, and keeps a stored one visible so it can be seen and cleared', () => {
+    const at = (parent: unknown, value?: unknown) =>
+      (field('edgeLayerBelow')?.hidden as (c: never) => boolean)({ parent, value } as never)
+    const still = { edge: 'still-water' }
+    expect(at(still)).toBe(false)
+    expect(at({ ...still, edgeDepth: 'standard' })).toBe(false)
+    expect(at({ ...still, edgeDepth: 'deep' })).toBe(false)
+    expect(at({ ...still, edgeDepth: 'shallow' })).toBe(true)
+    expect(at({ ...still, edgeDepth: 'shallow' }, false)).toBe(true)
+    expect(at({ ...still, edgeDepth: 'shallow' }, true)).toBe(false)
+  })
+
+  it('leaves the stepped controls unset, so an unset one is the preset’s default', () => {
+    for (const name of ['edgeCrest', 'edgeDepth', 'edgeStrength', 'edgePalette', 'edgeLayerBelow'])
+      expect(field(name)).not.toHaveProperty('initialValue')
+    const first = (name: string) => (field(name)?.options?.list as { value: string }[])[0]?.value
+    expect(first('edgeCrest')).toBe('standard')
+    expect(first('edgePalette')).toBe('tint')
+  })
+
+  it('draws a picker thumbnail for Still water, like every other shape', () => {
+    const list = field('edge')?.options?.list as { value: string; thumbnail?: unknown }[]
+    expect(list.find((option) => option.value === 'still-water')?.thumbnail).toBeTypeOf('function')
   })
 
   it('leaves Tide’s and Contour’s colours unset, so an unset one is the default, Primary', () => {

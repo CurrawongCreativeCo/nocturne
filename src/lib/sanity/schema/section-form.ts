@@ -8,9 +8,16 @@ import {
   type MotionCustomField,
   type MotionOption,
 } from '@/components/motion/presets'
+import { LAYERED_PRESETS, allowsLayerBelow } from '@/components/ui/edge-presets'
 
 import {
+  GENERATED_EDGE_HEIGHT_BOUNDS,
+  GENERATED_EDGE_HEIGHTS,
+  SECTION_EDGE_DEPTHS,
+  SECTION_EDGE_HEIGHTS,
   SECTION_MOTIONS,
+  type GeneratedEdgeScreen,
+  isGeneratedEdge,
   edgeAllowsAccent,
   edgeAllowsFlip,
   edgeAllowsInvert,
@@ -281,3 +288,79 @@ export const edgeTideLayerHidden: ConditionalPropertyCallback = ({ parent }) =>
 /** Only Contour has lines to colour. */
 export const edgeLineColourHidden: ConditionalPropertyCallback = ({ parent }) =>
   edgeOf(parent) !== 'contour'
+
+interface GeneratedEdgeParent extends EdgeParent {
+  edgeDepth?: string
+  edgeHeight?: string
+}
+
+/** The generated shapes' controls mean nothing for any other shape. */
+export const edgeGeneratedHidden: ConditionalPropertyCallback = ({ parent }) =>
+  !isGeneratedEdge(edgeOf(parent))
+
+/**
+ * A generated shape's control left over on another shape stays visible, so the editor can see the warning
+ * below and clear it; it is hidden once there is nothing to say.
+ */
+export const edgeGeneratedOptionHidden: ConditionalPropertyCallback = ({ parent, value }) =>
+  !isGeneratedEdge(edgeOf(parent)) && !value
+
+/** The warning for a generated shape's control left on another shape; true when there is nothing to say. */
+export function staleGeneratedOptionMessage(
+  value: unknown,
+  context: { parent?: unknown },
+): string | true {
+  if (!value || isGeneratedEdge(edgeOf(context.parent))) return true
+  return 'This choice belongs to Still water and is ignored by the shape chosen above. Clear it from the field menu.'
+}
+
+const depthOf = (parent: unknown) => {
+  const depth = (parent as GeneratedEdgeParent | undefined)?.edgeDepth
+  return SECTION_EDGE_DEPTHS.find((option) => option === depth) ?? 'standard'
+}
+
+/** Whether the depth chosen offers a layer below; any other shape has no layer below to offer. */
+const offersLayerBelow = (parent: unknown) => {
+  const edge = edgeOf(parent)
+  return isGeneratedEdge(edge) && allowsLayerBelow(LAYERED_PRESETS[edge], depthOf(parent))
+}
+
+/**
+ * Layer below is not offered at Shallow, where the layer is too thin to read. A value already stored there
+ * keeps the field visible, so the editor can see the warning below; the edge draws without it.
+ */
+export const edgeLayerBelowHidden: ConditionalPropertyCallback = ({ parent, value }) =>
+  !isGeneratedEdge(edgeOf(parent)) || (!offersLayerBelow(parent) && value !== true)
+
+/** The warning for a layer below saved under a depth that does not offer one; the saved value is kept. */
+export function staleLayerBelowMessage(
+  value: unknown,
+  context: { parent?: unknown },
+): string | true {
+  if (value !== true || !isGeneratedEdge(edgeOf(context.parent))) return true
+  if (offersLayerBelow(context.parent)) return true
+  return 'A layer below is not drawn at Shallow depth, so this is ignored. Choose Standard or Deep to show it, or turn it off.'
+}
+
+/** Small is not drawn for a generated shape: Studio refuses it, and the page draws Medium. */
+export function generatedHeightMessage(
+  value: unknown,
+  context: { parent?: unknown },
+): string | true {
+  if (!isGeneratedEdge(edgeOf(context.parent))) return true
+  const allowed = GENERATED_EDGE_HEIGHTS as readonly unknown[]
+  if (!SECTION_EDGE_HEIGHTS.some((size) => size === value) || allowed.includes(value)) return true
+  return 'Still water is not drawn at Small: its layers need a taller band to read. Choose Medium or Large. Until then it is drawn at Medium.'
+}
+
+/** A custom height of a generated shape must sit within what that screen size is proven for. */
+export function generatedCustomHeightMessage(
+  screen: GeneratedEdgeScreen,
+  value: unknown,
+  context: { parent?: unknown },
+): string | true {
+  if (typeof value !== 'number' || !isGeneratedEdge(edgeOf(context.parent))) return true
+  const { min, max } = GENERATED_EDGE_HEIGHT_BOUNDS[screen]
+  if (value >= min && value <= max) return true
+  return `Still water is drawn between ${String(min)} and ${String(max)} px on this screen size. Until this is changed it is drawn at the nearest one.`
+}

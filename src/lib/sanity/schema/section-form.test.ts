@@ -11,6 +11,10 @@ import {
   sectionAtStylePath,
   staleAlignmentMessage,
   staleMotionMessage,
+  generatedCustomHeightMessage,
+  generatedHeightMessage,
+  staleGeneratedOptionMessage,
+  staleLayerBelowMessage,
   motionCustomHidden,
   motionOptionHidden,
   visibleMotions,
@@ -194,5 +198,59 @@ describe('panel', () => {
     expect(allowsPanel({ _type: 'richText' })).toBe(true)
     // A path we can't resolve offers it: hiding an option wrongly is worse than showing one.
     expect(allowsPanel(undefined)).toBe(true)
+  })
+})
+
+describe('the generated shapes’ Studio rules (task 151, Slice 3)', () => {
+  const still = (extra = {}) => ({ parent: { edge: 'still-water', ...extra } })
+
+  it('refuses Small for Still water, and only for it', () => {
+    expect(generatedHeightMessage('small', still())).toMatch(/not drawn at Small/)
+    expect(generatedHeightMessage('medium', still())).toBe(true)
+    expect(generatedHeightMessage('large', still())).toBe(true)
+    expect(generatedHeightMessage(undefined, still())).toBe(true)
+    for (const edge of ['wave', 'layered', 'tide', 'contour', 'none', undefined])
+      expect(generatedHeightMessage('small', { parent: { edge } })).toBe(true)
+  })
+
+  it('holds Still water’s custom heights to 40-64 px on phones, 40-120 on tablets and 40-160 on desktops, each alone', () => {
+    const cases = {
+      mobile: [39, 40, 64, 65],
+      tablet: [39, 40, 120, 121],
+      desktop: [39, 40, 160, 161],
+    } as const
+    for (const [screen, [below, min, max, above]] of Object.entries(cases) as [
+      keyof typeof cases,
+      readonly number[],
+    ][]) {
+      expect(generatedCustomHeightMessage(screen, below, still())).toMatch(/px/)
+      expect(generatedCustomHeightMessage(screen, min, still())).toBe(true)
+      expect(generatedCustomHeightMessage(screen, max, still())).toBe(true)
+      expect(generatedCustomHeightMessage(screen, above, still())).toMatch(/px/)
+    }
+    // The three are independent: 64 is too tall for a phone and fine on the others.
+    expect(generatedCustomHeightMessage('mobile', 100, still())).toMatch(/40 and 64 px/)
+    expect(generatedCustomHeightMessage('tablet', 100, still())).toBe(true)
+    expect(generatedCustomHeightMessage('desktop', 100, still())).toBe(true)
+    // Blank is fine, and every other shape keeps its own range.
+    expect(generatedCustomHeightMessage('mobile', undefined, still())).toBe(true)
+    for (const edge of ['wave', 'layered', 'tide', 'contour'])
+      expect(generatedCustomHeightMessage('mobile', 16, { parent: { edge } })).toBe(true)
+  })
+
+  it('warns about a layer below saved at Shallow, which is not drawn, and says nothing else', () => {
+    expect(staleLayerBelowMessage(true, still({ edgeDepth: 'shallow' }))).toMatch(
+      /not drawn at Shallow/,
+    )
+    expect(staleLayerBelowMessage(true, still({ edgeDepth: 'standard' }))).toBe(true)
+    expect(staleLayerBelowMessage(true, still())).toBe(true)
+    expect(staleLayerBelowMessage(false, still({ edgeDepth: 'shallow' }))).toBe(true)
+    expect(staleLayerBelowMessage(undefined, still({ edgeDepth: 'shallow' }))).toBe(true)
+  })
+
+  it('warns about a stepped control left on another shape', () => {
+    expect(staleGeneratedOptionMessage('ink', { parent: { edge: 'wave' } })).toMatch(/Still water/)
+    expect(staleGeneratedOptionMessage('ink', still())).toBe(true)
+    expect(staleGeneratedOptionMessage(undefined, { parent: { edge: 'wave' } })).toBe(true)
   })
 })

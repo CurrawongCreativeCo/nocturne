@@ -59,7 +59,15 @@ import {
   SECTION_EDGE_LAYERS,
   SECTION_EDGE_LAYER_TITLES,
   SECTION_EDGE_LINE_COLOURS,
+  SECTION_EDGE_CREST_TITLES,
+  SECTION_EDGE_CRESTS,
+  SECTION_EDGE_DEPTH_TITLES,
+  SECTION_EDGE_DEPTHS,
   SECTION_EDGE_LINE_COLOUR_TITLES,
+  SECTION_EDGE_PALETTE_TITLES,
+  SECTION_EDGE_PALETTES,
+  SECTION_EDGE_STRENGTH_TITLES,
+  SECTION_EDGE_STRENGTHS,
   SECTION_EDGE_TIDE_LAYERS,
   SECTION_EDGE_TIDE_LAYER_TITLES,
   SECTION_EDGE_TITLES,
@@ -93,6 +101,12 @@ import {
   staleImageOptionMessage,
   edgeAccentHidden,
   edgeFlipHidden,
+  edgeGeneratedOptionHidden,
+  edgeLayerBelowHidden,
+  generatedCustomHeightMessage,
+  generatedHeightMessage,
+  staleGeneratedOptionMessage,
+  staleLayerBelowMessage,
   edgeInvertHidden,
   edgeLayerHidden,
   edgeLineColourHidden,
@@ -132,6 +146,7 @@ import {
   EdgeDiagonalThumbnail,
   EdgeLayeredThumbnail,
   EdgeNoneThumbnail,
+  EdgeStillWaterThumbnail,
   EdgeTideThumbnail,
   EdgeWaveThumbnail,
 } from './thumbnails/edge-thumbnails'
@@ -339,6 +354,11 @@ const CAPABILITY_FIELDS: Readonly<Record<string, CapabilityId>> = {
   edgeLayer: 'edge',
   edgeTideLayer: 'edge',
   edgeLineColour: 'edge',
+  edgeCrest: 'edge',
+  edgeDepth: 'edge',
+  edgeStrength: 'edge',
+  edgePalette: 'edge',
+  edgeLayerBelow: 'edge',
   edgeInvert: 'edge',
 }
 
@@ -1058,6 +1078,13 @@ export const sectionStyle = defineType({
           description: 'A sweeping cut, followed by three fine lines.',
           thumbnail: EdgeContourThumbnail,
         },
+        {
+          value: 'still-water',
+          title: SECTION_EDGE_TITLES['still-water'],
+          description:
+            'One calm crest with a soft layer above it, and an optional layer below. Medium or Large; Large is the one to start from.',
+          thumbnail: EdgeStillWaterThumbnail,
+        },
       ],
       initialValue: 'none',
     }),
@@ -1069,6 +1096,7 @@ export const sectionStyle = defineType({
       initialValue: 'medium',
       options: radio(SECTION_EDGE_HEIGHTS, SECTION_EDGE_HEIGHT_TITLES),
       hidden: edgeOptionsHidden,
+      validation: (rule) => rule.custom((value, context) => generatedHeightMessage(value, context)),
     }),
     defineField({
       name: 'edgeFlip',
@@ -1114,6 +1142,59 @@ export const sectionStyle = defineType({
       options: radio(SECTION_EDGE_LINE_COLOURS, SECTION_EDGE_LINE_COLOUR_TITLES),
       hidden: edgeLineColourHidden,
     }),
+    ...(
+      [
+        [
+          'edgeCrest',
+          'Crest position',
+          'Where the crest sits across the width.',
+          SECTION_EDGE_CRESTS,
+          SECTION_EDGE_CREST_TITLES,
+        ],
+        [
+          'edgeDepth',
+          'Depth',
+          'How far the layers reach from the edge. Shallow draws no layer below.',
+          SECTION_EDGE_DEPTHS,
+          SECTION_EDGE_DEPTH_TITLES,
+        ],
+        [
+          'edgeStrength',
+          'Layer strength',
+          'How strongly the layers show.',
+          SECTION_EDGE_STRENGTHS,
+          SECTION_EDGE_STRENGTH_TITLES,
+        ],
+        [
+          'edgePalette',
+          'Colours',
+          'Which brand colours the layers are drawn in: Tint (Primary), Ink (text over Primary) or Highlight (Highlight over Secondary).',
+          SECTION_EDGE_PALETTES,
+          SECTION_EDGE_PALETTE_TITLES,
+        ],
+      ] as const
+    ).map(([name, title, description, values, titles]) =>
+      defineField({
+        name,
+        title,
+        description,
+        type: 'string',
+        options: radio(values, titles as Record<(typeof values)[number], string>),
+        hidden: edgeGeneratedOptionHidden,
+        validation: (rule) =>
+          rule.custom((value, context) => staleGeneratedOptionMessage(value, context)).warning(),
+      }),
+    ),
+    defineField({
+      name: 'edgeLayerBelow',
+      title: 'Layer below',
+      description:
+        'A second soft layer below the edge, over the section that follows. Not offered at Shallow depth.',
+      type: 'boolean',
+      hidden: edgeLayerBelowHidden,
+      validation: (rule) =>
+        rule.custom((value, context) => staleLayerBelowMessage(value, context)).warning(),
+    }),
     defineField({
       name: 'edgeInvert',
       title: 'Invert',
@@ -1125,19 +1206,24 @@ export const sectionStyle = defineType({
     }),
     ...(
       [
-        ['edgeHeightMobile', 'Height on phones'],
-        ['edgeHeightTablet', 'Height on tablets'],
-        ['edgeHeightDesktop', 'Height on desktops'],
+        ['edgeHeightMobile', 'Height on phones', 'mobile'],
+        ['edgeHeightTablet', 'Height on tablets', 'tablet'],
+        ['edgeHeightDesktop', 'Height on desktops', 'desktop'],
       ] as const
-    ).map(([name, title]) =>
+    ).map(([name, title, screen]) =>
       defineField({
         name,
         title,
-        description: `In pixels, ${EDGE_CUSTOM_MIN} to ${EDGE_CUSTOM_MAX}. Leave empty to use the edge height above (a screen size left empty keeps the smaller one’s).`,
+        description: `In pixels, ${EDGE_CUSTOM_MIN} to ${EDGE_CUSTOM_MAX}. Leave empty to use the edge height above (a screen size left empty keeps the smaller one’s). Still water takes 40 to 64 px on phones, 40 to 120 on tablets and 40 to 160 on desktops.`,
         type: 'number',
         fieldset: 'edgeAdvanced',
         hidden: edgeOptionsHidden,
-        validation: (rule) => rule.integer().min(EDGE_CUSTOM_MIN).max(EDGE_CUSTOM_MAX),
+        validation: (rule) =>
+          rule
+            .integer()
+            .min(EDGE_CUSTOM_MIN)
+            .max(EDGE_CUSTOM_MAX)
+            .custom((value, context) => generatedCustomHeightMessage(screen, value, context)),
       }),
     ),
     defineField({

@@ -22,10 +22,16 @@ import {
   imageSizeUsesRepeat,
   SECTION_EDGES,
   SECTION_EDGE_ACCENTS,
+  SECTION_EDGE_CRESTS,
+  SECTION_EDGE_DEPTHS,
   SECTION_EDGE_HEIGHTS,
   SECTION_EDGE_LAYERS,
   SECTION_EDGE_LINE_COLOURS,
+  SECTION_EDGE_PALETTES,
+  SECTION_EDGE_STRENGTHS,
   SECTION_EDGE_TIDE_LAYERS,
+  GENERATED_EDGE_HEIGHTS,
+  GENERATED_EDGE_HEIGHT_BOUNDS,
   SECTION_MOTIONS,
   SECTION_OVERLAYS,
   SECTION_SPACINGS,
@@ -35,9 +41,11 @@ import {
   edgeAllowsAccent,
   edgeAllowsFlip,
   edgeAllowsInvert,
+  isGeneratedEdge,
 } from '@/lib/sanity/section-style-options'
 import type { SanityImageData } from '@/types/sanity'
 
+import { LAYERED_PRESETS, allowsLayerBelow, type LayeredSettings } from './edge-presets'
 import { customEdgeHeight, type ResolvedEdge } from './section-edges'
 
 /**
@@ -108,6 +116,12 @@ export interface SectionStyleInput {
   edgeTideLayer?: string | null
   /** Contour's line colour (task 151); unset is Primary. */
   edgeLineColour?: string | null
+  /** The generated shapes' stepped controls (task 151, Slice 3); unset is each preset's default. */
+  edgeCrest?: string | null
+  edgeDepth?: string | null
+  edgeStrength?: string | null
+  edgePalette?: string | null
+  edgeLayerBelow?: boolean | null
   edgeInvert?: boolean | null
   edgeHeightMobile?: number | null
   edgeHeightTablet?: number | null
@@ -293,12 +307,24 @@ function pick<T extends string>(
 export function resolveEdge(style: SectionStyleInput | null | undefined): ResolvedEdge | undefined {
   const edge = pick(SECTION_EDGES, style?.edge)
   if (!edge || edge === 'none') return undefined
-  const size = pick(SECTION_EDGE_HEIGHTS, style?.edgeHeight) ?? 'medium'
-  const custom = customEdgeHeight({
-    mobile: style?.edgeHeightMobile,
-    tablet: style?.edgeHeightTablet,
-    desktop: style?.edgeHeightDesktop,
-  })
+  const generated = isGeneratedEdge(edge)
+  const picked = pick(SECTION_EDGE_HEIGHTS, style?.edgeHeight) ?? 'medium'
+  // A generated shape is not drawn at Small, so a stored Small is drawn as Medium.
+  const size =
+    generated && !GENERATED_EDGE_HEIGHTS.some((allowed) => allowed === picked) ? 'medium' : picked
+  const custom = customEdgeHeight(
+    generated
+      ? {
+          mobile: clampedHeight(style?.edgeHeightMobile, 'mobile'),
+          tablet: clampedHeight(style?.edgeHeightTablet, 'tablet'),
+          desktop: clampedHeight(style?.edgeHeightDesktop, 'desktop'),
+        }
+      : {
+          mobile: style?.edgeHeightMobile,
+          tablet: style?.edgeHeightTablet,
+          desktop: style?.edgeHeightDesktop,
+        },
+  )
   const tideLayer = pick(SECTION_EDGE_TIDE_LAYERS, style?.edgeTideLayer)
 
   return {
@@ -312,6 +338,39 @@ export function resolveEdge(style: SectionStyleInput | null | undefined): Resolv
     layer: pick(SECTION_EDGE_LAYERS, style?.edgeLayer) ?? 'accent-2',
     tideLayer: tideLayer === 'echo' && hasBackdrop(style) ? 'accent' : (tideLayer ?? 'accent'),
     lineColour: pick(SECTION_EDGE_LINE_COLOURS, style?.edgeLineColour) ?? 'accent',
+    ...(generated ? { layered: resolveLayered(edge, style) } : {}),
+  }
+}
+
+/**
+ * A stored custom height for a generated shape, held to what Studio permits at that screen size. The clamp
+ * lives here and nowhere else: today's shapes keep the whole 16 to 320 px range (customEdgeHeight).
+ */
+function clampedHeight(
+  value: number | null | undefined,
+  screen: keyof typeof GENERATED_EDGE_HEIGHT_BOUNDS,
+): number | undefined {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return undefined
+  const { min, max } = GENERATED_EDGE_HEIGHT_BOUNDS[screen]
+  return Math.min(max, Math.max(min, value))
+}
+
+/**
+ * A generated shape's stepped controls: each unset or unknown value is the preset's default. A layer below
+ * that the depth does not offer (Shallow) is not drawn, whatever is stored: the saved value is kept, and
+ * Studio says it is ignored.
+ */
+function resolveLayered(
+  edge: keyof typeof LAYERED_PRESETS,
+  style: SectionStyleInput | null | undefined,
+): LayeredSettings {
+  const depth = pick(SECTION_EDGE_DEPTHS, style?.edgeDepth) ?? 'standard'
+  return {
+    crest: pick(SECTION_EDGE_CRESTS, style?.edgeCrest) ?? 'standard',
+    depth,
+    strength: pick(SECTION_EDGE_STRENGTHS, style?.edgeStrength) ?? 'standard',
+    palette: pick(SECTION_EDGE_PALETTES, style?.edgePalette) ?? 'tint',
+    below: style?.edgeLayerBelow === true && allowsLayerBelow(LAYERED_PRESETS[edge], depth),
   }
 }
 

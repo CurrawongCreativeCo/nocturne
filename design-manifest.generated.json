@@ -35875,6 +35875,10 @@
           {
             "value": "contour",
             "title": "Contour"
+          },
+          {
+            "value": "still-water",
+            "title": "Still water"
           }
         ],
         "capability": "edge",
@@ -35883,7 +35887,8 @@
       {
         "path": "edgeHeight",
         "kind": "string",
-        "required": false,
+        "required": null,
+        "max": null,
         "list": [
           {
             "value": "small",
@@ -35985,6 +35990,101 @@
             "title": "Muted text"
           }
         ],
+        "capability": "edge",
+        "clientEditable": false
+      },
+      {
+        "path": "edgeCrest",
+        "kind": "string",
+        "required": null,
+        "max": null,
+        "list": [
+          {
+            "value": "standard",
+            "title": "Standard"
+          },
+          {
+            "value": "centred",
+            "title": "Centred"
+          },
+          {
+            "value": "shifted",
+            "title": "Shifted"
+          }
+        ],
+        "capability": "edge",
+        "clientEditable": false
+      },
+      {
+        "path": "edgeDepth",
+        "kind": "string",
+        "required": null,
+        "max": null,
+        "list": [
+          {
+            "value": "shallow",
+            "title": "Shallow"
+          },
+          {
+            "value": "standard",
+            "title": "Standard"
+          },
+          {
+            "value": "deep",
+            "title": "Deep"
+          }
+        ],
+        "capability": "edge",
+        "clientEditable": false
+      },
+      {
+        "path": "edgeStrength",
+        "kind": "string",
+        "required": null,
+        "max": null,
+        "list": [
+          {
+            "value": "light",
+            "title": "Light"
+          },
+          {
+            "value": "standard",
+            "title": "Standard"
+          },
+          {
+            "value": "strong",
+            "title": "Strong"
+          }
+        ],
+        "capability": "edge",
+        "clientEditable": false
+      },
+      {
+        "path": "edgePalette",
+        "kind": "string",
+        "required": null,
+        "max": null,
+        "list": [
+          {
+            "value": "tint",
+            "title": "Tint"
+          },
+          {
+            "value": "ink",
+            "title": "Ink"
+          },
+          {
+            "value": "highlight",
+            "title": "Highlight"
+          }
+        ],
+        "capability": "edge",
+        "clientEditable": false
+      },
+      {
+        "path": "edgeLayerBelow",
+        "kind": "boolean",
+        "required": null,
         "capability": "edge",
         "clientEditable": false
       },

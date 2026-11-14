@@ -2893,6 +2893,29 @@ const gallerySections = [
     { tone: 'inverse', edge: 'contour', edgeLineColour: 'muted', edgeFlip: true },
     { tone: 'surface' },
   ),
+  // Still water (task 151, Slice 3): the defaults, then a layer below at Large, then Ink with Strong, a shifted
+  // crest, a deep layer and a layer below, flipped. Each upper section has a colour of its own (a plain surface
+  // section is see-through under any edge). At the end, so no section already in the gallery moves.
+  ...edgePair('still-water', { tone: 'inverse', edge: 'still-water' }, { tone: 'alt' }),
+  ...edgePair(
+    'still-water-below-large',
+    { tone: 'inverse', edge: 'still-water', edgeLayerBelow: true, edgeHeight: 'large' },
+    { tone: 'alt' },
+  ),
+  ...edgePair(
+    'still-water-ink-deep-flip',
+    {
+      tone: 'alt',
+      edge: 'still-water',
+      edgePalette: 'ink',
+      edgeStrength: 'strong',
+      edgeCrest: 'shifted',
+      edgeDepth: 'deep',
+      edgeLayerBelow: true,
+      edgeFlip: true,
+    },
+    { tone: 'inverse' },
+  ),
   // new-section:gallery
 ]
 
@@ -6185,6 +6208,8 @@ const seamPairs = [
   ['tide', 'medium'],
   ['tide', 'large'],
   ['contour', 'medium', 'inverse'],
+  ['still-water', 'medium'],
+  ['still-water', 'large'],
 ].flatMap(([shape, height, below = 'accent']) => [
   edgeSection(`seam-${shape}-${height}`, `Above the ${shape} (${height})`, {
     tone: 'inverse',
@@ -6312,6 +6337,103 @@ documents.push(
         edge: 'contour',
         edgeLineColour: 'muted',
       }),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    // Still water in a real browser (section-edge-layered.spec.ts, task 151, Slice 3). Each upper section has a
+    // colour of its own, and the layers are chosen to contrast with it, so a pixel can tell them from the section.
+    _id: 'page-edge-layered',
+    _type: 'page',
+    title: 'Layered edges',
+    slug: { _type: 'slug', current: 'edge-layered' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      // Ink over a light section, Strong: the upper layer is dark on light. A layer below in Primary, over inverse.
+      edgeSection('ls-ink', 'Still water, Ink', {
+        tone: 'alt',
+        edge: 'still-water',
+        edgePalette: 'ink',
+        edgeStrength: 'strong',
+        edgeLayerBelow: true,
+        edgeHeight: 'large',
+      }),
+      edgeSection('ls-ink-below', 'Below Still water, inverse', { tone: 'inverse' }),
+      // Defaults, Medium: the 40 px band on a phone.
+      edgeSection('ls-default', 'Still water at its defaults', {
+        tone: 'alt',
+        edge: 'still-water',
+        edgePalette: 'ink',
+        edgeStrength: 'strong',
+        edgeLayerBelow: true,
+      }),
+      edgeSection('ls-default-below', 'Below the defaults, inverse', { tone: 'inverse' }),
+      // Shallow with a layer below stored: the layer below is not drawn.
+      edgeSection('ls-shallow', 'Shallow, with a stored layer below', {
+        tone: 'alt',
+        edge: 'still-water',
+        edgePalette: 'ink',
+        edgeStrength: 'strong',
+        edgeDepth: 'shallow',
+        edgeLayerBelow: true,
+        edgeHeight: 'large',
+      }),
+      edgeSection('ls-shallow-below', 'Below Shallow, inverse', { tone: 'inverse' }),
+      // Small is stored: drawn as Medium. Custom heights are stored out of range: held to 40-64, 40-120, 40-160.
+      edgeSection('ls-small', 'A stored Small', {
+        tone: 'alt',
+        edge: 'still-water',
+        edgeHeight: 'small',
+      }),
+      edgeSection('ls-small-below', 'Below a stored Small, inverse', { tone: 'inverse' }),
+      edgeSection('ls-custom', 'Custom heights, out of range', {
+        tone: 'alt',
+        edge: 'still-water',
+        edgeHeightMobile: 20,
+        edgeHeightTablet: 300,
+        edgeHeightDesktop: 999,
+      }),
+      edgeSection('ls-custom-below', 'Below the custom heights, inverse', { tone: 'inverse' }),
+      // The upper layer over a mark, a gradient and a picture, to read its paint order.
+      edgeSection('ls-mark', 'Still water over a mark', {
+        tone: 'alt',
+        edge: 'still-water',
+        edgePalette: 'ink',
+        edgeStrength: 'strong',
+        edgeHeight: 'large',
+        mark: { kind: 'icon', icon: 'heart' },
+      }),
+      edgeSection('ls-mark-below', 'Below the mark, inverse', { tone: 'inverse' }),
+      edgeSection('ls-gradient', 'Still water over a gradient', {
+        tone: 'inverse',
+        edge: 'still-water',
+        edgePalette: 'highlight',
+        edgeStrength: 'strong',
+        edgeHeight: 'large',
+        gradient: 'forest-dusk',
+      }),
+      edgeSection('ls-gradient-below', 'Below the gradient, alternate', { tone: 'alt' }),
+      edgeSection('ls-picture', 'Still water over a picture', {
+        tone: 'inverse',
+        edge: 'still-water',
+        edgePalette: 'highlight',
+        edgeStrength: 'strong',
+        edgeHeight: 'large',
+        image: image(''),
+        imageSize: 'cover',
+        overlay: 'medium',
+      }),
+      edgeSection('ls-picture-below', 'Below the picture, alternate', { tone: 'alt' }),
+      edgeSection('ls-flip', 'Still water, flipped', {
+        tone: 'alt',
+        edge: 'still-water',
+        edgePalette: 'ink',
+        edgeStrength: 'strong',
+        edgeLayerBelow: true,
+        edgeFlip: true,
+        edgeHeight: 'large',
+      }),
+      edgeSection('ls-flip-below', 'Below the flip, inverse', { tone: 'inverse' }),
     ],
     _updatedAt: UPDATED,
   },
