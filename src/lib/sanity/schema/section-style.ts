@@ -7,6 +7,7 @@ import {
 } from 'sanity'
 
 import { customRange, isMotionPreset } from '@/components/motion/presets'
+import type { SectionStyleInput } from '@/components/ui/section-style'
 import { backgroundContrastProblem } from '@/lib/color/background-contrast'
 import { overlayGradientContrastProblem } from '@/lib/color/overlay-gradient-contrast'
 import type { CapabilityId } from '@/lib/design/capabilities'
@@ -92,6 +93,7 @@ import {
 import { fetchBrandColours } from './brand-colours'
 import { fetchBrandGradientState, gradientFieldWarning } from './brand-gradients'
 import { builtBy, builtOptions } from './capability-marker'
+import { faintLayerWarning, uncheckedSceneNote } from './edge-visibility-validation'
 import { imageField } from './image-field'
 import { presetField } from './preset-field'
 import {
@@ -1206,15 +1208,51 @@ export const sectionStyle = defineType({
               ? edgeStepHidden('depth')
               : edgeGeneratedOptionHidden,
         validation: (rule) =>
-          rule
-            .custom((value, context) =>
-              name === 'edgeCrest'
-                ? staleStepMessage('crest')(value, context)
-                : name === 'edgeDepth'
-                  ? staleStepMessage('depth')(value, context)
-                  : staleGeneratedOptionMessage(value, context),
-            )
-            .warning(),
+          name === 'edgePalette'
+            ? [
+                rule
+                  .custom((value, context) => staleGeneratedOptionMessage(value, context))
+                  .warning(),
+                // Task 151, Slice 5: is each layer above the edge visible on this section? One advisory, beside
+                // the edge controls: a warning for a faint layer, a note where the scene can't be judged.
+                rule
+                  .custom((_value, { getClient, parent, document, path }) =>
+                    faintLayerWarning(
+                      parent as SectionStyleInput | undefined,
+                      getClient({ apiVersion: '2025-01-01' }),
+                      // The section's own layout: a hero's picture is what the layers sit on, not the style's.
+                      {
+                        hasOwnBackground: sectionHasOwnBackground(
+                          sectionAtStylePath(document, path),
+                        ),
+                      },
+                    ),
+                  )
+                  .warning(),
+                rule
+                  .custom((_value, { getClient, parent, document, path }) =>
+                    uncheckedSceneNote(
+                      parent as SectionStyleInput | undefined,
+                      getClient({ apiVersion: '2025-01-01' }),
+                      // The section's own layout: a hero's picture is what the layers sit on, not the style's.
+                      {
+                        hasOwnBackground: sectionHasOwnBackground(
+                          sectionAtStylePath(document, path),
+                        ),
+                      },
+                    ),
+                  )
+                  .info(),
+              ]
+            : rule
+                .custom((value, context) =>
+                  name === 'edgeCrest'
+                    ? staleStepMessage('crest')(value, context)
+                    : name === 'edgeDepth'
+                      ? staleStepMessage('depth')(value, context)
+                      : staleGeneratedOptionMessage(value, context),
+                )
+                .warning(),
       }),
     ),
     defineField({

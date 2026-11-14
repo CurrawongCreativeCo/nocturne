@@ -4738,6 +4738,16 @@ Diagonal, Wave, Curve, Arch, Layered wave, Tide, Contour, Still water, Lagoon or
   (Light, Standard, Strong) and **Colours** (Tint: Secondary with Ink, or Secondary with Primary for Reef; Ink: text colour
   led; Highlight: Highlight led). A crest position, depth or layer-below switch saved under another shape is kept, not
   drawn, and the field says so. Reef has no hairline in this first pass.
+- **Visibility advisory** (Still water, Lagoon and Reef; Studio only): beside the Colours field, one message says when a
+  layer above the edge is faint against its section, naming the layer and, only if it helps on the same background, a
+  stronger strength or another colour set. It never blocks publishing and changes nothing saved or drawn. It reads the
+  effective colours and strength (an unset field is its default), the layers' own colours and opacities, the section's
+  tone and the site's Brand colours, and measures each layer's blend against the background with the contrast ratio the other
+  checks use, flagging anything under **1.2:1** (provisional; a decorative layer is not text, so WCAG's text ratios do not
+  apply). The message is plain ("Lagoon's second layer may be hard to see on this background. Try Tint, or check it in
+  Preview."); the ratios stay in the tests. It gives no verdict where it cannot know the scene: a background picture, a
+  gradient, a layout that draws its own picture or video (a hero's background), a Page (Surface) section, which is see-through
+  under an edge, a background set by the section type, or colours that could not be read. There it says to look in Preview. The layer below the edge sits over the next section, which is not looked up, so it is never judged.
 - **Advanced: edge** (collapsed): **Invert** (the shape bulges into the next section instead; not offered for Diagonal,
   where it is the same as Flip) and a **custom height** for phones, tablets (from 768 px) and desktops (from 1024 px), in
   pixels from 16 to 320. A screen size left empty keeps the smaller one's height; the phone falls back to Medium. Still water,
