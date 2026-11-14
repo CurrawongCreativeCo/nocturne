@@ -7,6 +7,8 @@ import type {
 } from '@/lib/sanity/section-style-options'
 
 import { contourComposition, tideComposition } from './edge-fixed'
+import { layeredComposition } from './edge-layered'
+import type { LayeredSettings } from './edge-presets'
 
 /**
  * Section dividers (README, "Section dividers"): the shapes, and the spacing maths that keeps the next
@@ -21,7 +23,7 @@ import { contourComposition, tideComposition } from './edge-fixed'
 /** Today's shapes, each drawn from its line (`LINES`). */
 export type LineShape = 'diagonal' | 'wave' | 'curve' | 'arch' | 'layered'
 /** New shapes (task 151), each drawn as a composition (`edgeComposition`). */
-export type ComposedShape = 'tide' | 'contour'
+export type ComposedShape = 'tide' | 'contour' | 'still-water'
 export type EdgeShape = LineShape | ComposedShape
 export type EdgeHeightSize = (typeof SECTION_EDGE_HEIGHTS)[number]
 export type EdgeAccent = (typeof SECTION_EDGE_ACCENTS)[number]
@@ -48,6 +50,8 @@ export interface ResolvedEdge {
   tideLayer: EdgeTideLayer
   /** Contour's line colour; meaningful only for Contour. */
   lineColour: EdgeLineColour
+  /** A generated shape's stepped controls (edge-presets.ts); present for Still water only. */
+  layered?: LayeredSettings
 }
 
 type Command = 'M' | 'L' | 'C' | 'Q'
@@ -220,6 +224,7 @@ export interface EdgeComposition {
 const COMPOSITIONS: Record<ComposedShape, (edge: ResolvedEdge) => EdgeComposition> = {
   tide: tideComposition,
   contour: contourComposition,
+  'still-water': layeredComposition,
 }
 
 /** The composition an edge is drawn as, or undefined for a shape that keeps its own rendering. */

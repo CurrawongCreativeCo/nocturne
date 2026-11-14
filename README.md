@@ -4704,16 +4704,17 @@ None of them draws a see-through surface of its own that the panel checks would 
 
 ### Section dividers
 
-A section can end in a shape instead of a straight line: a diagonal, a wave, a curve, an arch, a layered wave, Tide or
-Contour. The section below shows through the cut, whatever its background is (a flat tone, a gradient or a picture), and moves up to
+A section can end in a shape instead of a straight line: a diagonal, a wave, a curve, an arch, a layered wave, Tide, Contour or
+Still water. The section below shows through the cut, whatever its background is (a flat tone, a gradient or a picture), and moves up to
 meet it, so the colours and spacing come out right without anything to configure.
 
 **For editors** (Design tab, agency only). Under _Bottom edge_ pick a picture: None (the default, a straight edge),
-Diagonal, Wave, Curve, Arch, Layered wave, Tide or Contour. Then, as they apply to the shape:
+Diagonal, Wave, Curve, Arch, Layered wave, Tide, Contour or Still water. Then, as they apply to the shape:
 
-- **Edge height**: Small, Medium or Large. Smaller on phones.
-- **Flip**: mirror the shape left to right (Diagonal, Wave, Layered wave, Tide and Contour; Curve and Arch are symmetrical,
-  so it is not offered).
+- **Edge height**: Small, Medium or Large. Smaller on phones. Still water is not drawn at Small: Studio refuses it, and a
+  Small saved before the shape was chosen is drawn at Medium.
+- **Flip**: mirror the shape left to right (Diagonal, Wave, Layered wave, Tide, Contour and Still water; Curve and Arch are
+  symmetrical, so it is not offered).
 - **Accent line**: none, or a thin line along the edge in Primary, Secondary or Highlight. Not for Tide or Contour, whose
   crest and lines are their own ornament.
 - **Back wave colour** (Layered wave only): Secondary or Highlight, drawn behind the front wave and partly see-through.
@@ -4722,9 +4723,18 @@ Diagonal, Wave, Curve, Arch, Layered wave, Tide or Contour. Then, as they apply 
   is Primary.
 - **Line colour** (Contour only): its three lines in **Primary** (the default) or the **muted text** colour, in the
   colours of the section below.
+- **Still water only**: one calm crest with a soft layer above it, and an optional layer below. **Crest position**
+  (Standard, Centred, Shifted), **Depth** (Shallow, Standard, Deep: how far the layers reach), **Layer strength** (Light,
+  Standard, Strong), **Colours** (Tint: Primary; Ink: text over Primary; Highlight: Highlight over Secondary) and **Layer
+  below** (a second layer over the section below, in that section's colours). Layer below is not offered at Shallow, where
+  the layer is too thin to read; if one was saved before Shallow was chosen it is kept, not drawn, and the field says so.
+  Left empty, each is the shape's own default (Standard, Tint, no layer below). Still water offers neither Invert nor the
+  accent line.
 - **Advanced: edge** (collapsed): **Invert** (the shape bulges into the next section instead; not offered for Diagonal,
   where it is the same as Flip) and a **custom height** for phones, tablets (from 768 px) and desktops (from 1024 px), in
-  pixels from 16 to 320. A screen size left empty keeps the smaller one's height; the phone falls back to Medium.
+  pixels from 16 to 320. A screen size left empty keeps the smaller one's height; the phone falls back to Medium. Still water
+  takes 40 to 64 px on phones, 40 to 120 on tablets and 40 to 160 on desktops, each on its own; a stored value outside them
+  is drawn at the nearest one (Studio shows an error).
 
 The edge belongs to the **upper** section: one owner per boundary, it moves with its section when reordered, and a shared
 section carries its own edge wherever it is used. To change a boundary, edit the section above it.
@@ -4771,6 +4781,27 @@ section carries its own edge wherever it is used. To change a boundary, edit the
   page's colours, as today's back wave does. **Echo** is the colour of the section the edge belongs to: the frame carries
   its tone (`data-edge-echo`) and resolves `--edge-echo` there, before the parts inherit it, so their own remapping can't
   turn it into the section below's colour. The parts are hidden in **forced colours** and without mask support.
+- _Still water_ (task 151, Slice 3) is the first **generated** shape: its geometry is drawn by one generator
+  (`edge-layered.ts`, ported from the Divider Design Lab's `family()` and `repairDepth()`) from one row of a closed preset
+  table (`edge-presets.ts`) and a few stepped controls. No stored number reaches the shape, so every shape a page can ask
+  for is one of 30 (3 crest positions, 5 depth and layer-below pairs, Flip) that `edge-layered.test.ts` draws and checks.
+  Its layer above is drawn inside the section, clipped by the cut, and its layer below in the frame over the section below,
+  taking that section's tone (the same parts and rules as Tide and Contour). The geometry reads **no height**: it is made
+  once, at the constants the Lab reaches from a 100 px band up (a visible floor of 3.5% of the band, 3% of headroom), and
+  stretched to whatever band the page draws. At a band of 100 px and over this is the Lab's shape, path for path; below it,
+  the Lab's own output changes with the band and, on a phone band of 40 px, repairs its upper layer away entirely, so
+  production deliberately does not follow it there. A line is 32 cubic segments (within 0.05 px of its curve at the tallest
+  band, 160 px). The cost is motion headroom: 3% of the band is 1.2 px on a 40 px band, which Task 217 will have to work
+  with. A fourth preset is a row in `edge-presets.ts`, the value, title, picker entry and thumbnail, and its own checksums;
+  `edge-layered.ts`, `section-frame.tsx` and the CSS do not change.
+- _The geometry contract_ (Stage 3A section 6, run by `edge-layered.test.ts` with the checks in
+  `edge-geometry.test-utils.ts`, which ship nothing): no accidental sliver, edge wedge or long taper (over 6% of the width);
+  no layer pressed against the band; no pinch at an edge; no line steeper than 1.2 px per px at any width and band a page
+  can draw (the cut everywhere, a fill only where it shows); and each enabled layer clears **3 px over at least 10% of the
+  width**, after the band clips it. The band heights tested are every integer from 40 to 160, a quarter-px scan between, and
+  every token band from 320 to 2560 px wide; slope is checked at the narrowest and widest width of each screen size, where
+  height over width is greatest and least. The first failure going down is at 32 px, so 40 px has real margin. Checksums of
+  all 30 shapes are frozen in a snapshot, so a later slice cannot change Still water unseen.
 
 **Edge cases.**
 
@@ -4809,6 +4840,13 @@ the browser then draws, from its own pixels; and `tests/e2e/section-edge-hairlin
 pixel ratios and widths, whether any of the page's background shows along a cut. It measures only: no extra pixel of overlap is
 added unless it finds one. A control at each pixel ratio must find a deliberate 1px gap where it was made, and none without it,
 so a pass is evidence.
+
+Still water: `edge-layered.test.ts` (the Lab equivalence, every reachable combination through `resolveEdge`, the contract above,
+Flip, strength and palette, segment deviation, frozen checksums), `section-style.test.ts` (`resolveEdge`: Small, the custom
+bounds, Shallow without a layer below), the schema tests (which fields show, and each Studio warning or error), and
+`tests/e2e/section-edge-layered.spec.ts` (`/edge-layered`): the layers' pixels, paint order over a mark, a gradient and a
+picture, clipping at the cut, the 3 px floor on a 40 px phone band, stored heights, the 390 px comparison with the Lab, the
+sticky header and the fallbacks. It runs in WebKit locally too.
 
 Tide and Contour: `edge-fixed.test.ts` compares their paths with the Lab's own definitions (copied verbatim into the test)
 and holds them as exact strings; `section-frame-composition.test.tsx` checks how `SectionFrame` draws a composition (order,

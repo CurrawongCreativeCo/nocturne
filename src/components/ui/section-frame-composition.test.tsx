@@ -253,3 +253,39 @@ describe('today’s shapes', () => {
     },
   )
 })
+
+describe('Still water in SectionFrame (task 151, Slice 3), drawn by the real generator', () => {
+  const still: SectionStyleInput = { tone: 'inverse', edge: 'still-water', edgeLayerBelow: true }
+
+  it('draws its layer above inside the section and its layer below in the frame, in the existing slots', async () => {
+    const frame = await draw(still)
+    expect(frame.getAttribute('data-section-edge-frame')).toBe('still-water')
+    expect([...frame.children].map(label)).toEqual(['under-1', 'section'])
+    const section = frame.querySelector(':scope > section')
+    // After the background, before the content.
+    expect([...(section?.children ?? [])].map(label)).toEqual(['hero background', 'over-1', 'div'])
+    expect(frame.querySelector('[data-edge-part="over-1"] path')?.getAttribute('fill')).toBe(
+      'var(--color-accent)',
+    )
+    expect(frame.querySelector('[data-edge-part="under-1"] path')?.getAttribute('fill')).toBe(
+      'var(--color-accent)',
+    )
+  })
+
+  it('draws no layer below by default, and none at Shallow even when one is stored', async () => {
+    for (const style of [
+      { ...still, edgeLayerBelow: undefined },
+      { ...still, edgeDepth: 'shallow' },
+    ]) {
+      const frame = await draw(style)
+      expect([...frame.children].map(label)).toEqual(['section'])
+      expect(frame.querySelectorAll('[data-edge-part]')).toHaveLength(1)
+    }
+  })
+
+  it('masks the section with its own cut and keeps the line shapes’ attributes off it', async () => {
+    const frame = await draw(still)
+    expect(frame.getAttribute('style')).toContain('--edge-mask:url(')
+    expect(frame.querySelector('[data-edge-layer]')).toBeNull()
+  })
+})

@@ -14,6 +14,7 @@ export default defineConfig({
       name: 'webkit',
       testMatch: [
         /section-edge-composed\.spec\.ts/,
+        /section-edge-layered\.spec\.ts/,
         /section-edge-stability\.spec\.ts/,
         /section-edge-hairlines\.spec\.ts/,
         /section-edges\.spec\.ts/,

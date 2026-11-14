@@ -1,4 +1,5 @@
 import {
+  closeToBottom,
   closeToTop,
   edgeBackLine,
   edgeComposition,
@@ -48,6 +49,18 @@ function EdgeThumbnail({ edge }: { edge: SectionEdge }) {
           layer: 'accent-2',
           tideLayer: 'accent',
           lineColour: 'accent',
+          // A generated shape's default steps.
+          ...(edge === 'still-water'
+            ? {
+                layered: {
+                  crest: 'standard',
+                  depth: 'standard',
+                  strength: 'standard',
+                  palette: 'tint',
+                  below: false,
+                },
+              }
+            : {}),
         })
   // What the dark section keeps: today's shapes from their line, a new one from its composition's cut.
   const outline =
@@ -58,6 +71,10 @@ function EdgeThumbnail({ edge }: { edge: SectionEdge }) {
         : composition && closeToTop(composition.cut)
   const parts = (kind: EdgePart['kind']) =>
     composition?.parts.filter((part) => part.side === 'under' && part.kind === kind) ?? []
+  // A layer above the cut is drawn inside the dark section, clipped to it.
+  const overFills =
+    composition?.parts.filter((part) => part.side === 'over' && part.kind === 'fill') ?? []
+  const clipId = `edge-thumbnail-${edge}`
   return (
     <svg
       viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
@@ -108,6 +125,24 @@ function EdgeThumbnail({ edge }: { edge: SectionEdge }) {
         fill={colorHex.surfaceInverse}
       />
       {outline ? <path d={outline} transform={band} fill={colorHex.surfaceInverse} /> : null}
+      {outline && overFills.length > 0 ? (
+        <>
+          <clipPath id={clipId}>
+            <path d={outline} transform={band} />
+          </clipPath>
+          <g clipPath={`url(#${clipId})`}>
+            {overFills.map((part) => (
+              <path
+                key={part.line}
+                d={closeToBottom(part.line)}
+                transform={band}
+                fill={PAINT_HEX[part.paint]}
+                fillOpacity={part.opacity}
+              />
+            ))}
+          </g>
+        </>
+      ) : null}
       {parts('stroke').map((part) => (
         <path
           key={part.line}
@@ -139,4 +174,7 @@ export const EdgeLayeredThumbnail = (_props: PresetThumbnailProps) => (
 export const EdgeTideThumbnail = (_props: PresetThumbnailProps) => <EdgeThumbnail edge="tide" />
 export const EdgeContourThumbnail = (_props: PresetThumbnailProps) => (
   <EdgeThumbnail edge="contour" />
+)
+export const EdgeStillWaterThumbnail = (_props: PresetThumbnailProps) => (
+  <EdgeThumbnail edge="still-water" />
 )
