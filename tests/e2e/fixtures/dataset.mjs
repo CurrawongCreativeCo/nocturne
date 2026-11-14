@@ -5563,6 +5563,7 @@ documents.push(
         _type: 'ctaBanner',
         title: 'Call to action',
         text: 'Banner text under the divider.',
+        tone: 'brand',
         style: { _type: 'sectionStyle', align: 'center' },
         headerDesign: {
           _type: 'object',
