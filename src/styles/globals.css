@@ -95,7 +95,7 @@
   body:has([data-minimal-page]:not([style*='display: none']))
     main
     > div:not(:is(section, div) ~ *)
-    > [data-section-edge-frame]
+    > :is([data-section-edge-frame], [data-section-elevated])
     > section
     > [data-screen-backdrop],
   body:has([data-minimal-page]:not([style*='display: none']))
@@ -108,7 +108,7 @@
     main
     > [data-sanity]
     > div:first-child
-    > [data-section-edge-frame]
+    > :is([data-section-edge-frame], [data-section-elevated])
     > section
     > [data-screen-backdrop] {
     --screen-backdrop-top: -100lvh;
@@ -125,7 +125,7 @@
   body:has([data-minimal-page]:not([style*='display: none']))
     main
     > div:not([data-edge-backdrop]):not(:has(~ :is(section, div):not([data-edge-backdrop])))
-    > [data-section-edge-frame]
+    > :is([data-section-edge-frame], [data-section-elevated])
     > section
     > [data-screen-backdrop],
   body:has([data-minimal-page]:not([style*='display: none']))
@@ -138,7 +138,7 @@
     main
     > [data-sanity]
     > div:not([data-edge-backdrop]):not(:has(~ div:not([data-edge-backdrop])))
-    > [data-section-edge-frame]
+    > :is([data-section-edge-frame], [data-section-elevated])
     > section
     > [data-screen-backdrop] {
     --screen-backdrop-bottom: -100lvh;
@@ -433,6 +433,35 @@
   z-index: var(--edge-z, 1);
 }
 
+/*
+ * Elevated (task 151, Slice 6): a straight boundary and a shadow. It has its own attribute, so the cut's rules
+ * (the mask, the bottom padding, the follower's pull-up, the footer band) do not apply to it. It takes the same
+ * stacking step as an edge frame: above the sections after it, so its shadow falls on them, and under the
+ * sticky header (z-40). The shadow is the Lab's: ink at the strength, 35% of it by 40% of the way, then clear.
+ */
+[data-section-elevated] {
+  z-index: var(--edge-z, 1);
+}
+
+[data-section-elevated='soft'] {
+  --shadow-depth: 18px;
+  --shadow-strength: 16%;
+}
+
+[data-section-elevated='deep'] {
+  --shadow-depth: 28px;
+  --shadow-strength: 24%;
+}
+
+[data-edge-shadow] {
+  height: var(--shadow-depth);
+  background: linear-gradient(
+    color-mix(in srgb, var(--color-ink) var(--shadow-strength), transparent),
+    color-mix(in srgb, var(--color-ink) calc(var(--shadow-strength) * 0.35), transparent) 40%,
+    transparent
+  );
+}
+
 [data-section-edge-frame] > section[data-spacing='compact'] {
   padding-bottom: calc(var(--spacing-section-compact) + var(--edge-h));
 }
@@ -559,6 +588,33 @@ main:has(div:not(:empty) + [data-edge-backdrop]) ~ [data-site-chrome] footer {
  */
 @media (forced-colors: active) {
   [data-edge-part] {
+    display: none;
+  }
+}
+
+/*
+ * On a Minimal page nothing follows the last section: no footer, so no section for its shadow to fall on, and a
+ * strip that hangs past the page's end would only make the page scroll further. It is not drawn there. "Last"
+ * is read as the last section's wrapper in <main> (or in draft mode's editable wrapper), the same reading the
+ * screen backdrop's clip uses above; Elevated always has a wrapper, which carries its stacking step.
+ */
+body:has([data-minimal-page]:not([style*='display: none']))
+  main
+  > div:not([data-edge-backdrop]):not(:has(~ :is(section, div):not([data-edge-backdrop])))
+  > [data-section-elevated]
+  > [data-edge-shadow],
+body:has([data-minimal-page]:not([style*='display: none']))
+  main
+  > [data-sanity]
+  > div:not([data-edge-backdrop]):not(:has(~ div:not([data-edge-backdrop])))
+  > [data-section-elevated]
+  > [data-edge-shadow] {
+  display: none;
+}
+
+/* Elevated's shadow is decoration whose meaning is colour too: forced colours hide it, and the straight boundary shows. */
+@media (forced-colors: active) {
+  [data-edge-shadow] {
     display: none;
   }
 }

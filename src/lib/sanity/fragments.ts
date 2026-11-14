@@ -282,6 +282,7 @@ export const sectionStyleFields = /* groq */ `
   edgeLayer,
   edgeTideLayer,
   edgeLineColour,
+  edgeShadow,
   edgeCrest,
   edgeDepth,
   edgeStrength,

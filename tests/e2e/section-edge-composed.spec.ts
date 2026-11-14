@@ -260,6 +260,35 @@ test.describe('Contour in the browser', () => {
   })
 })
 
+test.describe('before an Elevated section (task 151, Slice 6)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/edge-composed-elevated')
+  })
+
+  // The section below an edge recolours the edge's parts: Contrast (inverse) and Primary (accent) each redefine
+  // the Primary the parts are painted in. An Elevated section has a frame between its wrapper and its section.
+  test('draws Tide’s crest in the Primary of the Elevated Contrast section below', async ({
+    page,
+  }) => {
+    const below = section(page, 'ce-tide-below')
+    await expect(frameOf(page, 'ce-tide-below')).toHaveAttribute('data-section-elevated', 'soft')
+    const crest = await srgb(part(page, 'ce-tide', 'under-1'), 'fill')
+    expectNear(crest, await roleIn(below, '--color-accent'), 'the crest’s colour')
+    expect(near(crest, await roleIn(page.locator('body'), '--color-accent'))).toBe(false)
+  })
+
+  test('draws Contour’s lines in the Primary of the Elevated Primary section below', async ({
+    page,
+  }) => {
+    const below = section(page, 'ce-contour-below')
+    await expect(frameOf(page, 'ce-contour-below')).toHaveAttribute('data-section-elevated', 'soft')
+    const primary = await roleIn(below, '--color-accent')
+    expect(near(primary, await roleIn(page.locator('body'), '--color-accent'))).toBe(false)
+    for (const name of ['line-1', 'line-2', 'line-3'])
+      expectNear(await srgb(part(page, 'ce-contour', name), 'stroke'), primary, name)
+  })
+})
+
 test.describe('Classic beside them', () => {
   test('keeps the page’s colours over an inverse section: the new rules never reach it', async ({
     page,

@@ -29,6 +29,7 @@ import {
   type EdgeComposition,
   type EdgePaint,
   type EdgePart,
+  type EdgeShadow,
   type ResolvedEdge,
 } from './section-edges'
 import {
@@ -215,8 +216,11 @@ function SectionFrameView({
     gradients: design?.gradients,
     site: design?.colours,
     hasOwnBackground: Boolean(background),
+    // Elevated cuts nothing away, so nothing changes under a panel at the section's foot.
     overlaps:
-      Boolean(resolved.edge) || resolved.motion === 'parallax' || resolved.motion === 'float',
+      (Boolean(resolved.edge) && resolved.edge?.shape !== 'elevated') ||
+      resolved.motion === 'parallax' ||
+      resolved.motion === 'float',
   })
   const panelProps = panel ? panelDomProps(panel) : undefined
   // A mark sits above the background and overlay. With a panel it stays behind the content unless asked
@@ -350,12 +354,35 @@ function SectionFrameView({
     </section>
   )
 
-  return resolved.edge ? (
+  if (!resolved.edge) return section
+  if (resolved.edge.shape === 'elevated')
+    return <ElevatedFrame shadow={resolved.edge.shadow ?? 'soft'}>{section}</ElevatedFrame>
+  return (
     <EdgeFrame edge={resolved.edge} composition={composition} tone={resolved.tone}>
       {section}
     </EdgeFrame>
-  ) : (
-    section
+  )
+}
+
+/**
+ * Elevated (task 151, Slice 6): a straight boundary that casts a soft shadow onto the section below. The frame
+ * lifts the section a step above the sections after it, as an edge's does (globals.css), so the shadow falls on
+ * them and stays under the sticky header; the shadow is a strip that starts where the section ends and is
+ * painted over what follows. Nothing is masked and no room is reserved: the strip is absolutely placed and
+ * takes no part in layout, the section below is not pulled up, and the strip is outside the section, so a
+ * section that clips its overflow cannot clip it. It is its own attribute, not the edge frame's, so none of
+ * the cut's rules (mask, bottom padding, follower, footer band) reach it.
+ */
+function ElevatedFrame({ shadow, children }: { shadow: EdgeShadow; children: ReactNode }) {
+  return (
+    <div data-section-elevated={shadow} className="relative">
+      {children}
+      <div
+        data-edge-shadow=""
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-full"
+      />
+    </div>
   )
 }
 

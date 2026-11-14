@@ -4705,11 +4705,11 @@ None of them draws a see-through surface of its own that the panel checks would 
 ### Section dividers
 
 A section can end in a shape instead of a straight line: a diagonal, a wave, a curve, an arch, a layered wave, Tide, Contour,
-Still water, Lagoon or Reef. The section below shows through the cut, whatever its background is (a flat tone, a gradient or a picture), and moves up to
+Still water, Lagoon, Reef, or Elevated, which is a straight edge with a shadow. The section below shows through the cut, whatever its background is (a flat tone, a gradient or a picture), and moves up to
 meet it, so the colours and spacing come out right without anything to configure.
 
 **For editors** (Design tab, agency only). Under _Bottom edge_ pick a picture: None (the default, a straight edge),
-Diagonal, Wave, Curve, Arch, Layered wave, Tide, Contour, Still water, Lagoon or Reef. Then, as they apply to the shape:
+Diagonal, Wave, Curve, Arch, Layered wave, Tide, Contour, Still water, Lagoon, Reef or Elevated. Then, as they apply to the shape:
 
 - **Edge height**: Small, Medium or Large. Smaller on phones. Still water, Lagoon and Reef are not drawn at Small: Studio refuses it, and a
   Small saved before the shape was chosen is drawn at Medium.
@@ -4738,6 +4738,17 @@ Diagonal, Wave, Curve, Arch, Layered wave, Tide, Contour, Still water, Lagoon or
   (Light, Standard, Strong) and **Colours** (Tint: Secondary with Ink, or Secondary with Primary for Reef; Ink: text colour
   led; Highlight: Highlight led). A crest position, depth or layer-below switch saved under another shape is kept, not
   drawn, and the field says so. Reef has no hairline in this first pass.
+- **Elevated only**: a straight boundary that casts a soft shadow onto the section below, in place of a cut. One
+  choice, **Shadow**: Soft (the default: 18 px deep, starting at 16% of the text colour) or Deep (28 px, 24%). It
+  has none of the cut's settings (no height or custom heights, Flip, Invert, accent line or back wave colour); any of
+  those stored under another shape is ignored and kept, so choosing another shape brings it back. The shadow is a
+  decoration drawn outside the section, over what follows it: nothing is masked, no room is reserved, the section
+  below is not pulled up and no footer band is drawn, so it takes no space and cannot be clipped by a section that
+  clips its own overflow. It uses the same stacking step as an edge, so it falls on the sections after it and on the
+  footer and stays under the sticky header. It is hidden in forced colours, does not depend on mask support, and on a
+  Minimal page the last section's shadow is not drawn (nothing follows it). It needs a section below with some
+  light in it: on a near-black section it is nearly invisible. After a shaped edge, an Elevated section still takes
+  that edge's overlap, as any section would.
 - **Visibility advisory** (Still water, Lagoon and Reef; Studio only): beside the Colours field, one message says when a
   layer above the edge is faint against its section, naming the layer and, only if it helps on the same background, a
   stronger strength or another colour set. It never blocks publishing and changes nothing saved or drawn. It reads the

@@ -103,6 +103,7 @@ describe('sectionStyle', () => {
       'edgeLayer',
       'edgeTideLayer',
       'edgeLineColour',
+      'edgeShadow',
       'edgeCrest',
       'edgeDepth',
       'edgeStrength',

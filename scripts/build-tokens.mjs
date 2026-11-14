@@ -349,7 +349,7 @@ const toneBackground = (tone) =>
  * drawn over the section below the edge, so they take that section's tone, as anything inside it would: the
  * same variables, from the same table as the tones above. The section below is found from the markup, as
  * globals.css finds a drawn cut: the wrapper after the edge's own is `[data-edge-above]`, and its section is
- * plain or in a frame of its own. One `:has()` each, never nested (browsers drop such a rule). With no
+ * plain, or in a frame of its own (an edge's, or Elevated's). One `:has()` each, never nested (browsers drop such a rule). With no
  * section below, or no `:has()`, the parts keep the page's colours. Only `[data-edge-part]`: today's back
  * wave and accent line (`data-edge-layer`) keep theirs.
  *
@@ -364,6 +364,8 @@ const edgeBlocks = [
         [
           `div:has(+ [data-edge-above] > section[data-tone='${name}']) [data-section-edge-frame] > [data-edge-part]`,
           `div:has(+ [data-edge-above] > [data-section-edge-frame] > section[data-tone='${name}']) [data-section-edge-frame] > [data-edge-part]`,
+          // Elevated's frame (task 151, Slice 6) sits between the wrapper and the section too.
+          `div:has(+ [data-edge-above] > [data-section-elevated] > section[data-tone='${name}']) [data-section-edge-frame] > [data-edge-part]`,
         ],
         tone.vars.map(([variable, value]) => `${variable}: ${value}`),
       ),
