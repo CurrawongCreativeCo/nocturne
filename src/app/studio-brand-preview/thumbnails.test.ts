@@ -8,12 +8,15 @@ import { sectionTypes } from '@/features/pages/schemas/sections'
 import { hero } from '@/features/pages/schemas/sections/hero'
 import { linkList } from '@/features/pages/schemas/sections/link-list'
 import { SHADOW_LEVELS } from '@/lib/sanity/depth-options'
-import { DIVIDER_STYLES } from '@/lib/sanity/divider-options'
+import { DIVIDER_FINISHES, DIVIDER_STYLES } from '@/lib/sanity/divider-options'
 import { LINK_ARROWS } from '@/lib/sanity/link-arrow-options'
 import { decorativeDivider } from '@/lib/sanity/schema/decorative-divider'
 import { imageDesign } from '@/lib/sanity/schema/image-design'
 import { sectionStyle } from '@/lib/sanity/schema/section-style'
-import { dividerThumbnails } from '@/lib/sanity/schema/thumbnails/divider-thumbnails'
+import {
+  dividerFinishThumbnails,
+  dividerThumbnails,
+} from '@/lib/sanity/schema/thumbnails/divider-thumbnails'
 import {
   shadowThumbnails,
   linkArrowThumbnails,
@@ -149,6 +152,7 @@ describe('thumbnails cover every option', () => {
   it.each([
     ['shadow', SHADOW_LEVELS, shadowThumbnails],
     ['divider', DIVIDER_STYLES, dividerThumbnails],
+    ['divider finish', DIVIDER_FINISHES, dividerFinishThumbnails],
     ['link arrow', LINK_ARROWS, linkArrowThumbnails],
     ['social style', SOCIAL_STYLES, socialStyleThumbnails],
   ] as const)('has a thumbnail for every %s choice', (_name, values, thumbnails) => {
@@ -174,6 +178,11 @@ describe('thumbnails cover every option', () => {
     expect(Object.keys(dividers).sort()).toEqual(Object.keys(dividerThumbnails).sort())
     for (const [value, thumbnail] of Object.entries(dividerThumbnails)) {
       expect(dividers[value], `divider.${value}`).toBe(thumbnail)
+    }
+    const finishes = listOf(decorativeDivider.fields, 'finish')
+    expect(Object.keys(finishes).sort()).toEqual(Object.keys(dividerFinishThumbnails).sort())
+    for (const [value, thumbnail] of Object.entries(dividerFinishThumbnails)) {
+      expect(finishes[value], `divider finish.${value}`).toBe(thumbnail)
     }
   })
 
@@ -203,6 +212,7 @@ const everything: [string, Thumbnail][] = [
       ['panel-presentation', panelPresentationThumbnails],
       ['shadow', shadowThumbnails],
       ['divider', dividerThumbnails],
+      ['divider-finish', dividerFinishThumbnails],
       ['link-arrow', linkArrowThumbnails],
       ['social-style', socialStyleThumbnails],
     ] as const

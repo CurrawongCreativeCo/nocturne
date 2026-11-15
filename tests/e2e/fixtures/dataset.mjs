@@ -5678,6 +5678,84 @@ documents.push(
     _updatedAt: UPDATED,
   },
   {
+    // Finish and the Ornament centre (tests/e2e/rules-finish.spec.ts): the same section header, one per case, so a
+    // test can hold a glowing divider against its flat twin. `rf-*-stored` carry a Glow the style never draws.
+    _id: 'page-rules-finish',
+    _type: 'page',
+    title: 'Rules finish',
+    slug: { _type: 'slug', current: 'rules-finish' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      ['line-flat', { style: 'line', width: 'long', finish: 'flat' }],
+      ['line-unset', { style: 'line', width: 'long' }],
+      ['line-glow', { style: 'line', width: 'long', finish: 'glow' }],
+      ['line-glow-bold', { style: 'line', width: 'long', thickness: 'bold', finish: 'glow' }],
+      ['double-flat', { style: 'double', width: 'long' }],
+      ['double-glow', { style: 'double', width: 'long', finish: 'glow' }],
+      ['gradient-flat', { style: 'gradient', width: 'long' }],
+      ['gradient-glow', { style: 'gradient', width: 'long', finish: 'glow' }],
+      [
+        'gradient-glow-bold',
+        { style: 'gradient', width: 'long', thickness: 'bold', finish: 'glow' },
+      ],
+      ['gradient-glow-full', { style: 'gradient', width: 'full', finish: 'glow' }],
+      // A full-width section keeps no gutters of its own (section-style.ts), so on a phone a Full width divider
+      // in its header runs from one edge of the screen to the other.
+      ['gutterless-thin', { style: 'gradient', width: 'full', finish: 'glow' }, { width: 'full' }],
+      [
+        'gutterless-bold',
+        { style: 'gradient', width: 'full', thickness: 'bold', finish: 'glow' },
+        { width: 'full' },
+      ],
+      [
+        'gutterless-centre',
+        { style: 'gradient', width: 'full', finish: 'glow', centre: 'diamond' },
+        { width: 'full' },
+      ],
+      [
+        'gradient-glow-centre',
+        { style: 'gradient', width: 'long', finish: 'glow', centre: 'diamond' },
+      ],
+      ['fade-stored', { style: 'fade', width: 'long', finish: 'glow' }],
+      ['dotted-stored', { style: 'dotted', width: 'long', finish: 'glow' }],
+      ['dots-stored', { style: 'dots', finish: 'glow' }],
+      ['ornament', { style: 'line', width: 'long', centre: 'ornament' }],
+      ['ornament-small', { style: 'line', width: 'long', centre: 'ornament', centreSize: 'small' }],
+      [
+        'ornament-own',
+        {
+          style: 'line',
+          width: 'long',
+          centre: 'ornament',
+          centreSize: 'large',
+          centreColour: { _type: 'object', colour: 'highlight' },
+        },
+      ],
+      ['ornament-glow', { style: 'line', width: 'long', finish: 'glow', centre: 'ornament' }],
+      ['dots-ornament', { style: 'dots', centre: 'ornament' }],
+    ].map(([name, divider, style]) => ({
+      _key: `rf-${name}`,
+      _type: 'featuresGrid',
+      title: `Header: ${name}`,
+      intro: 'An introduction under the divider.',
+      columns: 2,
+      style: { _type: 'sectionStyle', anchorId: `rf-${name}`, align: 'center', ...style },
+      headerDesign: {
+        _type: 'object',
+        divider: { _type: 'decorativeDivider', ...divider },
+      },
+      items: [1, 2].map((i) => ({
+        _key: key(),
+        _type: 'featureItem',
+        title: `Feature ${i}`,
+        text: 'Text.',
+        icon: image(''),
+      })),
+    })),
+    _updatedAt: UPDATED,
+  },
+  {
     // A divider under a hero's title (tests/e2e/hero-dividers.spec.ts): one hero in each layout, each with
     // an intro and buttons, and a Full background hero with none chosen to compare spacing against.
     _id: 'page-hero-dividers',

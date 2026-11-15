@@ -23,6 +23,7 @@ export const decorativeDividerFields = /* groq */ `
   style,
   width,
   thickness,
+  finish,
   centre,
   text,
   textCase,
