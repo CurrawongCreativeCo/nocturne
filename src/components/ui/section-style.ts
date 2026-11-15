@@ -26,6 +26,8 @@ import {
   SECTION_EDGE_DEPTHS,
   SECTION_EDGE_HEIGHTS,
   SECTION_EDGE_LAYERS,
+  SECTION_EDGE_LAYER_ROLES,
+  SECTION_EDGE_LAYER_SLOTS,
   SECTION_EDGE_LINE_COLOURS,
   SECTION_EDGE_PALETTES,
   SECTION_EDGE_SHADOWS,
@@ -43,10 +45,16 @@ import {
   edgeAllowsFlip,
   edgeAllowsInvert,
   isGeneratedEdge,
+  type EdgeLayerColoursInput,
 } from '@/lib/sanity/section-style-options'
 import type { SanityImageData } from '@/types/sanity'
 
-import { LAYERED_PRESETS, drawsLayerBelow, type LayeredSettings } from './edge-presets'
+import {
+  LAYERED_PRESETS,
+  drawsLayerBelow,
+  type LayeredSettings,
+  type LayerOverrides,
+} from './edge-presets'
 import { customEdgeHeight, type ResolvedEdge } from './section-edges'
 
 /**
@@ -125,6 +133,8 @@ export interface SectionStyleInput {
   edgeStrength?: string | null
   edgePalette?: string | null
   edgeLayerBelow?: boolean | null
+  /** A generated shape's own colour and strength for each layer (task 151, Slice 8); unset is the recipe. */
+  edgeLayerColours?: EdgeLayerColoursInput | null
   edgeInvert?: boolean | null
   edgeHeightMobile?: number | null
   edgeHeightTablet?: number | null
@@ -393,7 +403,28 @@ function resolveLayered(
     strength: pick(SECTION_EDGE_STRENGTHS, style?.edgeStrength) ?? 'standard',
     palette: pick(SECTION_EDGE_PALETTES, style?.edgePalette) ?? preset.defaultPalette,
     below: drawsLayerBelow(preset, depth, style?.edgeLayerBelow === true),
+    ...overridesOf(style?.edgeLayerColours),
   }
+}
+
+/**
+ * The per-layer colours and strengths as stored, each field read on its own: a missing, null, empty or unknown
+ * value is unset (the recipe's role, or the shared strength), so a colour with no strength and a strength with
+ * no colour are both valid. Every slot is read, drawn or not: the composition draws only the layers a shape has,
+ * and a value for another slot is kept in the data. Nothing is added when nothing valid is stored.
+ */
+function overridesOf(
+  stored: EdgeLayerColoursInput | null | undefined,
+): { overrides: LayerOverrides } | undefined {
+  if (!stored || typeof stored !== 'object') return undefined
+  const overrides: LayerOverrides = {}
+  for (const slot of SECTION_EDGE_LAYER_SLOTS) {
+    const paint = pick(SECTION_EDGE_LAYER_ROLES, stored[slot])
+    const strength = pick(SECTION_EDGE_STRENGTHS, stored[`${slot}Strength`])
+    if (paint || strength)
+      overrides[slot] = { ...(paint ? { paint } : {}), ...(strength ? { strength } : {}) }
+  }
+  return Object.keys(overrides).length > 0 ? { overrides } : undefined
 }
 
 /** Whether a section is drawn over a picture or a brand gradient, as resolveSectionStyle reads them. */

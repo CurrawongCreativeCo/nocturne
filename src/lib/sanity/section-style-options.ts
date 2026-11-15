@@ -383,6 +383,33 @@ export const SECTION_EDGE_PALETTE_TITLES: Record<(typeof SECTION_EDGE_PALETTES)[
   highlight: 'Highlight',
 }
 
+/**
+ * The layers of a generated edge that Advanced can colour on their own (task 151, Slice 8): the first and second
+ * above the cut and the one below it. A colour is one of the four brand roles the recipes draw in; it is never
+ * a stored hex. (Reef's hairline and its White veil are deferred, not part of this list.)
+ */
+export const SECTION_EDGE_LAYER_SLOTS = ['above1', 'above2', 'below'] as const
+export type EdgeLayerSlot = (typeof SECTION_EDGE_LAYER_SLOTS)[number]
+export const SECTION_EDGE_LAYER_ROLES = ['accent', 'accent-2', 'highlight', 'ink'] as const
+export const SECTION_EDGE_LAYER_ROLE_TITLES: Record<
+  (typeof SECTION_EDGE_LAYER_ROLES)[number],
+  string
+> = {
+  accent: 'Primary',
+  'accent-2': 'Secondary',
+  highlight: 'Highlight',
+  ink: 'Text',
+}
+export const SECTION_EDGE_LAYER_SLOT_TITLES: Record<EdgeLayerSlot, string> = {
+  above1: 'First layer above',
+  above2: 'Second layer above',
+  below: 'Layer below',
+}
+/** The stored fields of `style.edgeLayerColours`: a slot's colour is named for it, its strength `<slot>Strength`. */
+export type EdgeLayerColoursInput = Partial<
+  Record<EdgeLayerSlot | `${EdgeLayerSlot}Strength`, string | null>
+>
+
 /** Curve and Arch are symmetrical, so mirroring them would change nothing: Flip is not offered. */
 export const edgeAllowsFlip = (edge: string | null | undefined) =>
   edge === 'diagonal' ||

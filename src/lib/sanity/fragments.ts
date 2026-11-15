@@ -289,6 +289,14 @@ export const sectionStyleFields = /* groq */ `
   edgeStrength,
   edgePalette,
   edgeLayerBelow,
+  edgeLayerColours {
+    above1,
+    above1Strength,
+    above2,
+    above2Strength,
+    below,
+    belowStrength
+  },
   edgeInvert,
   edgeHeightMobile,
   edgeHeightTablet,

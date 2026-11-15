@@ -110,6 +110,7 @@ describe('sectionStyle', () => {
       'edgePalette',
       'edgeLayerBelow',
       'edgeInvert',
+      'edgeLayerColours',
       'edgeHeightMobile',
       'edgeHeightTablet',
       'edgeHeightDesktop',

@@ -58,6 +58,10 @@ import {
   SECTION_EDGE_HEIGHTS,
   SECTION_EDGE_HEIGHT_TITLES,
   SECTION_EDGE_LAYERS,
+  SECTION_EDGE_LAYER_ROLE_TITLES,
+  SECTION_EDGE_LAYER_ROLES,
+  SECTION_EDGE_LAYER_SLOT_TITLES,
+  SECTION_EDGE_LAYER_SLOTS,
   SECTION_EDGE_LAYER_TITLES,
   SECTION_EDGE_LINE_COLOURS,
   SECTION_EDGE_CREST_TITLES,
@@ -108,6 +112,10 @@ import {
   edgeGeneratedOptionHidden,
   edgeStepHidden,
   edgeLayerBelowHidden,
+  edgeLayerColoursHidden,
+  edgeLayerColourFieldHidden,
+  staleLayerColourFieldMessage,
+  staleLayerColoursMessage,
   generatedCustomHeightMessage,
   generatedHeightMessage,
   staleGeneratedOptionMessage,
@@ -370,6 +378,7 @@ const CAPABILITY_FIELDS: Readonly<Record<string, CapabilityId>> = {
   edgeStrength: 'edge',
   edgePalette: 'edge',
   edgeLayerBelow: 'edge',
+  edgeLayerColours: 'edge',
   edgeInvert: 'edge',
 }
 
@@ -416,7 +425,8 @@ export const sectionStyle = defineType({
     {
       name: 'edgeAdvanced',
       title: 'Advanced: edge',
-      description: 'Turn the shape inside out, or set the height for each screen size.',
+      description:
+        'Turn the shape inside out, give each layer its own colour or strength, or set the height for each screen size.',
       options: { collapsible: true, collapsed: true },
     },
   ],
@@ -1294,6 +1304,40 @@ export const sectionStyle = defineType({
       fieldset: 'edgeAdvanced',
       initialValue: false,
       hidden: edgeInvertHidden,
+    }),
+    defineField({
+      name: 'edgeLayerColours',
+      title: 'Layer colours',
+      description:
+        'Give a layer above or below the edge its own brand colour or strength. Anything left empty follows Colours and Layer strength above. Clear a field from its menu; clear them all to return to the recipe.',
+      type: 'object',
+      fieldset: 'edgeAdvanced',
+      hidden: edgeLayerColoursHidden,
+      // No initial value: nothing is stored until a layer is given its own, and an empty group is the recipe.
+      fields: SECTION_EDGE_LAYER_SLOTS.flatMap((slot) => {
+        const layer = SECTION_EDGE_LAYER_SLOT_TITLES[slot]
+        return [
+          defineField({
+            name: slot,
+            title: `${layer}: colour`,
+            type: 'string',
+            options: radio(SECTION_EDGE_LAYER_ROLES, SECTION_EDGE_LAYER_ROLE_TITLES),
+            hidden: edgeLayerColourFieldHidden(slot),
+            validation: (rule) =>
+              rule.custom(staleLayerColourFieldMessage(slot, 'colour')).warning(),
+          }),
+          defineField({
+            name: `${slot}Strength`,
+            title: `${layer}: strength`,
+            type: 'string',
+            options: radio(SECTION_EDGE_STRENGTHS, SECTION_EDGE_STRENGTH_TITLES),
+            hidden: edgeLayerColourFieldHidden(slot),
+            validation: (rule) =>
+              rule.custom(staleLayerColourFieldMessage(slot, 'strength')).warning(),
+          }),
+        ]
+      }),
+      validation: (rule) => rule.custom(staleLayerColoursMessage).warning(),
     }),
     ...(
       [

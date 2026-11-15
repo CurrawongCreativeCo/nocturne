@@ -286,21 +286,28 @@ export function layeredComposition(edge: ResolvedEdge): EdgeComposition {
   const geometry = layeredGeometryOf(edge)
   if (!geometry || !isGeneratedEdge(edge.shape) || !edge.layered) return { cut: '', parts: [] }
   const preset = LAYERED_PRESETS[edge.shape]
-  const recipe = preset.recipes[edge.layered.palette]
-  const opacity = opacityOf(preset, edge.layered.strength)
+  const settings = edge.layered
+  const recipe = preset.recipes[settings.palette]
   let upper = 0
   const parts: EdgePart[] = geometry.layers.map((layer) => {
     const second = layer.side === 'over' && upper++ === 1
+    // A layer's own colour and strength (Advanced) replace the recipe's role and the shared strength for that
+    // layer only; the layer ratios and the order of the multiplications are the same as without them. Slots the
+    // shape does not draw never get here, so an override stored for one is ignored.
+    const override =
+      settings.overrides?.[layer.side === 'under' ? 'below' : second ? 'above2' : 'above1']
+    const opacity = opacityOf(preset, override?.strength ?? settings.strength)
     return {
       kind: 'fill',
       side: layer.side,
       line: pathFromFunction(layer.line, 0, 1, LAYER_SEGMENTS),
       paint:
-        layer.side === 'under'
+        override?.paint ??
+        (layer.side === 'under'
           ? recipe.under
           : second
             ? (recipe.over2 ?? recipe.over)
-            : recipe.over,
+            : recipe.over),
       opacity:
         layer.side === 'under'
           ? opacity * BELOW_OPACITY

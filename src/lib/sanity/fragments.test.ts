@@ -14,6 +14,17 @@ describe('sectionStyleFields', () => {
     expect(edgeFields.length).toBeGreaterThan(5)
     expect(edgeFields.filter((name) => !projected.has(name))).toEqual([])
   })
+
+  it('projects each field of the per-layer colours by name (task 151, Slice 8)', () => {
+    const group = (
+      sectionStyle.fields as unknown as { name: string; fields?: { name: string }[] }[]
+    ).find((field) => field.name === 'edgeLayerColours')
+    const inner = group?.fields?.map((field) => field.name) ?? []
+    expect(inner).toHaveLength(6)
+    const projection = /edgeLayerColours\s*\{([^}]*)\}/.exec(sectionStyleFields)?.[1] ?? ''
+    const projected = new Set(projection.match(/\b[a-zA-Z0-9]+\b/g))
+    expect(inner.filter((name) => !projected.has(name))).toEqual([])
+  })
 })
 
 describe('decorativeDividerFields', () => {

@@ -43740,6 +43740,152 @@
         "clientEditable": false
       },
       {
+        "path": "edgeLayerColours",
+        "kind": "object",
+        "required": null,
+        "max": null,
+        "capability": "edge",
+        "clientEditable": false
+      },
+      {
+        "path": "edgeLayerColours.above1",
+        "kind": "string",
+        "required": null,
+        "max": null,
+        "list": [
+          {
+            "value": "accent",
+            "title": "Primary"
+          },
+          {
+            "value": "accent-2",
+            "title": "Secondary"
+          },
+          {
+            "value": "highlight",
+            "title": "Highlight"
+          },
+          {
+            "value": "ink",
+            "title": "Text"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
+        "path": "edgeLayerColours.above1Strength",
+        "kind": "string",
+        "required": null,
+        "max": null,
+        "list": [
+          {
+            "value": "light",
+            "title": "Light"
+          },
+          {
+            "value": "standard",
+            "title": "Standard"
+          },
+          {
+            "value": "strong",
+            "title": "Strong"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
+        "path": "edgeLayerColours.above2",
+        "kind": "string",
+        "required": null,
+        "max": null,
+        "list": [
+          {
+            "value": "accent",
+            "title": "Primary"
+          },
+          {
+            "value": "accent-2",
+            "title": "Secondary"
+          },
+          {
+            "value": "highlight",
+            "title": "Highlight"
+          },
+          {
+            "value": "ink",
+            "title": "Text"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
+        "path": "edgeLayerColours.above2Strength",
+        "kind": "string",
+        "required": null,
+        "max": null,
+        "list": [
+          {
+            "value": "light",
+            "title": "Light"
+          },
+          {
+            "value": "standard",
+            "title": "Standard"
+          },
+          {
+            "value": "strong",
+            "title": "Strong"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
+        "path": "edgeLayerColours.below",
+        "kind": "string",
+        "required": null,
+        "max": null,
+        "list": [
+          {
+            "value": "accent",
+            "title": "Primary"
+          },
+          {
+            "value": "accent-2",
+            "title": "Secondary"
+          },
+          {
+            "value": "highlight",
+            "title": "Highlight"
+          },
+          {
+            "value": "ink",
+            "title": "Text"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
+        "path": "edgeLayerColours.belowStrength",
+        "kind": "string",
+        "required": null,
+        "max": null,
+        "list": [
+          {
+            "value": "light",
+            "title": "Light"
+          },
+          {
+            "value": "standard",
+            "title": "Standard"
+          },
+          {
+            "value": "strong",
+            "title": "Strong"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
         "path": "edgeHeightMobile",
         "kind": "number",
         "required": null,
