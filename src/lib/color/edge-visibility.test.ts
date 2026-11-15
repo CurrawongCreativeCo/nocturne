@@ -25,12 +25,14 @@ const advise = (
 ) => edgeVisibility({ style, site: colours, follower })
 
 const LAST: FollowerInput = { position: 'last' }
+/** A following section whose presence is established, unless a test says otherwise. */
 const next = (
   style: SectionStyleInput | null,
   extra: Partial<FollowerInput> = {},
 ): FollowerInput => ({
   position: 'next',
   style,
+  presence: 'established',
   ...extra,
 })
 
@@ -355,13 +357,38 @@ describe('the layer below the edge', () => {
     ['a gradient', next({ tone: 'alt', gradient: 'forest-dusk' }), /has a gradient/],
     [
       'a form section with no form, whatever tone is stored',
-      next({ tone: 'inverse' }, { presence: 'nothing' }),
+      next({ tone: 'inverse' }, { presence: 'form-empty' }),
       /form with no form chosen/,
     ],
     [
       'a form section whose form cannot be checked, whatever tone is stored',
-      next({ tone: 'accent' }, { presence: 'unverified' }),
+      next({ tone: 'accent' }, { presence: 'form-unresolved' }),
       /form can’t be checked/,
+    ],
+    [
+      'a pricing table with no plans',
+      next({ tone: 'inverse' }, { presence: 'plans-empty' }),
+      /no plans/,
+    ],
+    [
+      'a pricing table whose plans are references',
+      next({ tone: 'inverse' }, { presence: 'plans-unverified' }),
+      /Stripe prices/,
+    ],
+    [
+      'an embed the page cannot draw',
+      next({ tone: 'inverse' }, { presence: 'embed-invalid' }),
+      /embed address/,
+    ],
+    [
+      'a section type not shown to draw its background',
+      next({ tone: 'inverse' }, { presence: 'type-unverified' }),
+      /can’t confirm/,
+    ],
+    [
+      'a section with no presence stated, whatever tone is stored',
+      { position: 'next', style: { tone: 'inverse' } },
+      /can’t confirm/,
     ],
     ['a tone left to the section type', next({}), /not set in its Background field/],
     ['no style at all', next(null), /not set in its Background field/],

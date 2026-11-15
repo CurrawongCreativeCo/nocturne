@@ -1,3 +1,4 @@
+import { stegaClean } from 'next-sanity'
 import type { ConditionalPropertyCallback } from 'sanity'
 
 import {
@@ -10,7 +11,8 @@ import {
 } from '@/components/motion/presets'
 import { LAYERED_PRESETS, allowsLayerBelow, drawnLayerSlots } from '@/components/ui/edge-presets'
 import { resolveEdge, type SectionStyleInput } from '@/components/ui/section-style'
-import type { FollowerInput } from '@/lib/color/edge-visibility'
+import { resolveEmbed } from '@/config/embed-providers'
+import type { FollowerInput, FollowerPresence } from '@/lib/color/edge-visibility'
 import { isMembersOnly } from '@/lib/sanity/access'
 
 import {
@@ -112,15 +114,41 @@ export function sectionAtStylePath(
 }
 
 /**
- * Whether the following section draws at all, where its own data decides. A form section renders nothing without
- * a form (and, in the renderer, when the reference points at a deleted form): with no form chosen it draws
- * nothing, and with a reference Studio cannot resolve (no request is made) it may draw nothing. Other section
- * types are not modelled here.
+ * Whether the following section draws its background, from its own data and what is verified of its component
+ * (follower-presence.test.tsx). Only a type whose component always draws its frame in the stored tone is
+ * `established`; a form, a pricing table or an embed is judged by the data its component depends on, and an
+ * embed through the same guard the page uses (`resolveEmbed`). References alone prove nothing: a form or a plan
+ * may point at something deleted. Every other type is `type-unverified`; this is not a model of the renderer.
  */
-function presenceOf(section: SectionValue): Pick<FollowerInput, 'presence'> {
-  if (section._type !== 'formSection') return {}
-  const form = section.form as { _ref?: unknown } | null | undefined
-  return { presence: form?._ref ? 'unverified' : 'nothing' }
+function presenceOf(section: SectionValue): { presence: FollowerPresence } {
+  switch (section._type) {
+    case 'richText':
+    case 'featuresGrid':
+    case 'ctaBanner':
+    case 'newsletterSignup':
+      return { presence: 'established' }
+    case 'embed':
+      return {
+        presence: resolveEmbed(
+          stegaClean(section.provider as string),
+          stegaClean(section.url as string),
+        )
+          ? 'established'
+          : 'embed-invalid',
+      }
+    case 'formSection': {
+      const form = section.form as { _ref?: unknown } | null | undefined
+      return { presence: form?._ref ? 'form-unresolved' : 'form-empty' }
+    }
+    case 'pricingTable': {
+      const plans = section.plans
+      return {
+        presence: Array.isArray(plans) && plans.length > 0 ? 'plans-unverified' : 'plans-empty',
+      }
+    }
+    default:
+      return { presence: 'type-unverified' }
+  }
 }
 
 /** The lists the page renderer draws sections from: a page's `pageBuilder` and a service's `sections`. */

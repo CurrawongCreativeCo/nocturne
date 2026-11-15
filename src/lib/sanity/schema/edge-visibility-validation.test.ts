@@ -122,7 +122,7 @@ describe('the follower, read from the document the form holds', () => {
   const at = (key: string) => ['pageBuilder', { _key: key }, 'style', 'edgePalette']
   const section = (key: string, style: object = {}, extra = {}) => ({
     _key: key,
-    _type: 'cta',
+    _type: 'richText',
     style,
     ...extra,
   })
@@ -244,7 +244,7 @@ describe('a follower that may draw nothing', () => {
       follower: followerAtStylePath(pages(form('inverse')), key),
     })
     const accentNext = await edgeVisibilityFor(REEF, reading().client, {
-      follower: { position: 'next', style: { tone: 'accent' } },
+      follower: { position: 'next', style: { tone: 'accent' }, presence: 'established' },
     })
     // Had it looked past the form, it would have measured the accent section after it.
     expect(accentNext.layers.some((layer) => layer.side === 'under')).toBe(true)
@@ -267,5 +267,112 @@ describe('a follower that may draw nothing', () => {
       /second layer may be hard to see|first layer may be hard to see|layers may be hard to see/,
     )
     expect(await uncheckedSceneNote(faintAbove, reading().client, { follower })).toMatch(/form/)
+  })
+})
+
+/**
+ * A follower is assessed only when its presence and background are established: a section type whose component
+ * always draws its frame in the stored tone (verified against the renderer in follower-presence.test.tsx), or an
+ * embed whose address the page can draw. Everything else (a type not proven here, a pricing table whose plans
+ * are references or empty, an embed the page cannot draw) is left unassessed, with its own Preview guidance, and
+ * contributes no ratio and no suggestion.
+ */
+describe('which followers are assessed', () => {
+  const REEF: SectionStyleInput = { tone: 'alt', edge: 'reef' }
+  const key = ['pageBuilder', { _key: 'a' }, 'style', 'edgePalette']
+  const pages = (follower: object) => ({
+    pageBuilder: [
+      { _key: 'a', _type: 'richText', style: REEF },
+      follower,
+      { _key: 'n', _type: 'richText', style: { tone: 'accent' } },
+    ],
+  })
+  const at = (type: string, tone: string, extra: object = {}) => ({
+    _key: 'f',
+    _type: type,
+    style: { tone },
+    ...extra,
+  })
+  const judge = (follower: object, style: SectionStyleInput = REEF) =>
+    edgeVisibilityFor(style, reading().client, {
+      follower: followerAtStylePath(pages(follower), key),
+    })
+
+  for (const type of ['richText', 'featuresGrid', 'ctaBanner', 'newsletterSignup'])
+    for (const tone of ['alt', 'inverse', 'accent'])
+      it(`assesses a ${tone} ${type}, which always draws its frame`, async () => {
+        const result = await judge(at(type, tone))
+        expect(result.state).toBe('clear')
+        expect(result.layers.some((layer) => layer.side === 'under')).toBe(true)
+      })
+
+  it('assesses an embed the page can draw, and not one it cannot', async () => {
+    const valid = { provider: 'typeform', url: 'https://form.typeform.com/to/abcd1234' }
+    expect((await judge(at('embed', 'inverse', valid))).state).toBe('clear')
+    for (const bad of [
+      {},
+      { provider: 'typeform' },
+      { provider: 'typeform', url: 'https://evil.test/to/abcd1234' },
+      { provider: 'nope', url: 'https://x.test' },
+    ]) {
+      const result = await judge(at('embed', 'inverse', bad))
+      expect(result.state, JSON.stringify(bad)).toBe('unchecked')
+      expect(result.message).toMatch(/embed/)
+      expect(result.layers.some((layer) => layer.side === 'under')).toBe(false)
+    }
+  })
+
+  it('does not assess a pricing table: empty plans draw nothing, and plans are references that may not resolve', async () => {
+    const none = await judge(at('pricingTable', 'inverse', { plans: [] }))
+    expect(none.state).toBe('unchecked')
+    expect(none.message).toMatch(/no plans/)
+    const refs = await judge(
+      at('pricingTable', 'accent', { plans: [{ price: { _type: 'reference', _ref: 'price_1' } }] }),
+    )
+    expect(refs.state).toBe('unchecked')
+    expect(refs.message).toMatch(/Stripe prices/)
+    for (const result of [none, refs])
+      expect(result.layers.some((l) => l.side === 'under')).toBe(false)
+  })
+
+  for (const type of [
+    'faq',
+    'events',
+    'team',
+    'testimonials',
+    'mediaText',
+    'gallery',
+    'somethingNew',
+  ])
+    it(`does not assess a ${type}, which this check has not shown to draw its background`, async () => {
+      const result = await judge(at(type, 'inverse'))
+      expect(result.state).toBe('unchecked')
+      expect(result.message).toMatch(/can’t confirm/)
+      expect(result.layers.some((layer) => layer.side === 'under')).toBe(false)
+    })
+
+  it('gives an unassessed layer no ratio and no suggestion, even when its override would be faint', async () => {
+    const faintBelow: SectionStyleInput = { ...REEF, edgeLayerColours: { below: 'highlight' } }
+    const result = await judge(at('events', 'alt'), faintBelow)
+    expect(result.state).toBe('unchecked')
+    expect(result.faint).toEqual([])
+    expect(result.message).not.toMatch(/Try|set to|may be hard/)
+  })
+
+  it('keeps an assessed faint layer above available beside the note', async () => {
+    const faintAbove: SectionStyleInput = { ...REEF, edgePalette: 'highlight' }
+    const follower = followerAtStylePath(pages(at('events', 'inverse')), key)
+    expect(await faintLayerWarning(faintAbove, reading().client, { follower })).toMatch(
+      /hard to see/,
+    )
+    expect(await uncheckedSceneNote(faintAbove, reading().client, { follower })).toMatch(
+      /can’t confirm/,
+    )
+  })
+
+  it('never reads the section after it', async () => {
+    const result = await judge(at('events', 'inverse'))
+    expect(result.unassessed.map((layer) => layer.side)).toEqual(['under'])
+    expect(result.layers.some((layer) => layer.side === 'under')).toBe(false)
   })
 })

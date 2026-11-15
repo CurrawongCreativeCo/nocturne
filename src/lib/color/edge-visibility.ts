@@ -68,13 +68,30 @@ const UNCHECKED_REASON: Record<Unchecked, string> = {
   colours: 'the site colours could not be read',
 }
 
+/**
+ * Whether the section after this one draws its background, as far as the form can establish it from the
+ * document. Only `established` allows a scene to be assessed: the section's type is one whose component always
+ * draws its frame in the stored tone (verified in follower-presence.test.tsx), with its own data valid. The rest
+ * name why not, so the note can say it. A section type not listed is `type-unverified`: a stored tone or a
+ * reference alone proves nothing about what is drawn.
+ */
+export type FollowerPresence = 'established' | FollowerGap
+
+/** The ways a following section's presence is not established. */
+export type FollowerGap =
+  | 'form-empty'
+  | 'form-unresolved'
+  | 'plans-empty'
+  | 'plans-unverified'
+  | 'embed-invalid'
+  | 'type-unverified'
+
 /** Why the layer below the edge is not judged: it is over the next section, or the footer's band. */
 export type FollowerUnchecked =
   | 'context'
   | 'shared'
   | 'locked'
-  | 'empty'
-  | 'unresolved'
+  | FollowerGap
   | 'own'
   | 'picture'
   | 'gradient'
@@ -85,10 +102,17 @@ const FOLLOWER_REASON: Record<FollowerUnchecked, string> = {
   context: 'this section’s place on the page can’t be read from here',
   shared: 'the next section is a shared section',
   locked: 'the next section is members only',
-  empty:
+  'form-empty':
     'the next section is a form with no form chosen, so it draws nothing, and the layer is over whatever follows that gap',
-  unresolved:
+  'form-unresolved':
     'the next section’s form can’t be checked from here, and a form that no longer exists draws nothing',
+  'plans-empty': 'the next section is a pricing table with no plans, so it draws nothing',
+  'plans-unverified':
+    'the next section’s plans are Stripe prices that can’t be checked from here, and a table with none draws nothing',
+  'embed-invalid':
+    'the next section’s embed address is not one the page can draw, so it draws nothing',
+  'type-unverified':
+    'the next section is a kind this check can’t confirm will draw its background, as it may depend on content or data that is not loaded here',
   own: 'the next section draws its own picture or video',
   picture: 'the next section has a background picture',
   gradient: 'the next section has a gradient',
@@ -111,12 +135,8 @@ export interface FollowerInput {
   shared?: boolean
   /** `next`: a members-only section, which the page draws as a stub. */
   locked?: boolean
-  /**
-   * `next`: whether the section draws at all. A stored tone does not say so: a form section with no form draws
-   * nothing (`nothing`), and one whose form is a reference Studio cannot resolve may draw nothing
-   * (`unverified`). Left out, the section is taken to draw its background.
-   */
-  presence?: 'nothing' | 'unverified'
+  /** `next`: whether the section draws its background; left out is `type-unverified`, so nothing is assessed. */
+  presence?: FollowerPresence
   /** `last`: a Minimal page, which has no footer band (the page's own background shows under the cut). */
   minimal?: boolean
 }
@@ -214,8 +234,7 @@ function followerScene(
   if (follower.shared) return { reason: 'shared' }
   if (follower.locked) return { reason: 'locked' }
   // Presence comes before tone: an empty section paints nothing, so its stored tone says nothing about the scene.
-  if (follower.presence === 'nothing') return { reason: 'empty' }
-  if (follower.presence === 'unverified') return { reason: 'unresolved' }
+  if (follower.presence !== 'established') return { reason: follower.presence ?? 'type-unverified' }
   if (follower.hasOwnBackground) return { reason: 'own' }
   const style = follower.style
   if (style?.image?.asset) return { reason: 'picture' }
