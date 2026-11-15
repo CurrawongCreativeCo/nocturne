@@ -1004,6 +1004,18 @@
             {
               "value": "dots",
               "title": "Three dots"
+            },
+            {
+              "value": "double",
+              "title": "Double"
+            },
+            {
+              "value": "dotted",
+              "title": "Dotted line"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient"
             }
           ],
           "clientEditable": false
@@ -4901,6 +4913,18 @@
             {
               "value": "dots",
               "title": "Three dots"
+            },
+            {
+              "value": "double",
+              "title": "Double"
+            },
+            {
+              "value": "dotted",
+              "title": "Dotted line"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient"
             }
           ],
           "clientEditable": false
@@ -6422,6 +6446,18 @@
             {
               "value": "dots",
               "title": "Three dots"
+            },
+            {
+              "value": "double",
+              "title": "Double"
+            },
+            {
+              "value": "dotted",
+              "title": "Dotted line"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient"
             }
           ],
           "clientEditable": false
@@ -7852,6 +7888,18 @@
             {
               "value": "dots",
               "title": "Three dots"
+            },
+            {
+              "value": "double",
+              "title": "Double"
+            },
+            {
+              "value": "dotted",
+              "title": "Dotted line"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient"
             }
           ],
           "clientEditable": false
@@ -9136,6 +9184,18 @@
             {
               "value": "dots",
               "title": "Three dots"
+            },
+            {
+              "value": "double",
+              "title": "Double"
+            },
+            {
+              "value": "dotted",
+              "title": "Dotted line"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient"
             }
           ],
           "clientEditable": false
@@ -11530,6 +11590,18 @@
             {
               "value": "dots",
               "title": "Three dots"
+            },
+            {
+              "value": "double",
+              "title": "Double"
+            },
+            {
+              "value": "dotted",
+              "title": "Dotted line"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient"
             }
           ],
           "clientEditable": false
@@ -13452,6 +13524,18 @@
             {
               "value": "dots",
               "title": "Three dots"
+            },
+            {
+              "value": "double",
+              "title": "Double"
+            },
+            {
+              "value": "dotted",
+              "title": "Dotted line"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient"
             }
           ],
           "clientEditable": false
@@ -14660,6 +14744,18 @@
             {
               "value": "dots",
               "title": "Three dots"
+            },
+            {
+              "value": "double",
+              "title": "Double"
+            },
+            {
+              "value": "dotted",
+              "title": "Dotted line"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient"
             }
           ],
           "clientEditable": false
@@ -16963,6 +17059,18 @@
             {
               "value": "dots",
               "title": "Three dots"
+            },
+            {
+              "value": "double",
+              "title": "Double"
+            },
+            {
+              "value": "dotted",
+              "title": "Dotted line"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient"
             }
           ],
           "clientEditable": false
@@ -19437,6 +19545,18 @@
             {
               "value": "dots",
               "title": "Three dots"
+            },
+            {
+              "value": "double",
+              "title": "Double"
+            },
+            {
+              "value": "dotted",
+              "title": "Dotted line"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient"
             }
           ],
           "clientEditable": false
@@ -20853,6 +20973,18 @@
             {
               "value": "dots",
               "title": "Three dots"
+            },
+            {
+              "value": "double",
+              "title": "Double"
+            },
+            {
+              "value": "dotted",
+              "title": "Dotted line"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient"
             }
           ],
           "clientEditable": false
@@ -22941,6 +23073,18 @@
             {
               "value": "dots",
               "title": "Three dots"
+            },
+            {
+              "value": "double",
+              "title": "Double"
+            },
+            {
+              "value": "dotted",
+              "title": "Dotted line"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient"
             }
           ],
           "clientEditable": false
@@ -24216,6 +24360,18 @@
             {
               "value": "dots",
               "title": "Three dots"
+            },
+            {
+              "value": "double",
+              "title": "Double"
+            },
+            {
+              "value": "dotted",
+              "title": "Dotted line"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient"
             }
           ],
           "clientEditable": false
@@ -26898,6 +27054,18 @@
             {
               "value": "dots",
               "title": "Three dots"
+            },
+            {
+              "value": "double",
+              "title": "Double"
+            },
+            {
+              "value": "dotted",
+              "title": "Dotted line"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient"
             }
           ],
           "clientEditable": false
@@ -29103,6 +29271,18 @@
             {
               "value": "dots",
               "title": "Three dots"
+            },
+            {
+              "value": "double",
+              "title": "Double"
+            },
+            {
+              "value": "dotted",
+              "title": "Dotted line"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient"
             }
           ],
           "clientEditable": false
@@ -30337,6 +30517,18 @@
             {
               "value": "dots",
               "title": "Three dots"
+            },
+            {
+              "value": "double",
+              "title": "Double"
+            },
+            {
+              "value": "dotted",
+              "title": "Dotted line"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient"
             }
           ],
           "clientEditable": false
@@ -32199,6 +32391,18 @@
             {
               "value": "dots",
               "title": "Three dots"
+            },
+            {
+              "value": "double",
+              "title": "Double"
+            },
+            {
+              "value": "dotted",
+              "title": "Dotted line"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient"
             }
           ],
           "clientEditable": false
@@ -36427,6 +36631,18 @@
             {
               "value": "dots",
               "title": "Three dots"
+            },
+            {
+              "value": "double",
+              "title": "Double"
+            },
+            {
+              "value": "dotted",
+              "title": "Dotted line"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient"
             }
           ],
           "clientEditable": false
@@ -36794,6 +37010,18 @@
             {
               "value": "dots",
               "title": "Three dots"
+            },
+            {
+              "value": "double",
+              "title": "Double"
+            },
+            {
+              "value": "dotted",
+              "title": "Dotted line"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient"
             }
           ],
           "clientEditable": false
@@ -37161,6 +37389,18 @@
             {
               "value": "dots",
               "title": "Three dots"
+            },
+            {
+              "value": "double",
+              "title": "Double"
+            },
+            {
+              "value": "dotted",
+              "title": "Dotted line"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient"
             }
           ],
           "clientEditable": false
@@ -37528,6 +37768,18 @@
             {
               "value": "dots",
               "title": "Three dots"
+            },
+            {
+              "value": "double",
+              "title": "Double"
+            },
+            {
+              "value": "dotted",
+              "title": "Dotted line"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient"
             }
           ],
           "clientEditable": false
@@ -40212,6 +40464,18 @@
             {
               "value": "dots",
               "title": "Three dots"
+            },
+            {
+              "value": "double",
+              "title": "Double"
+            },
+            {
+              "value": "dotted",
+              "title": "Dotted line"
+            },
+            {
+              "value": "gradient",
+              "title": "Gradient"
             }
           ],
           "clientEditable": false

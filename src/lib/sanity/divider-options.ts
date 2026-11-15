@@ -15,8 +15,20 @@ import { themeColourCss, type ThemeColour, type ThemeColourInput } from './theme
  * code so the site can import it.
  */
 
-/** How the rule is drawn. Three dots stand alone; the others can hold a centre. */
-export const DIVIDER_STYLES = ['none', 'line', 'fade', 'dots'] as const
+/**
+ * How the rule is drawn. Three dots (`dots`) stand alone; the others can hold a centre. Double, Dotted line and
+ * Gradient (task 151, Slice 7) are new values appended after the stored ones, so no stored key changes: a
+ * stored `dots` is still Three dots, and `dotted` is a different, newer thing (a line made of dots).
+ */
+export const DIVIDER_STYLES = [
+  'none',
+  'line',
+  'fade',
+  'dots',
+  'double',
+  'dotted',
+  'gradient',
+] as const
 export type DividerStyle = (typeof DIVIDER_STYLES)[number]
 
 export const DIVIDER_STYLE_TITLES: Record<DividerStyle, string> = {
@@ -24,6 +36,9 @@ export const DIVIDER_STYLE_TITLES: Record<DividerStyle, string> = {
   line: 'Line',
   fade: 'Fading line',
   dots: 'Three dots',
+  double: 'Double',
+  dotted: 'Dotted line',
+  gradient: 'Gradient',
 }
 
 export const DIVIDER_STYLE_DESCRIPTIONS: Record<DividerStyle, string> = {
@@ -31,6 +46,9 @@ export const DIVIDER_STYLE_DESCRIPTIONS: Record<DividerStyle, string> = {
   line: 'An even rule, with anything in the middle.',
   fade: 'Fades out towards its ends.',
   dots: 'Three small dots, centred.',
+  double: 'Two fine lines, side by side, with anything in the middle.',
+  dotted: 'A line of small dots, with anything in the middle.',
+  gradient: 'A line from the Primary to the Secondary colour, fading at its ends.',
 }
 
 export const DIVIDER_CENTRES = ['none', 'diamond', 'icon', 'text', 'image'] as const
@@ -159,7 +177,9 @@ function resolveCentre(input: DividerInput): ResolvedCentre | null {
 
 /**
  * One divider, or null for none (unset, None, or a style the schema never offered). Three dots
- * never take a centre. A Custom colour is drawn only when its hex is valid.
+ * never take a centre. A Custom colour is drawn only when its hex is valid. Gradient is always Primary to
+ * Secondary, so a line colour stored for it is not drawn; it is not removed either, and comes back if the style
+ * is changed (the input is only read).
  */
 export function resolveDivider(input: DividerInput | null | undefined): ResolvedDivider | null {
   const style = pick(DIVIDER_STYLES, input?.style)
@@ -170,7 +190,7 @@ export function resolveDivider(input: DividerInput | null | undefined): Resolved
     thickness: pick(DIVIDER_THICKNESSES, input.thickness) ?? 'thin',
     centre: style === 'dots' ? null : resolveCentre(input),
     centreSize: pick(DIVIDER_CENTRE_SIZES, input.centreSize) ?? 'medium',
-    lineColour: themeColourCss(input.lineColour, OFFERED),
+    lineColour: style === 'gradient' ? undefined : themeColourCss(input.lineColour, OFFERED),
     centreColour: themeColourCss(input.centreColour, OFFERED),
   }
 }

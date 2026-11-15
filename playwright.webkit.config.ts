@@ -17,6 +17,7 @@ export default defineConfig({
         /section-edge-layered\.spec\.ts/,
         /section-edge-lagoon-reef\.spec\.ts/,
         /section-edge-elevated\.spec\.ts/,
+        /rules-styles\.spec\.ts/,
         /section-edge-stability\.spec\.ts/,
         /section-edge-hairlines\.spec\.ts/,
         /section-edges\.spec\.ts/,
