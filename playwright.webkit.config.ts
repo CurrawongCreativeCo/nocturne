@@ -16,6 +16,7 @@ export default defineConfig({
         /section-edge-composed\.spec\.ts/,
         /section-edge-layered\.spec\.ts/,
         /section-edge-lagoon-reef\.spec\.ts/,
+        /section-edge-layer-colours\.spec\.ts/,
         /section-edge-elevated\.spec\.ts/,
         /rules-styles\.spec\.ts/,
         /rules-finish\.spec\.ts/,

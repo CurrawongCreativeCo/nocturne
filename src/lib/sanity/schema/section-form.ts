@@ -1,3 +1,4 @@
+import { stegaClean } from 'next-sanity'
 import type { ConditionalPropertyCallback } from 'sanity'
 
 import {
@@ -8,15 +9,24 @@ import {
   type MotionCustomField,
   type MotionOption,
 } from '@/components/motion/presets'
-import { LAYERED_PRESETS, allowsLayerBelow } from '@/components/ui/edge-presets'
+import { LAYERED_PRESETS, allowsLayerBelow, drawnLayerSlots } from '@/components/ui/edge-presets'
+import { resolveEdge, type SectionStyleInput } from '@/components/ui/section-style'
+import { resolveEmbed } from '@/config/embed-providers'
+import type { FollowerInput, FollowerPresence } from '@/lib/color/edge-visibility'
+import { isMembersOnly } from '@/lib/sanity/access'
 
 import {
   GENERATED_EDGE_HEIGHT_BOUNDS,
   GENERATED_EDGE_HEIGHTS,
   SECTION_EDGE_DEPTHS,
   SECTION_EDGE_HEIGHTS,
+  SECTION_EDGE_LAYER_ROLES,
+  SECTION_EDGE_LAYER_SLOTS,
+  SECTION_EDGE_LAYER_SLOT_TITLES,
+  SECTION_EDGE_STRENGTHS,
   SECTION_EDGE_TITLES,
   SECTION_MOTIONS,
+  type EdgeLayerSlot,
   type GeneratedEdgeScreen,
   isGeneratedEdge,
   edgeAllowsAccent,
@@ -101,6 +111,85 @@ export function sectionAtStylePath(
     }
   }
   return current !== null && typeof current === 'object' ? (current as SectionValue) : undefined
+}
+
+/**
+ * Whether the following section draws its background, from its own data and what is verified of its component
+ * (follower-presence.test.tsx). Only a type whose component always draws its frame in the stored tone is
+ * `established`; a form, a pricing table or an embed is judged by the data its component depends on, and an
+ * embed through the same guard the page uses (`resolveEmbed`). References alone prove nothing: a form or a plan
+ * may point at something deleted. Every other type is `type-unverified`; this is not a model of the renderer.
+ */
+function presenceOf(section: SectionValue): { presence: FollowerPresence } {
+  switch (section._type) {
+    case 'richText':
+    case 'featuresGrid':
+    case 'ctaBanner':
+    case 'newsletterSignup':
+      return { presence: 'established' }
+    case 'embed':
+      return {
+        presence: resolveEmbed(
+          stegaClean(section.provider as string),
+          stegaClean(section.url as string),
+        )
+          ? 'established'
+          : 'embed-invalid',
+      }
+    case 'formSection': {
+      const form = section.form as { _ref?: unknown } | null | undefined
+      return { presence: form?._ref ? 'form-unresolved' : 'form-empty' }
+    }
+    case 'pricingTable': {
+      const plans = section.plans
+      return {
+        presence: Array.isArray(plans) && plans.length > 0 ? 'plans-unverified' : 'plans-empty',
+      }
+    }
+    default:
+      return { presence: 'type-unverified' }
+  }
+}
+
+/** The lists the page renderer draws sections from: a page's `pageBuilder` and a service's `sections`. */
+const SECTION_LISTS = ['pageBuilder', 'sections']
+
+/**
+ * What follows the section a `style` field belongs to, as the page draws it, read from the document the form
+ * already holds (no request). The next entry of the same list is the follower; after the last the footer's band
+ * (a Minimal page has none). A section anywhere else (a shared section's own document) has no known place, and a
+ * shared or members-only follower is marked as such: its style is elsewhere, or the page draws a stub.
+ */
+export function followerAtStylePath(
+  document: unknown,
+  path: readonly PathSegment[] | undefined,
+): FollowerInput {
+  const unknown: FollowerInput = { position: 'unknown' }
+  const [name, at, style] = path ?? []
+  if (typeof name !== 'string' || !SECTION_LISTS.includes(name) || style !== 'style') return unknown
+  const doc = document as Record<string, unknown> | null | undefined
+  const list = doc?.[name]
+  if (!Array.isArray(list)) return unknown
+  const entries = list as (SectionValue | undefined)[]
+  const index =
+    typeof at === 'number'
+      ? at
+      : typeof at === 'object' && !Array.isArray(at) && '_key' in at
+        ? entries.findIndex((entry) => entry?._key === at._key)
+        : -1
+  if (index < 0 || index >= entries.length) return unknown
+  if (index === entries.length - 1)
+    return { position: 'last', minimal: doc?.minimalLayout === true }
+  const next = entries[index + 1]
+  if (!next || typeof next !== 'object') return unknown
+  return {
+    position: 'next',
+    style: (next.style as SectionStyleInput | undefined) ?? null,
+    hasOwnBackground: sectionHasOwnBackground(next),
+    shared: next._type === 'reference',
+    locked: isMembersOnly(next.access as string | undefined),
+    ...presenceOf(next),
+  }
 }
 
 /** Whether Parallax has something to move in this section's chosen layout. */
@@ -389,6 +478,97 @@ export function staleLayerBelowMessage(
   if (layerBelow === 'never')
     return `${SECTION_EDGE_TITLES[edge]} has no layer below, so this is ignored. Clear it from the field menu.`
   return 'A layer below is not drawn at Shallow depth, so this is ignored. Choose Standard or Deep to show it, or turn it off.'
+}
+
+type LayerColoursValue = Record<string, unknown> | null | undefined
+type PathLike = Parameters<typeof sectionAtStylePath>[1]
+
+const layerColourFields = (slot: EdgeLayerSlot) => [slot, `${slot}Strength`] as const
+const layerColourSet = (value: LayerColoursValue, slot: EdgeLayerSlot) =>
+  layerColourFields(slot).some((field) => !!value?.[field])
+
+/** Whether anything is stored in the per-layer colours: the object is shown while it holds a value. */
+const anyLayerColourSet = (value: LayerColoursValue) =>
+  SECTION_EDGE_LAYER_SLOTS.some((slot) => layerColourSet(value, slot))
+
+/** Why a layer's colour or strength is not drawn, or undefined when its layer is drawn (or cannot be known). */
+function inactiveLayerReason(
+  style: SectionStyleInput | undefined,
+  slot: EdgeLayerSlot,
+): string | undefined {
+  if (!style) return undefined
+  const edge = resolveEdge(style)
+  if (!edge?.layered || !isGeneratedEdge(edge.shape))
+    return 'These colours belong to Still water, Lagoon and Reef and are ignored by the shape chosen above.'
+  const preset = LAYERED_PRESETS[edge.shape]
+  if (drawnLayerSlots(preset, edge.layered.depth, edge.layered.below).includes(slot))
+    return undefined
+  const title = SECTION_EDGE_TITLES[edge.shape]
+  if (slot === 'above2') return `${title} has one layer above the edge, so this is ignored.`
+  if (preset.layerBelow === 'never') return `${title} has no layer below, so this is ignored.`
+  return `${title} draws its layer below only when Layer below is on and the depth offers it, so this is ignored.`
+}
+
+/** The style a per-layer field belongs to: the object's parent, or two levels up from a field inside it. */
+const styleOfLayerField = (document: unknown, path: PathLike): SectionStyleInput | undefined =>
+  (sectionAtStylePath(document, path?.slice(0, -1))?.style as SectionStyleInput | undefined) ??
+  undefined
+
+interface LayerColoursContext {
+  document?: unknown
+  path?: PathLike
+  parent?: unknown
+}
+
+/**
+ * The per-layer colours (task 151, Slice 8) are shown for every generated shape. For any other shape they are
+ * shown only while something is stored, so the editor can read the warning and clear it; nothing is deleted.
+ */
+export const edgeLayerColoursHidden: ConditionalPropertyCallback = ({ parent, value }) =>
+  !isGeneratedEdge(edgeOf(parent)) && !anyLayerColourSet(value as LayerColoursValue)
+
+/**
+ * One colour or strength field of a layer: shown while its layer is drawn, and while it holds a value for a
+ * layer that is not (so its warning can be read); hidden once that value is cleared. When the shape cannot be
+ * read it is shown, because hiding a control wrongly is worse than showing one that does nothing.
+ */
+export const edgeLayerColourFieldHidden =
+  (slot: EdgeLayerSlot): ConditionalPropertyCallback =>
+  ({ document, path, value }) => {
+    const style = styleOfLayerField(document, path)
+    return !value && !!style && inactiveLayerReason(style, slot) !== undefined
+  }
+
+/**
+ * The warning on a layer's colour or strength: a value for a layer the shape does not draw (kept, not drawn), or
+ * one that is not a choice (it is ignored, and the recipe or the shared strength is used).
+ */
+export const staleLayerColourFieldMessage =
+  (slot: EdgeLayerSlot, kind: 'colour' | 'strength') =>
+  (value: unknown, context: LayerColoursContext): string | true => {
+    if (!value) return true
+    const reason = inactiveLayerReason(styleOfLayerField(context.document, context.path), slot)
+    if (reason) return `${reason} Clear it from the field menu.`
+    const choices: readonly unknown[] =
+      kind === 'colour' ? SECTION_EDGE_LAYER_ROLES : SECTION_EDGE_STRENGTHS
+    return choices.includes(value)
+      ? true
+      : `This is not one of the choices, so it is ignored and ${kind === 'colour' ? 'the recipe’s colour' : 'the shared Layer strength'} is used. Clear it from the field menu.`
+  }
+
+/** The warning on the group: layers it holds values for that the shape does not draw here. Kept, not drawn. */
+export function staleLayerColoursMessage(
+  value: unknown,
+  context: { parent?: unknown },
+): string | true {
+  const stored = value as LayerColoursValue
+  const style = context.parent as SectionStyleInput | undefined
+  const inactive = SECTION_EDGE_LAYER_SLOTS.filter(
+    (slot) => layerColourSet(stored, slot) && inactiveLayerReason(style, slot) !== undefined,
+  )
+  if (inactive.length === 0) return true
+  const names = inactive.map((slot) => SECTION_EDGE_LAYER_SLOT_TITLES[slot].toLowerCase())
+  return `Colours set for the ${names.join(' and the ')} are ignored here, because this edge does not draw ${inactive.length > 1 ? 'those layers' : 'that layer'}. They stay saved and show again if it does. Clear them from the field menus.`
 }
 
 /** Small is not drawn for a generated shape: Studio refuses it, and the page draws Medium. */

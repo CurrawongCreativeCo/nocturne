@@ -1,4 +1,5 @@
 import type {
+  EdgeLayerSlot,
   GeneratedEdge,
   SECTION_EDGE_CRESTS,
   SECTION_EDGE_DEPTHS,
@@ -23,6 +24,16 @@ export type EdgeDepth = (typeof SECTION_EDGE_DEPTHS)[number]
 export type EdgeStrength = (typeof SECTION_EDGE_STRENGTHS)[number]
 export type EdgePalette = (typeof SECTION_EDGE_PALETTES)[number]
 
+/**
+ * One layer's own colour and strength (task 151, Slice 8), each optional and independent: a colour left out is
+ * the recipe's role for that layer, a strength left out is the shared Layer strength.
+ */
+export interface LayerOverride {
+  paint?: EdgePaint
+  strength?: EdgeStrength
+}
+export type LayerOverrides = Partial<Record<EdgeLayerSlot, LayerOverride>>
+
 /** The stepped controls of a generated edge once read from the page's data, whole. */
 export interface LayeredSettings {
   crest: EdgeCrest
@@ -31,6 +42,8 @@ export interface LayeredSettings {
   palette: EdgePalette
   /** A second layer below the cut, over the section that follows. */
   below: boolean
+  /** Per-layer overrides; present only when at least one valid value is stored. Never read by the geometry. */
+  overrides?: LayerOverrides
 }
 
 /** What a preset fixes about the shape. Every length is a share of the band, every x a share of the width. */
@@ -211,3 +224,18 @@ export const drawsLayerBelow = (preset: LayeredPreset, depth: EdgeDepth, switche
 /** Whether Studio offers the layer-below switch at a depth: only an optional layer, and not at Shallow. */
 export const allowsLayerBelow = (preset: LayeredPreset, depth: EdgeDepth) =>
   preset.layerBelow === 'optional' && preset.belowDepths.includes(depth)
+
+/**
+ * The layers a preset draws at a depth and switch, as Advanced names them: the first above always, the second
+ * only where the preset has two, and the one below only where it is drawn. A stored override for any other slot
+ * is kept but not drawn.
+ */
+export const drawnLayerSlots = (
+  preset: LayeredPreset,
+  depth: EdgeDepth,
+  switchedOn: boolean,
+): readonly EdgeLayerSlot[] => [
+  'above1',
+  ...(preset.uppers === 2 ? (['above2'] as const) : []),
+  ...(drawsLayerBelow(preset, depth, switchedOn) ? (['below'] as const) : []),
+]

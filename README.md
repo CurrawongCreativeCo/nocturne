@@ -4773,7 +4773,39 @@ Diagonal, Wave, Curve, Arch, Layered wave, Tide, Contour, Still water, Lagoon, R
   apply). The message is plain ("Lagoon's second layer may be hard to see on this background. Try Tint, or check it in
   Preview."); the ratios stay in the tests. It gives no verdict where it cannot know the scene: a background picture, a
   gradient, a layout that draws its own picture or video (a hero's background), a Page (Surface) section, which is see-through
-  under an edge, a background set by the section type, or colours that could not be read. There it says to look in Preview. The layer below the edge sits over the next section, which is not looked up, so it is never judged.
+  under an edge, a background set by the section type, or colours that could not be read. There it says to look in Preview. The layer below the edge is judged too, against what the page paints under it (below), and a layer that cannot be judged is named as such: a layer above that passes never stands for it.
+- **Layer colours** (Advanced: edge; Still water, Lagoon and Reef; task 151, Slice 8): give a layer its own brand colour and
+  its own strength, under `style.edgeLayerColours`. The layers are the **first layer above** and **second layer above**
+  (Lagoon and Reef) and the **layer below** (Reef always; Still water when its switch is on at a depth that offers one).
+  Each has a colour (Primary, Secondary, Highlight or Text; stored as `accent`, `accent-2`, `highlight`, `ink`) and a strength
+  (Light, Standard or Strong); the six fields are `above1`, `above1Strength`, `above2`, `above2Strength`, `below` and
+  `belowStrength`. There is no hex and no free picker. **Precedence:** a field left empty follows the recipe (Colours) for its
+  colour and the shared Layer strength for its strength, each on its own, so a colour with no strength and a strength with no
+  colour are both fine. A set field wins for that layer only: the other layers keep following Colours and Layer strength,
+  and changing either later never moves a set field. A strength replaces the shared one for its layer with the same cap
+  and the same layer ratios (the second layer at 60% of the first, the layer below at 85%), and Standard beats a shared
+  Strong. An empty, null or unknown value counts as unset. **Clearing:** clear any field from its menu to return that field
+  to the recipe or the shared strength; clear the whole group and every layer is exactly what it was before the group
+  existed (a frozen test holds the unset output). **Layers a shape does not draw** (a second layer above on Still water, a
+  layer below on Lagoon, or on Still water with the switch off or at Shallow) keep what is stored, draw nothing for it, and
+  show it with a warning, on the field and on the group, until it is cleared; once cleared the field is hidden. Geometry is
+  untouched: the cut and every layer's path are the same with and without these fields. **Deferred, not implemented:** Reef's
+  hairline and its White veil colour (a hairline-only option), which wait for the hairline itself, a geometry change.
+- **Visibility advisory, the layer below** (task 151, Slice 8; Studio only): the layer below the edge sits in the edge frame, over
+  the section that follows, so it is judged over that section as the page paints it: an inverse or Brand follower remaps
+  Primary and Text (the generated follower-tone rules), an alt or Page follower leaves the page's own colours, the footer's band
+  (Alt) is what follows the last section, and a Minimal page has no band, so the page's own background shows. Studio reads the
+  follower from the document it already holds and makes no request. It is judged only when its presence and background are
+  established: a rich text, features grid, CTA banner or newsletter signup with a stored Background, or an embed the page can
+  resolve. Everything else is **not assessed**, with its own Preview note: a form with no form, or whose form cannot be
+  checked from here; a pricing table with no plans or with plans that are references; an embed the page cannot draw; a shared
+  or members-only section; a picture, gradient or layout that draws its own background; a Background left to the section
+  type; a section whose place on the page cannot be read; any other section type. It never skips ahead to the section after
+  one, and never assumes the footer. An unassessed layer adds no ratio and no suggestion, and a faint layer above is still
+  warned about beside the note. Suggestions keep every set field and are checked through the real composition for every
+  assessed layer; they may name a set field as Studio labels it ("Layer below: colour" set to Primary), and nothing is
+  ever changed for the editor. Not modelled: a follower that draws nothing for a reason not listed, dark-mode palettes, and
+  sections outside a page's or service's section list.
 - **Advanced: edge** (collapsed): **Invert** (the shape bulges into the next section instead; not offered for Diagonal,
   where it is the same as Flip) and a **custom height** for phones, tablets (from 768 px) and desktops (from 1024 px), in
   pixels from 16 to 320. A screen size left empty keeps the smaller one's height; the phone falls back to Medium. Still water,
