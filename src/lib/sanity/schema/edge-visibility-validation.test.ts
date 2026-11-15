@@ -2,7 +2,12 @@ import { describe, expect, it, vi } from 'vitest'
 
 import type { SectionStyleInput } from '@/components/ui/section-style'
 
-import { edgeVisibilityFor } from './edge-visibility-validation'
+import {
+  edgeVisibilityFor,
+  faintLayerWarning,
+  uncheckedSceneNote,
+} from './edge-visibility-validation'
+import { followerAtStylePath } from './section-form'
 
 const DARK_LAGOON: SectionStyleInput = {
   tone: 'inverse',
@@ -106,5 +111,91 @@ describe('the Colours field’s validation', async () => {
   it('still warns about a stepped control left on another shape', () => {
     const [stale] = recorded()
     expect(stale?.check('ink', { parent: { edge: 'wave' } })).toMatch(/Still water/)
+  })
+})
+
+describe('the follower, read from the document the form holds', () => {
+  const doc = (list: unknown[], extra: Record<string, unknown> = {}) => ({
+    pageBuilder: list,
+    ...extra,
+  })
+  const at = (key: string) => ['pageBuilder', { _key: key }, 'style', 'edgePalette']
+  const section = (key: string, style: object = {}, extra = {}) => ({
+    _key: key,
+    _type: 'cta',
+    style,
+    ...extra,
+  })
+
+  it('is the next section of the same list, with its stored tone, layout, sharing and access', () => {
+    const document = doc([
+      section('a'),
+      section('b', { tone: 'inverse' }),
+      { _key: 'c', _type: 'reference' },
+      section('d', {}, { access: 'members' }),
+      section('e'),
+    ])
+    expect(followerAtStylePath(document, at('a'))).toMatchObject({
+      position: 'next',
+      style: { tone: 'inverse' },
+      shared: false,
+      locked: false,
+    })
+    expect(followerAtStylePath(document, at('b'))).toMatchObject({ position: 'next', shared: true })
+    expect(followerAtStylePath(document, at('c'))).toMatchObject({ locked: true })
+    // A number works as a key does.
+    expect(followerAtStylePath(document, ['pageBuilder', 0, 'style', 'edgePalette'])).toMatchObject(
+      {
+        position: 'next',
+      },
+    )
+  })
+
+  it('is the footer’s band after the last section, and knows a Minimal page', () => {
+    const list = [section('a'), section('b')]
+    expect(followerAtStylePath(doc(list), at('b'))).toEqual({ position: 'last', minimal: false })
+    expect(followerAtStylePath(doc(list, { minimalLayout: true }), at('b'))).toEqual({
+      position: 'last',
+      minimal: true,
+    })
+  })
+
+  it('reads a service’s sections list too, and nothing else', () => {
+    const service = { sections: [section('a'), section('b', { tone: 'accent' })] }
+    expect(followerAtStylePath(service, ['sections', { _key: 'a' }, 'style', 'x'])).toMatchObject({
+      position: 'next',
+      style: { tone: 'accent' },
+    })
+    for (const [document, path] of [
+      [doc([section('a')]), ['pageBuilder', { _key: 'zzz' }, 'style', 'x']],
+      [doc([section('a')]), ['somethingElse', { _key: 'a' }, 'style', 'x']],
+      [{ section: section('a') }, ['section', 'style', 'x']],
+      [doc([section('a')]), ['pageBuilder', { _key: 'a' }, 'content', 'x']],
+      [undefined, ['pageBuilder', { _key: 'a' }, 'style', 'x']],
+      [doc([section('a')]), undefined],
+    ] as [unknown, never][])
+      expect(followerAtStylePath(document, path)).toEqual({ position: 'unknown' })
+  })
+
+  it('reaches the advisory: the same edge is judged over a known follower and noted over an unknown one', async () => {
+    const style: SectionStyleInput = { tone: 'alt', edge: 'reef' }
+    const document = doc([section('a', style), section('b', { tone: 'inverse' })])
+    const known = await edgeVisibilityFor(style, reading().client, {
+      follower: followerAtStylePath(document, at('a')),
+    })
+    expect(known.state).toBe('clear')
+    expect(known.layers.some((layer) => layer.side === 'under')).toBe(true)
+    const unknown = await edgeVisibilityFor(style, reading().client)
+    expect(unknown.state).toBe('unchecked')
+    expect(await uncheckedSceneNote(style, reading().client)).toMatch(/layer below/)
+    expect(
+      await uncheckedSceneNote(style, reading().client, { follower: { position: 'last' } }),
+    ).toBe(true)
+  })
+
+  it('shows the warning and the note together when one layer is faint and another was not assessed', async () => {
+    const style: SectionStyleInput = { tone: 'alt', edge: 'reef', edgePalette: 'highlight' }
+    expect(await faintLayerWarning(style, reading().client)).toMatch(/may be hard to see/)
+    expect(await uncheckedSceneNote(style, reading().client)).toMatch(/layer below/)
   })
 })

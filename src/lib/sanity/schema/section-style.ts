@@ -113,6 +113,7 @@ import {
   edgeStepHidden,
   edgeLayerBelowHidden,
   edgeLayerColoursHidden,
+  followerAtStylePath,
   edgeLayerColourFieldHidden,
   staleLayerColourFieldMessage,
   staleLayerColoursMessage,
@@ -1256,6 +1257,8 @@ export const sectionStyle = defineType({
                         hasOwnBackground: sectionHasOwnBackground(
                           sectionAtStylePath(document, path),
                         ),
+                        // What the layer below is drawn over: the next section, or the footer's band.
+                        follower: followerAtStylePath(document, path),
                       },
                     ),
                   )
@@ -1270,6 +1273,8 @@ export const sectionStyle = defineType({
                         hasOwnBackground: sectionHasOwnBackground(
                           sectionAtStylePath(document, path),
                         ),
+                        // What the layer below is drawn over: the next section, or the footer's band.
+                        follower: followerAtStylePath(document, path),
                       },
                     ),
                   )

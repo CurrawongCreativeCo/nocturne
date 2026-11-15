@@ -1,5 +1,9 @@
 import type { SectionStyleInput } from '@/components/ui/section-style'
-import { edgeVisibility, type EdgeVisibility } from '@/lib/color/edge-visibility'
+import {
+  edgeVisibility,
+  type EdgeVisibility,
+  type FollowerInput,
+} from '@/lib/color/edge-visibility'
 
 import { fetchBrandColourState } from './brand-colours'
 
@@ -12,6 +16,8 @@ interface ColourClient {
 export interface SectionContext {
   /** The layout draws a picture or video of its own behind its content (`sectionHasOwnBackground`). */
   hasOwnBackground?: boolean
+  /** What follows the section on the page, read from the document the form holds (`followerAtStylePath`). */
+  follower?: FollowerInput
 }
 
 /**
@@ -24,17 +30,25 @@ export async function edgeVisibilityFor(
   client: ColourClient,
   section: SectionContext = {},
 ): Promise<EdgeVisibility> {
-  const { hasOwnBackground = false } = section
+  const { hasOwnBackground = false, follower } = section
   // Nothing to measure for a section with no generated edge: leave the site's colours unasked.
-  const needsColours = edgeVisibility({ style, site: null, hasOwnBackground }).state !== 'none'
-  if (!needsColours) return edgeVisibility({ style, site: null, hasOwnBackground })
+  const needsColours =
+    edgeVisibility({ style, site: null, hasOwnBackground, follower }).state !== 'none'
+  if (!needsColours) return edgeVisibility({ style, site: null, hasOwnBackground, follower })
   const state = await fetchBrandColourState(client)
-  return edgeVisibility({ style, site: state.known ? state.colours : null, hasOwnBackground })
+  return edgeVisibility({
+    style,
+    site: state.known ? state.colours : null,
+    hasOwnBackground,
+    follower,
+  })
 }
 
 /**
  * The two checks the Colours field carries (section-style.ts), as functions: a warning for a faint layer, and a note
- * for a scene that cannot be judged. At most one has anything to say, so the form shows one advisory.
+ * for a layer that cannot be judged (above the edge, or the layer below over what follows). They are separate, so a
+ * faint layer does not hide a layer that was not looked at, and a layer that passes does not vouch for one that was
+ * not assessed.
  */
 export async function faintLayerWarning(
   style: SectionStyleInput | null | undefined,
@@ -51,5 +65,5 @@ export async function uncheckedSceneNote(
   section: SectionContext = {},
 ): Promise<string | true> {
   const result = await edgeVisibilityFor(style, client, section)
-  return result.state === 'unchecked' ? (result.message ?? true) : true
+  return result.note ?? true
 }

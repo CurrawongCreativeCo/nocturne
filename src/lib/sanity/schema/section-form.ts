@@ -10,6 +10,8 @@ import {
 } from '@/components/motion/presets'
 import { LAYERED_PRESETS, allowsLayerBelow, drawnLayerSlots } from '@/components/ui/edge-presets'
 import { resolveEdge, type SectionStyleInput } from '@/components/ui/section-style'
+import type { FollowerInput } from '@/lib/color/edge-visibility'
+import { isMembersOnly } from '@/lib/sanity/access'
 
 import {
   GENERATED_EDGE_HEIGHT_BOUNDS,
@@ -107,6 +109,46 @@ export function sectionAtStylePath(
     }
   }
   return current !== null && typeof current === 'object' ? (current as SectionValue) : undefined
+}
+
+/** The lists the page renderer draws sections from: a page's `pageBuilder` and a service's `sections`. */
+const SECTION_LISTS = ['pageBuilder', 'sections']
+
+/**
+ * What follows the section a `style` field belongs to, as the page draws it, read from the document the form
+ * already holds (no request). The next entry of the same list is the follower; after the last the footer's band
+ * (a Minimal page has none). A section anywhere else (a shared section's own document) has no known place, and a
+ * shared or members-only follower is marked as such: its style is elsewhere, or the page draws a stub.
+ */
+export function followerAtStylePath(
+  document: unknown,
+  path: readonly PathSegment[] | undefined,
+): FollowerInput {
+  const unknown: FollowerInput = { position: 'unknown' }
+  const [name, at, style] = path ?? []
+  if (typeof name !== 'string' || !SECTION_LISTS.includes(name) || style !== 'style') return unknown
+  const doc = document as Record<string, unknown> | null | undefined
+  const list = doc?.[name]
+  if (!Array.isArray(list)) return unknown
+  const entries = list as (SectionValue | undefined)[]
+  const index =
+    typeof at === 'number'
+      ? at
+      : typeof at === 'object' && !Array.isArray(at) && '_key' in at
+        ? entries.findIndex((entry) => entry?._key === at._key)
+        : -1
+  if (index < 0 || index >= entries.length) return unknown
+  if (index === entries.length - 1)
+    return { position: 'last', minimal: doc?.minimalLayout === true }
+  const next = entries[index + 1]
+  if (!next || typeof next !== 'object') return unknown
+  return {
+    position: 'next',
+    style: (next.style as SectionStyleInput | undefined) ?? null,
+    hasOwnBackground: sectionHasOwnBackground(next),
+    shared: next._type === 'reference',
+    locked: isMembersOnly(next.access as string | undefined),
+  }
 }
 
 /** Whether Parallax has something to move in this section's chosen layout. */
