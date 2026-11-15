@@ -26,14 +26,42 @@ test.beforeEach(async ({ page }) => {
 })
 
 test.describe('through the Link list', () => {
-  test('draws Double as two lines 3px apart: 5px tall, two 1px bars', async ({ page }) => {
+  test('draws Double as two lines 3px apart: 5px tall, a 1px border above and below', async ({
+    page,
+  }) => {
     const double = dividerIn(page, 'rs-links', 'double')
     await expect(double).toHaveCount(1)
     const line = first(double)
     expect(await computed(line, 'height')).toBe('5px')
-    const image = await computed(line, 'background-image')
-    expect(image.match(/linear-gradient/g)).toHaveLength(2)
-    expect(await computed(line, 'background-size')).toBe('100% 1px, 100% 1px')
+    // Two 1px borders with the 3px between them (the box is border-box), not a background.
+    expect(await computed(line, 'border-top-width')).toBe('1px')
+    expect(await computed(line, 'border-bottom-width')).toBe('1px')
+    expect(await computed(line, 'border-top-style')).toBe('solid')
+    expect(await computed(line, 'border-bottom-style')).toBe('solid')
+    expect(await computed(line, 'background-image')).toBe('none')
+  })
+
+  test('paints Double as it always looked: a 1px line, a 3px gap, a 1px line, in the line colour', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, 'Reads pixels at desktop widths')
+    const line = first(dividerIn(page, 'rs-links', 'double'))
+    await line.scrollIntoViewIfNeeded()
+    const box = await line.boundingBox()
+    if (!box) throw new Error('No line box.')
+    const x = box.x + box.width / 2
+    const [bg, row0, row1, row2, row3, row4] = await pixelsAt(page, await page.screenshot(), [
+      { x: box.x - 12, y: box.y + 2.5 },
+      ...[0.5, 1.5, 2.5, 3.5, 4.5].map((dy) => ({ x, y: box.y + dy })),
+    ])
+    const away = (a: number[] = [], b: number[] = []) =>
+      Math.hypot(...[0, 1, 2].map((c) => (a[c] ?? 0) - (b[c] ?? 0)))
+    // Painted on the first and fifth rows, the page's own colour between them: two bars and the gap.
+    expect(away(row0, bg), `row 0 ${String(row0)}`).toBeGreaterThan(40)
+    expect(away(row4, bg), `row 4 ${String(row4)}`).toBeGreaterThan(40)
+    for (const gap of [row1, row2, row3])
+      expect(away(gap, bg), `gap ${String(gap)}`).toBeLessThan(12)
   })
 
   test('draws Dotted line as dots every 8px, and holds a middle between two lines', async ({
@@ -129,42 +157,102 @@ test.describe('through a section header', () => {
   })
 })
 
-test.describe('fallbacks', () => {
-  test('falls back to a plain system-text line for Gradient, and to the system text colour for the others, in forced colours', async ({
-    page,
-    browserName,
-  }) => {
+test.describe('in forced colours', () => {
+  /** Turns forced colours on, or skips where the browser cannot emulate them. */
+  async function force(page: Page, browserName: string) {
     await page.emulateMedia({ forcedColors: 'active' })
     const supported = await page.evaluate(() => matchMedia('(forced-colors: active)').matches)
     test.skip(!supported, `${browserName} can't emulate forced colours`)
+  }
+  /** The system text colour, as this browser resolves it. Only Chromium forces the colours it paints with. */
+  const systemText = (page: Page) =>
+    page.evaluate(() => {
+      const probe = document.createElement('span')
+      probe.style.color = 'CanvasText'
+      document.body.append(probe)
+      const colour = getComputedStyle(probe).color
+      probe.remove()
+      return colour
+    })
+  const distance = (a: number[] = [], b: number[] = []) =>
+    Math.hypot(...[0, 1, 2].map((c) => (a[c] ?? 0) - (b[c] ?? 0)))
+  const PAINTED = 40
+
+  test('falls back to a plain system-text line for Gradient', async ({ page, browserName }) => {
+    await force(page, browserName)
     const gradient = first(dividerIn(page, 'rs-header-gradient', 'gradient'))
     expect(await computed(gradient, 'background-image')).toBe('none')
     expect(await computed(gradient, 'background-color')).not.toBe('rgba(0, 0, 0, 0)')
-    // Double and Dotted line are still drawn, from the text colour.
-    for (const [id, style] of [
-      ['rs-header-double', 'double'],
-      ['rs-header-dotted', 'dotted'],
-    ] as const)
-      expect(await computed(first(dividerIn(page, id, style)), 'background-image'), style).not.toBe(
-        'none',
-      )
-    // Where the browser really forces colours (Chromium; Playwright's WebKit only matches the media query, as
-    // Safari has no forced-colours mode), that text colour is the system's, so they need no fallback of their own.
+  })
+
+  test('paints Double as two system-colour lines with the gap between them', async ({
+    page,
+    browserName,
+    isMobile,
+  }) => {
+    await force(page, browserName)
+    const line = first(dividerIn(page, 'rs-header-double', 'double'))
+    // Two borders: still there when a background would be removed.
+    expect(await computed(line, 'border-top-width')).toBe('1px')
+    expect(await computed(line, 'border-bottom-width')).toBe('1px')
+    expect(await computed(line, 'border-top-style')).toBe('solid')
     if (browserName === 'chromium') {
-      const system = await page.evaluate(() => {
-        const probe = document.createElement('span')
-        probe.style.color = 'CanvasText'
-        document.body.append(probe)
-        const colour = getComputedStyle(probe).color
-        probe.remove()
-        return colour
-      })
-      for (const [id, style] of [
-        ['rs-header-double', 'double'],
-        ['rs-header-dotted', 'dotted'],
-      ] as const)
-        expect(await computed(dividerIn(page, id, style), 'color'), style).toBe(system)
+      // Where colours are really forced, both borders are the system text colour.
+      const system = await systemText(page)
+      expect(await computed(line, 'border-top-color')).toBe(system)
+      expect(await computed(line, 'border-bottom-color')).toBe(system)
     }
+    if (isMobile) return
+    // And pixels: a painted row above, a gap, a painted row below, none of it the page's own colour.
+    await line.scrollIntoViewIfNeeded()
+    const box = await line.boundingBox()
+    if (!box) throw new Error('No line box.')
+    const x = box.x + box.width / 2
+    const [bg, top, gap, bottom] = await pixelsAt(page, await page.screenshot(), [
+      { x: box.x - 12, y: box.y + 2.5 },
+      { x, y: box.y + 0.5 },
+      { x, y: box.y + 2.5 },
+      { x, y: box.y + 4.5 },
+    ])
+    expect(distance(top, bg), `top row ${String(top)} against ${String(bg)}`).toBeGreaterThan(
+      PAINTED,
+    )
+    expect(distance(bottom, bg), `bottom row ${String(bottom)}`).toBeGreaterThan(PAINTED)
+    expect(distance(gap, bg), `the gap ${String(gap)} is the page`).toBeLessThan(PAINTED / 2)
+  })
+
+  test('paints Dotted line as a dotted line of system colour, neither empty nor solid', async ({
+    page,
+    browserName,
+    isMobile,
+  }) => {
+    await force(page, browserName)
+    const line = first(dividerIn(page, 'rs-header-dotted', 'dotted'))
+    // The dots are a background, removed here: a dotted top border as thick as a (bold) dot is wide stands in.
+    expect(await computed(line, 'border-top-width')).toBe('4px')
+    expect(await computed(line, 'border-top-style')).toBe('dotted')
+    if (browserName === 'chromium')
+      expect(await computed(line, 'border-top-color')).toBe(await systemText(page))
+    if (isMobile) return
+    await line.scrollIntoViewIfNeeded()
+    const box = await line.boundingBox()
+    if (!box) throw new Error('No line box.')
+    const columns = Array.from({ length: Math.floor(box.width) - 8 }, (_, i) => box.x + 4 + i)
+    const points = [
+      { x: box.x - 12, y: box.y + 2 },
+      ...columns.flatMap((x) => [
+        { x, y: box.y + 1.5 },
+        { x, y: box.y + 2.5 },
+      ]),
+    ]
+    const [bg, ...rest] = await pixelsAt(page, await page.screenshot(), points)
+    let painted = 0
+    for (let i = 0; i < columns.length; i++)
+      if (distance(rest[2 * i], bg) > PAINTED || distance(rest[2 * i + 1], bg) > PAINTED) painted++
+    const share = painted / columns.length
+    // Dots with gaps between them: some of the line is painted and some of it is not.
+    expect(share, `painted share of the line: ${share.toFixed(2)}`).toBeGreaterThan(0.2)
+    expect(share, `painted share of the line: ${share.toFixed(2)}`).toBeLessThan(0.85)
   })
 })
 

@@ -50,13 +50,26 @@ const FILL = SHAPE_FILL
 /**
  * Double, Dotted line and Gradient (task 151, Slice 7), from the Divider Design Lab's measurements, where `t` is
  * the line's thickness in px (thin 1, bold 2): Double is two lines of `t` with a 3px gap, so `2t + 3` tall;
- * Dotted line is dots of radius `1.1t` every `5t + 3`px, `3t + 2` tall; Gradient is `t + 1` tall, Primary to
+ * Dotted line is dots of radius `1.1t` every `5t + 3` px, `3t + 2` tall; Gradient is `t + 1` tall, Primary to
  * Secondary, faded to nothing over the last 40% of each outer end (15% at both ends of a line with no centre).
  * Heights are full class names, so Tailwind's scanner sees them.
+ *
+ * FORCED COLOURS remove background images, gradients included, and keep borders, painted in the user's system
+ * colours. So Double is drawn from borders (two lines of `t` with the gap between them, the same picture as two
+ * background bars), and Dotted line, whose dots are a background, falls back to a dotted top border of the dots'
+ * size in forced colours. Gradient falls back to a plain system-text line.
  */
 const LINE_PX: Record<DividerThickness, number> = { thin: 1, bold: 2 }
-const DOUBLE_HEIGHT: Record<DividerThickness, string> = { thin: 'h-[5px]', bold: 'h-[7px]' }
-const DOTTED_HEIGHT: Record<DividerThickness, string> = { thin: 'h-[5px]', bold: 'h-2' }
+/** Two borders with the 3px gap between them (the box is border-box): `2t + 3` tall. */
+const DOUBLE: Record<DividerThickness, string> = {
+  thin: 'h-[5px] border-y border-current',
+  bold: 'h-[7px] border-y-2 border-current',
+}
+/** Dots of a background, and in forced colours a dotted top border as thick as a dot is wide (2px, 4px). */
+const DOTTED: Record<DividerThickness, string> = {
+  thin: 'h-[5px] forced-colors:border-t-2 forced-colors:border-dotted forced-colors:border-[CanvasText]',
+  bold: 'h-2 forced-colors:border-t-4 forced-colors:border-dotted forced-colors:border-[CanvasText]',
+}
 const GRADIENT_HEIGHT: Record<DividerThickness, string> = { thin: 'h-0.5', bold: 'h-[3px]' }
 /** Primary to Secondary: tone-aware roles, and in forced colours a plain system-text line. */
 const GRADIENT_PAINT =
@@ -67,16 +80,9 @@ const GRADIENT_FADE = {
   alone: '[mask-image:linear-gradient(to_right,transparent,#000_15%,#000_85%,transparent)]',
 }
 
-/**
- * The picture of a Double or Dotted line: a background made from `currentColor`, which forced colours turn into
- * the system text colour, so neither needs a fallback of its own.
- */
-function linePicture(style: 'double' | 'dotted', thickness: DividerThickness): CSSProperties {
+/** The dots of a Dotted line: a background made from `currentColor`, which is the line colour. */
+function dottedPicture(thickness: DividerThickness): CSSProperties {
   const t = LINE_PX[thickness]
-  if (style === 'double')
-    return {
-      background: `linear-gradient(currentColor, currentColor) top / 100% ${String(t)}px no-repeat, linear-gradient(currentColor, currentColor) bottom / 100% ${String(t)}px no-repeat`,
-    }
   // Rounded, so 1.1 + 0.6 is 1.7px and not 1.7000000000000002px.
   const px = (value: number) => String(Math.round(value * 100) / 100)
   const radius = t * 1.1
@@ -96,12 +102,19 @@ function Line({
   className: string
 }) {
   const { style, thickness } = divider
-  if (style === 'double' || style === 'dotted')
+  if (style === 'double')
     return (
       <span
         aria-hidden="true"
-        className={`block min-w-4 shrink-[4] ${style === 'double' ? DOUBLE_HEIGHT[thickness] : DOTTED_HEIGHT[thickness]} ${className}`}
-        style={linePicture(style, thickness)}
+        className={`block min-w-4 shrink-[4] ${DOUBLE[thickness]} ${className}`}
+      />
+    )
+  if (style === 'dotted')
+    return (
+      <span
+        aria-hidden="true"
+        className={`block min-w-4 shrink-[4] ${DOTTED[thickness]} ${className}`}
+        style={dottedPicture(thickness)}
       />
     )
   if (style === 'gradient')

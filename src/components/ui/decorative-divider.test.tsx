@@ -113,18 +113,17 @@ it.each([
 describe('Double, Dotted line and Gradient', () => {
   const lines = (html: string) => html.match(/<span aria-hidden="true"[^>]*>/g) ?? []
 
-  it('draws Double as two lines with a 3px gap: 5px tall thin, 7px bold', () => {
+  it('draws Double as two borders with a 3px gap: 5px tall thin, 7px bold, so forced colours keep it', () => {
     const thin = render({ style: 'double', thickness: 'thin' })
     expect(thin).toContain('data-decorative-divider="double"')
     expect(lines(thin)).toHaveLength(1)
-    expect(thin).toContain('h-[5px]')
-    expect(thin).toContain(
-      'linear-gradient(currentColor, currentColor) top / 100% 1px no-repeat, linear-gradient(currentColor, currentColor) bottom / 100% 1px no-repeat',
-    )
+    expect(thin).toContain('h-[5px] border-y border-current')
+    // Borders, not a background: a background is removed in forced colours, a border is painted in system colours.
+    expect(thin).not.toContain('style="background')
+    expect(thin).not.toContain('linear-gradient')
     const bold = render({ style: 'double', thickness: 'bold' })
-    expect(bold).toContain('h-[7px]')
-    expect(bold).toContain('top / 100% 2px no-repeat')
-    expect(bold).toContain('bottom / 100% 2px no-repeat')
+    expect(bold).toContain('h-[7px] border-y-2 border-current')
+    expect(bold).not.toContain('linear-gradient')
   })
 
   it('draws Dotted line as dots of radius 1.1t every 5t + 3 px: 5px tall thin, 8px bold', () => {
@@ -139,6 +138,18 @@ describe('Double, Dotted line and Gradient', () => {
     expect(bold).toContain(
       'radial-gradient(circle, currentColor 2.2px, transparent 2.8px) 0 50% / 13px 100% repeat-x',
     )
+  })
+
+  it('gives Dotted line a dotted system-colour border for forced colours, as thick as a dot is wide', () => {
+    const thin = render({ style: 'dotted', thickness: 'thin' })
+    expect(thin).toContain('forced-colors:border-t-2')
+    expect(thin).toContain('forced-colors:border-dotted')
+    expect(thin).toContain('forced-colors:border-[CanvasText]')
+    expect(render({ style: 'dotted', thickness: 'bold' })).toContain('forced-colors:border-t-4')
+    // Nothing of it applies outside forced colours: every border class is behind the variant.
+    const tag = /<span aria-hidden="true" class="([^"]*)"/.exec(thin)?.[1] ?? ''
+    for (const name of tag.split(' ').filter((n) => n.includes('border')))
+      expect(name.startsWith('forced-colors:'), name).toBe(true)
   })
 
   it('draws Gradient from Primary to Secondary, 2px thin and 3px bold, with a Canvas text fallback', () => {
