@@ -20,11 +20,28 @@ const computed = (el: Locator, property: string) =>
   el.evaluate((node, name) => getComputedStyle(node).getPropertyValue(name), property)
 const distance = (a: number[] = [], b: number[] = []) =>
   Math.hypot(...[0, 1, 2].map((c) => (a[c] ?? 0) - (b[c] ?? 0)))
+/**
+ * Scrolls a line into view and measures it. During hydration the element can be replaced between the locator
+ * resolving and the scroll ("Element is not attached to the DOM"), so that one operation, and only that, is retried:
+ * the locator resolves again each time, within a bounded time. Any other error is thrown at once, and an element
+ * that stays missing still fails when the time is up. Every assertion on the result stays outside the retry.
+ */
+const DETACHED_RETRY_MS = 5000
 const box = async (el: Locator) => {
-  await el.scrollIntoViewIfNeeded()
-  const found = await el.boundingBox()
-  if (!found) throw new Error('No box.')
-  return found
+  const deadline = Date.now() + DETACHED_RETRY_MS
+  for (;;) {
+    try {
+      await el.scrollIntoViewIfNeeded({ timeout: 2000 })
+      const found = await el.boundingBox({ timeout: 2000 })
+      if (!found) throw new Error('No box.')
+      return found
+    } catch (error) {
+      const transient =
+        error instanceof Error &&
+        /not attached to the DOM|detached from the DOM/.test(error.message)
+      if (!transient || Date.now() >= deadline) throw error
+    }
+  }
 }
 /** How far the page is from its own colour, at these points above and below a line, against the page left of it. */
 async function haloAround(page: Page, el: Locator, x: number) {
