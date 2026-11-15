@@ -5590,6 +5590,94 @@ documents.push(
     ],
   },
   {
+    // Double, Dotted line and Gradient through real queries (tests/e2e/rules-styles.spec.ts, task 151, Slice 7): a
+    // Link list with three divider positions (one after the last icons would end the section, so it is not drawn), and
+    // four section headers (a Part A surface): one per new style, and Three dots as the unchanged control. The
+    // Gradient stores a line colour, which it must ignore.
+    _id: 'page-rules-styles',
+    _type: 'page',
+    title: 'Rules styles',
+    slug: { _type: 'slug', current: 'rules-styles' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'rs-links',
+        _type: 'linkList',
+        variant: 'stacked',
+        thumbnailSize: 'standard',
+        style: { _type: 'sectionStyle', anchorId: 'rs-links', align: 'center' },
+        profile: {
+          _type: 'object',
+          name: 'New divider styles',
+          categories: ['Move', 'Breathe'],
+          bio: 'A welcoming space for therapeutic bodywork.',
+        },
+        socialDesign: { _type: 'object', position: 'below' },
+        socialSource: 'custom',
+        socialLinks: [
+          {
+            _key: 'ig',
+            _type: 'socialLink',
+            platform: 'instagram',
+            url: 'https://instagram.com/x',
+          },
+        ],
+        dividerDesign: {
+          _type: 'object',
+          afterCategories: { _type: 'decorativeDivider', style: 'double', width: 'short' },
+          afterProfile: {
+            _type: 'decorativeDivider',
+            style: 'dotted',
+            width: 'long',
+            centre: 'diamond',
+          },
+          aboveSocial: {
+            _type: 'decorativeDivider',
+            style: 'gradient',
+            width: 'full',
+            centre: 'text',
+            text: 'Stay connected',
+            lineColour: { _type: 'object', colour: 'custom', hex: '#aa5500' },
+          },
+        },
+        links: [linkItem('rs-a', 'First link', external('https://example.com/a'))],
+      },
+      ...[
+        ['dots', { style: 'dots' }],
+        ['double', { style: 'double', width: 'long' }],
+        ['dotted', { style: 'dotted', width: 'long', thickness: 'bold' }],
+        [
+          'gradient',
+          {
+            style: 'gradient',
+            width: 'long',
+            lineColour: { _type: 'object', colour: 'custom', hex: '#aa5500' },
+          },
+        ],
+      ].map(([name, divider]) => ({
+        _key: `rs-header-${name}`,
+        _type: 'featuresGrid',
+        title: `Header with a ${name} divider`,
+        intro: 'An introduction under the divider.',
+        columns: 2,
+        style: { _type: 'sectionStyle', anchorId: `rs-header-${name}`, align: 'center' },
+        headerDesign: {
+          _type: 'object',
+          divider: { _type: 'decorativeDivider', ...divider },
+        },
+        items: [1, 2].map((i) => ({
+          _key: key(),
+          _type: 'featureItem',
+          title: `Feature ${i}`,
+          text: 'Text.',
+          icon: image(''),
+        })),
+      })),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
     // A divider under a hero's title (tests/e2e/hero-dividers.spec.ts): one hero in each layout, each with
     // an intro and buttons, and a Full background hero with none chosen to compare spacing against.
     _id: 'page-hero-dividers',
