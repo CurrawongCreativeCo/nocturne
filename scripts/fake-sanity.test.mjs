@@ -72,6 +72,16 @@ afterAll(async () => {
   await gone
 })
 
+/** The lake's stderr arrives through a pipe, so it can land after the response does: wait for it, bounded. */
+async function logged(needle, from) {
+  const deadline = Date.now() + 5000
+  while (Date.now() < deadline) {
+    if (stderr.slice(from).includes(needle)) return true
+    await new Promise((resolve) => setTimeout(resolve, 25))
+  }
+  return false
+}
+
 const get = (path) => fetch(`http://127.0.0.1:${port}${path}`, { headers })
 const validQuery = async () => {
   const response = await get(`/v2026-10-01/data/query/production?query=${QUERY}`)
@@ -89,7 +99,7 @@ describe('the fake Content Lake', () => {
     const response = await get(`/v2026-10-01/data/query/production?query=${QUERY}&$slug=notjson`)
     expect(response.status).toBe(400)
     expect(await response.json()).toEqual({ error: 'Invalid request' })
-    expect(stderr.slice(before)).toContain('fake-sanity request error:')
+    expect(await logged('fake-sanity request error:', before), stderr.slice(before)).toBe(true)
     expect(exited).toBe(false)
     expect(child.exitCode).toBeNull()
     await validQuery()
@@ -104,7 +114,7 @@ describe('the fake Content Lake', () => {
     })
     expect(response.status).toBe(400)
     expect(await response.json()).toEqual({ error: 'Invalid request' })
-    expect(stderr.slice(before)).toContain('fake-sanity request error:')
+    expect(await logged('fake-sanity request error:', before), stderr.slice(before)).toBe(true)
     expect(exited).toBe(false)
     await validQuery()
   })
