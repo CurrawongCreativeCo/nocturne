@@ -42,10 +42,15 @@ interface Divider {
 }
 const divider = (parent: unknown) => (parent ?? {}) as Divider
 const isOff = (parent: unknown) => (divider(parent).style ?? 'none') === 'none'
-const off: ConditionalPropertyCallback = ({ parent }) => isOff(parent)
 /** Three dots stand alone: they take no centre and have no length. */
 const isOffOrDots = (parent: unknown) => isOff(parent) || divider(parent).style === 'dots'
 const offOrDots: ConditionalPropertyCallback = ({ parent }) => isOffOrDots(parent)
+/**
+ * A Gradient is always Primary to Secondary, so it has no line colour to choose. A colour stored before the style was
+ * changed is kept (the field is only hidden) and is simply not drawn.
+ */
+const offOrGradient: ConditionalPropertyCallback = ({ parent }) =>
+  isOff(parent) || divider(parent).style === 'gradient'
 const centreIs =
   (...kinds: string[]): ConditionalPropertyCallback =>
   ({ parent }) =>
@@ -166,7 +171,7 @@ export const decorativeDivider = defineType({
       inherits: 'the line colour',
       choices: DIVIDER_COLOUR_CHOICES,
       fieldset: 'colours',
-      hidden: off,
+      hidden: offOrGradient,
     }),
     themeColourField({
       name: 'centreColour',

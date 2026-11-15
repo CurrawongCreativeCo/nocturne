@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { linkListParts, resolveDivider } from './divider-options'
+import {
+  DIVIDER_STYLES,
+  DIVIDER_STYLE_TITLES,
+  linkListParts,
+  resolveDivider,
+} from './divider-options'
 
 const image = { asset: { _id: 'image-a-40x40-png' } }
 const all = { profile: true, heading: false, social: true, socialsBelow: false }
@@ -113,5 +118,88 @@ describe('linkListParts', () => {
       'social',
       'links',
     ])
+  })
+})
+
+describe('Double, Dotted line and Gradient (task 151, Slice 7)', () => {
+  it('are new values after the stored ones: no stored key changes', () => {
+    expect([...DIVIDER_STYLES]).toEqual([
+      'none',
+      'line',
+      'fade',
+      'dots',
+      'double',
+      'dotted',
+      'gradient',
+    ])
+    expect(DIVIDER_STYLE_TITLES).toMatchObject({
+      dots: 'Three dots',
+      double: 'Double',
+      dotted: 'Dotted line',
+      gradient: 'Gradient',
+    })
+  })
+
+  it.each(['double', 'dotted', 'gradient'] as const)(
+    '%s resolves like a line: medium, thin, nothing in the middle until told otherwise',
+    (style) => {
+      expect(resolveDivider({ style })).toEqual({
+        style,
+        width: 'medium',
+        thickness: 'thin',
+        centre: null,
+        centreSize: 'medium',
+        lineColour: undefined,
+        centreColour: undefined,
+      })
+    },
+  )
+
+  it('lets Double, Dotted line and Gradient hold every centre a Line holds, and Three dots none', () => {
+    const centres = [
+      { centre: 'diamond' },
+      { centre: 'icon', icon: 'heart' },
+      { centre: 'text', text: 'Stay connected' },
+      { centre: 'image', image },
+    ]
+    for (const centre of centres) {
+      const line = resolveDivider({ style: 'line', ...centre })
+      expect(line?.centre).not.toBeNull()
+      for (const style of ['double', 'dotted', 'gradient'] as const)
+        expect(resolveDivider({ style, ...centre })?.centre, `${style} ${centre.centre}`).toEqual(
+          line?.centre,
+        )
+      expect(resolveDivider({ style: 'dots', ...centre })?.centre).toBeNull()
+    }
+  })
+
+  it('draws a line colour on Double and Dotted line as it does on a Line', () => {
+    const lineColour = { colour: 'accent' }
+    const expected = resolveDivider({ style: 'line', lineColour })?.lineColour
+    expect(expected).toBeDefined()
+    expect(resolveDivider({ style: 'double', lineColour })?.lineColour).toBe(expected)
+    expect(resolveDivider({ style: 'dotted', lineColour })?.lineColour).toBe(expected)
+  })
+
+  it('ignores a line colour on Gradient, and does not remove it: the input is only read', () => {
+    const input = Object.freeze({
+      style: 'gradient',
+      lineColour: Object.freeze({ colour: 'custom', hex: '#aa5500' }),
+      centre: 'diamond',
+      centreColour: Object.freeze({ colour: 'highlight' }),
+    })
+    const before = JSON.stringify(input)
+    const resolved = resolveDivider(input)
+    expect(resolved?.lineColour).toBeUndefined()
+    // The middle keeps its own colour, as it does on any style.
+    expect(resolved?.centreColour).toBeDefined()
+    expect(JSON.stringify(input)).toBe(before)
+    // Changing the style brings the stored colour back.
+    expect(resolveDivider({ ...input, style: 'line' })?.lineColour).toBe('#aa5500')
+  })
+
+  it('still draws nothing for a style never offered, and None', () => {
+    for (const style of ['wave', 'glow', 'dotted-line', 'Double', ''])
+      expect(resolveDivider({ style }), style).toBeNull()
   })
 })

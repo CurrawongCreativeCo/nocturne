@@ -2216,7 +2216,7 @@ export type DecorativeMark = {
 
 export type DecorativeDivider = {
   _type: 'decorativeDivider'
-  style?: 'none' | 'line' | 'fade' | 'dots'
+  style?: 'none' | 'line' | 'fade' | 'dots' | 'double' | 'dotted' | 'gradient'
   centre?: 'none' | 'diamond' | 'icon' | 'text' | 'image'
   text?: string
   textCase?: 'normal' | 'uppercase'
@@ -5123,7 +5123,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
             fontStyle: null
           } | null
           divider: {
-            style: 'dots' | 'fade' | 'line' | 'none' | null
+            style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
             width: 'full' | 'long' | 'medium' | 'short' | null
             thickness: 'bold' | 'thin' | null
             centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -5452,7 +5452,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
             fontStyle: null
           } | null
           divider: {
-            style: 'dots' | 'fade' | 'line' | 'none' | null
+            style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
             width: 'full' | 'long' | 'medium' | 'short' | null
             thickness: 'bold' | 'thin' | null
             centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -5780,7 +5780,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
             fontStyle: null
           } | null
           divider: {
-            style: 'dots' | 'fade' | 'line' | 'none' | null
+            style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
             width: 'full' | 'long' | 'medium' | 'short' | null
             thickness: 'bold' | 'thin' | null
             centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -6278,7 +6278,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
             fontStyle: null
           } | null
           divider: {
-            style: 'dots' | 'fade' | 'line' | 'none' | null
+            style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
             width: 'full' | 'long' | 'medium' | 'short' | null
             thickness: 'bold' | 'thin' | null
             centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -6734,7 +6734,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
             fontStyle: null
           } | null
           divider: {
-            style: 'dots' | 'fade' | 'line' | 'none' | null
+            style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
             width: 'full' | 'long' | 'medium' | 'short' | null
             thickness: 'bold' | 'thin' | null
             centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -7098,7 +7098,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
             fontStyle: null
           } | null
           divider: {
-            style: 'dots' | 'fade' | 'line' | 'none' | null
+            style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
             width: 'full' | 'long' | 'medium' | 'short' | null
             thickness: 'bold' | 'thin' | null
             centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -7714,7 +7714,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
         } | null
         dividerDesign: {
           afterCategories: {
-            style: 'dots' | 'fade' | 'line' | 'none' | null
+            style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
             width: 'full' | 'long' | 'medium' | 'short' | null
             thickness: 'bold' | 'thin' | null
             centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -7770,7 +7770,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
             } | null
           } | null
           afterProfile: {
-            style: 'dots' | 'fade' | 'line' | 'none' | null
+            style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
             width: 'full' | 'long' | 'medium' | 'short' | null
             thickness: 'bold' | 'thin' | null
             centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -7826,7 +7826,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
             } | null
           } | null
           aboveSocial: {
-            style: 'dots' | 'fade' | 'line' | 'none' | null
+            style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
             width: 'full' | 'long' | 'medium' | 'short' | null
             thickness: 'bold' | 'thin' | null
             centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -7882,7 +7882,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
             } | null
           } | null
           belowSocial: {
-            style: 'dots' | 'fade' | 'line' | 'none' | null
+            style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
             width: 'full' | 'long' | 'medium' | 'short' | null
             thickness: 'bold' | 'thin' | null
             centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -8453,7 +8453,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
             fontStyle: null
           } | null
           divider: {
-            style: 'dots' | 'fade' | 'line' | 'none' | null
+            style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
             width: 'full' | 'long' | 'medium' | 'short' | null
             thickness: 'bold' | 'thin' | null
             centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -8767,7 +8767,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
             fontStyle: null
           } | null
           divider: {
-            style: 'dots' | 'fade' | 'line' | 'none' | null
+            style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
             width: 'full' | 'long' | 'medium' | 'short' | null
             thickness: 'bold' | 'thin' | null
             centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -9259,7 +9259,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
             fontStyle: null
           } | null
           divider: {
-            style: 'dots' | 'fade' | 'line' | 'none' | null
+            style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
             width: 'full' | 'long' | 'medium' | 'short' | null
             thickness: 'bold' | 'thin' | null
             centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -9650,7 +9650,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
           | {
               _key: string
               _type: 'decorativeDivider'
-              style: 'dots' | 'fade' | 'line' | 'none' | null
+              style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
               centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
               text: string | null
               textCase: 'normal' | 'uppercase' | null
@@ -9981,7 +9981,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
             fontStyle: null
           } | null
           divider: {
-            style: 'dots' | 'fade' | 'line' | 'none' | null
+            style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
             width: 'full' | 'long' | 'medium' | 'short' | null
             thickness: 'bold' | 'thin' | null
             centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -10389,7 +10389,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
             fontStyle: null
           } | null
           divider: {
-            style: 'dots' | 'fade' | 'line' | 'none' | null
+            style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
             width: 'full' | 'long' | 'medium' | 'short' | null
             thickness: 'bold' | 'thin' | null
             centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -10868,7 +10868,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
             fontStyle: null
           } | null
           divider: {
-            style: 'dots' | 'fade' | 'line' | 'none' | null
+            style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
             width: 'full' | 'long' | 'medium' | 'short' | null
             thickness: 'bold' | 'thin' | null
             centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -11337,7 +11337,7 @@ export type SERVICE_SECTIONS_QUERY_RESULT = {
             fontStyle: null
           } | null
           divider: {
-            style: 'dots' | 'fade' | 'line' | 'none' | null
+            style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
             width: 'full' | 'long' | 'medium' | 'short' | null
             thickness: 'bold' | 'thin' | null
             centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -12488,7 +12488,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -12861,7 +12861,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -13246,7 +13246,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -13616,7 +13616,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -14000,7 +14000,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -14578,7 +14578,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -15167,7 +15167,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -15688,7 +15688,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -16221,7 +16221,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -16635,7 +16635,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -17060,7 +17060,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -17439,7 +17439,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -17832,7 +17832,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -18211,7 +18211,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -18565,7 +18565,7 @@ export type PAGE_QUERY_RESULT = {
               } | null
             } | null
             dividerDesign: {
-              style: 'dots' | 'fade' | 'line' | 'none' | null
+              style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
               width: 'full' | 'long' | 'medium' | 'short' | null
               thickness: 'bold' | 'thin' | null
               centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -19150,7 +19150,7 @@ export type PAGE_QUERY_RESULT = {
               } | null
             } | null
             dividerDesign: {
-              style: 'dots' | 'fade' | 'line' | 'none' | null
+              style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
               width: 'full' | 'long' | 'medium' | 'short' | null
               thickness: 'bold' | 'thin' | null
               centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -20156,7 +20156,7 @@ export type PAGE_QUERY_RESULT = {
             } | null
             dividerDesign: {
               afterCategories: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -20226,7 +20226,7 @@ export type PAGE_QUERY_RESULT = {
                 } | null
               } | null
               afterProfile: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -20296,7 +20296,7 @@ export type PAGE_QUERY_RESULT = {
                 } | null
               } | null
               aboveSocial: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -20366,7 +20366,7 @@ export type PAGE_QUERY_RESULT = {
                 } | null
               } | null
               belowSocial: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -21373,7 +21373,7 @@ export type PAGE_QUERY_RESULT = {
             } | null
             dividerDesign: {
               afterCategories: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -21443,7 +21443,7 @@ export type PAGE_QUERY_RESULT = {
                 } | null
               } | null
               afterProfile: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -21513,7 +21513,7 @@ export type PAGE_QUERY_RESULT = {
                 } | null
               } | null
               aboveSocial: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -21583,7 +21583,7 @@ export type PAGE_QUERY_RESULT = {
                 } | null
               } | null
               belowSocial: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -22229,7 +22229,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -22784,7 +22784,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -23353,7 +23353,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -23707,7 +23707,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -24070,7 +24070,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -24604,7 +24604,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -25150,7 +25150,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -25518,7 +25518,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -25899,7 +25899,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -26676,7 +26676,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -27466,7 +27466,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -27943,7 +27943,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -28397,7 +28397,7 @@ export type PAGE_QUERY_RESULT = {
               | {
                   _key: string
                   _type: 'decorativeDivider'
-                  style: 'dots' | 'fade' | 'line' | 'none' | null
+                  style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                   centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
                   text: string | null
                   textCase: 'normal' | 'uppercase' | null
@@ -28716,7 +28716,7 @@ export type PAGE_QUERY_RESULT = {
               | {
                   _key: string
                   _type: 'decorativeDivider'
-                  style: 'dots' | 'fade' | 'line' | 'none' | null
+                  style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                   centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
                   text: string | null
                   textCase: 'normal' | 'uppercase' | null
@@ -29082,7 +29082,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -29555,7 +29555,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -30040,7 +30040,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -30598,7 +30598,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -31168,7 +31168,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -31710,7 +31710,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -32263,7 +32263,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -32616,7 +32616,7 @@ export type PAGE_QUERY_RESULT = {
                 fontStyle: null
               } | null
               divider: {
-                style: 'dots' | 'fade' | 'line' | 'none' | null
+                style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
                 width: 'full' | 'long' | 'medium' | 'short' | null
                 thickness: 'bold' | 'thin' | null
                 centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -33198,7 +33198,7 @@ export type SETTINGS_QUERY_RESULT = {
     } | null
   }
   footerDividerDesign: null | {
-    style: 'dots' | 'fade' | 'line' | 'none' | null
+    style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
     width: 'full' | 'long' | 'medium' | 'short' | null
     thickness: 'bold' | 'thin' | null
     centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null
@@ -34484,7 +34484,7 @@ export type TEAM_MEMBER_QUERY_RESULT = {
           } | null
         } | null
         dividerDesign: {
-          style: 'dots' | 'fade' | 'line' | 'none' | null
+          style: 'dots' | 'dotted' | 'double' | 'fade' | 'gradient' | 'line' | 'none' | null
           width: 'full' | 'long' | 'medium' | 'short' | null
           thickness: 'bold' | 'thin' | null
           centre: 'diamond' | 'icon' | 'image' | 'none' | 'text' | null

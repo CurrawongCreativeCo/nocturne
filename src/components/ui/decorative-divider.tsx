@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react'
+
 import type {
   DividerCentreSize,
   DividerThickness,
@@ -45,6 +47,44 @@ const TEXT: Record<DividerCentreSize, string> = {
 // Forced-colours mode drops backgrounds, so the shapes fall back to the system text colour.
 const FILL = SHAPE_FILL
 
+/**
+ * Double, Dotted line and Gradient (task 151, Slice 7), from the Divider Design Lab's measurements, where `t` is
+ * the line's thickness in px (thin 1, bold 2): Double is two lines of `t` with a 3px gap, so `2t + 3` tall;
+ * Dotted line is dots of radius `1.1t` every `5t + 3`px, `3t + 2` tall; Gradient is `t + 1` tall, Primary to
+ * Secondary, faded to nothing over the last 40% of each outer end (15% at both ends of a line with no centre).
+ * Heights are full class names, so Tailwind's scanner sees them.
+ */
+const LINE_PX: Record<DividerThickness, number> = { thin: 1, bold: 2 }
+const DOUBLE_HEIGHT: Record<DividerThickness, string> = { thin: 'h-[5px]', bold: 'h-[7px]' }
+const DOTTED_HEIGHT: Record<DividerThickness, string> = { thin: 'h-[5px]', bold: 'h-2' }
+const GRADIENT_HEIGHT: Record<DividerThickness, string> = { thin: 'h-0.5', bold: 'h-[3px]' }
+/** Primary to Secondary: tone-aware roles, and in forced colours a plain system-text line. */
+const GRADIENT_PAINT =
+  'bg-linear-to-r from-accent to-accent-2 forced-colors:bg-none forced-colors:bg-[CanvasText]'
+const GRADIENT_FADE = {
+  start: '[mask-image:linear-gradient(to_right,transparent,#000_40%)]',
+  end: '[mask-image:linear-gradient(to_left,transparent,#000_40%)]',
+  alone: '[mask-image:linear-gradient(to_right,transparent,#000_15%,#000_85%,transparent)]',
+}
+
+/**
+ * The picture of a Double or Dotted line: a background made from `currentColor`, which forced colours turn into
+ * the system text colour, so neither needs a fallback of its own.
+ */
+function linePicture(style: 'double' | 'dotted', thickness: DividerThickness): CSSProperties {
+  const t = LINE_PX[thickness]
+  if (style === 'double')
+    return {
+      background: `linear-gradient(currentColor, currentColor) top / 100% ${String(t)}px no-repeat, linear-gradient(currentColor, currentColor) bottom / 100% ${String(t)}px no-repeat`,
+    }
+  // Rounded, so 1.1 + 0.6 is 1.7px and not 1.7000000000000002px.
+  const px = (value: number) => String(Math.round(value * 100) / 100)
+  const radius = t * 1.1
+  return {
+    background: `radial-gradient(circle, currentColor ${px(radius)}px, transparent ${px(radius + 0.6)}px) 0 50% / ${px(t * 5 + 3)}px 100% repeat-x`,
+  }
+}
+
 /** One line: even, or fading towards its outer end (`side`), or towards both ends when it stands alone. */
 function Line({
   divider,
@@ -55,6 +95,22 @@ function Line({
   side?: 'start' | 'end'
   className: string
 }) {
+  const { style, thickness } = divider
+  if (style === 'double' || style === 'dotted')
+    return (
+      <span
+        aria-hidden="true"
+        className={`block min-w-4 shrink-[4] ${style === 'double' ? DOUBLE_HEIGHT[thickness] : DOTTED_HEIGHT[thickness]} ${className}`}
+        style={linePicture(style, thickness)}
+      />
+    )
+  if (style === 'gradient')
+    return (
+      <span
+        aria-hidden="true"
+        className={`block min-w-4 shrink-[4] ${GRADIENT_HEIGHT[thickness]} ${GRADIENT_PAINT} ${GRADIENT_FADE[side ?? 'alone']} ${className}`}
+      />
+    )
   const fade =
     divider.style !== 'fade'
       ? FILL
@@ -120,8 +176,8 @@ function Centre({
 }
 
 /**
- * A decorative divider inside a section (lib/sanity/divider-options.ts): a line, a fading line or
- * three dots, with an optional diamond, icon, few words or small picture between two lines, in
+ * A decorative divider inside a section (lib/sanity/divider-options.ts): a line, a fading line, a double line,
+ * a dotted line, a Primary to Secondary gradient or three dots, with an optional diamond, icon, few words or small picture between two lines, in
  * `currentColor` (the line colour unless one is chosen; the middle follows the lines unless it has
  * its own). Decoration is hidden from assistive technology; words in the middle are read like any
  * text. `block` centres it in a centred section. It brings its own space above and below

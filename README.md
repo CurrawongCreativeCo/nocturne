@@ -4612,13 +4612,13 @@ Card contrast is one lookup for any family (`src/lib/color/card-contrast.ts`): e
 
 ### Decorative dividers
 
-A decorative divider is a small rule _inside_ a section, between two parts of its content: a line, a fading line or three
-dots, with an optional middle between two lines: a diamond, an icon (the badge icon set), a few words ("Stay connected")
+A decorative divider is a small rule _inside_ a section, between two parts of its content: a line, a fading line, a double
+line, a dotted line, a gradient or three dots, with an optional middle between two lines: a diamond, an icon (the badge icon set), a few words ("Stay connected")
 or a small picture. Not to be confused with [Section dividers](#section-dividers), the shaped edge between two sections.
 
 | Option              | Choices                                                                                                     |
 | ------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Divider             | None (default), Line, Fading line, Three dots, as pictures                                                  |
+| Divider             | None (default), Line, Fading line, Three dots, Double, Dotted line, Gradient, as pictures                   |
 | In the middle       | Nothing, Diamond, Icon, Words (up to about 30 characters; As typed or Capitals), Picture                    |
 | Size in the middle  | Small, Medium (default), Large, for an icon, the words or a picture                                         |
 | Length              | Short, Medium (default), Long, Full width: the whole rule, or each line beside a middle                     |
@@ -4629,7 +4629,12 @@ Words also offer **Letter spacing**: Normal, Wide or Extra wide. Unset preserves
 spacing (including the wider capitals). This is the same choice as Link list service categories.
 
 Each option appears only once it applies (three dots take no middle and no length). A fading line fades towards its outer
-ends around a middle. Lines, diamonds, icons and pictures are decoration and hidden from screen readers; words in the
+ends around a middle. **Double** is two fine lines with a 3px gap, **Dotted line** a line made of dots (it takes a middle,
+where Three dots does not) and **Gradient** a line from the Primary to the Secondary colour, fading at its ends; a Gradient
+has no line colour (it is always Primary to Secondary), and one stored before the style was chosen is kept, not drawn, and
+comes back if the style is changed. In forced colours a Gradient is a plain system-text line. Their sizes are the Divider
+Design Lab's, for a line of `t` px (Thin 1, Bold 2): Double `2t + 3` tall, Dotted line dots of radius `1.1t` every `5t + 3`
+px, Gradient `t + 1` tall. Lines, diamonds, icons and pictures are decoration and hidden from screen readers; words in the
 middle are read like any text. A picture is a small mark with a transparent background, shown without a blurred
 preview (no alt text: it is decoration). CSS and server components only, no JavaScript.
 
