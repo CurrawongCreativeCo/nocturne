@@ -140,7 +140,7 @@ async function readBody(req) {
   return body
 }
 
-createServer(async (req, res) => {
+async function handle(req, res) {
   const url = new URL(req.url ?? '/', 'http://localhost')
   if (req.method === 'GET' && url.pathname === '/__fixture/picture.png') {
     res.writeHead(200, { 'content-type': 'image/png', 'cache-control': 'public, max-age=3600' })
@@ -303,6 +303,73 @@ createServer(async (req, res) => {
     res.writeHead(400, { 'content-type': 'application/json' })
     res.end(JSON.stringify({ error: 'Invalid query' }))
   }
-}).listen(PORT, () => {
+}
+
+// A request that throws (a malformed body or parameter, say) used to reject outside every try, and Node
+// ends the process on an unhandled rejection: every in-flight connection is reset (ECONNRESET) and every
+// later one refused, for the rest of the run. It now answers that one request and the lake stays up.
+const server = createServer((req, res) => {
+  const started = Date.now()
+  // Diagnostics only: a request that took over a second, or that the client gave up on before it was answered.
+  res.on('close', () => {
+    const took = Date.now() - started
+    if (!res.writableFinished)
+      console.error(
+        'fake-sanity client closed early:',
+        req.method,
+        (req.url ?? '').slice(0, 120),
+        `after ${took}ms`,
+      )
+    else if (took > SLOW_MS)
+      console.error(
+        'fake-sanity slow request:',
+        req.method,
+        (req.url ?? '').slice(0, 120),
+        `${took}ms`,
+      )
+  })
+  handle(req, res).catch((error) => {
+    console.error(
+      'fake-sanity request error:',
+      req.method,
+      (req.url ?? '').slice(0, 120),
+      error instanceof Error ? error.message : error,
+    )
+    if (res.headersSent) res.destroy()
+    else {
+      res.writeHead(400, { 'content-type': 'application/json' })
+      res.end(JSON.stringify({ error: 'Invalid request' }))
+    }
+  })
+})
+
+// More diagnostics, all quiet unless something goes wrong, and none of it changes how a request is answered:
+// a connection that errors is named with how long it had been open; a stretch where the one thread was
+// too busy to serve anyone (GROQ evaluation is synchronous) is named with its length; and a non-zero exit
+// says so, so a lake that went away mid-build is in the log. Node's own handling of sockets is unchanged.
+const SLOW_MS = 1000
+const STALL_MS = 250
+server.on('connection', (socket) => {
+  const opened = Date.now()
+  socket.on('error', (error) => {
+    console.error(
+      'fake-sanity socket error:',
+      error.code ?? error.message,
+      `after ${Date.now() - opened}ms`,
+    )
+  })
+})
+let ticked = Date.now()
+setInterval(() => {
+  const now = Date.now()
+  const stalled = now - ticked - 100
+  ticked = now
+  if (stalled > STALL_MS) console.error(`fake-sanity event loop stalled for ${stalled}ms`)
+}, 100).unref()
+process.on('exit', (code) => {
+  if (code) console.error(`fake-sanity exiting with code ${code}`)
+})
+
+server.listen(PORT, () => {
   console.log(`fake Content Lake on http://localhost:${PORT}`)
 })
