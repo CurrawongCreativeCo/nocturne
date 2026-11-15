@@ -4619,8 +4619,9 @@ or a small picture. Not to be confused with [Section dividers](#section-dividers
 | Option              | Choices                                                                                                     |
 | ------------------- | ----------------------------------------------------------------------------------------------------------- |
 | Divider             | None (default), Line, Fading line, Three dots, Double, Dotted line, Gradient, as pictures                   |
-| In the middle       | Nothing, Diamond, Icon, Words (up to about 30 characters; As typed or Capitals), Picture                    |
-| Size in the middle  | Small, Medium (default), Large, for an icon, the words or a picture                                         |
+| In the middle       | Nothing, Diamond, Icon, Words (up to about 30 characters; As typed or Capitals), Picture, Ornament          |
+| Size in the middle  | Small, Medium (default), Large, for an icon, the words, a picture or an Ornament                            |
+| Finish              | Flat (default) or Glow, as pictures; only for Line, Double and Gradient                                     |
 | Length              | Short, Medium (default), Long, Full width: the whole rule, or each line beside a middle                     |
 | Thickness           | Thin (default), Bold                                                                                        |
 | Colours (collapsed) | Line colour (Inherit is the line colour) and Colour in the middle (Inherit follows the lines); theme or hex |
@@ -4637,6 +4638,15 @@ Design Lab's, for a line of `t` px (Thin 1, Bold 2): Double `2t + 3` tall, Dotte
 px, Gradient `t + 1` tall. Lines, diamonds, icons and pictures are decoration and hidden from screen readers; words in the
 middle are read like any text. A picture is a small mark with a transparent background, shown without a blurred
 preview (no alt text: it is decoration). CSS and server components only, no JavaScript.
+
+**Finish and Ornament (task 151, Slice 7, second batch).** **Glow** is a finish of the line, never a style: a soft halo of
+the line's own colour, the Lab's `0 0 (6 + 2t)px t px` at 55% on a Line and a Double, and for a Gradient (whose end fade is a
+mask that would clip a shadow) a blurred copy of the gradient on its own masked layer. It paints outside the line's box and adds
+nothing to the layout. It is offered only for Line, Double and Gradient; unset, Flat and any unknown value draw Flat, and a Glow
+stored for any other style is kept and not drawn. Forced colours drop the halo and keep the lines. The **Ornament** centre is
+the Lab's flourish, two soft arches either side of a small diamond (90 by 18 px at Medium; Small and Large keep its
+proportions), drawn in the middle's colour and sized by _Size in the middle_. It is decoration, hidden from screen readers and
+not focusable; Three dots never take it.
 
 - **Code.** The schema type is `decorativeDivider` (`src/lib/sanity/schema/decorative-divider.ts`, registered in
   `sharedSchemaTypes`), queried with `decorativeDividerFields` (`src/lib/sanity/fragments.ts`), resolved by
