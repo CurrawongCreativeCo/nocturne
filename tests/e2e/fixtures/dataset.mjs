@@ -7072,4 +7072,105 @@ documents.push(
     pageBuilder: seamPairs,
     _updatedAt: UPDATED,
   },
+  {
+    // Per-layer colours and strengths (section-edge-layer-colours.spec.ts, task 151, Slice 8). Each override
+    // section sits beside an identical one with nothing set, so geometry and the recipe can be compared; the
+    // followers are dark (inverse), light (alt) and Brand (accent), because the layer below takes its roles
+    // from the section that follows.
+    _id: 'page-edge-layer-colours',
+    _type: 'page',
+    title: 'Layer colours',
+    slug: { _type: 'slug', current: 'edge-layer-colours' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      // Reef: nothing set, then a colour only (first layer), a strength only (second layer) and both (below).
+      edgeSection('lc-reef-unset', 'Reef, nothing set', {
+        tone: 'alt',
+        edge: 'reef',
+        edgeHeight: 'large',
+      }),
+      edgeSection('lc-reef-unset-f', 'Dark follower', { tone: 'inverse' }),
+      edgeSection('lc-reef', 'Reef, layers set', {
+        tone: 'alt',
+        edge: 'reef',
+        edgeHeight: 'large',
+        edgeLayerColours: {
+          above1: 'ink',
+          above2Strength: 'light',
+          below: 'accent',
+          belowStrength: 'strong',
+        },
+      }),
+      edgeSection('lc-reef-f', 'Dark follower', { tone: 'inverse' }),
+      edgeSection('lc-reef-light', 'Reef, layers set, light follower', {
+        tone: 'alt',
+        edge: 'reef',
+        edgeHeight: 'large',
+        edgeLayerColours: {
+          above1: 'ink',
+          above2Strength: 'light',
+          below: 'accent',
+          belowStrength: 'strong',
+        },
+      }),
+      edgeSection('lc-reef-light-f', 'Light follower', { tone: 'alt' }),
+      edgeSection('lc-reef-brand', 'Reef, layers set, Brand follower', {
+        tone: 'alt',
+        edge: 'reef',
+        edgeHeight: 'large',
+        edgeLayerColours: {
+          above1: 'ink',
+          above2Strength: 'light',
+          below: 'accent',
+          belowStrength: 'strong',
+        },
+      }),
+      edgeSection('lc-reef-brand-f', 'Brand follower', { tone: 'accent' }),
+      // Still water: its layer below switched on, nothing set, then both layers set.
+      edgeSection('lc-still-unset', 'Still water, nothing set', {
+        tone: 'alt',
+        edge: 'still-water',
+        edgeLayerBelow: true,
+        edgeHeight: 'large',
+      }),
+      edgeSection('lc-still-unset-f', 'Dark follower', { tone: 'inverse' }),
+      edgeSection('lc-still', 'Still water, layers set', {
+        tone: 'alt',
+        edge: 'still-water',
+        edgeLayerBelow: true,
+        edgeHeight: 'large',
+        edgeLayerColours: {
+          above1: 'highlight',
+          above1Strength: 'strong',
+          below: 'ink',
+          belowStrength: 'light',
+        },
+      }),
+      edgeSection('lc-still-f', 'Dark follower', { tone: 'inverse' }),
+      // Still water with no layer below switched on: what is stored for the second layer above and the layer
+      // below is kept and not drawn.
+      edgeSection('lc-still-stale', 'Still water, stored values for layers it does not draw', {
+        tone: 'alt',
+        edge: 'still-water',
+        edgeHeight: 'large',
+        edgeLayerColours: { above2: 'highlight', above2Strength: 'strong', below: 'ink' },
+      }),
+      edgeSection('lc-still-stale-f', 'Light follower', { tone: 'alt' }),
+      // Lagoon on a dark section over a light one: nothing set, then the second layer, and a stored layer below.
+      edgeSection('lc-lagoon-unset', 'Lagoon, nothing set', {
+        tone: 'inverse',
+        edge: 'lagoon',
+        edgeHeight: 'large',
+      }),
+      edgeSection('lc-lagoon-unset-f', 'Light follower', { tone: 'alt' }),
+      edgeSection('lc-lagoon', 'Lagoon, second layer set', {
+        tone: 'inverse',
+        edge: 'lagoon',
+        edgeHeight: 'large',
+        edgeLayerColours: { above2: 'highlight', above2Strength: 'strong', below: 'ink' },
+      }),
+      edgeSection('lc-lagoon-f', 'Light follower', { tone: 'alt' }),
+    ],
+    _updatedAt: UPDATED,
+  },
 )
