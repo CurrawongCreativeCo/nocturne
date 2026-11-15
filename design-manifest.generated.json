@@ -1045,6 +1045,10 @@
             {
               "value": "image",
               "title": "Picture"
+            },
+            {
+              "value": "ornament",
+              "title": "Ornament"
             }
           ],
           "clientEditable": false
@@ -1248,6 +1252,23 @@
             {
               "value": "bold",
               "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.finish",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "glow",
+              "title": "Glow"
             }
           ],
           "clientEditable": false
@@ -4954,6 +4975,10 @@
             {
               "value": "image",
               "title": "Picture"
+            },
+            {
+              "value": "ornament",
+              "title": "Ornament"
             }
           ],
           "clientEditable": false
@@ -5157,6 +5182,23 @@
             {
               "value": "bold",
               "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.finish",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "glow",
+              "title": "Glow"
             }
           ],
           "clientEditable": false
@@ -6487,6 +6529,10 @@
             {
               "value": "image",
               "title": "Picture"
+            },
+            {
+              "value": "ornament",
+              "title": "Ornament"
             }
           ],
           "clientEditable": false
@@ -6690,6 +6736,23 @@
             {
               "value": "bold",
               "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.finish",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "glow",
+              "title": "Glow"
             }
           ],
           "clientEditable": false
@@ -7929,6 +7992,10 @@
             {
               "value": "image",
               "title": "Picture"
+            },
+            {
+              "value": "ornament",
+              "title": "Ornament"
             }
           ],
           "clientEditable": false
@@ -8132,6 +8199,23 @@
             {
               "value": "bold",
               "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.finish",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "glow",
+              "title": "Glow"
             }
           ],
           "clientEditable": false
@@ -9225,6 +9309,10 @@
             {
               "value": "image",
               "title": "Picture"
+            },
+            {
+              "value": "ornament",
+              "title": "Ornament"
             }
           ],
           "clientEditable": false
@@ -9428,6 +9516,23 @@
             {
               "value": "bold",
               "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.finish",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "glow",
+              "title": "Glow"
             }
           ],
           "clientEditable": false
@@ -11631,6 +11736,10 @@
             {
               "value": "image",
               "title": "Picture"
+            },
+            {
+              "value": "ornament",
+              "title": "Ornament"
             }
           ],
           "clientEditable": false
@@ -11834,6 +11943,23 @@
             {
               "value": "bold",
               "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.finish",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "glow",
+              "title": "Glow"
             }
           ],
           "clientEditable": false
@@ -13565,6 +13691,10 @@
             {
               "value": "image",
               "title": "Picture"
+            },
+            {
+              "value": "ornament",
+              "title": "Ornament"
             }
           ],
           "clientEditable": false
@@ -13768,6 +13898,23 @@
             {
               "value": "bold",
               "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.finish",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "glow",
+              "title": "Glow"
             }
           ],
           "clientEditable": false
@@ -14785,6 +14932,10 @@
             {
               "value": "image",
               "title": "Picture"
+            },
+            {
+              "value": "ornament",
+              "title": "Ornament"
             }
           ],
           "clientEditable": false
@@ -14988,6 +15139,23 @@
             {
               "value": "bold",
               "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.finish",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "glow",
+              "title": "Glow"
             }
           ],
           "clientEditable": false
@@ -17100,6 +17268,10 @@
             {
               "value": "image",
               "title": "Picture"
+            },
+            {
+              "value": "ornament",
+              "title": "Ornament"
             }
           ],
           "clientEditable": false
@@ -17303,6 +17475,23 @@
             {
               "value": "bold",
               "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.finish",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "glow",
+              "title": "Glow"
             }
           ],
           "clientEditable": false
@@ -19586,6 +19775,10 @@
             {
               "value": "image",
               "title": "Picture"
+            },
+            {
+              "value": "ornament",
+              "title": "Ornament"
             }
           ],
           "clientEditable": false
@@ -19789,6 +19982,23 @@
             {
               "value": "bold",
               "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.finish",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "glow",
+              "title": "Glow"
             }
           ],
           "clientEditable": false
@@ -21014,6 +21224,10 @@
             {
               "value": "image",
               "title": "Picture"
+            },
+            {
+              "value": "ornament",
+              "title": "Ornament"
             }
           ],
           "clientEditable": false
@@ -21217,6 +21431,23 @@
             {
               "value": "bold",
               "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.finish",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "glow",
+              "title": "Glow"
             }
           ],
           "clientEditable": false
@@ -23114,6 +23345,10 @@
             {
               "value": "image",
               "title": "Picture"
+            },
+            {
+              "value": "ornament",
+              "title": "Ornament"
             }
           ],
           "clientEditable": false
@@ -23317,6 +23552,23 @@
             {
               "value": "bold",
               "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.finish",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "glow",
+              "title": "Glow"
             }
           ],
           "clientEditable": false
@@ -24401,6 +24653,10 @@
             {
               "value": "image",
               "title": "Picture"
+            },
+            {
+              "value": "ornament",
+              "title": "Ornament"
             }
           ],
           "clientEditable": false
@@ -24604,6 +24860,23 @@
             {
               "value": "bold",
               "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.finish",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "glow",
+              "title": "Glow"
             }
           ],
           "clientEditable": false
@@ -27095,6 +27368,10 @@
             {
               "value": "image",
               "title": "Picture"
+            },
+            {
+              "value": "ornament",
+              "title": "Ornament"
             }
           ],
           "clientEditable": false
@@ -27298,6 +27575,23 @@
             {
               "value": "bold",
               "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.finish",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "glow",
+              "title": "Glow"
             }
           ],
           "clientEditable": false
@@ -29312,6 +29606,10 @@
             {
               "value": "image",
               "title": "Picture"
+            },
+            {
+              "value": "ornament",
+              "title": "Ornament"
             }
           ],
           "clientEditable": false
@@ -29515,6 +29813,23 @@
             {
               "value": "bold",
               "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.finish",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "glow",
+              "title": "Glow"
             }
           ],
           "clientEditable": false
@@ -30558,6 +30873,10 @@
             {
               "value": "image",
               "title": "Picture"
+            },
+            {
+              "value": "ornament",
+              "title": "Ornament"
             }
           ],
           "clientEditable": false
@@ -30761,6 +31080,23 @@
             {
               "value": "bold",
               "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.finish",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "glow",
+              "title": "Glow"
             }
           ],
           "clientEditable": false
@@ -32432,6 +32768,10 @@
             {
               "value": "image",
               "title": "Picture"
+            },
+            {
+              "value": "ornament",
+              "title": "Ornament"
             }
           ],
           "clientEditable": false
@@ -32635,6 +32975,23 @@
             {
               "value": "bold",
               "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.finish",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "glow",
+              "title": "Glow"
             }
           ],
           "clientEditable": false
@@ -36672,6 +37029,10 @@
             {
               "value": "image",
               "title": "Picture"
+            },
+            {
+              "value": "ornament",
+              "title": "Ornament"
             }
           ],
           "clientEditable": false
@@ -36880,6 +37241,23 @@
           "clientEditable": false
         },
         {
+          "path": "dividerDesign.afterCategories.finish",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "glow",
+              "title": "Glow"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
           "path": "dividerDesign.afterCategories.lineColour",
           "kind": "object",
           "required": null,
@@ -37051,6 +37429,10 @@
             {
               "value": "image",
               "title": "Picture"
+            },
+            {
+              "value": "ornament",
+              "title": "Ornament"
             }
           ],
           "clientEditable": false
@@ -37259,6 +37641,23 @@
           "clientEditable": false
         },
         {
+          "path": "dividerDesign.afterProfile.finish",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "glow",
+              "title": "Glow"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
           "path": "dividerDesign.afterProfile.lineColour",
           "kind": "object",
           "required": null,
@@ -37430,6 +37829,10 @@
             {
               "value": "image",
               "title": "Picture"
+            },
+            {
+              "value": "ornament",
+              "title": "Ornament"
             }
           ],
           "clientEditable": false
@@ -37638,6 +38041,23 @@
           "clientEditable": false
         },
         {
+          "path": "dividerDesign.aboveSocial.finish",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "glow",
+              "title": "Glow"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
           "path": "dividerDesign.aboveSocial.lineColour",
           "kind": "object",
           "required": null,
@@ -37809,6 +38229,10 @@
             {
               "value": "image",
               "title": "Picture"
+            },
+            {
+              "value": "ornament",
+              "title": "Ornament"
             }
           ],
           "clientEditable": false
@@ -38012,6 +38436,23 @@
             {
               "value": "bold",
               "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.belowSocial.finish",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "glow",
+              "title": "Glow"
             }
           ],
           "clientEditable": false
@@ -40505,6 +40946,10 @@
             {
               "value": "image",
               "title": "Picture"
+            },
+            {
+              "value": "ornament",
+              "title": "Ornament"
             }
           ],
           "clientEditable": false
@@ -40708,6 +41153,23 @@
             {
               "value": "bold",
               "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.finish",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "flat",
+              "title": "Flat"
+            },
+            {
+              "value": "glow",
+              "title": "Glow"
             }
           ],
           "clientEditable": false

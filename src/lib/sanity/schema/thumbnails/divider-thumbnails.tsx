@@ -1,5 +1,5 @@
 import { Wireframe } from './wireframe'
-import type { DividerStyle } from '../../divider-options'
+import type { DividerFinish, DividerStyle } from '../../divider-options'
 import type { PresetThumbnailProps } from '../preset-field'
 
 const FG = 'var(--card-fg-color)'
@@ -81,4 +81,41 @@ export const dividerThumbnails: Record<
   double: () => <DividerThumbnail style="double" />,
   dotted: () => <DividerThumbnail style="dotted" />,
   gradient: () => <DividerThumbnail style="gradient" />,
+}
+
+/** The finish picker: a line, flat, and the same line with a soft halo (the Studio's own foreground colour only). */
+function FinishThumbnail({ finish }: { finish: DividerFinish }) {
+  const y = 60
+  return (
+    <Wireframe label={`divider-finish-${finish}`}>
+      <rect x={45} y={28} width={70} height={7} rx={3.5} style={{ fill: FG, opacity: 0.6 }} />
+      {finish === 'glow' && (
+        <>
+          <defs>
+            <filter id="divider-finish-blur" x="-10%" y="-400%" width="120%" height="900%">
+              <feGaussianBlur stdDeviation={3} />
+            </filter>
+          </defs>
+          <rect
+            x={30}
+            y={y - 1}
+            width={100}
+            height={3.5}
+            filter="url(#divider-finish-blur)"
+            style={{ fill: FG, opacity: 0.55 }}
+          />
+        </>
+      )}
+      <rect x={30} y={y} width={100} height={1.5} style={{ fill: FG, opacity: 0.8 }} />
+      <rect x={20} y={82} width={120} height={22} rx={8} style={outline} />
+    </Wireframe>
+  )
+}
+
+export const dividerFinishThumbnails: Record<
+  DividerFinish,
+  (props: PresetThumbnailProps) => React.JSX.Element
+> = {
+  flat: () => <FinishThumbnail finish="flat" />,
+  glow: () => <FinishThumbnail finish="glow" />,
 }

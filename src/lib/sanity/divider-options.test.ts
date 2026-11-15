@@ -203,3 +203,52 @@ describe('Double, Dotted line and Gradient (task 151, Slice 7)', () => {
       expect(resolveDivider({ style }), style).toBeNull()
   })
 })
+
+describe('Finish and the Ornament centre (task 151, Slice 7)', () => {
+  const stored = (style: string, finish?: string | null) => resolveDivider({ style, finish })
+
+  it('resolves Glow only for Line, Double and Gradient', () => {
+    for (const style of ['line', 'double', 'gradient'])
+      expect(stored(style, 'glow')?.finish).toBe('glow')
+    for (const style of ['fade', 'dots', 'dotted'])
+      expect(stored(style, 'glow'), style).not.toHaveProperty('finish')
+  })
+
+  it('leaves the finish out for unset, null, Flat and unknown values, so the output is what it was', () => {
+    for (const finish of [undefined, null, 'flat', 'sparkly', '', 'GLOW'])
+      expect(stored('line', finish), String(finish)).toEqual(resolveDivider({ style: 'line' }))
+    expect(stored('line', 'flat')).not.toHaveProperty('finish')
+  })
+
+  it('ignores a Glow stored for an unsupported style without changing anything else', () => {
+    for (const style of ['fade', 'dots', 'dotted'])
+      expect(stored(style, 'glow'), style).toEqual(resolveDivider({ style }))
+  })
+
+  it('keeps the centre independent of the finish', () => {
+    const input = { style: 'line', centre: 'text', text: 'Hi', centreColour: { colour: 'accent' } }
+    const glowing = resolveDivider({ ...input, finish: 'glow' })
+    expect(glowing?.finish).toBe('glow')
+    expect({ ...glowing, finish: undefined }).toEqual({
+      ...resolveDivider(input),
+      finish: undefined,
+    })
+  })
+
+  it('resolves the Ornament centre for every style that takes a centre, with its size and colour', () => {
+    for (const style of ['line', 'fade', 'double', 'dotted', 'gradient'])
+      expect(resolveDivider({ style, centre: 'ornament' })?.centre).toEqual({ kind: 'ornament' })
+    const resolved = resolveDivider({
+      style: 'line',
+      centre: 'ornament',
+      centreSize: 'large',
+      centreColour: { colour: 'highlight' },
+    })
+    expect(resolved?.centreSize).toBe('large')
+    expect(resolved?.centreColour).toBe('var(--color-highlight)')
+  })
+
+  it('keeps Three dots centre-free, even with an Ornament stored', () => {
+    expect(resolveDivider({ style: 'dots', centre: 'ornament' })?.centre).toBeNull()
+  })
+})

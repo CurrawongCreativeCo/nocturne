@@ -89,3 +89,33 @@ describe('decorativeDivider: Double, Dotted line and Gradient (task 151, Slice 7
     expect(JSON.stringify(parent)).toBe(before)
   })
 })
+
+describe('decorativeDivider: Finish and the Ornament centre (task 151, Slice 7)', () => {
+  it('offers Finish only for Line, Double and Gradient, and never before a style is chosen', () => {
+    for (const style of ['line', 'double', 'gradient'])
+      expect(shown('finish', { style }), style).toBe(true)
+    for (const style of ['none', 'fade', 'dots', 'dotted'])
+      expect(shown('finish', { style }), style).toBe(false)
+    expect(shown('finish', {})).toBe(false)
+  })
+
+  it('is a Flat | Glow picker that stores nothing until chosen', () => {
+    const field = (
+      decorativeDivider.fields as unknown as {
+        name: string
+        options?: { list?: { value: string }[] }
+      }[]
+    ).find((candidate) => candidate.name === 'finish')
+    expect(field?.options?.list?.map((option) => option.value)).toEqual(['flat', 'glow'])
+  })
+
+  it('offers Ornament as a centre, with the existing size and colour controls', () => {
+    const line = { style: 'line', centre: 'ornament' }
+    expect(shown('centreSize', line)).toBe(true)
+    expect(shown('centreColour', line)).toBe(true)
+    expect(shown('text', line)).toBe(false)
+    expect(shown('icon', line)).toBe(false)
+    expect(shown('image', line)).toBe(false)
+    expect(shown('centre', { style: 'dots', centre: 'ornament' })).toBe(false)
+  })
+})

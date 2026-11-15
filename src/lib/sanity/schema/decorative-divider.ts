@@ -8,6 +8,10 @@ import {
   DIVIDER_CENTRE_SIZE_TITLES,
   DIVIDER_CENTRE_TITLES,
   DIVIDER_COLOUR_CHOICES,
+  DIVIDER_FINISHES,
+  DIVIDER_FINISH_DESCRIPTIONS,
+  DIVIDER_FINISH_TITLES,
+  GLOW_STYLES,
   DIVIDER_STYLES,
   DIVIDER_STYLE_DESCRIPTIONS,
   DIVIDER_STYLE_TITLES,
@@ -25,7 +29,7 @@ import { imageField } from './image-field'
 import { lengthWarning } from './length-guidance'
 import { presetField } from './preset-field'
 import { themeColourField } from './theme-colour'
-import { dividerThumbnails } from './thumbnails/divider-thumbnails'
+import { dividerFinishThumbnails, dividerThumbnails } from './thumbnails/divider-thumbnails'
 import { validateVisible } from './validate-visible'
 
 /**
@@ -51,6 +55,9 @@ const offOrDots: ConditionalPropertyCallback = ({ parent }) => isOffOrDots(paren
  */
 const offOrGradient: ConditionalPropertyCallback = ({ parent }) =>
   isOff(parent) || divider(parent).style === 'gradient'
+/** A finish is offered only for the styles that can glow; one stored before the style changed is kept, not drawn. */
+const notGlowable: ConditionalPropertyCallback = ({ parent }) =>
+  !GLOW_STYLES.includes((divider(parent).style ?? 'none') as never)
 const centreIs =
   (...kinds: string[]): ConditionalPropertyCallback =>
   ({ parent }) =>
@@ -146,7 +153,7 @@ export const decorativeDivider = defineType({
       title: 'Size in the middle',
       type: 'string',
       options: radio(DIVIDER_CENTRE_SIZES, DIVIDER_CENTRE_SIZE_TITLES),
-      hidden: centreIs('icon', 'text', 'image'),
+      hidden: centreIs('icon', 'text', 'image', 'ornament'),
     }),
     defineField({
       name: 'width',
@@ -162,6 +169,21 @@ export const decorativeDivider = defineType({
       type: 'string',
       options: radio(DIVIDER_THICKNESSES, DIVIDER_THICKNESS_TITLES),
       hidden: offOrDots,
+    }),
+    presetField({
+      name: 'finish',
+      title: 'Finish',
+      options: DIVIDER_FINISHES.map((value) => ({
+        value,
+        title: DIVIDER_FINISH_TITLES[value],
+        description: DIVIDER_FINISH_DESCRIPTIONS[value],
+        thumbnail: dividerFinishThumbnails[value],
+      })),
+      // Empty is Flat, so a divider saved before this field existed draws as it did.
+      required: false,
+      initialValue: null,
+      defaultValue: () => 'flat',
+      hidden: notGlowable,
     }),
     themeColourField({
       name: 'lineColour',
@@ -182,7 +204,7 @@ export const decorativeDivider = defineType({
       choices: DIVIDER_COLOUR_CHOICES,
       fieldset: 'colours',
       // A picture keeps its own colours.
-      hidden: centreIs('diamond', 'icon', 'text'),
+      hidden: centreIs('diamond', 'icon', 'text', 'ornament'),
     }),
   ].map(validateVisible),
   preview: {

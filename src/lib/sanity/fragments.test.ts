@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { sectionStyleFields } from './fragments'
+import { decorativeDividerFields, sectionStyleFields } from './fragments'
 import { sectionStyle } from './schema/section-style'
 
 describe('sectionStyleFields', () => {
@@ -13,5 +13,13 @@ describe('sectionStyleFields', () => {
       .filter((name) => name.startsWith('edge'))
     expect(edgeFields.length).toBeGreaterThan(5)
     expect(edgeFields.filter((name) => !projected.has(name))).toEqual([])
+  })
+})
+
+describe('decorativeDividerFields', () => {
+  it('projects the finish with the rest of the divider, so every consumer’s existing query carries it', () => {
+    const projected = decorativeDividerFields.split(/[,\n]/).map((part) => part.trim())
+    expect(projected).toContain('finish')
+    expect(projected).toContain('thickness')
   })
 })
