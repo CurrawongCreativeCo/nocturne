@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 
 import * as groq from 'groq-js'
-import { createElement } from 'react'
+import { createElement, type ReactNode } from 'react'
 
 import { renderToHtml } from '@/lib/design/capability-harness'
 import type { LocationBusiness } from '@/types/business'
@@ -139,6 +139,8 @@ export interface RenderOptions {
   gate?: SectionGate
   /** The page draws its own heading, so no section is the first (and every one may animate). */
   belowHeading?: boolean
+  /** Request-time content for sections (`SectionProps.greeting`), as a page passes it. */
+  greeting?: ReactNode
 }
 
 /** The HTML SectionRenderer streams for these (already projected) sections. */

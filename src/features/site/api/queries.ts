@@ -1,12 +1,23 @@
 import { defineQuery } from 'next-sanity'
 
-import { ctaFields, iconDesignFields, imageFields, linkFields } from '@/lib/sanity/fragments'
+import {
+  ctaFields,
+  decorativeDividerFields,
+  iconDesignFields,
+  imageFields,
+  linkFields,
+} from '@/lib/sanity/fragments'
 
 /** The footer's social icons: whether, in which style, and the Icons box that changes it. */
 export const footerSocialFields = /* groq */ `
   footerShowSocial,
   footerSocialStyle,
   footerIconDesign { ${iconDesignFields} }
+`
+
+/** The footer's divider above its bottom row (task 151). */
+export const footerDividerFields = /* groq */ `
+  footerDividerDesign { ${decorativeDividerFields} }
 `
 
 const navItemFields = /* groq */ `
@@ -53,7 +64,8 @@ export const SETTINGS_QUERY = defineQuery(/* groq */ `
       headerCta { ${ctaFields} },
       footerNav[] { ${navItemFields} },
       footerText,
-      ${footerSocialFields}
+      ${footerSocialFields},
+      ${footerDividerFields}
     },
     "announcement": coalesce(*[_id == "announcement"][0], *[_id == "settings"][0].announcement) {
       message,
@@ -125,6 +137,7 @@ export const SETTINGS_QUERY = defineQuery(/* groq */ `
     "footerShowSocial": navigation.footerShowSocial == true,
     "footerSocialStyle": navigation.footerSocialStyle,
     "footerIconDesign": navigation.footerIconDesign,
+    "footerDividerDesign": navigation.footerDividerDesign,
     "consent": consent,
     "design": design,
     "business": business,

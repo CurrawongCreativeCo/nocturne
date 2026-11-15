@@ -3,6 +3,7 @@ import { PlainText } from '@/components/ui/plain-text'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveIconDesign } from '@/lib/sanity/surface-options'
 import { resolveTextRoles } from '@/lib/sanity/text-role'
@@ -34,6 +35,7 @@ export function FeaturesGrid({ data, isFirst }: SectionProps<'featuresGrid'>) {
         heading={heading}
         intro={intro}
         design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+        divider={resolveDivider(data.headerDesign?.divider)}
         block={block}
         text={text}
       />

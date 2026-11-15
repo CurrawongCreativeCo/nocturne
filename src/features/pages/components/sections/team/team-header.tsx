@@ -1,4 +1,5 @@
 import { SectionHeader } from '@/components/ui/section-header'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveTextRoles } from '@/lib/sanity/text-role'
 
@@ -29,6 +30,7 @@ export function TeamHeader({
       // With no title above it, the intro needs no margin.
       introClass={title ? undefined : 'text-lead text-pretty text-ink-muted'}
       design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+      divider={resolveDivider(data.headerDesign?.divider)}
       block={block}
       text={text}
     />

@@ -128,7 +128,7 @@ export const embed = defineType({
         ],
         hidden: ({ parent }) => !(parent as Parent)?.provider,
       }),
-      headerDesignField(),
+      headerDesignField({}, { divider: true }),
       formCardField({
         subject: 'the embedded content’s card',
         unset: 'Empty keeps the card as it is drawn now.',

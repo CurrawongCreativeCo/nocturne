@@ -105,7 +105,7 @@ export const events = defineType({
         hidden: ({ parent }) => !(parent as { seeAllLink?: unknown } | undefined)?.seeAllLink,
         validation: (rule) => lengthWarning(rule, LIMITS.label, 'Link text'),
       }),
-      headerDesignField(),
+      headerDesignField({}, { divider: true }),
       cardDesignField({
         description:
           'Text for every layout. Only Featured draws a card, so its fill, border and mark are shown there.',

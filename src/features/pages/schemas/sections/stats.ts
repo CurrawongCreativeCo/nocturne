@@ -105,7 +105,7 @@ export const stats = defineType({
         validation: (rule) =>
           rule.required().min(STATS_SECTION_ITEMS.min).max(STATS_SECTION_ITEMS.max),
       }),
-      headerDesignField(),
+      headerDesignField({}, { divider: true }),
       cardDesignField({
         description:
           'Only the Cards layout draws a card: its fill, border, figure and label text, and mark.',

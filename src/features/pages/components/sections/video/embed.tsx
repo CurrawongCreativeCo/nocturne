@@ -1,6 +1,7 @@
 import { SectionFrame } from '@/components/ui/section-frame'
 import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveTextRoles } from '@/lib/sanity/text-role'
 
@@ -19,7 +20,7 @@ const DEFAULTS: SectionDefaults = { container: 'max-w-content', align: 'start' }
 export function VideoEmbed({ data, isFirst }: SectionProps<'video'>) {
   const { heading, text } = data
   const title = sectionTitle(data)
-  const { text: textAlign } = sectionTraits(data.style, DEFAULTS)
+  const { block, text: textAlign } = sectionTraits(data.style, DEFAULTS)
 
   return (
     <SectionFrame
@@ -35,6 +36,8 @@ export function VideoEmbed({ data, isFirst }: SectionProps<'video'>) {
         heading={heading}
         intro={text}
         design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+        divider={resolveDivider(data.headerDesign?.divider)}
+        dividerBlock={block}
         introClass="mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted"
       />
       <div className="mt-8 text-left">

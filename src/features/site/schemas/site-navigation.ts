@@ -83,6 +83,17 @@ export const siteNavigation = defineType({
         !(context.document as { footerShowSocial?: boolean } | undefined)?.footerShowSocial,
     }),
     // Agency only. Each choice inherits the style above, so empty draws what the footer always drew.
+    // Agency only. A rule above the copyright and links row (task 151); empty is None, and the footer draws
+    // its fixed lines as it always has.
+    defineField({
+      name: 'footerDividerDesign',
+      title: 'Divider above the copyright line',
+      type: 'decorativeDivider',
+      group: 'footer',
+      description:
+        'A rule between the footer’s details and the copyright and links. Replaces the footer’s fixed line there.',
+      hidden: hiddenFromClients,
+    }),
     iconsDesignField({
       name: 'footerIconDesign',
       scope: 'section',

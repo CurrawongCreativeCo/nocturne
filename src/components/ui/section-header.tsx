@@ -1,7 +1,10 @@
 import type { CSSProperties } from 'react'
 
+import { DecorativeDivider } from '@/components/ui/decorative-divider'
 import { PlainText } from '@/components/ui/plain-text'
 import { RichHeading } from '@/components/ui/rich-heading'
+import { plainTextParagraphs } from '@/lib/plain-text'
+import type { ResolvedDivider } from '@/lib/sanity/divider-options'
 import type { HeadingBlocks } from '@/lib/sanity/heading-text'
 import { textRoleProps } from '@/lib/sanity/text-role'
 import type { OwnText, TextStyle } from '@/lib/sanity/text-style-options'
@@ -22,6 +25,12 @@ const DEFAULT_EYEBROW_CLASS =
 const DEFAULT_HEADING_CLASS = 'text-h2 font-semibold text-balance'
 const DEFAULT_INTRO_CLASS = 'mt-4 text-lead text-pretty text-ink-muted'
 
+/**
+ * The intro's own top margin, dropped when a divider sits above it (the divider brings its space).
+ * It acts on the intro's element from outside, so no section's class string is edited.
+ */
+const BELOW_DIVIDER = '[&>*]:mt-0!'
+
 export type SectionHeaderRoles = Record<'eyebrow' | 'heading' | 'intro', TextStyle>
 
 /** What each of the header's roles draws with nothing chosen, when a section's differ from the usual. */
@@ -33,6 +42,9 @@ export type SectionHeaderOwn = Partial<Record<'eyebrow' | 'heading' | 'intro', O
  * their header has always been drawn (its element, spacing and classes), so each of those is a prop and a
  * section keeps its output class for class: nothing is a default a section must accept. A section that
  * has only ever drawn a bare heading passes `bare`, and with no eyebrow or intro it still does.
+ *
+ * A `divider` (decorative-divider.tsx) is drawn between the heading and the intro, and only when both
+ * are drawn: never first or last. With none, or with either missing, the markup is exactly what it was.
  */
 export function SectionHeader({
   eyebrow,
@@ -52,6 +64,8 @@ export function SectionHeader({
   introClass = DEFAULT_INTRO_CLASS,
   own,
   each = '',
+  divider,
+  dividerBlock = block,
 }: {
   eyebrow?: string | null
   /** The plain title, drawn when `heading` has no words. */
@@ -78,6 +92,10 @@ export function SectionHeader({
   own?: SectionHeaderOwn
   /** Classes added to every part, when there is no wrapper to hold them (a logo cloud's alignment). */
   each?: string
+  /** A decorative divider between the heading and the intro. */
+  divider?: ResolvedDivider | null
+  /** The divider's alignment classes: the section's own unless a section draws no `block` (`as={null}`). */
+  dividerBlock?: string
 }) {
   if (!title && !eyebrow && !intro) return null
   const add = (base: string) => (each ? `${base} ${each}` : base)
@@ -96,6 +114,7 @@ export function SectionHeader({
       />
     )
   }
+  const hasDivider = Boolean(divider && title && plainTextParagraphs(intro).length > 0)
   const intros = textRoleProps('intro', add(introClass), own?.intro ?? OWN_INTRO, design.intro)
   const parts = (
     <>
@@ -120,7 +139,26 @@ export function SectionHeader({
           {...headingProps(add(headingClass), design.heading, own?.heading)}
         />
       )}
-      <PlainText text={intro} className={intros.className} style={intros.style} textRole="intro" />
+      {divider && hasDivider ? (
+        <>
+          <DecorativeDivider divider={divider} block={dividerBlock} />
+          <div className={BELOW_DIVIDER}>
+            <PlainText
+              text={intro}
+              className={intros.className}
+              style={intros.style}
+              textRole="intro"
+            />
+          </div>
+        </>
+      ) : (
+        <PlainText
+          text={intro}
+          className={intros.className}
+          style={intros.style}
+          textRole="intro"
+        />
+      )}
     </>
   )
   if (Wrapper === null) return parts

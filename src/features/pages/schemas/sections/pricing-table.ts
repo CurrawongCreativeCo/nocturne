@@ -204,7 +204,7 @@ export const pricingTable = defineType({
           }),
         ],
       }),
-      headerDesignField(),
+      headerDesignField({}, { divider: true }),
       iconsDesignField(),
       cardDesignField({
         description:

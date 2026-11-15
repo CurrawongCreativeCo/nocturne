@@ -180,7 +180,7 @@ export const testimonials = defineType({
           }),
         ],
       }),
-      headerDesignField(),
+      headerDesignField({}, { divider: true }),
       cardDesignField({
         description:
           'Shared background, border, text and mark for every quote. Inherit uses the default card.',

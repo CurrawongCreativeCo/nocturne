@@ -8,6 +8,7 @@ import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { resolveCardDesign, type CardDesign } from '@/lib/sanity/card-design'
 import { CARD_SHADOW_CLASS, OWN_SHADOW, resolveCardDepth } from '@/lib/sanity/depth-options'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveTextRoles, textRoleProps } from '@/lib/sanity/text-role'
 import { graph } from '@/lib/structured-data/graph'
@@ -96,6 +97,7 @@ export function Faq({ data, isFirst, page }: SectionProps<'faq'>) {
         heading={heading}
         intro={intro}
         design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+        divider={resolveDivider(data.headerDesign?.divider)}
         className={`mb-12 ${text}`}
       />
       {cards ? (

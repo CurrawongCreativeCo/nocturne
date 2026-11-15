@@ -133,7 +133,7 @@ export const team = defineType({
       }),
       // A shadow and glow on the portraits (task 147), beside Image design and Portrait so it works with either.
       pictureDepthFields({}),
-      headerDesignField(),
+      headerDesignField({}, { divider: true }),
       cardDesignField({
         description:
           'Shared background, border, text and mark for every member card, and for the list’s rows. Inherit uses the default card.',

@@ -57,6 +57,14 @@ const radio = <T extends string>(values: readonly T[], titles: Record<T, string>
   direction: 'horizontal' as const,
 })
 
+/**
+ * The options of a named array type that offers this divider as a block in its body (task 151: the Rich
+ * text section's `richTextBody`), stamped as the shared divider builder's so the design contract can tell a
+ * field of that type is the divider capability. It lives here because only this module may stamp as the
+ * divider builder. Nothing is stored and the Studio draws the field as before.
+ */
+export const dividerBlockOptions = () => builtOptions('decorativeDivider', {}, 'divider')
+
 export const decorativeDivider = defineType({
   name: 'decorativeDivider',
   title: 'Divider',

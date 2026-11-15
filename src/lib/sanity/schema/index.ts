@@ -10,6 +10,7 @@ import { imageDesign } from './image-design'
 import { launchDate } from './launch-date'
 import { link } from './link'
 import { logoRow } from './logo-row'
+import { richTextBody } from './rich-text-body'
 import { sectionStyle } from './section-style'
 import { seo } from './seo'
 import { statItem, statsBar } from './stats'
@@ -20,6 +21,7 @@ export const sharedSchemaTypes: SchemaTypeDefinition[] = [
   cta,
   seo,
   blockContent,
+  richTextBody,
   headingText,
   sectionStyle,
   statItem,

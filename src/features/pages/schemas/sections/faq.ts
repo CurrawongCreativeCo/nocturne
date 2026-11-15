@@ -90,7 +90,7 @@ export const faq = defineType({
           }),
         ],
       }),
-      headerDesignField(),
+      headerDesignField({}, { divider: true }),
       cardDesignField({
         description:
           'Text for every item style. Only Cards draws a card, so its fill, border and mark are shown there.',

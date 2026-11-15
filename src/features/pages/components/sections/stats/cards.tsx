@@ -5,6 +5,7 @@ import { sectionTraits, type SectionDefaults } from '@/components/ui/section-sty
 import { StatFigure } from '@/components/ui/stat-figure'
 import { resolveCardDesign } from '@/lib/sanity/card-design'
 import { CARD_SHADOW_CLASS, OWN_SHADOW, resolveCardDepth } from '@/lib/sanity/depth-options'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveTextRoles, textRoleProps } from '@/lib/sanity/text-role'
 
@@ -55,6 +56,7 @@ export function StatsCards({ data, isFirst }: SectionProps<'stats'>) {
         heading={heading}
         intro={intro}
         design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+        divider={resolveDivider(data.headerDesign?.divider)}
         block={block}
         text={text}
       />

@@ -11,6 +11,7 @@ import { siteLanguage } from '@/config/env'
 import { formatInterval, formatPrice } from '@/lib/format-price'
 import { cardMarkChoice, isCustomised, resolveItemCardDesign } from '@/lib/sanity/card-design'
 import { CARD_SHADOW_CLASS, OWN_SHADOW, resolveCardDepth } from '@/lib/sanity/depth-options'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveIconDesign, type OwnIcon } from '@/lib/sanity/surface-options'
 import { resolveTextRoles, textRoleProps } from '@/lib/sanity/text-role'
@@ -89,6 +90,7 @@ export function PricingTable({ data, isFirst, renderCheckout }: SectionProps<'pr
         heading={data.heading}
         intro={intro}
         design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+        divider={resolveDivider(data.headerDesign?.divider)}
         block={block}
         text={text}
         headingId={headingId}

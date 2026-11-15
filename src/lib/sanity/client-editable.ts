@@ -83,7 +83,12 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
   },
   siteNavigation: {
     editable: ['headerNav', 'headerCta', 'footerNav', 'footerText'],
-    agencyOnly: ['footerShowSocial', 'footerSocialStyle', 'footerIconDesign'],
+    agencyOnly: [
+      'footerShowSocial',
+      'footerSocialStyle',
+      'footerIconDesign',
+      'footerDividerDesign',
+    ],
   },
   announcement: {
     editable: ['message', 'link', 'startsAt', 'endsAt', 'dismissible'],
@@ -206,6 +211,7 @@ export const CLIENT_EDITABLE_FIELDS: Readonly<Record<string, FieldClassification
     ],
     agencyOnly: [
       'eyebrowDesign',
+      'dividerDesign',
       'imageDesign',
       'pictureDepthDesign',
       'supporting',

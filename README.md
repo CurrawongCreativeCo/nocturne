@@ -2539,26 +2539,26 @@ The tables below are generated from the declarations and the evidence by `npm ru
 
 | Component                                | Surface | Text | Header | Mark | Depth | Icon | Action | Framing | Pic. depth | Overlay | Glass | Divider | Edge | Motion | Slots |
 | ---------------------------------------- | ------- | ---- | ------ | ---- | ----- | ---- | ------ | ------- | ---------- | ------- | ----- | ------- | ---- | ------ | ----- |
-| Hero (`hero`), 4 layouts                 | –       | R…   | R…     | R✓   | –     | –    | C✓     | R…*     | R✓*        | R…*     | R✓*   | R…      | R✓   | R✓     | R◐    |
-| Rich text (`richText`)                   | –       | –    | –      | R✓   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Image + text (`mediaText`), 3 layouts    | –       | –    | R✓     | R✓   | –     | –    | C✓     | C…*     | R✓*        | R✓*     | R✓    | R…      | R✓   | R✓     | R✓    |
-| Features grid (`featuresGrid`)           | C…      | R…   | R✓     | R✓   | C…    | R✓   | C…     | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
-| Logo strip (`logoCloud`), 2 layouts      | –       | –    | R✓     | R✓   | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Testimonials (`testimonials`), 2 layouts | R✓      | R✓   | R✓     | R✓   | R✓    | –    | –      | R…      | R✓         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
-| FAQ (`faq`)                              | R✓      | R✓   | R✓     | R✓   | C✓    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Call to action banner (`ctaBanner`)      | R…      | –    | R✓     | R✓   | R✓    | –    | C✓     | C…      | –          | R✓      | R…    | R…      | R✓   | R✓     | –     |
-| Form (`formSection`)                     | R✓      | –    | R✓     | R✓   | R✓    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Pricing table (`pricingTable`)           | R✓      | R✓   | R✓     | R✓   | R✓    | C✓   | –      | C…      | –          | R✓      | R◐    | R…      | R✓   | R✓     | –     |
-| Newsletter signup (`newsletterSignup`)   | R✓      | –    | R✓     | R✓   | R✓    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Stats (`stats`), 2 layouts               | R✓*     | R✓*  | R✓     | R✓*  | C✓*   | –    | –      | C…      | –          | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
-| Gallery (`gallery`), 3 layouts           | –       | –    | R✓     | R✓   | –     | –    | –      | R…      | R✓         | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Location (`location`)                    | R✓      | R✓   | R✓     | R✓   | R✓    | R✓   | –      | C…      | C✓         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
-| Team (`team`), 3 layouts                 | R✓      | R✓   | R✓     | R✓   | R✓    | –    | R✓     | R…      | R✓         | R✓      | R◐    | R…      | R✓   | R✓     | –     |
-| Video (`video`), 2 layouts               | –       | –    | R✓     | –    | –     | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Process (`process`), 2 layouts           | –       | R✓   | R✓     | R✓   | –     | R✓   | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
-| Embed (`embed`)                          | R✓      | –    | R✓     | –    | R✓    | –    | –      | C…      | –          | R✓      | R✓    | R…      | R✓   | R✓     | –     |
+| Hero (`hero`), 4 layouts                 | –       | R…   | R…     | R✓   | –     | –    | C✓     | R…*     | R✓*        | R…*     | R✓*   | R✓      | R✓   | R✓     | R◐    |
+| Rich text (`richText`)                   | –       | –    | –      | R✓   | –     | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Image + text (`mediaText`), 3 layouts    | –       | –    | R✓     | R✓   | –     | –    | C✓     | C…*     | R✓*        | R✓*     | R✓    | R✓      | R✓   | R✓     | R✓    |
+| Features grid (`featuresGrid`)           | C…      | R…   | R✓     | R✓   | C…    | R✓   | C…     | C…      | –          | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
+| Logo strip (`logoCloud`), 2 layouts      | –       | –    | R✓     | R✓   | –     | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Testimonials (`testimonials`), 2 layouts | R✓      | R✓   | R✓     | R✓   | R✓    | –    | –      | R…      | R✓         | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
+| FAQ (`faq`)                              | R✓      | R✓   | R✓     | R✓   | C✓    | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Call to action banner (`ctaBanner`)      | R…      | –    | R✓     | R✓   | R✓    | –    | C✓     | C…      | –          | R✓      | R…    | R✓      | R✓   | R✓     | –     |
+| Form (`formSection`)                     | R✓      | –    | R✓     | R✓   | R✓    | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Pricing table (`pricingTable`)           | R✓      | R✓   | R✓     | R✓   | R✓    | C✓   | –      | C…      | –          | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
+| Newsletter signup (`newsletterSignup`)   | R✓      | –    | R✓     | R✓   | R✓    | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Stats (`stats`), 2 layouts               | R✓*     | R✓*  | R✓     | R✓*  | C✓*   | –    | –      | C…      | –          | R✓      | R◐*   | R✓      | R✓   | R✓     | –     |
+| Gallery (`gallery`), 3 layouts           | –       | –    | R✓     | R✓   | –     | –    | –      | R…      | R✓         | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Location (`location`)                    | R✓      | R✓   | R✓     | R✓   | R✓    | R✓   | –      | C…      | C✓         | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
+| Team (`team`), 3 layouts                 | R✓      | R✓   | R✓     | R✓   | R✓    | –    | R✓     | R…      | R✓         | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
+| Video (`video`), 2 layouts               | –       | –    | R✓     | –    | –     | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Process (`process`), 2 layouts           | –       | R✓   | R✓     | R✓   | –     | R✓   | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Embed (`embed`)                          | R✓      | –    | R✓     | –    | R✓    | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
 | Link list (`linkList`), 4 layouts        | R✓*     | R✓   | R✓     | R✓   | R✓*   | R✓*  | R✓*    | R◐*     | R✓         | R✓      | R…*   | R✓      | R✓   | R✓     | –     |
-| Events (`events`), 3 layouts             | R✓*     | R✓   | R✓     | R✓*  | R✓*   | –    | R✓*    | R…*     | C✓*        | R✓      | R◐*   | R…      | R✓   | R✓     | –     |
+| Events (`events`), 3 layouts             | R✓*     | R✓   | R✓     | R✓*  | R✓*   | –    | R✓*    | R…*     | C✓*        | R✓      | R◐*   | R✓      | R✓   | R✓     | –     |
 | Statistics bar (`statsBar`)              | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Badges (`badgeRow`)                      | –       | –    | –      | –    | –     | R✓   | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Logos (`logoRow`)                        | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
@@ -2568,20 +2568,20 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | Event details card (`eventDetailsCard`)  | R…      | R…   | –      | R…   | R…    | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Service page (`servicePage`)             | –       | R…   | –      | –    | –     | –    | –      | R…      | –          | –       | –     | R…      | –    | –      | –     |
 | Search results (`searchResults`)         | –       | R…   | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
-| Site footer (`siteFooter`)               | –       | –    | –      | –    | –     | R✓   | –      | –       | –          | –       | –     | R…      | –    | –      | –     |
-| Team member page (`teamMemberPage`)      | –       | –    | –      | –    | –     | R✓   | –      | R…      | –          | –       | –     | R…      | –    | –      | –     |
+| Site footer (`siteFooter`)               | –       | –    | –      | –    | –     | R✓   | –      | –       | –          | –       | –     | R✓      | –    | –      | –     |
+| Team member page (`teamMemberPage`)      | –       | –    | –      | –    | –     | R✓   | –      | R…      | –          | –       | –     | R✓      | –    | –      | –     |
 | Blog post cards (`blogPostCards`)        | R✓      | R✓   | –      | R✓   | R✓    | –    | R✓     | R…      | C✓         | –       | C…    | –       | –    | –      | –     |
 
 | Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
 | -------------------------------------------------------- | -------- | --------------- | ------- |
-| Required                                                 | 253      | 0               | 61      |
+| Required                                                 | 274      | 0               | 40      |
 | Conditional                                              | 13       | 0               | 31      |
 
 A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
 
 | Closing task | Required pending | Conditional pending |
 | ------------ | ---------------- | ------------------- |
-| 151          | 22               | 0                   |
+| 151          | 1                | 0                   |
 | 157          | 1                | 0                   |
 | 159          | 3                | 8                   |
 | 177          | 9                | 20                  |
@@ -2589,7 +2589,7 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | 276          | 2                | 3                   |
 | 280          | 17               | 0                   |
 
-**Evidence.** 281 capability entries, 526 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
+**Evidence.** 302 capability entries, 563 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
 **Capabilities and their owners**
 

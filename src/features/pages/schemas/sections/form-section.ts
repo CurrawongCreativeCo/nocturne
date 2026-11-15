@@ -54,7 +54,7 @@ export const formSection = defineType({
         description: 'Create forms under Forms in the sidebar. One form can be used on many pages.',
         validation: (rule) => rule.required(),
       }),
-      headerDesignField(),
+      headerDesignField({}, { divider: true }),
       formCardField({
         subject: 'the form',
         unset:

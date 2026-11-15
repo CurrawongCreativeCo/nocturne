@@ -102,6 +102,17 @@ export const PICTURE = {
 } as const
 
 /** One button, which a section with a call to action has: the trigger of the action pair. */
+/** Two paragraphs of Rich text body (task 151): the divider's evidence puts a divider between them. */
+const paragraphBlock = (key: string, words: string) => ({
+  _type: 'block',
+  _key: key,
+  style: 'normal',
+  markDefs: [],
+  children: [{ _type: 'span', _key: `${key}-span`, text: words, marks: [] }],
+})
+const RICH_TEXT_FIRST = paragraphBlock('rt-first', 'The first paragraph.')
+const RICH_TEXT_SECOND = paragraphBlock('rt-second', 'The second paragraph.')
+
 const BUTTON = {
   _key: 'button',
   label: 'Book a call',
@@ -217,6 +228,8 @@ interface CardFamilyEvidence {
   headerRoles?: readonly TextRole[]
   /** The file that draws them, when a section composes them itself (Image + text's intro is its body). */
   headerRender?: string
+  /** Also proves the header's divider (task 151): `SectionHeader` draws it between the title and the intro. */
+  headerDivider?: boolean
   /** The array whose members have their own Appearance, and which member the probes set. */
   item?: { array: string; index?: number }
   /** The Cards box's name on the section. */
@@ -269,6 +282,32 @@ function iconContainerEvidence(config: {
     target: config.target ?? '[data-icon-shape]',
     change: config.change ?? 'attributes',
     probe: { [`${box}.iconShape`]: config.shape ?? 'circle' },
+  }
+}
+
+/**
+ * A section header's divider (task 151): the stored choice is `headerDesign.divider`, `resolveDivider` reads
+ * it and `DecorativeDivider` draws it between the title and the intro, so the probe makes it appear. `base`
+ * gives the section the title and the intro the divider sits between.
+ */
+function headerDividerEvidence(
+  component: string,
+  layouts: readonly string[] | undefined,
+  base: Patch,
+): CapabilityEvidence {
+  return {
+    id: `${component}.divider.section`,
+    component,
+    ...(layouts ? { layouts } : {}),
+    capability: 'divider',
+    scope: 'section',
+    field: 'headerDesign.divider',
+    resolvers: [{ module: '@/lib/sanity/divider-options', export: 'resolveDivider' }],
+    render: 'src/components/ui/decorative-divider.tsx',
+    target: '[data-decorative-divider]',
+    change: 'appears',
+    base,
+    probe: { 'headerDesign.divider': { _type: 'decorativeDivider', style: 'line' } },
   }
 }
 
@@ -347,6 +386,7 @@ function cardFamilyEvidence(config: CardFamilyEvidence): CapabilityEvidence[] {
       change: 'attributes',
       probe: { [`headerDesign.${role}.size`]: 'large' },
     })),
+    ...(config.headerDivider ? [headerDividerEvidence(component, layouts, base)] : []),
     ...(config.depth ? scopes : []).map((scope): CapabilityEvidence => ({
       id: `${component}.depth.${scope}${named}`,
       ...common(scope, cardLayouts ?? layouts),
@@ -913,6 +953,37 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { 'navigation.footerShowSocial': true, 'navigation.footerSocialStyle': 'circle' },
     shape: 'square',
   }),
+  // The footer's divider (task 151): `navigation.footerDividerDesign` is drawn above its bottom row. The probe
+  // chooses a line; the drawer's seed has Business info and the social row, so there is content above the
+  // bottom row for the divider to separate it from (the unit tests cover the other setups).
+  {
+    id: 'siteFooter.divider.section',
+    component: 'siteFooter',
+    capability: 'divider',
+    scope: 'section',
+    field: 'navigation.footerDividerDesign',
+    resolvers: [{ module: '@/lib/sanity/divider-options', export: 'resolveDivider' }],
+    render: 'src/components/ui/decorative-divider.tsx',
+    target: '[data-decorative-divider]',
+    change: 'appears',
+    base: {},
+    probe: { 'navigation.footerDividerDesign': { _type: 'decorativeDivider', style: 'line' } },
+  },
+  // A member's divider (task 151): `settings.dividerDesign` (Team page settings) is drawn between the
+  // member's summary and their biography, once there is a biography to separate it from.
+  {
+    id: 'teamMemberPage.divider.section',
+    component: 'teamMemberPage',
+    capability: 'divider',
+    scope: 'section',
+    field: 'settings.dividerDesign',
+    resolvers: [{ module: '@/lib/sanity/divider-options', export: 'resolveDivider' }],
+    render: 'src/components/ui/decorative-divider.tsx',
+    target: '[data-decorative-divider]',
+    change: 'appears',
+    base: {},
+    probe: { 'settings.dividerDesign': { _type: 'decorativeDivider', style: 'line' } },
+  },
   iconContainerEvidence({
     component: 'teamMemberPage',
     scope: 'section',
@@ -1012,6 +1083,23 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { backgroundImage: PICTURE, imageDesign: { appearance: 'framed' } },
     probe: { 'pictureDepthDesign.shadow': 'floating' },
   },
+  // The hero's divider (task 151): `divider` is drawn under the title by HeroText, in every layout, once
+  // the hero has a title and a description or buttons. The gallery's first Split hero has only a title, so
+  // the base gives every layout the same description.
+  {
+    id: 'hero.divider.section',
+    component: 'hero',
+    layouts: ['overlay', 'split', 'editorial', 'full-bleed'],
+    capability: 'divider',
+    scope: 'section',
+    field: 'dividerDesign',
+    resolvers: [{ module: '@/lib/sanity/divider-options', export: 'resolveDivider' }],
+    render: 'src/components/ui/decorative-divider.tsx',
+    target: '[data-decorative-divider]',
+    change: 'appears',
+    base: { description: 'A short introduction.' },
+    probe: { dividerDesign: { _type: 'decorativeDivider', style: 'line' } },
+  },
   {
     id: 'hero.slots.supporting',
     component: 'hero',
@@ -1040,6 +1128,7 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
     headerRender: 'src/features/pages/components/sections/media-text.tsx',
+    headerDivider: true,
   }),
   ...frameEvidence('mediaText', {
     mark: ['side', 'stacked', 'overlay'],
@@ -1223,6 +1312,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: TESTIMONIAL_CONTENT,
     probe: { [`cardDesign.${role}.size`]: 'large' },
   })),
+  headerDividerEvidence('testimonials', TESTIMONIAL_LAYOUTS, TESTIMONIAL_CONTENT),
   ...(['eyebrow', 'heading', 'intro'] as const).map((role): CapabilityEvidence => ({
     id: `testimonials.header.section.${role}`,
     component: 'testimonials',
@@ -1304,6 +1394,28 @@ export const EVIDENCE: readonly Evidence[] = [
       },
     ],
   },
+  // A divider block in the Rich text body (task 151): `body` holds the blocks, and a `decorativeDivider` between
+  // two paragraphs is drawn by RichText through `resolveDivider`. The probe is the same body with one added, so
+  // the divider appears; unset, nothing is drawn.
+  {
+    id: 'richText.divider.section',
+    component: 'richText',
+    capability: 'divider',
+    scope: 'section',
+    field: 'body',
+    resolvers: [{ module: '@/lib/sanity/divider-options', export: 'resolveDivider' }],
+    render: 'src/components/ui/decorative-divider.tsx',
+    target: '[data-decorative-divider]',
+    change: 'appears',
+    base: { body: [RICH_TEXT_FIRST, RICH_TEXT_SECOND] },
+    probe: {
+      body: [
+        RICH_TEXT_FIRST,
+        { _type: 'decorativeDivider', _key: 'probe-divider', style: 'line' },
+        RICH_TEXT_SECOND,
+      ],
+    },
+  },
   ...frameEvidence('richText', {
     mark: true,
     overlay: true,
@@ -1319,6 +1431,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Why us', intro: 'An intro.' },
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    headerDivider: true,
   }),
   iconContainerEvidence({
     component: 'featuresGrid',
@@ -1343,6 +1456,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Trusted by', intro: 'An intro.' },
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    headerDivider: true,
   }),
   ...frameEvidence('logoCloud', {
     mark: ['grid', 'marquee'],
@@ -1362,6 +1476,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Questions', intro: 'An intro.' },
     roles: ['title', 'body'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    headerDivider: true,
   }),
   ...cardFamilyEvidence({
     component: 'faq',
@@ -1383,6 +1498,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Ready?', text: 'An intro.' },
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    headerDivider: true,
   }),
   // The banner's one card: its depth is the only thing its Cards box offers (its fill is the tone).
   {
@@ -1407,6 +1523,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Contact', text: 'An intro.' },
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    headerDivider: true,
   }),
   ...sectionCardEvidence({
     component: 'formSection',
@@ -1450,6 +1567,7 @@ export const EVIDENCE: readonly Evidence[] = [
     headerRoles: ['eyebrow', 'heading', 'intro'],
     item: { array: 'plans' },
     depth: true,
+    headerDivider: true,
   }),
   iconContainerEvidence({
     component: 'pricingTable',
@@ -1481,6 +1599,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Updates', text: 'An intro.' },
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    headerDivider: true,
   }),
   ...sectionCardEvidence({
     component: 'newsletterSignup',
@@ -1507,6 +1626,7 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: ['number', 'label'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
     depth: true,
+    headerDivider: true,
   }),
   ...frameEvidence('stats', {
     mark: ['inline', 'cards'],
@@ -1524,6 +1644,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Our work', intro: 'An intro.' },
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    headerDivider: true,
   }),
   // Masonry draws a plain picture inside its button, which is the tile's outline: the filter goes on the button
   // (the tile's own hook, `aria-haspopup`, is what every tile has and nothing else does).
@@ -1575,6 +1696,7 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: ['title', 'body', 'meta'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
     depth: true,
+    headerDivider: true,
   }),
   ...cardFamilyEvidence({
     component: 'location',
@@ -1624,6 +1746,7 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: ['title', 'meta', 'body'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
     depth: true,
+    headerDivider: true,
   }),
   // A shadow and glow on the portraits (task 147). The cards and slides draw a flush portrait, which is inset
   // by the room the depth needs; the list's small portrait is `ProfileImage`, which needs none.
@@ -1694,6 +1817,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Watch', text: 'An intro.' },
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    headerDivider: true,
   }),
   ...frameEvidence('video', {
     overlay: ['embed', 'ambient'],
@@ -1723,6 +1847,7 @@ export const EVIDENCE: readonly Evidence[] = [
     },
     roles: ['label', 'title', 'body'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    headerDivider: true,
   }),
   iconContainerEvidence({
     component: 'process',
@@ -1750,6 +1875,7 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Book', text: 'An intro.' },
     roles: [],
     headerRoles: ['eyebrow', 'heading', 'intro'],
+    headerDivider: true,
   }),
   ...sectionCardEvidence({
     component: 'embed',
@@ -1769,6 +1895,7 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: ['title', 'meta', 'body'],
     headerRoles: ['eyebrow', 'heading', 'intro'],
     depth: true,
+    headerDivider: true,
   }),
   // A shadow and glow on the Featured card's picture (task 147), for an event that has one (the gallery's first
   // event does). The picture is inset by the room the depth needs, so the filter and `pictureClearance` are both

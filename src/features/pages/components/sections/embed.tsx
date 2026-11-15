@@ -6,6 +6,7 @@ import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { embedHeight, embedNotes, resolveEmbed } from '@/config/embed-providers'
 import { CARD_SHADOW_CLASS, OWN_SHADOW, resolveCardDepth } from '@/lib/sanity/depth-options'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveSurface } from '@/lib/sanity/surface-options'
 import { resolveTextRoles } from '@/lib/sanity/text-role'
@@ -28,7 +29,7 @@ const DEFAULTS: SectionDefaults = { container: 'max-w-content', align: 'start' }
 export function Embed({ data, isFirst }: SectionProps<'embed'>) {
   const { heading, text } = data
   const title = sectionTitle(data)
-  const { text: textAlign } = sectionTraits(data.style, DEFAULTS)
+  const { block, text: textAlign } = sectionTraits(data.style, DEFAULTS)
   const embed = resolveEmbed(stegaClean(data.provider), stegaClean(data.url))
   if (!embed) return null
   const { provider } = embed
@@ -57,6 +58,8 @@ export function Embed({ data, isFirst }: SectionProps<'embed'>) {
         heading={heading}
         intro={text}
         design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+        divider={resolveDivider(data.headerDesign?.divider)}
+        dividerBlock={block}
         introClass="mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted"
       />
       <div className="mt-8 text-center">

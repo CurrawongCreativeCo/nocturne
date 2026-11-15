@@ -17,6 +17,7 @@ import { repeatLabel } from '@/lib/events/recurrence'
 import { requestTime } from '@/lib/request-time'
 import { resolveCardAction, type OwnAction } from '@/lib/sanity/card-action'
 import { type resolveCardDesign } from '@/lib/sanity/card-design'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveTextRoles, textRoleProps } from '@/lib/sanity/text-role'
 import type { OwnText } from '@/lib/sanity/text-style-options'
@@ -246,6 +247,7 @@ function Header({ data, block, text }: { data: EventsData; block: string; text: 
       // With no title above it, the intro needs no margin.
       introClass={title ? undefined : 'text-lead text-pretty text-ink-muted'}
       design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+      divider={resolveDivider(data.headerDesign?.divider)}
       block={block}
       text={text}
     />

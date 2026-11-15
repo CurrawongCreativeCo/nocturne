@@ -1681,6 +1681,18 @@ export const blogPostWithoutPicture = {
   mainImage: undefined,
 }
 
+/** Team page settings with a divider between a member's summary and biography (tests/e2e/team-divider.spec.ts). */
+export const teamPageDividerOn = {
+  _id: 'teamPageSettings',
+  _type: 'teamPageSettings',
+  dividerDesign: { _type: 'decorativeDivider', style: 'line', width: 'short' },
+}
+
+/** Navigation with a divider above the footer's bottom row (tests/e2e/footer-divider.spec.ts). */
+export const footerDividerOn = {
+  footerDividerDesign: { _type: 'decorativeDivider', style: 'line', width: 'short' },
+}
+
 /** Navigation with the footer's social icons switched on (tests/e2e/footer-social.spec.ts). */
 export const footerSocialOn = { footerShowSocial: true, footerSocialStyle: 'circle' }
 
@@ -5504,6 +5516,191 @@ documents.push(
           belowSocial: { _type: 'decorativeDivider', style: 'line' },
         },
         links: [linkItem('div-c', 'Third link', external('https://example.com/c'))],
+      },
+    ],
+  },
+  {
+    // A divider between a section header's title and its intro (tests/e2e/header-dividers.spec.ts): in a
+    // start-aligned and a centred section with a header of their own, in two that draw their header with
+    // no wrapper (a call to action, a logo cloud), beside a header with no divider, and one with no intro.
+    _id: 'page-header-dividers',
+    _type: 'page',
+    title: 'Header dividers',
+    slug: { _type: 'slug', current: 'header-dividers' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      ...[
+        ['hd-start', 'Start header', 'start', true, 'An introduction under the divider.'],
+        ['hd-centre', 'Centre header', 'center', true, 'An introduction under the divider.'],
+        ['hd-control', 'Control header', 'center', false, 'An introduction with no divider.'],
+        ['hd-no-intro', 'Title only', 'center', true, undefined],
+      ].map(([id, title, align, divider, intro]) => ({
+        _key: id,
+        _type: 'featuresGrid',
+        title,
+        ...(intro ? { intro } : {}),
+        columns: 2,
+        style: { _type: 'sectionStyle', align },
+        ...(divider
+          ? {
+              headerDesign: {
+                _type: 'object',
+                divider: { _type: 'decorativeDivider', style: 'line', width: 'short' },
+              },
+            }
+          : {}),
+        items: [1, 2].map((i) => ({
+          _key: key(),
+          _type: 'featureItem',
+          title: `Feature ${i}`,
+          text: 'Text.',
+          icon: image(''),
+        })),
+      })),
+      {
+        _key: 'hd-cta',
+        _type: 'ctaBanner',
+        title: 'Call to action',
+        text: 'Banner text under the divider.',
+        tone: 'brand',
+        style: { _type: 'sectionStyle', align: 'center' },
+        headerDesign: {
+          _type: 'object',
+          divider: { _type: 'decorativeDivider', style: 'line', width: 'short' },
+        },
+        ctas: [cta('Get started', internal('page-about'))],
+      },
+      {
+        _key: 'hd-logos',
+        _type: 'logoCloud',
+        title: 'Trusted by',
+        intro: 'Teams we have worked with.',
+        style: { _type: 'sectionStyle', align: 'center' },
+        headerDesign: {
+          _type: 'object',
+          divider: { _type: 'decorativeDivider', style: 'line', width: 'short' },
+        },
+        logos: ['Acme', 'Globex', 'Initech'].map((name) => ({
+          _key: key(),
+          name,
+          image: image(name),
+        })),
+      },
+    ],
+  },
+  {
+    // A divider under a hero's title (tests/e2e/hero-dividers.spec.ts): one hero in each layout, each with
+    // an intro and buttons, and a Full background hero with none chosen to compare spacing against.
+    _id: 'page-hero-dividers',
+    _type: 'page',
+    title: 'Hero dividers',
+    slug: { _type: 'slug', current: 'hero-dividers' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      ['overlay', 'Hero overlay', true],
+      ['split', 'Hero split', true],
+      ['editorial', 'Hero editorial', true],
+      ['full-bleed', 'Hero panel', true],
+      ['overlay', 'Hero control', false],
+      ['overlay', 'Hero buttons', true, { description: undefined }],
+      ['split', 'Hero greeting', true, { showGreeting: true }],
+    ].map(([variant, title, divider, extra], index) => ({
+      _key: `hrd-${index}`,
+      _type: 'hero',
+      variant,
+      title,
+      description: 'An introduction under the divider.',
+      ctas: [cta('Get started', internal('page-about'))],
+      ...extra,
+      ...(variant === 'editorial' ? {} : { backgroundImage: image('') }),
+      ...(divider
+        ? { dividerDesign: { _type: 'decorativeDivider', style: 'line', width: 'short' } }
+        : {}),
+    })),
+  },
+  {
+    // A divider between Image + text's heading and its body (tests/e2e/media-text-dividers.spec.ts): in
+    // each layout, with a body that opens with a heading, and one with none chosen to compare spacing against.
+    _id: 'page-media-text-dividers',
+    _type: 'page',
+    title: 'Image and text dividers',
+    slug: { _type: 'slug', current: 'media-text-dividers' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      ['side', 'Side divider', true, undefined],
+      ['stacked', 'Stacked divider', true, undefined],
+      ['overlay', 'Overlay divider', true, undefined],
+      ['side', 'Heading first divider', true, { heading: true }],
+      ['side', 'Centred divider', true, { align: 'center' }],
+      ['side', 'No divider', false, undefined],
+    ].map(([variant, title, divider, extra], index) => ({
+      _key: `mtd-${index}`,
+      _type: 'mediaText',
+      variant,
+      title,
+      body: extra?.heading
+        ? [block(['Opening heading'], { style: 'h2' }), block(['Body text under the divider.'])]
+        : [block(['Body text under the divider.'])],
+      image: image('Picture'),
+      imagePosition: 'right',
+      ...(extra?.align ? { style: { _type: 'sectionStyle', align: extra.align } } : {}),
+      ...(divider
+        ? {
+            headerDesign: {
+              _type: 'object',
+              divider: { _type: 'decorativeDivider', style: 'line', width: 'short' },
+            },
+          }
+        : {}),
+    })),
+  },
+  {
+    // A divider block in a Rich text body (tests/e2e/rich-text-dividers.spec.ts): between two paragraphs, after a
+    // list and before a heading, in a centred section, and a body with none to compare spacing against.
+    _id: 'page-rich-text-dividers',
+    _type: 'page',
+    title: 'Rich text dividers',
+    slug: { _type: 'slug', current: 'rich-text-dividers' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'rtd-basic',
+        _type: 'richText',
+        body: [
+          block(['Before the first divider.']),
+          { _key: 'rtd-d1', _type: 'decorativeDivider', style: 'line', width: 'short' },
+          block(['After the first divider.']),
+        ],
+      },
+      {
+        _key: 'rtd-mixed',
+        _type: 'richText',
+        body: [
+          block(['A list item'], { listItem: 'bullet', level: 1 }),
+          block(['Another list item'], { listItem: 'bullet', level: 1 }),
+          { _key: 'rtd-d2', _type: 'decorativeDivider', style: 'line', width: 'short' },
+          block(['A heading after the divider'], { style: 'h2' }),
+          block(['Text under the heading.']),
+        ],
+      },
+      {
+        _key: 'rtd-centred',
+        _type: 'richText',
+        style: { _type: 'sectionStyle', align: 'center' },
+        body: [
+          block(['Centred before.']),
+          { _key: 'rtd-d3', _type: 'decorativeDivider', style: 'line', width: 'short' },
+          block(['Centred after.']),
+        ],
+      },
+      {
+        _key: 'rtd-control',
+        _type: 'richText',
+        body: [block(['Control: first paragraph.']), block(['Control: second paragraph.'])],
       },
     ],
   },

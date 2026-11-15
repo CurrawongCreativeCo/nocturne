@@ -977,6 +977,372 @@
           "clientEditable": false
         },
         {
+          "path": "dividerDesign",
+          "kind": "decorativeDivider",
+          "required": false,
+          "capability": "divider",
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.style",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "line",
+              "title": "Line"
+            },
+            {
+              "value": "fade",
+              "title": "Fading line"
+            },
+            {
+              "value": "dots",
+              "title": "Three dots"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.centre",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "Nothing"
+            },
+            {
+              "value": "diamond",
+              "title": "Diamond"
+            },
+            {
+              "value": "icon",
+              "title": "Icon"
+            },
+            {
+              "value": "text",
+              "title": "Words"
+            },
+            {
+              "value": "image",
+              "title": "Picture"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.text",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.textCase",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.letterSpacing",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "extra-wide",
+              "title": "Extra wide"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.icon",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "check",
+              "title": "Tick"
+            },
+            {
+              "value": "star",
+              "title": "Star"
+            },
+            {
+              "value": "shield",
+              "title": "Shield"
+            },
+            {
+              "value": "clock",
+              "title": "Clock"
+            },
+            {
+              "value": "heart",
+              "title": "Heart"
+            },
+            {
+              "value": "bolt",
+              "title": "Lightning bolt"
+            },
+            {
+              "value": "leaf",
+              "title": "Leaf"
+            },
+            {
+              "value": "award",
+              "title": "Award"
+            },
+            {
+              "value": "care",
+              "title": "Care"
+            },
+            {
+              "value": "sun",
+              "title": "Sun"
+            },
+            {
+              "value": "community",
+              "title": "Community"
+            },
+            {
+              "value": "person",
+              "title": "Person"
+            },
+            {
+              "value": "location",
+              "title": "Location"
+            },
+            {
+              "value": "email",
+              "title": "Email"
+            },
+            {
+              "value": "calendar",
+              "title": "Calendar"
+            },
+            {
+              "value": "phone",
+              "title": "Phone"
+            },
+            {
+              "value": "lotus",
+              "title": "Lotus"
+            },
+            {
+              "value": "gift",
+              "title": "Gift"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.image",
+          "kind": "image",
+          "required": null,
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.image.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.centreSize",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.width",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "short",
+              "title": "Short"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "long",
+              "title": "Long"
+            },
+            {
+              "value": "full",
+              "title": "Full width"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.thickness",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "bold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.lineColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.centreColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "dividerDesign.centreColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "heading",
           "kind": "headingText",
           "required": null,
@@ -2975,16 +3341,34 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
-              "fields": [],
+              "fields": [
+                "dividerDesign"
+              ],
               "availability": {
-                "overlay": "pending",
-                "split": "pending",
-                "editorial": "pending",
-                "full-bleed": "pending"
+                "overlay": "verified",
+                "split": "verified",
+                "editorial": "verified",
+                "full-bleed": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "hero.divider.section",
+              "field": "dividerDesign",
+              "resolvers": [
+                "@/lib/sanity/divider-options#resolveDivider"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider]",
+              "cases": [
+                "hero.divider.section@overlay",
+                "hero.divider.section@split",
+                "hero.divider.section@editorial",
+                "hero.divider.section@full-bleed"
+              ]
+            }
+          ]
         },
         "edge": {
           "policies": [
@@ -3115,7 +3499,7 @@
       "fields": [
         {
           "path": "body",
-          "kind": "blockContent",
+          "kind": "richTextBody",
           "required": true,
           "max": null,
           "clientEditable": true
@@ -3282,11 +3666,26 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "body"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "richText.divider.section",
+              "field": "body",
+              "resolvers": [
+                "@/lib/sanity/divider-options#resolveDivider"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider]",
+              "cases": [
+                "richText.divider.section"
+              ]
+            }
+          ]
         },
         "edge": {
           "policies": [
@@ -4475,6 +4874,372 @@
           "clientEditable": false
         },
         {
+          "path": "headerDesign.divider",
+          "kind": "decorativeDivider",
+          "required": false,
+          "capability": "divider",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.style",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "line",
+              "title": "Line"
+            },
+            {
+              "value": "fade",
+              "title": "Fading line"
+            },
+            {
+              "value": "dots",
+              "title": "Three dots"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centre",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "Nothing"
+            },
+            {
+              "value": "diamond",
+              "title": "Diamond"
+            },
+            {
+              "value": "icon",
+              "title": "Icon"
+            },
+            {
+              "value": "text",
+              "title": "Words"
+            },
+            {
+              "value": "image",
+              "title": "Picture"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.text",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.textCase",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.letterSpacing",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "extra-wide",
+              "title": "Extra wide"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.icon",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "check",
+              "title": "Tick"
+            },
+            {
+              "value": "star",
+              "title": "Star"
+            },
+            {
+              "value": "shield",
+              "title": "Shield"
+            },
+            {
+              "value": "clock",
+              "title": "Clock"
+            },
+            {
+              "value": "heart",
+              "title": "Heart"
+            },
+            {
+              "value": "bolt",
+              "title": "Lightning bolt"
+            },
+            {
+              "value": "leaf",
+              "title": "Leaf"
+            },
+            {
+              "value": "award",
+              "title": "Award"
+            },
+            {
+              "value": "care",
+              "title": "Care"
+            },
+            {
+              "value": "sun",
+              "title": "Sun"
+            },
+            {
+              "value": "community",
+              "title": "Community"
+            },
+            {
+              "value": "person",
+              "title": "Person"
+            },
+            {
+              "value": "location",
+              "title": "Location"
+            },
+            {
+              "value": "email",
+              "title": "Email"
+            },
+            {
+              "value": "calendar",
+              "title": "Calendar"
+            },
+            {
+              "value": "phone",
+              "title": "Phone"
+            },
+            {
+              "value": "lotus",
+              "title": "Lotus"
+            },
+            {
+              "value": "gift",
+              "title": "Gift"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image",
+          "kind": "image",
+          "required": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreSize",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.width",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "short",
+              "title": "Short"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "long",
+              "title": "Long"
+            },
+            {
+              "value": "full",
+              "title": "Full width"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.thickness",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "bold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -4891,15 +5656,32 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
-              "fields": [],
+              "fields": [
+                "headerDesign.divider"
+              ],
               "availability": {
-                "side": "pending",
-                "stacked": "pending",
-                "overlay": "pending"
+                "side": "verified",
+                "stacked": "verified",
+                "overlay": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "mediaText.divider.section",
+              "field": "headerDesign.divider",
+              "resolvers": [
+                "@/lib/sanity/divider-options#resolveDivider"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider]",
+              "cases": [
+                "mediaText.divider.section@side",
+                "mediaText.divider.section@stacked",
+                "mediaText.divider.section@overlay"
+              ]
+            }
+          ]
         },
         "edge": {
           "policies": [
@@ -5613,6 +6395,372 @@
           "clientEditable": false
         },
         {
+          "path": "headerDesign.divider",
+          "kind": "decorativeDivider",
+          "required": false,
+          "capability": "divider",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.style",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "line",
+              "title": "Line"
+            },
+            {
+              "value": "fade",
+              "title": "Fading line"
+            },
+            {
+              "value": "dots",
+              "title": "Three dots"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centre",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "Nothing"
+            },
+            {
+              "value": "diamond",
+              "title": "Diamond"
+            },
+            {
+              "value": "icon",
+              "title": "Icon"
+            },
+            {
+              "value": "text",
+              "title": "Words"
+            },
+            {
+              "value": "image",
+              "title": "Picture"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.text",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.textCase",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.letterSpacing",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "extra-wide",
+              "title": "Extra wide"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.icon",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "check",
+              "title": "Tick"
+            },
+            {
+              "value": "star",
+              "title": "Star"
+            },
+            {
+              "value": "shield",
+              "title": "Shield"
+            },
+            {
+              "value": "clock",
+              "title": "Clock"
+            },
+            {
+              "value": "heart",
+              "title": "Heart"
+            },
+            {
+              "value": "bolt",
+              "title": "Lightning bolt"
+            },
+            {
+              "value": "leaf",
+              "title": "Leaf"
+            },
+            {
+              "value": "award",
+              "title": "Award"
+            },
+            {
+              "value": "care",
+              "title": "Care"
+            },
+            {
+              "value": "sun",
+              "title": "Sun"
+            },
+            {
+              "value": "community",
+              "title": "Community"
+            },
+            {
+              "value": "person",
+              "title": "Person"
+            },
+            {
+              "value": "location",
+              "title": "Location"
+            },
+            {
+              "value": "email",
+              "title": "Email"
+            },
+            {
+              "value": "calendar",
+              "title": "Calendar"
+            },
+            {
+              "value": "phone",
+              "title": "Phone"
+            },
+            {
+              "value": "lotus",
+              "title": "Lotus"
+            },
+            {
+              "value": "gift",
+              "title": "Gift"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image",
+          "kind": "image",
+          "required": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreSize",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.width",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "short",
+              "title": "Short"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "long",
+              "title": "Long"
+            },
+            {
+              "value": "full",
+              "title": "Full width"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.thickness",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "bold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "iconDesign",
           "kind": "object",
           "required": false,
@@ -6160,11 +7308,26 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "headerDesign.divider"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "featuresGrid.divider.section",
+              "field": "headerDesign.divider",
+              "resolvers": [
+                "@/lib/sanity/divider-options#resolveDivider"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider]",
+              "cases": [
+                "featuresGrid.divider.section"
+              ]
+            }
+          ]
         },
         "edge": {
           "policies": [
@@ -6662,6 +7825,372 @@
           "clientEditable": false
         },
         {
+          "path": "headerDesign.divider",
+          "kind": "decorativeDivider",
+          "required": false,
+          "capability": "divider",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.style",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "line",
+              "title": "Line"
+            },
+            {
+              "value": "fade",
+              "title": "Fading line"
+            },
+            {
+              "value": "dots",
+              "title": "Three dots"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centre",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "Nothing"
+            },
+            {
+              "value": "diamond",
+              "title": "Diamond"
+            },
+            {
+              "value": "icon",
+              "title": "Icon"
+            },
+            {
+              "value": "text",
+              "title": "Words"
+            },
+            {
+              "value": "image",
+              "title": "Picture"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.text",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.textCase",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.letterSpacing",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "extra-wide",
+              "title": "Extra wide"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.icon",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "check",
+              "title": "Tick"
+            },
+            {
+              "value": "star",
+              "title": "Star"
+            },
+            {
+              "value": "shield",
+              "title": "Shield"
+            },
+            {
+              "value": "clock",
+              "title": "Clock"
+            },
+            {
+              "value": "heart",
+              "title": "Heart"
+            },
+            {
+              "value": "bolt",
+              "title": "Lightning bolt"
+            },
+            {
+              "value": "leaf",
+              "title": "Leaf"
+            },
+            {
+              "value": "award",
+              "title": "Award"
+            },
+            {
+              "value": "care",
+              "title": "Care"
+            },
+            {
+              "value": "sun",
+              "title": "Sun"
+            },
+            {
+              "value": "community",
+              "title": "Community"
+            },
+            {
+              "value": "person",
+              "title": "Person"
+            },
+            {
+              "value": "location",
+              "title": "Location"
+            },
+            {
+              "value": "email",
+              "title": "Email"
+            },
+            {
+              "value": "calendar",
+              "title": "Calendar"
+            },
+            {
+              "value": "phone",
+              "title": "Phone"
+            },
+            {
+              "value": "lotus",
+              "title": "Lotus"
+            },
+            {
+              "value": "gift",
+              "title": "Gift"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image",
+          "kind": "image",
+          "required": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreSize",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.width",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "short",
+              "title": "Short"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "long",
+              "title": "Long"
+            },
+            {
+              "value": "full",
+              "title": "Full width"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.thickness",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "bold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -6955,14 +8484,30 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
-              "fields": [],
+              "fields": [
+                "headerDesign.divider"
+              ],
               "availability": {
-                "grid": "pending",
-                "marquee": "pending"
+                "grid": "verified",
+                "marquee": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "logoCloud.divider.section",
+              "field": "headerDesign.divider",
+              "resolvers": [
+                "@/lib/sanity/divider-options#resolveDivider"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider]",
+              "cases": [
+                "logoCloud.divider.section@grid",
+                "logoCloud.divider.section@marquee"
+              ]
+            }
+          ]
         },
         "edge": {
           "policies": [
@@ -7561,6 +9106,372 @@
               "title": "Relaxed"
             }
           ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider",
+          "kind": "decorativeDivider",
+          "required": false,
+          "capability": "divider",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.style",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "line",
+              "title": "Line"
+            },
+            {
+              "value": "fade",
+              "title": "Fading line"
+            },
+            {
+              "value": "dots",
+              "title": "Three dots"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centre",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "Nothing"
+            },
+            {
+              "value": "diamond",
+              "title": "Diamond"
+            },
+            {
+              "value": "icon",
+              "title": "Icon"
+            },
+            {
+              "value": "text",
+              "title": "Words"
+            },
+            {
+              "value": "image",
+              "title": "Picture"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.text",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.textCase",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.letterSpacing",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "extra-wide",
+              "title": "Extra wide"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.icon",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "check",
+              "title": "Tick"
+            },
+            {
+              "value": "star",
+              "title": "Star"
+            },
+            {
+              "value": "shield",
+              "title": "Shield"
+            },
+            {
+              "value": "clock",
+              "title": "Clock"
+            },
+            {
+              "value": "heart",
+              "title": "Heart"
+            },
+            {
+              "value": "bolt",
+              "title": "Lightning bolt"
+            },
+            {
+              "value": "leaf",
+              "title": "Leaf"
+            },
+            {
+              "value": "award",
+              "title": "Award"
+            },
+            {
+              "value": "care",
+              "title": "Care"
+            },
+            {
+              "value": "sun",
+              "title": "Sun"
+            },
+            {
+              "value": "community",
+              "title": "Community"
+            },
+            {
+              "value": "person",
+              "title": "Person"
+            },
+            {
+              "value": "location",
+              "title": "Location"
+            },
+            {
+              "value": "email",
+              "title": "Email"
+            },
+            {
+              "value": "calendar",
+              "title": "Calendar"
+            },
+            {
+              "value": "phone",
+              "title": "Phone"
+            },
+            {
+              "value": "lotus",
+              "title": "Lotus"
+            },
+            {
+              "value": "gift",
+              "title": "Gift"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image",
+          "kind": "image",
+          "required": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreSize",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.width",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "short",
+              "title": "Short"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "long",
+              "title": "Long"
+            },
+            {
+              "value": "full",
+              "title": "Full width"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.thickness",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "bold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
           "clientEditable": false
         },
         {
@@ -9052,14 +10963,30 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
-              "fields": [],
+              "fields": [
+                "headerDesign.divider"
+              ],
               "availability": {
-                "grid": "pending",
-                "slider": "pending"
+                "grid": "verified",
+                "slider": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "testimonials.divider.section",
+              "field": "headerDesign.divider",
+              "resolvers": [
+                "@/lib/sanity/divider-options#resolveDivider"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider]",
+              "cases": [
+                "testimonials.divider.section@grid",
+                "testimonials.divider.section@slider"
+              ]
+            }
+          ]
         },
         "edge": {
           "policies": [
@@ -9573,6 +11500,372 @@
               "title": "Relaxed"
             }
           ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider",
+          "kind": "decorativeDivider",
+          "required": false,
+          "capability": "divider",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.style",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "line",
+              "title": "Line"
+            },
+            {
+              "value": "fade",
+              "title": "Fading line"
+            },
+            {
+              "value": "dots",
+              "title": "Three dots"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centre",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "Nothing"
+            },
+            {
+              "value": "diamond",
+              "title": "Diamond"
+            },
+            {
+              "value": "icon",
+              "title": "Icon"
+            },
+            {
+              "value": "text",
+              "title": "Words"
+            },
+            {
+              "value": "image",
+              "title": "Picture"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.text",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.textCase",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.letterSpacing",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "extra-wide",
+              "title": "Extra wide"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.icon",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "check",
+              "title": "Tick"
+            },
+            {
+              "value": "star",
+              "title": "Star"
+            },
+            {
+              "value": "shield",
+              "title": "Shield"
+            },
+            {
+              "value": "clock",
+              "title": "Clock"
+            },
+            {
+              "value": "heart",
+              "title": "Heart"
+            },
+            {
+              "value": "bolt",
+              "title": "Lightning bolt"
+            },
+            {
+              "value": "leaf",
+              "title": "Leaf"
+            },
+            {
+              "value": "award",
+              "title": "Award"
+            },
+            {
+              "value": "care",
+              "title": "Care"
+            },
+            {
+              "value": "sun",
+              "title": "Sun"
+            },
+            {
+              "value": "community",
+              "title": "Community"
+            },
+            {
+              "value": "person",
+              "title": "Person"
+            },
+            {
+              "value": "location",
+              "title": "Location"
+            },
+            {
+              "value": "email",
+              "title": "Email"
+            },
+            {
+              "value": "calendar",
+              "title": "Calendar"
+            },
+            {
+              "value": "phone",
+              "title": "Phone"
+            },
+            {
+              "value": "lotus",
+              "title": "Lotus"
+            },
+            {
+              "value": "gift",
+              "title": "Gift"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image",
+          "kind": "image",
+          "required": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreSize",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.width",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "short",
+              "title": "Short"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "long",
+              "title": "Long"
+            },
+            {
+              "value": "full",
+              "title": "Full width"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.thickness",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "bold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
           "clientEditable": false
         },
         {
@@ -10430,11 +12723,26 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "headerDesign.divider"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "faq.divider.section",
+              "field": "headerDesign.divider",
+              "resolvers": [
+                "@/lib/sanity/divider-options#resolveDivider"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider]",
+              "cases": [
+                "faq.divider.section"
+              ]
+            }
+          ]
         },
         "edge": {
           "policies": [
@@ -11117,6 +13425,372 @@
           "clientEditable": false
         },
         {
+          "path": "headerDesign.divider",
+          "kind": "decorativeDivider",
+          "required": false,
+          "capability": "divider",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.style",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "line",
+              "title": "Line"
+            },
+            {
+              "value": "fade",
+              "title": "Fading line"
+            },
+            {
+              "value": "dots",
+              "title": "Three dots"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centre",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "Nothing"
+            },
+            {
+              "value": "diamond",
+              "title": "Diamond"
+            },
+            {
+              "value": "icon",
+              "title": "Icon"
+            },
+            {
+              "value": "text",
+              "title": "Words"
+            },
+            {
+              "value": "image",
+              "title": "Picture"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.text",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.textCase",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.letterSpacing",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "extra-wide",
+              "title": "Extra wide"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.icon",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "check",
+              "title": "Tick"
+            },
+            {
+              "value": "star",
+              "title": "Star"
+            },
+            {
+              "value": "shield",
+              "title": "Shield"
+            },
+            {
+              "value": "clock",
+              "title": "Clock"
+            },
+            {
+              "value": "heart",
+              "title": "Heart"
+            },
+            {
+              "value": "bolt",
+              "title": "Lightning bolt"
+            },
+            {
+              "value": "leaf",
+              "title": "Leaf"
+            },
+            {
+              "value": "award",
+              "title": "Award"
+            },
+            {
+              "value": "care",
+              "title": "Care"
+            },
+            {
+              "value": "sun",
+              "title": "Sun"
+            },
+            {
+              "value": "community",
+              "title": "Community"
+            },
+            {
+              "value": "person",
+              "title": "Person"
+            },
+            {
+              "value": "location",
+              "title": "Location"
+            },
+            {
+              "value": "email",
+              "title": "Email"
+            },
+            {
+              "value": "calendar",
+              "title": "Calendar"
+            },
+            {
+              "value": "phone",
+              "title": "Phone"
+            },
+            {
+              "value": "lotus",
+              "title": "Lotus"
+            },
+            {
+              "value": "gift",
+              "title": "Gift"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image",
+          "kind": "image",
+          "required": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreSize",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.width",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "short",
+              "title": "Short"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "long",
+              "title": "Long"
+            },
+            {
+              "value": "full",
+              "title": "Full width"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.thickness",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "bold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "cardDesign",
           "kind": "object",
           "required": false,
@@ -11485,11 +14159,26 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "headerDesign.divider"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "ctaBanner.divider.section",
+              "field": "headerDesign.divider",
+              "resolvers": [
+                "@/lib/sanity/divider-options#resolveDivider"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider]",
+              "cases": [
+                "ctaBanner.divider.section"
+              ]
+            }
+          ]
         },
         "edge": {
           "policies": [
@@ -11941,6 +14630,372 @@
               "title": "Relaxed"
             }
           ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider",
+          "kind": "decorativeDivider",
+          "required": false,
+          "capability": "divider",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.style",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "line",
+              "title": "Line"
+            },
+            {
+              "value": "fade",
+              "title": "Fading line"
+            },
+            {
+              "value": "dots",
+              "title": "Three dots"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centre",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "Nothing"
+            },
+            {
+              "value": "diamond",
+              "title": "Diamond"
+            },
+            {
+              "value": "icon",
+              "title": "Icon"
+            },
+            {
+              "value": "text",
+              "title": "Words"
+            },
+            {
+              "value": "image",
+              "title": "Picture"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.text",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.textCase",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.letterSpacing",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "extra-wide",
+              "title": "Extra wide"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.icon",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "check",
+              "title": "Tick"
+            },
+            {
+              "value": "star",
+              "title": "Star"
+            },
+            {
+              "value": "shield",
+              "title": "Shield"
+            },
+            {
+              "value": "clock",
+              "title": "Clock"
+            },
+            {
+              "value": "heart",
+              "title": "Heart"
+            },
+            {
+              "value": "bolt",
+              "title": "Lightning bolt"
+            },
+            {
+              "value": "leaf",
+              "title": "Leaf"
+            },
+            {
+              "value": "award",
+              "title": "Award"
+            },
+            {
+              "value": "care",
+              "title": "Care"
+            },
+            {
+              "value": "sun",
+              "title": "Sun"
+            },
+            {
+              "value": "community",
+              "title": "Community"
+            },
+            {
+              "value": "person",
+              "title": "Person"
+            },
+            {
+              "value": "location",
+              "title": "Location"
+            },
+            {
+              "value": "email",
+              "title": "Email"
+            },
+            {
+              "value": "calendar",
+              "title": "Calendar"
+            },
+            {
+              "value": "phone",
+              "title": "Phone"
+            },
+            {
+              "value": "lotus",
+              "title": "Lotus"
+            },
+            {
+              "value": "gift",
+              "title": "Gift"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image",
+          "kind": "image",
+          "required": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreSize",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.width",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "short",
+              "title": "Short"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "long",
+              "title": "Long"
+            },
+            {
+              "value": "full",
+              "title": "Full width"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.thickness",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "bold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
           "clientEditable": false
         },
         {
@@ -12467,11 +15522,26 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "headerDesign.divider"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "formSection.divider.section",
+              "field": "headerDesign.divider",
+              "resolvers": [
+                "@/lib/sanity/divider-options#resolveDivider"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider]",
+              "cases": [
+                "formSection.divider.section"
+              ]
+            }
+          ]
         },
         "edge": {
           "policies": [
@@ -13863,6 +16933,372 @@
               "title": "Relaxed"
             }
           ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider",
+          "kind": "decorativeDivider",
+          "required": false,
+          "capability": "divider",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.style",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "line",
+              "title": "Line"
+            },
+            {
+              "value": "fade",
+              "title": "Fading line"
+            },
+            {
+              "value": "dots",
+              "title": "Three dots"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centre",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "Nothing"
+            },
+            {
+              "value": "diamond",
+              "title": "Diamond"
+            },
+            {
+              "value": "icon",
+              "title": "Icon"
+            },
+            {
+              "value": "text",
+              "title": "Words"
+            },
+            {
+              "value": "image",
+              "title": "Picture"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.text",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.textCase",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.letterSpacing",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "extra-wide",
+              "title": "Extra wide"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.icon",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "check",
+              "title": "Tick"
+            },
+            {
+              "value": "star",
+              "title": "Star"
+            },
+            {
+              "value": "shield",
+              "title": "Shield"
+            },
+            {
+              "value": "clock",
+              "title": "Clock"
+            },
+            {
+              "value": "heart",
+              "title": "Heart"
+            },
+            {
+              "value": "bolt",
+              "title": "Lightning bolt"
+            },
+            {
+              "value": "leaf",
+              "title": "Leaf"
+            },
+            {
+              "value": "award",
+              "title": "Award"
+            },
+            {
+              "value": "care",
+              "title": "Care"
+            },
+            {
+              "value": "sun",
+              "title": "Sun"
+            },
+            {
+              "value": "community",
+              "title": "Community"
+            },
+            {
+              "value": "person",
+              "title": "Person"
+            },
+            {
+              "value": "location",
+              "title": "Location"
+            },
+            {
+              "value": "email",
+              "title": "Email"
+            },
+            {
+              "value": "calendar",
+              "title": "Calendar"
+            },
+            {
+              "value": "phone",
+              "title": "Phone"
+            },
+            {
+              "value": "lotus",
+              "title": "Lotus"
+            },
+            {
+              "value": "gift",
+              "title": "Gift"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image",
+          "kind": "image",
+          "required": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreSize",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.width",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "short",
+              "title": "Short"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "long",
+              "title": "Long"
+            },
+            {
+              "value": "full",
+              "title": "Full width"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.thickness",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "bold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
           "clientEditable": false
         },
         {
@@ -15492,11 +18928,26 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "headerDesign.divider"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "pricingTable.divider.section",
+              "field": "headerDesign.divider",
+              "resolvers": [
+                "@/lib/sanity/divider-options#resolveDivider"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider]",
+              "cases": [
+                "pricingTable.divider.section"
+              ]
+            }
+          ]
         },
         "edge": {
           "policies": [
@@ -15956,6 +19407,372 @@
               "title": "Relaxed"
             }
           ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider",
+          "kind": "decorativeDivider",
+          "required": false,
+          "capability": "divider",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.style",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "line",
+              "title": "Line"
+            },
+            {
+              "value": "fade",
+              "title": "Fading line"
+            },
+            {
+              "value": "dots",
+              "title": "Three dots"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centre",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "Nothing"
+            },
+            {
+              "value": "diamond",
+              "title": "Diamond"
+            },
+            {
+              "value": "icon",
+              "title": "Icon"
+            },
+            {
+              "value": "text",
+              "title": "Words"
+            },
+            {
+              "value": "image",
+              "title": "Picture"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.text",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.textCase",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.letterSpacing",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "extra-wide",
+              "title": "Extra wide"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.icon",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "check",
+              "title": "Tick"
+            },
+            {
+              "value": "star",
+              "title": "Star"
+            },
+            {
+              "value": "shield",
+              "title": "Shield"
+            },
+            {
+              "value": "clock",
+              "title": "Clock"
+            },
+            {
+              "value": "heart",
+              "title": "Heart"
+            },
+            {
+              "value": "bolt",
+              "title": "Lightning bolt"
+            },
+            {
+              "value": "leaf",
+              "title": "Leaf"
+            },
+            {
+              "value": "award",
+              "title": "Award"
+            },
+            {
+              "value": "care",
+              "title": "Care"
+            },
+            {
+              "value": "sun",
+              "title": "Sun"
+            },
+            {
+              "value": "community",
+              "title": "Community"
+            },
+            {
+              "value": "person",
+              "title": "Person"
+            },
+            {
+              "value": "location",
+              "title": "Location"
+            },
+            {
+              "value": "email",
+              "title": "Email"
+            },
+            {
+              "value": "calendar",
+              "title": "Calendar"
+            },
+            {
+              "value": "phone",
+              "title": "Phone"
+            },
+            {
+              "value": "lotus",
+              "title": "Lotus"
+            },
+            {
+              "value": "gift",
+              "title": "Gift"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image",
+          "kind": "image",
+          "required": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreSize",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.width",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "short",
+              "title": "Short"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "long",
+              "title": "Long"
+            },
+            {
+              "value": "full",
+              "title": "Full width"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.thickness",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "bold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
           "clientEditable": false
         },
         {
@@ -16482,11 +20299,26 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "headerDesign.divider"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "newsletterSignup.divider.section",
+              "field": "headerDesign.divider",
+              "resolvers": [
+                "@/lib/sanity/divider-options#resolveDivider"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider]",
+              "cases": [
+                "newsletterSignup.divider.section"
+              ]
+            }
+          ]
         },
         "edge": {
           "policies": [
@@ -16991,6 +20823,372 @@
               "title": "Relaxed"
             }
           ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider",
+          "kind": "decorativeDivider",
+          "required": false,
+          "capability": "divider",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.style",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "line",
+              "title": "Line"
+            },
+            {
+              "value": "fade",
+              "title": "Fading line"
+            },
+            {
+              "value": "dots",
+              "title": "Three dots"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centre",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "Nothing"
+            },
+            {
+              "value": "diamond",
+              "title": "Diamond"
+            },
+            {
+              "value": "icon",
+              "title": "Icon"
+            },
+            {
+              "value": "text",
+              "title": "Words"
+            },
+            {
+              "value": "image",
+              "title": "Picture"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.text",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.textCase",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.letterSpacing",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "extra-wide",
+              "title": "Extra wide"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.icon",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "check",
+              "title": "Tick"
+            },
+            {
+              "value": "star",
+              "title": "Star"
+            },
+            {
+              "value": "shield",
+              "title": "Shield"
+            },
+            {
+              "value": "clock",
+              "title": "Clock"
+            },
+            {
+              "value": "heart",
+              "title": "Heart"
+            },
+            {
+              "value": "bolt",
+              "title": "Lightning bolt"
+            },
+            {
+              "value": "leaf",
+              "title": "Leaf"
+            },
+            {
+              "value": "award",
+              "title": "Award"
+            },
+            {
+              "value": "care",
+              "title": "Care"
+            },
+            {
+              "value": "sun",
+              "title": "Sun"
+            },
+            {
+              "value": "community",
+              "title": "Community"
+            },
+            {
+              "value": "person",
+              "title": "Person"
+            },
+            {
+              "value": "location",
+              "title": "Location"
+            },
+            {
+              "value": "email",
+              "title": "Email"
+            },
+            {
+              "value": "calendar",
+              "title": "Calendar"
+            },
+            {
+              "value": "phone",
+              "title": "Phone"
+            },
+            {
+              "value": "lotus",
+              "title": "Lotus"
+            },
+            {
+              "value": "gift",
+              "title": "Gift"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image",
+          "kind": "image",
+          "required": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreSize",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.width",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "short",
+              "title": "Short"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "long",
+              "title": "Long"
+            },
+            {
+              "value": "full",
+              "title": "Full width"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.thickness",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "bold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
           "clientEditable": false
         },
         {
@@ -17924,14 +22122,30 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
-              "fields": [],
+              "fields": [
+                "headerDesign.divider"
+              ],
               "availability": {
-                "inline": "pending",
-                "cards": "pending"
+                "inline": "verified",
+                "cards": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "stats.divider.section",
+              "field": "headerDesign.divider",
+              "resolvers": [
+                "@/lib/sanity/divider-options#resolveDivider"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider]",
+              "cases": [
+                "stats.divider.section@inline",
+                "stats.divider.section@cards"
+              ]
+            }
+          ]
         },
         "edge": {
           "policies": [
@@ -18700,6 +22914,372 @@
           "clientEditable": false
         },
         {
+          "path": "headerDesign.divider",
+          "kind": "decorativeDivider",
+          "required": false,
+          "capability": "divider",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.style",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "line",
+              "title": "Line"
+            },
+            {
+              "value": "fade",
+              "title": "Fading line"
+            },
+            {
+              "value": "dots",
+              "title": "Three dots"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centre",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "Nothing"
+            },
+            {
+              "value": "diamond",
+              "title": "Diamond"
+            },
+            {
+              "value": "icon",
+              "title": "Icon"
+            },
+            {
+              "value": "text",
+              "title": "Words"
+            },
+            {
+              "value": "image",
+              "title": "Picture"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.text",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.textCase",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.letterSpacing",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "extra-wide",
+              "title": "Extra wide"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.icon",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "check",
+              "title": "Tick"
+            },
+            {
+              "value": "star",
+              "title": "Star"
+            },
+            {
+              "value": "shield",
+              "title": "Shield"
+            },
+            {
+              "value": "clock",
+              "title": "Clock"
+            },
+            {
+              "value": "heart",
+              "title": "Heart"
+            },
+            {
+              "value": "bolt",
+              "title": "Lightning bolt"
+            },
+            {
+              "value": "leaf",
+              "title": "Leaf"
+            },
+            {
+              "value": "award",
+              "title": "Award"
+            },
+            {
+              "value": "care",
+              "title": "Care"
+            },
+            {
+              "value": "sun",
+              "title": "Sun"
+            },
+            {
+              "value": "community",
+              "title": "Community"
+            },
+            {
+              "value": "person",
+              "title": "Person"
+            },
+            {
+              "value": "location",
+              "title": "Location"
+            },
+            {
+              "value": "email",
+              "title": "Email"
+            },
+            {
+              "value": "calendar",
+              "title": "Calendar"
+            },
+            {
+              "value": "phone",
+              "title": "Phone"
+            },
+            {
+              "value": "lotus",
+              "title": "Lotus"
+            },
+            {
+              "value": "gift",
+              "title": "Gift"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image",
+          "kind": "image",
+          "required": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreSize",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.width",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "short",
+              "title": "Short"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "long",
+              "title": "Long"
+            },
+            {
+              "value": "full",
+              "title": "Full width"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.thickness",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "bold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -19077,15 +23657,32 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
-              "fields": [],
+              "fields": [
+                "headerDesign.divider"
+              ],
               "availability": {
-                "grid": "pending",
-                "masonry": "pending",
-                "slider": "pending"
+                "grid": "verified",
+                "masonry": "verified",
+                "slider": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "gallery.divider.section",
+              "field": "headerDesign.divider",
+              "resolvers": [
+                "@/lib/sanity/divider-options#resolveDivider"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider]",
+              "cases": [
+                "gallery.divider.section@grid",
+                "gallery.divider.section@masonry",
+                "gallery.divider.section@slider"
+              ]
+            }
+          ]
         },
         "edge": {
           "policies": [
@@ -19589,6 +24186,372 @@
               "title": "Relaxed"
             }
           ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider",
+          "kind": "decorativeDivider",
+          "required": false,
+          "capability": "divider",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.style",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "line",
+              "title": "Line"
+            },
+            {
+              "value": "fade",
+              "title": "Fading line"
+            },
+            {
+              "value": "dots",
+              "title": "Three dots"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centre",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "Nothing"
+            },
+            {
+              "value": "diamond",
+              "title": "Diamond"
+            },
+            {
+              "value": "icon",
+              "title": "Icon"
+            },
+            {
+              "value": "text",
+              "title": "Words"
+            },
+            {
+              "value": "image",
+              "title": "Picture"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.text",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.textCase",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.letterSpacing",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "extra-wide",
+              "title": "Extra wide"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.icon",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "check",
+              "title": "Tick"
+            },
+            {
+              "value": "star",
+              "title": "Star"
+            },
+            {
+              "value": "shield",
+              "title": "Shield"
+            },
+            {
+              "value": "clock",
+              "title": "Clock"
+            },
+            {
+              "value": "heart",
+              "title": "Heart"
+            },
+            {
+              "value": "bolt",
+              "title": "Lightning bolt"
+            },
+            {
+              "value": "leaf",
+              "title": "Leaf"
+            },
+            {
+              "value": "award",
+              "title": "Award"
+            },
+            {
+              "value": "care",
+              "title": "Care"
+            },
+            {
+              "value": "sun",
+              "title": "Sun"
+            },
+            {
+              "value": "community",
+              "title": "Community"
+            },
+            {
+              "value": "person",
+              "title": "Person"
+            },
+            {
+              "value": "location",
+              "title": "Location"
+            },
+            {
+              "value": "email",
+              "title": "Email"
+            },
+            {
+              "value": "calendar",
+              "title": "Calendar"
+            },
+            {
+              "value": "phone",
+              "title": "Phone"
+            },
+            {
+              "value": "lotus",
+              "title": "Lotus"
+            },
+            {
+              "value": "gift",
+              "title": "Gift"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image",
+          "kind": "image",
+          "required": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreSize",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.width",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "short",
+              "title": "Short"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "long",
+              "title": "Long"
+            },
+            {
+              "value": "full",
+              "title": "Full width"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.thickness",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "bold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
           "clientEditable": false
         },
         {
@@ -20953,11 +25916,26 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "headerDesign.divider"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "location.divider.section",
+              "field": "headerDesign.divider",
+              "resolvers": [
+                "@/lib/sanity/divider-options#resolveDivider"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider]",
+              "cases": [
+                "location.divider.section"
+              ]
+            }
+          ]
         },
         "edge": {
           "policies": [
@@ -21890,6 +26868,372 @@
               "title": "Relaxed"
             }
           ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider",
+          "kind": "decorativeDivider",
+          "required": false,
+          "capability": "divider",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.style",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "line",
+              "title": "Line"
+            },
+            {
+              "value": "fade",
+              "title": "Fading line"
+            },
+            {
+              "value": "dots",
+              "title": "Three dots"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centre",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "Nothing"
+            },
+            {
+              "value": "diamond",
+              "title": "Diamond"
+            },
+            {
+              "value": "icon",
+              "title": "Icon"
+            },
+            {
+              "value": "text",
+              "title": "Words"
+            },
+            {
+              "value": "image",
+              "title": "Picture"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.text",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.textCase",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.letterSpacing",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "extra-wide",
+              "title": "Extra wide"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.icon",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "check",
+              "title": "Tick"
+            },
+            {
+              "value": "star",
+              "title": "Star"
+            },
+            {
+              "value": "shield",
+              "title": "Shield"
+            },
+            {
+              "value": "clock",
+              "title": "Clock"
+            },
+            {
+              "value": "heart",
+              "title": "Heart"
+            },
+            {
+              "value": "bolt",
+              "title": "Lightning bolt"
+            },
+            {
+              "value": "leaf",
+              "title": "Leaf"
+            },
+            {
+              "value": "award",
+              "title": "Award"
+            },
+            {
+              "value": "care",
+              "title": "Care"
+            },
+            {
+              "value": "sun",
+              "title": "Sun"
+            },
+            {
+              "value": "community",
+              "title": "Community"
+            },
+            {
+              "value": "person",
+              "title": "Person"
+            },
+            {
+              "value": "location",
+              "title": "Location"
+            },
+            {
+              "value": "email",
+              "title": "Email"
+            },
+            {
+              "value": "calendar",
+              "title": "Calendar"
+            },
+            {
+              "value": "phone",
+              "title": "Phone"
+            },
+            {
+              "value": "lotus",
+              "title": "Lotus"
+            },
+            {
+              "value": "gift",
+              "title": "Gift"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image",
+          "kind": "image",
+          "required": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreSize",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.width",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "short",
+              "title": "Short"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "long",
+              "title": "Long"
+            },
+            {
+              "value": "full",
+              "title": "Full width"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.thickness",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "bold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
           "clientEditable": false
         },
         {
@@ -23152,15 +28496,32 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
-              "fields": [],
+              "fields": [
+                "headerDesign.divider"
+              ],
               "availability": {
-                "grid": "pending",
-                "slider": "pending",
-                "list": "pending"
+                "grid": "verified",
+                "slider": "verified",
+                "list": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "team.divider.section",
+              "field": "headerDesign.divider",
+              "resolvers": [
+                "@/lib/sanity/divider-options#resolveDivider"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider]",
+              "cases": [
+                "team.divider.section@grid",
+                "team.divider.section@slider",
+                "team.divider.section@list"
+              ]
+            }
+          ]
         },
         "edge": {
           "policies": [
@@ -23715,6 +29076,372 @@
           "clientEditable": false
         },
         {
+          "path": "headerDesign.divider",
+          "kind": "decorativeDivider",
+          "required": false,
+          "capability": "divider",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.style",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "line",
+              "title": "Line"
+            },
+            {
+              "value": "fade",
+              "title": "Fading line"
+            },
+            {
+              "value": "dots",
+              "title": "Three dots"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centre",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "Nothing"
+            },
+            {
+              "value": "diamond",
+              "title": "Diamond"
+            },
+            {
+              "value": "icon",
+              "title": "Icon"
+            },
+            {
+              "value": "text",
+              "title": "Words"
+            },
+            {
+              "value": "image",
+              "title": "Picture"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.text",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.textCase",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.letterSpacing",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "extra-wide",
+              "title": "Extra wide"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.icon",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "check",
+              "title": "Tick"
+            },
+            {
+              "value": "star",
+              "title": "Star"
+            },
+            {
+              "value": "shield",
+              "title": "Shield"
+            },
+            {
+              "value": "clock",
+              "title": "Clock"
+            },
+            {
+              "value": "heart",
+              "title": "Heart"
+            },
+            {
+              "value": "bolt",
+              "title": "Lightning bolt"
+            },
+            {
+              "value": "leaf",
+              "title": "Leaf"
+            },
+            {
+              "value": "award",
+              "title": "Award"
+            },
+            {
+              "value": "care",
+              "title": "Care"
+            },
+            {
+              "value": "sun",
+              "title": "Sun"
+            },
+            {
+              "value": "community",
+              "title": "Community"
+            },
+            {
+              "value": "person",
+              "title": "Person"
+            },
+            {
+              "value": "location",
+              "title": "Location"
+            },
+            {
+              "value": "email",
+              "title": "Email"
+            },
+            {
+              "value": "calendar",
+              "title": "Calendar"
+            },
+            {
+              "value": "phone",
+              "title": "Phone"
+            },
+            {
+              "value": "lotus",
+              "title": "Lotus"
+            },
+            {
+              "value": "gift",
+              "title": "Gift"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image",
+          "kind": "image",
+          "required": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreSize",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.width",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "short",
+              "title": "Short"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "long",
+              "title": "Long"
+            },
+            {
+              "value": "full",
+              "title": "Full width"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.thickness",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "bold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "access",
           "kind": "string",
           "required": false,
@@ -23964,14 +29691,30 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
-              "fields": [],
+              "fields": [
+                "headerDesign.divider"
+              ],
               "availability": {
-                "embed": "pending",
-                "ambient": "pending"
+                "embed": "verified",
+                "ambient": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "video.divider.section",
+              "field": "headerDesign.divider",
+              "resolvers": [
+                "@/lib/sanity/divider-options#resolveDivider"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider]",
+              "cases": [
+                "video.divider.section@embed",
+                "video.divider.section@ambient"
+              ]
+            }
+          ]
         },
         "edge": {
           "policies": [
@@ -24564,6 +30307,372 @@
               "title": "Relaxed"
             }
           ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider",
+          "kind": "decorativeDivider",
+          "required": false,
+          "capability": "divider",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.style",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "line",
+              "title": "Line"
+            },
+            {
+              "value": "fade",
+              "title": "Fading line"
+            },
+            {
+              "value": "dots",
+              "title": "Three dots"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centre",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "Nothing"
+            },
+            {
+              "value": "diamond",
+              "title": "Diamond"
+            },
+            {
+              "value": "icon",
+              "title": "Icon"
+            },
+            {
+              "value": "text",
+              "title": "Words"
+            },
+            {
+              "value": "image",
+              "title": "Picture"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.text",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.textCase",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.letterSpacing",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "extra-wide",
+              "title": "Extra wide"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.icon",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "check",
+              "title": "Tick"
+            },
+            {
+              "value": "star",
+              "title": "Star"
+            },
+            {
+              "value": "shield",
+              "title": "Shield"
+            },
+            {
+              "value": "clock",
+              "title": "Clock"
+            },
+            {
+              "value": "heart",
+              "title": "Heart"
+            },
+            {
+              "value": "bolt",
+              "title": "Lightning bolt"
+            },
+            {
+              "value": "leaf",
+              "title": "Leaf"
+            },
+            {
+              "value": "award",
+              "title": "Award"
+            },
+            {
+              "value": "care",
+              "title": "Care"
+            },
+            {
+              "value": "sun",
+              "title": "Sun"
+            },
+            {
+              "value": "community",
+              "title": "Community"
+            },
+            {
+              "value": "person",
+              "title": "Person"
+            },
+            {
+              "value": "location",
+              "title": "Location"
+            },
+            {
+              "value": "email",
+              "title": "Email"
+            },
+            {
+              "value": "calendar",
+              "title": "Calendar"
+            },
+            {
+              "value": "phone",
+              "title": "Phone"
+            },
+            {
+              "value": "lotus",
+              "title": "Lotus"
+            },
+            {
+              "value": "gift",
+              "title": "Gift"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image",
+          "kind": "image",
+          "required": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreSize",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.width",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "short",
+              "title": "Short"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "long",
+              "title": "Long"
+            },
+            {
+              "value": "full",
+              "title": "Full width"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.thickness",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "bold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
           "clientEditable": false
         },
         {
@@ -25535,14 +31644,30 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
-              "fields": [],
+              "fields": [
+                "headerDesign.divider"
+              ],
               "availability": {
-                "vertical": "pending",
-                "alternating": "pending"
+                "vertical": "verified",
+                "alternating": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "process.divider.section",
+              "field": "headerDesign.divider",
+              "resolvers": [
+                "@/lib/sanity/divider-options#resolveDivider"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider]",
+              "cases": [
+                "process.divider.section@vertical",
+                "process.divider.section@alternating"
+              ]
+            }
+          ]
         },
         "edge": {
           "policies": [
@@ -26044,6 +32169,372 @@
               "title": "Relaxed"
             }
           ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider",
+          "kind": "decorativeDivider",
+          "required": false,
+          "capability": "divider",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.style",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "line",
+              "title": "Line"
+            },
+            {
+              "value": "fade",
+              "title": "Fading line"
+            },
+            {
+              "value": "dots",
+              "title": "Three dots"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centre",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "Nothing"
+            },
+            {
+              "value": "diamond",
+              "title": "Diamond"
+            },
+            {
+              "value": "icon",
+              "title": "Icon"
+            },
+            {
+              "value": "text",
+              "title": "Words"
+            },
+            {
+              "value": "image",
+              "title": "Picture"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.text",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.textCase",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.letterSpacing",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "extra-wide",
+              "title": "Extra wide"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.icon",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "check",
+              "title": "Tick"
+            },
+            {
+              "value": "star",
+              "title": "Star"
+            },
+            {
+              "value": "shield",
+              "title": "Shield"
+            },
+            {
+              "value": "clock",
+              "title": "Clock"
+            },
+            {
+              "value": "heart",
+              "title": "Heart"
+            },
+            {
+              "value": "bolt",
+              "title": "Lightning bolt"
+            },
+            {
+              "value": "leaf",
+              "title": "Leaf"
+            },
+            {
+              "value": "award",
+              "title": "Award"
+            },
+            {
+              "value": "care",
+              "title": "Care"
+            },
+            {
+              "value": "sun",
+              "title": "Sun"
+            },
+            {
+              "value": "community",
+              "title": "Community"
+            },
+            {
+              "value": "person",
+              "title": "Person"
+            },
+            {
+              "value": "location",
+              "title": "Location"
+            },
+            {
+              "value": "email",
+              "title": "Email"
+            },
+            {
+              "value": "calendar",
+              "title": "Calendar"
+            },
+            {
+              "value": "phone",
+              "title": "Phone"
+            },
+            {
+              "value": "lotus",
+              "title": "Lotus"
+            },
+            {
+              "value": "gift",
+              "title": "Gift"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image",
+          "kind": "image",
+          "required": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreSize",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.width",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "short",
+              "title": "Short"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "long",
+              "title": "Long"
+            },
+            {
+              "value": "full",
+              "title": "Full width"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.thickness",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "bold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
           "clientEditable": false
         },
         {
@@ -26553,11 +33044,26 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "headerDesign.divider"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "embed.divider.section",
+              "field": "headerDesign.divider",
+              "resolvers": [
+                "@/lib/sanity/divider-options#resolveDivider"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider]",
+              "cases": [
+                "embed.divider.section"
+              ]
+            }
+          ]
         },
         "edge": {
           "policies": [
@@ -33679,6 +40185,372 @@
           "clientEditable": false
         },
         {
+          "path": "headerDesign.divider",
+          "kind": "decorativeDivider",
+          "required": false,
+          "capability": "divider",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.style",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "None"
+            },
+            {
+              "value": "line",
+              "title": "Line"
+            },
+            {
+              "value": "fade",
+              "title": "Fading line"
+            },
+            {
+              "value": "dots",
+              "title": "Three dots"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centre",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "Nothing"
+            },
+            {
+              "value": "diamond",
+              "title": "Diamond"
+            },
+            {
+              "value": "icon",
+              "title": "Icon"
+            },
+            {
+              "value": "text",
+              "title": "Words"
+            },
+            {
+              "value": "image",
+              "title": "Picture"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.text",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.textCase",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "As typed"
+            },
+            {
+              "value": "uppercase",
+              "title": "Capitals"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.letterSpacing",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "normal",
+              "title": "Normal"
+            },
+            {
+              "value": "wide",
+              "title": "Wide"
+            },
+            {
+              "value": "extra-wide",
+              "title": "Extra wide"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.icon",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "check",
+              "title": "Tick"
+            },
+            {
+              "value": "star",
+              "title": "Star"
+            },
+            {
+              "value": "shield",
+              "title": "Shield"
+            },
+            {
+              "value": "clock",
+              "title": "Clock"
+            },
+            {
+              "value": "heart",
+              "title": "Heart"
+            },
+            {
+              "value": "bolt",
+              "title": "Lightning bolt"
+            },
+            {
+              "value": "leaf",
+              "title": "Leaf"
+            },
+            {
+              "value": "award",
+              "title": "Award"
+            },
+            {
+              "value": "care",
+              "title": "Care"
+            },
+            {
+              "value": "sun",
+              "title": "Sun"
+            },
+            {
+              "value": "community",
+              "title": "Community"
+            },
+            {
+              "value": "person",
+              "title": "Person"
+            },
+            {
+              "value": "location",
+              "title": "Location"
+            },
+            {
+              "value": "email",
+              "title": "Email"
+            },
+            {
+              "value": "calendar",
+              "title": "Calendar"
+            },
+            {
+              "value": "phone",
+              "title": "Phone"
+            },
+            {
+              "value": "lotus",
+              "title": "Lotus"
+            },
+            {
+              "value": "gift",
+              "title": "Gift"
+            }
+          ],
+          "capability": "icon",
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image",
+          "kind": "image",
+          "required": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.image.alt",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreSize",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "small",
+              "title": "Small"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "large",
+              "title": "Large"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.width",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "short",
+              "title": "Short"
+            },
+            {
+              "value": "medium",
+              "title": "Medium"
+            },
+            {
+              "value": "long",
+              "title": "Long"
+            },
+            {
+              "value": "full",
+              "title": "Full width"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.thickness",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "thin",
+              "title": "Thin"
+            },
+            {
+              "value": "bold",
+              "title": "Bold"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.lineColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour",
+          "kind": "object",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.colour",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "inherit",
+              "title": "Inherit"
+            },
+            {
+              "value": "ink",
+              "title": "Text"
+            },
+            {
+              "value": "muted",
+              "title": "Muted text"
+            },
+            {
+              "value": "accent",
+              "title": "Primary"
+            },
+            {
+              "value": "accent-2",
+              "title": "Secondary"
+            },
+            {
+              "value": "highlight",
+              "title": "Highlight"
+            },
+            {
+              "value": "custom",
+              "title": "Custom"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "headerDesign.divider.centreColour.hex",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "clientEditable": false
+        },
+        {
           "path": "cardDesign",
           "kind": "object",
           "required": false,
@@ -35071,15 +41943,32 @@
               "policy": "required",
               "scope": "section",
               "closingTask": 151,
-              "fields": [],
+              "fields": [
+                "headerDesign.divider"
+              ],
               "availability": {
-                "list": "pending",
-                "agenda": "pending",
-                "featured": "pending"
+                "list": "verified",
+                "agenda": "verified",
+                "featured": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "events.divider.section",
+              "field": "headerDesign.divider",
+              "resolvers": [
+                "@/lib/sanity/divider-options#resolveDivider"
+              ],
+              "render": "src/components/ui/decorative-divider.tsx",
+              "target": "[data-decorative-divider]",
+              "cases": [
+                "events.divider.section@list",
+                "events.divider.section@agenda",
+                "events.divider.section@featured"
+              ]
+            }
+          ]
         },
         "edge": {
           "policies": [
@@ -37836,11 +44725,26 @@
                 "policy": "required",
                 "scope": "section",
                 "closingTask": 151,
-                "fields": [],
-                "availability": "pending"
+                "fields": [
+                  "navigation.footerDividerDesign"
+                ],
+                "availability": "verified"
               }
             ],
-            "evidence": []
+            "evidence": [
+              {
+                "id": "siteFooter.divider.section",
+                "field": "navigation.footerDividerDesign",
+                "resolvers": [
+                  "@/lib/sanity/divider-options#resolveDivider"
+                ],
+                "render": "src/components/ui/decorative-divider.tsx",
+                "target": "[data-decorative-divider]",
+                "cases": [
+                  "siteFooter.divider.section"
+                ]
+              }
+            ]
           },
           "edge": {
             "notApplicable": "Not a section, so it has no edge"
@@ -37930,11 +44834,26 @@
                 "policy": "required",
                 "scope": "section",
                 "closingTask": 151,
-                "fields": [],
-                "availability": "pending"
+                "fields": [
+                  "settings.dividerDesign"
+                ],
+                "availability": "verified"
               }
             ],
-            "evidence": []
+            "evidence": [
+              {
+                "id": "teamMemberPage.divider.section",
+                "field": "settings.dividerDesign",
+                "resolvers": [
+                  "@/lib/sanity/divider-options#resolveDivider"
+                ],
+                "render": "src/components/ui/decorative-divider.tsx",
+                "target": "[data-decorative-divider]",
+                "cases": [
+                  "teamMemberPage.divider.section"
+                ]
+              }
+            ]
           },
           "edge": {
             "notApplicable": "Not a section, so it has no edge"

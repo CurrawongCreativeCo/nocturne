@@ -5,6 +5,7 @@ import { slotField } from '@/features/pages/slots/slot-field'
 import { SPLIT_IMAGE_SHAPES, SPLIT_PROPORTIONS } from '@/features/pages/utils/hero-split'
 import { ownsSurfaces } from '@/lib/design/section-surfaces'
 import { DEFAULT_HEADING_TONES, headingPlainText } from '@/lib/sanity/heading-text'
+import { hiddenFromClients } from '@/lib/sanity/roles'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageDesignField } from '@/lib/sanity/schema/image-design'
@@ -266,6 +267,16 @@ export const hero = defineType({
         ],
       }),
       heroEyebrowDesignField,
+      // A rule under the title (task 151), agency only. Drawn by HeroText when the hero has a title and
+      // something under it; empty is None, so a hero that never chose one is unchanged.
+      defineField({
+        name: 'dividerDesign',
+        title: 'Divider under the title',
+        type: 'decorativeDivider',
+        group: 'design',
+        description: 'A rule between the title and the intro or buttons. Optional.',
+        hidden: hiddenFromClients,
+      }),
       // Select words in the title to highlight them. Replaces the plain `title` below, which is read
       // only until the "Hero titles to heading text" migration has run (migrations/README.md).
       headingField({

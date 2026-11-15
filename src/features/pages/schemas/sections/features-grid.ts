@@ -88,7 +88,7 @@ export const featuresGrid = defineType({
           }),
         ],
       }),
-      headerDesignField(),
+      headerDesignField({}, { divider: true }),
       iconsDesignField(),
       accessField,
     ],

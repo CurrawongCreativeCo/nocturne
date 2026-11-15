@@ -238,7 +238,7 @@ export const mediaText = defineType({
         hidden: notSide,
         validation: (rule) => rule.required(),
       }),
-      headerDesignField(),
+      headerDesignField({}, { divider: true }),
       accessField,
       // Set by the presets above the form; the stored value is the layout the section renders. Hidden
       // so there is one picker, not two. A hidden field keeps its value, and the list subtitle shows it.

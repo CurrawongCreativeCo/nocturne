@@ -116,7 +116,7 @@ export const gallery = defineType({
       // A shadow and glow on every tile (task 147), beside Image design so it never moves with it: on every layout,
       // Masonry too (which has no Image design to hold it).
       pictureDepthFields({}),
-      headerDesignField(),
+      headerDesignField({}, { divider: true }),
       accessField,
       // Shown first in the Content tab.
       variantField(GALLERY_VARIANTS),

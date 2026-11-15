@@ -2,6 +2,7 @@ import { MOTION_DEFAULTS } from '@/components/motion/presets'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveTextRoles } from '@/lib/sanity/text-role'
 
@@ -23,7 +24,7 @@ export const LOGO_CLOUD_DEFAULTS: SectionDefaults = {
 export function LogoCloudGrid({ data, isFirst }: SectionProps<'logoCloud'>) {
   const { heading, intro, logos } = data
   const title = sectionTitle(data)
-  const { text, justify } = sectionTraits(data.style, LOGO_CLOUD_DEFAULTS)
+  const { block, text, justify } = sectionTraits(data.style, LOGO_CLOUD_DEFAULTS)
 
   return (
     <SectionFrame style={data.style} defaults={LOGO_CLOUD_DEFAULTS} isFirst={isFirst}>
@@ -34,6 +35,8 @@ export function LogoCloudGrid({ data, isFirst }: SectionProps<'logoCloud'>) {
         heading={heading}
         intro={intro}
         design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+        divider={resolveDivider(data.headerDesign?.divider)}
+        dividerBlock={block}
         headingClass="text-small font-semibold text-ink-muted"
         own={{ heading: OWN_CAPTION }}
         each={text}

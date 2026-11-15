@@ -1,5 +1,6 @@
 import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits } from '@/components/ui/section-style'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
 import { resolveTextRoles } from '@/lib/sanity/text-role'
 
@@ -18,6 +19,7 @@ export function TestimonialsHeader({ data }: { data: SectionProps<'testimonials'
       heading={data.heading}
       intro={data.intro}
       design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+      divider={resolveDivider(data.headerDesign?.divider)}
       block={block}
       text={text}
       bare
