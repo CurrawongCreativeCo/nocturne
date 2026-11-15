@@ -138,6 +138,20 @@ test.describe('independent overrides', () => {
       opacityOf(STILL, 'light') * BELOW_OPACITY,
       5,
     )
+    // The layer below: Text (`below: ink`) as the dark follower reads it, not the recipe's Primary there.
+    const below = await fillOf(page, 'lc-still', 'under-1')
+    expectNear(
+      below,
+      await roleOf(page, 'lc-still-f', 'ink'),
+      'the layer below is the follower’s Text',
+    )
+    const recipe = await fillOf(page, 'lc-still-unset', 'under-1')
+    expectNear(
+      recipe,
+      await roleOf(page, 'lc-still-unset-f', STILL.recipes.tint.under),
+      'the unset control draws the recipe',
+    )
+    expect(near(below, recipe, 2 * TOLERANCE), 'Text is not the recipe’s colour').toBe(false)
   })
 
   test('Lagoon’s second layer takes its own colour and strength, and its first layer stays the recipe', async ({
@@ -206,7 +220,7 @@ test.describe('layers a shape does not draw', () => {
     expect(await names(page, 'lc-still-stale')).toEqual(['over-1'])
     expectNear(
       await fillOf(page, 'lc-still-stale', 'over-1'),
-      await fillOf(page, 'lc-still-unset', 'over-1'),
+      await fillOf(page, 'lc-still-stale-unset', 'over-1'),
       'the first layer is the recipe',
     )
     expect(await opacityIn(page, 'lc-still-stale', 'over-1')).toBeCloseTo(
@@ -226,7 +240,7 @@ test.describe('geometry', () => {
       ['lc-reef', 'lc-reef-unset', ['over-1', 'over-2', 'under-1']],
       ['lc-still', 'lc-still-unset', ['over-1', 'under-1']],
       ['lc-lagoon', 'lc-lagoon-unset', ['over-1', 'over-2']],
-      ['lc-still-stale', 'lc-still-unset', ['over-1']],
+      ['lc-still-stale', 'lc-still-stale-unset', ['over-1']],
     ] as const) {
       expect(await maskOf(page, set), `${set} cut`).toBe(await maskOf(page, unset))
       for (const name of parts)

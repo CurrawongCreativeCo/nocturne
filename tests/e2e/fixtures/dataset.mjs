@@ -7156,6 +7156,14 @@ documents.push(
         edgeLayerColours: { above2: 'highlight', above2Strength: 'strong', below: 'ink' },
       }),
       edgeSection('lc-still-stale-f', 'Light follower', { tone: 'alt' }),
+      // The same shape with nothing stored, which is what the section above must draw (its switch is off, so
+      // its cut differs from the layer-below sections').
+      edgeSection('lc-still-stale-unset', 'Still water, switch off, nothing stored', {
+        tone: 'alt',
+        edge: 'still-water',
+        edgeHeight: 'large',
+      }),
+      edgeSection('lc-still-stale-unset-f', 'Light follower', { tone: 'alt' }),
       // Lagoon on a dark section over a light one: nothing set, then the second layer, and a stored layer below.
       edgeSection('lc-lagoon-unset', 'Lagoon, nothing set', {
         tone: 'inverse',
