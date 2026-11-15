@@ -70,12 +70,25 @@ const UNCHECKED_REASON: Record<Unchecked, string> = {
 
 /** Why the layer below the edge is not judged: it is over the next section, or the footer's band. */
 export type FollowerUnchecked =
-  'context' | 'shared' | 'locked' | 'own' | 'picture' | 'gradient' | 'tone' | 'colours'
+  | 'context'
+  | 'shared'
+  | 'locked'
+  | 'empty'
+  | 'unresolved'
+  | 'own'
+  | 'picture'
+  | 'gradient'
+  | 'tone'
+  | 'colours'
 
 const FOLLOWER_REASON: Record<FollowerUnchecked, string> = {
   context: 'this section’s place on the page can’t be read from here',
   shared: 'the next section is a shared section',
   locked: 'the next section is members only',
+  empty:
+    'the next section is a form with no form chosen, so it draws nothing, and the layer is over whatever follows that gap',
+  unresolved:
+    'the next section’s form can’t be checked from here, and a form that no longer exists draws nothing',
   own: 'the next section draws its own picture or video',
   picture: 'the next section has a background picture',
   gradient: 'the next section has a gradient',
@@ -98,6 +111,12 @@ export interface FollowerInput {
   shared?: boolean
   /** `next`: a members-only section, which the page draws as a stub. */
   locked?: boolean
+  /**
+   * `next`: whether the section draws at all. A stored tone does not say so: a form section with no form draws
+   * nothing (`nothing`), and one whose form is a reference Studio cannot resolve may draw nothing
+   * (`unverified`). Left out, the section is taken to draw its background.
+   */
+  presence?: 'nothing' | 'unverified'
   /** `last`: a Minimal page, which has no footer band (the page's own background shows under the cut). */
   minimal?: boolean
 }
@@ -194,6 +213,9 @@ function followerScene(
   }
   if (follower.shared) return { reason: 'shared' }
   if (follower.locked) return { reason: 'locked' }
+  // Presence comes before tone: an empty section paints nothing, so its stored tone says nothing about the scene.
+  if (follower.presence === 'nothing') return { reason: 'empty' }
+  if (follower.presence === 'unverified') return { reason: 'unresolved' }
   if (follower.hasOwnBackground) return { reason: 'own' }
   const style = follower.style
   if (style?.image?.asset) return { reason: 'picture' }

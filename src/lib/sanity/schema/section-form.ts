@@ -111,6 +111,18 @@ export function sectionAtStylePath(
   return current !== null && typeof current === 'object' ? (current as SectionValue) : undefined
 }
 
+/**
+ * Whether the following section draws at all, where its own data decides. A form section renders nothing without
+ * a form (and, in the renderer, when the reference points at a deleted form): with no form chosen it draws
+ * nothing, and with a reference Studio cannot resolve (no request is made) it may draw nothing. Other section
+ * types are not modelled here.
+ */
+function presenceOf(section: SectionValue): Pick<FollowerInput, 'presence'> {
+  if (section._type !== 'formSection') return {}
+  const form = section.form as { _ref?: unknown } | null | undefined
+  return { presence: form?._ref ? 'unverified' : 'nothing' }
+}
+
 /** The lists the page renderer draws sections from: a page's `pageBuilder` and a service's `sections`. */
 const SECTION_LISTS = ['pageBuilder', 'sections']
 
@@ -148,6 +160,7 @@ export function followerAtStylePath(
     hasOwnBackground: sectionHasOwnBackground(next),
     shared: next._type === 'reference',
     locked: isMembersOnly(next.access as string | undefined),
+    ...presenceOf(next),
   }
 }
 

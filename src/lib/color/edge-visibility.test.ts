@@ -353,6 +353,16 @@ describe('the layer below the edge', () => {
       /background picture/,
     ],
     ['a gradient', next({ tone: 'alt', gradient: 'forest-dusk' }), /has a gradient/],
+    [
+      'a form section with no form, whatever tone is stored',
+      next({ tone: 'inverse' }, { presence: 'nothing' }),
+      /form with no form chosen/,
+    ],
+    [
+      'a form section whose form cannot be checked, whatever tone is stored',
+      next({ tone: 'accent' }, { presence: 'unverified' }),
+      /form can’t be checked/,
+    ],
     ['a tone left to the section type', next({}), /not set in its Background field/],
     ['no style at all', next(null), /not set in its Background field/],
   ]

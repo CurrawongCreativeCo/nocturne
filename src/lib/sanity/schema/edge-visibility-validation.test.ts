@@ -199,3 +199,73 @@ describe('the follower, read from the document the form holds', () => {
     expect(await uncheckedSceneNote(style, reading().client)).toMatch(/layer below/)
   })
 })
+
+/**
+ * A follower with a stored tone does not necessarily draw its background: a form section with no form chosen, or
+ * whose form reference cannot be checked from here (it may point at a deleted form), renders nothing. The
+ * renderer then leaves the page's colours (section-edge-css.test.tsx, "keeps the page’s colours with no section
+ * below"), and what the layer below sits over is what follows that empty wrapper, which is not looked up. The
+ * advisory must not read the empty section's tone, and must not skip ahead to the section after it.
+ */
+describe('a follower that may draw nothing', () => {
+  const REEF: SectionStyleInput = { tone: 'alt', edge: 'reef' }
+  const key = ['pageBuilder', { _key: 'a' }, 'style', 'edgePalette']
+  const richText = (k: string, tone: string) => ({ _key: k, _type: 'richText', style: { tone } })
+  const form = (tone: string, extra: object = {}) => ({
+    _key: 'f',
+    _type: 'formSection',
+    style: { tone },
+    ...extra,
+  })
+  const ref = { form: { _type: 'reference', _ref: 'form-contact' } }
+  const pages = (follower: object) => ({
+    pageBuilder: [{ _key: 'a', _type: 'richText', style: REEF }, follower, richText('n', 'accent')],
+  })
+
+  for (const tone of ['inverse', 'accent'])
+    for (const [name, extra] of [
+      ['no form chosen', {}],
+      ['a form reference that cannot be checked', ref],
+    ] as const)
+      it(`does not assess the layer below over a ${tone} form section with ${name}`, async () => {
+        const document = pages(form(tone, extra))
+        const result = await edgeVisibilityFor(REEF, reading().client, {
+          follower: followerAtStylePath(document, key),
+        })
+        expect(result.layers.some((layer) => layer.side === 'under')).toBe(false)
+        expect(result.state).toBe('unchecked')
+        expect(result.unassessed.map((layer) => layer.side)).toEqual(['under'])
+        expect(result.message).toMatch(/form/)
+        expect(result.message).toMatch(/Look at it in Preview/)
+      })
+
+  it('does not skip ahead to the solid section after it', async () => {
+    const empty = await edgeVisibilityFor(REEF, reading().client, {
+      follower: followerAtStylePath(pages(form('inverse')), key),
+    })
+    const accentNext = await edgeVisibilityFor(REEF, reading().client, {
+      follower: { position: 'next', style: { tone: 'accent' } },
+    })
+    // Had it looked past the form, it would have measured the accent section after it.
+    expect(accentNext.layers.some((layer) => layer.side === 'under')).toBe(true)
+    expect(empty.layers.some((layer) => layer.side === 'under')).toBe(false)
+  })
+
+  it('still assesses an ordinary solid follower, so the correction is only for the form', async () => {
+    const document = pages(richText('f', 'inverse'))
+    const result = await edgeVisibilityFor(REEF, reading().client, {
+      follower: followerAtStylePath(document, key),
+    })
+    expect(result.state).toBe('clear')
+    expect(result.layers.some((layer) => layer.side === 'under')).toBe(true)
+  })
+
+  it('keeps a faint layer above visible beside the note about the layer below', async () => {
+    const faintAbove: SectionStyleInput = { ...REEF, edgePalette: 'highlight' }
+    const follower = followerAtStylePath(pages(form('inverse', ref)), key)
+    expect(await faintLayerWarning(faintAbove, reading().client, { follower })).toMatch(
+      /second layer may be hard to see|first layer may be hard to see|layers may be hard to see/,
+    )
+    expect(await uncheckedSceneNote(faintAbove, reading().client, { follower })).toMatch(/form/)
+  })
+})
