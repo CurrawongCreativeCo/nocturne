@@ -193,6 +193,82 @@ describe('the lake with diagnostics off and on', () => {
   })
 })
 
+describe('the lake diagnostics observe before the application works', () => {
+  /**
+   * The lake installs its diagnostics after `createServer(handler)`, so a listener added with `on` runs after the
+   * handler, and anything the handler does synchronously (the lake evaluates GROQ on its one thread) is over before
+   * the request is recorded. The record would then start late, and the time since the last response would include
+   * the handler's own work. A child process with a handler that blocks for 300 ms stands in for that.
+   */
+  const BLOCKING = `
+    import http from 'node:http'
+    const { installLakeDiagnostics } = await import(process.env.LAKE_DIAGNOSTICS_URL)
+    const server = http.createServer((req, res) => {
+      process.stderr.write('HANDLER-START ' + Date.now() + '\\n')
+      const end = Date.now() + 300
+      while (Date.now() < end) {
+        // Synchronous work, as the lake's own GROQ evaluation is.
+      }
+      res.end('ok')
+    })
+    installLakeDiagnostics(server, { port: 0 })
+    server.listen(0, '127.0.0.1', () => console.log('PORT ' + server.address().port))
+  `
+
+  it('records a request before the handler’s synchronous work, and leaves the handler to run', async () => {
+    const child = spawn(process.execPath, ['--input-type=module', '-e', BLOCKING], {
+      env: {
+        ...process.env,
+        E2E_LAKE_DIAGNOSTICS: '1',
+        LAKE_DIAGNOSTICS_URL: pathToFileURL(
+          join(root, 'tests', 'e2e', 'diagnostics', 'lake-diagnostics.mjs'),
+        ).href,
+      },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    })
+    children.add(child)
+    let stdout = ''
+    let stderr = ''
+    child.stdout.on('data', (chunk) => (stdout += chunk))
+    child.stderr.on('data', (chunk) => (stderr += chunk))
+    expect(
+      await appears(
+        () => stdout,
+        (text) => /PORT \d+/.test(text),
+      ),
+    ).toBe(true)
+    const port = Number(/PORT (\d+)/.exec(stdout)[1])
+    // Two requests on one connection: the second is where the idle time is read.
+    const agent = new http.Agent({ keepAlive: true, maxSockets: 1 })
+    const first = await request(port, '/a', { agent })
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    const second = await request(port, '/b', { agent })
+    agent.destroy()
+    expect([first.status, second.status, first.body, second.body]).toEqual([200, 200, 'ok', 'ok'])
+
+    expect(
+      await appears(
+        () => stderr,
+        (text) => diagLines(text).filter((l) => l.event === 'request').length >= 2,
+      ),
+    ).toBe(true)
+    const lines = stderr.split('\n')
+    const handlerAt = lines
+      .filter((line) => line.startsWith('HANDLER-START '))
+      .map((line) => Number(line.slice('HANDLER-START '.length)))
+    expect(handlerAt).toHaveLength(2)
+    const requests = diagLines(stderr).filter((l) => l.event === 'request')
+    expect(requests).toHaveLength(2)
+    for (const [i, record] of requests.entries()) {
+      // Recorded before the handler began its 300 ms, not after it.
+      expect(Date.parse(record.at) - handlerAt[i], `request ${i + 1}`).toBeLessThan(100)
+    }
+    // The idle time before the second request is the 100 ms the client waited, not the 300 ms the handler took.
+    expect(requests[1].idleMsBeforeRequest).toBeGreaterThanOrEqual(90)
+    expect(requests[1].idleMsBeforeRequest).toBeLessThan(250)
+  }, 20_000)
+})
+
 describe('what the lake diagnostics record', () => {
   it('logs the server’s real settings, including keepAliveTimeoutBuffer where Node has one', async () => {
     const { out } = await startLake({ E2E_LAKE_DIAGNOSTICS: '1' })
@@ -421,5 +497,156 @@ describe('the client preload', () => {
     expect(watched.code).toBe(plain.code)
     expect(plain.stderr).toContain('ECONNRESET')
     expect(watched.stderr).toContain('ECONNRESET')
+  })
+})
+
+describe('the client preload, response completion and watched traffic only', () => {
+  const CLIENT_ANY = `
+    const http = require('node:http')
+    const [mode, ...ports] = process.argv.slice(1)
+    const agent = new http.Agent({ keepAlive: true, maxSockets: 1 })
+    const get = (port) => new Promise((resolve) => {
+      const req = http.get({ host: '127.0.0.1', port, path: '/x', agent }, (res) => {
+        if (mode === 'no-read') {
+          // Leave the body alone and report what the diagnostics did to the stream.
+          return setTimeout(() => {
+            resolve(JSON.stringify({ flowing: res.readableFlowing, data: res.listenerCount('data'), readable: res.listenerCount('readable') }))
+          }, 200)
+        }
+        res.resume()
+        res.on('end', () => resolve('status ' + res.statusCode))
+      })
+      req.on('error', (error) => resolve('error ' + error.code))
+    })
+    ;(async () => {
+      const seen = []
+      for (const port of ports) seen.push(await get(port))
+      console.log(JSON.stringify(seen))
+      agent.destroy()
+    })()
+  `
+  const runAny = (args, env = {}, withPreload = true) =>
+    new Promise((resolve) => {
+      const child = spawn(
+        process.execPath,
+        [
+          ...(withPreload ? ['--import', pathToFileURL(preload).href] : []),
+          '-e',
+          CLIENT_ANY,
+          ...args,
+        ],
+        { env: { ...process.env, ...env }, stdio: ['ignore', 'pipe', 'pipe'] },
+      )
+      children.add(child)
+      let stdout = ''
+      let stderr = ''
+      child.stdout.on('data', (chunk) => (stdout += chunk))
+      child.stderr.on('data', (chunk) => (stderr += chunk))
+      child.once('exit', (code) => resolve({ code, stdout, stderr }))
+    })
+
+  /** Sends the headers and a first chunk at once, and the rest of the body after `delay` ms. */
+  const serveSlowBody = async (delay) => {
+    const server = http.createServer((req, res) => {
+      res.writeHead(200, { 'content-type': 'text/plain' })
+      res.write('first')
+      setTimeout(() => res.end('second'), delay)
+    })
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve))
+    return { server, port: server.address().port }
+  }
+  const serveOk = async () => {
+    const server = http.createServer((req, res) => res.end('ok'))
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve))
+    return { server, port: server.address().port }
+  }
+  const watch = (port, extra = {}) => ({
+    E2E_HTTP_DIAGNOSTICS: '1',
+    E2E_DIAGNOSTICS_PORTS: String(port),
+    ...extra,
+  })
+
+  it('measures idle time from when a delayed body completes, so an immediate reuse is not "idle" for the body’s duration', async () => {
+    const { server, port } = await serveSlowBody(300)
+    const plain = await runAny(['handled', String(port), String(port)], {}, false)
+    const watched = await runAny(['handled', String(port), String(port)], watch(port))
+    server.close()
+    expect(JSON.parse(watched.stdout)).toEqual(['status 200', 'status 200'])
+    expect(watched.stdout).toBe(plain.stdout)
+    const lines = diagLines(watched.stderr)
+    const bound = lines.filter((l) => l.event === 'request-socket')
+    expect(bound.map((l) => l.reusedSocket)).toEqual([false, true])
+    // The client asked again as soon as the body ended: the socket had been idle for a moment, not for 300 ms.
+    expect(bound[1].idleMsSinceLastResponse).toBeLessThan(150)
+    // The body's own duration is recorded, from the headers to the end.
+    const completes = lines.filter((l) => l.event === 'response-complete')
+    expect(completes).toHaveLength(2)
+    for (const complete of completes) expect(complete.ms).toBeGreaterThanOrEqual(280)
+    // Headers arrive at once; that is a separate record from completion.
+    const headers = lines.filter((l) => l.event === 'response')
+    expect(headers).toHaveLength(2)
+    expect(headers[0].ms).toBeLessThan(200)
+  }, 20_000)
+
+  it('does not read, resume or consume a body it was not asked to', async () => {
+    const { server, port } = await serveSlowBody(50)
+    const watched = await runAny(['no-read', String(port)], watch(port))
+    server.close()
+    expect(JSON.parse(JSON.parse(watched.stdout)[0])).toEqual({
+      flowing: null,
+      data: 0,
+      readable: 0,
+    })
+    // It saw the headers, and, with the body never read, no completion.
+    const lines = diagLines(watched.stderr)
+    expect(lines.some((l) => l.event === 'response')).toBe(true)
+    expect(lines.some((l) => l.event === 'response-complete')).toBe(false)
+  })
+
+  it('logs no socket events for traffic it is not watching', async () => {
+    const watchedServer = await serveOk()
+    const other = await serveOk()
+    const result = await runAny(
+      ['handled', String(other.port), String(other.port), String(other.port)],
+      watch(watchedServer.port),
+    )
+    watchedServer.server.close()
+    other.server.close()
+    expect(JSON.parse(result.stdout)).toEqual(['status 200', 'status 200', 'status 200'])
+    const lines = diagLines(result.stderr)
+    expect(
+      lines.filter((l) => l.event.startsWith('socket') || l.event.startsWith('request')),
+    ).toEqual([])
+    // Only the one line a process writes to say it is watching.
+    expect(lines.map((l) => l.event)).toEqual(['preload'])
+  })
+
+  it('does not spend its line budget on unwatched sockets, and keeps what a watched socket was created with', async () => {
+    const watchedServer = await serveOk()
+    const other = await serveOk()
+    const result = await runAny(
+      [
+        'handled',
+        ...Array.from({ length: 6 }, () => String(other.port)),
+        String(watchedServer.port),
+      ],
+      watch(watchedServer.port, { E2E_DIAGNOSTICS_MAX_LINES: '10' }),
+    )
+    watchedServer.server.close()
+    other.server.close()
+    const lines = diagLines(result.stderr)
+    expect(lines.some((l) => l.event === 'limit-reached')).toBe(false)
+    expect(lines.filter((l) => l.event === 'request-created')).toHaveLength(1)
+    const bound = lines.find((l) => l.event === 'request-socket')
+    expect(bound).toMatchObject({ reusedSocket: false })
+    // The watched socket's creation is still reported, with how long ago it was made when it was first seen.
+    const created = lines.find((l) => l.event === 'socket-created' && l.socketId === bound.socketId)
+    expect(created).toBeDefined()
+    expect(created.createdAgoMs).toBeTypeOf('number')
+    expect(
+      lines.find((l) => l.event === 'socket-connected' && l.socketId === bound.socketId),
+    ).toMatchObject({
+      remotePort: watchedServer.port,
+    })
   })
 })

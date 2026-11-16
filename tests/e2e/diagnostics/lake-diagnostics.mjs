@@ -17,7 +17,7 @@ import { clip, emit } from './diagnostics-log.mjs'
  *
  * What it never does: change a header, a status, a body, a timeout or a pooling setting; consume a request or response
  * stream; or replace Node's own handling. It only adds listeners to events where Node has no default behaviour
- * (`connection`, `request` beside the server's own handler, `close`, `finish`). It deliberately adds no `clientError`
+ * (`connection`, `request` beside the server's own handler and ahead of it, `close`, `finish`). It deliberately adds no `clientError`
  * listener (that would replace Node's default of answering 400 and closing) and no `error` listener of its own (the
  * lake already has one). Every handler is guarded, and the log is bounded (see diagnostics-log.cjs).
  *
@@ -118,7 +118,10 @@ export function installLakeDiagnostics(server, { port } = {}) {
   })
 
   // Beside the server's own request handler, not instead of it: both run, and this one reads and answers nothing.
-  server.on('request', (req, res) => {
+  // Prepended, so the request is observed before the handler does any work: the lake evaluates GROQ synchronously,
+  // and a listener added after the handler would be recorded only once that work was over (a late timestamp, and an
+  // idle time that includes the handler's own time).
+  server.prependListener('request', (req, res) => {
     try {
       const state = req.socket?.__diag
       if (!state) return
