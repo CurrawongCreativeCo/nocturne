@@ -87,7 +87,9 @@ async function startLake(env = {}) {
 const request = (port, path, { agent, method = 'GET', headers = auth, body } = {}) =>
   new Promise((resolve, reject) => {
     const req = http.request({ host: '127.0.0.1', port, path, method, headers, agent }, (res) => {
-      const localPort = res.socket?.localPort
+      // Taken when the response starts: by 'end' a keep-alive agent has freed the socket and `res.socket` is null.
+      const socket = res.socket
+      const localPort = socket?.localPort
       const chunks = []
       res.on('data', (chunk) => chunks.push(chunk))
       res.on('end', () =>
@@ -95,7 +97,7 @@ const request = (port, path, { agent, method = 'GET', headers = auth, body } = {
           status: res.statusCode,
           headers: res.headers,
           body: Buffer.concat(chunks).toString(),
-          socket: res.socket,
+          socket,
           localPort,
           reused: req.reusedSocket,
         }),
@@ -271,7 +273,7 @@ describe('the lake diagnostics observe before the application works', () => {
 })
 
 describe('what the lake diagnostics record', () => {
-  it('logs the server’s real settings, including keepAliveTimeoutBuffer where Node has one', async () => {
+  it('logs the server’s real settings: keep-alive expiry off by design, every other timeout Node’s default', async () => {
     const { out } = await startLake({ E2E_LAKE_DIAGNOSTICS: '1' })
     expect(
       await appears(
@@ -281,8 +283,11 @@ describe('what the lake diagnostics record', () => {
     ).toBe(true)
     const settings = diagLines(out.stderr).find((l) => l.event === 'settings')
     const reference = http.createServer()
+    // The lake's one deliberate setting (fake-sanity.mjs: no server idle expiry, so no expiry race). Everything else is
+    // read from a server made with Node's defaults, so a change to any other timeout still fails here.
+    expect(reference.keepAliveTimeout).toBeGreaterThan(0)
     const expected = {
-      keepAliveTimeout: reference.keepAliveTimeout ?? null,
+      keepAliveTimeout: 0,
       keepAliveTimeoutBuffer: reference.keepAliveTimeoutBuffer ?? null,
       headersTimeout: reference.headersTimeout ?? null,
       requestTimeout: reference.requestTimeout ?? null,
@@ -297,7 +302,7 @@ describe('what the lake diagnostics record', () => {
     expect(settings.port).toBeTypeOf('number')
   })
 
-  it('follows keep-alive GETs: one connection, a sequence 1 to 3, the idle time between them, then the close', async () => {
+  it('follows keep-alive GETs: one connection, a sequence 1 to 3, the idle time between them, then the client’s close', async () => {
     const { port, out } = await startLake({ E2E_LAKE_DIAGNOSTICS: '1' })
     const agent = new http.Agent({ keepAlive: true, maxSockets: 1 })
     const seen = []
@@ -305,11 +310,23 @@ describe('what the lake diagnostics record', () => {
       const r = await request(port, valid, { agent })
       expect(r.status).toBe(200)
       expect(r.headers.connection).toBe('keep-alive')
+      // No idle-timeout hint: the lake has no idle expiry to advertise (keepAliveTimeout 0), so undici falls back to
+      // its own idle limit instead of `timeout=5` less its threshold.
+      expect(r.headers['keep-alive']).toBeUndefined()
       seen.push({ reused: r.reused, socket: r.socket, localPort: r.localPort })
     }
     expect(seen.map((s) => s.reused)).toEqual([false, true, true])
+    expect(seen[0].socket).toBeTruthy()
     expect(new Set(seen.map((s) => s.socket)).size).toBe(1)
     const local = seen[0].localPort
+    // Cleanup is the client's: until the client closes, the lake has neither ended nor closed the connection.
+    const socket = seen[0].socket
+    let lakeEnded = false
+    socket.once('end', () => (lakeEnded = true))
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    expect(lakeEnded).toBe(false)
+    expect(socket.destroyed).toBe(false)
+    expect(diagLines(out.stderr).filter((l) => l.event === 'connection-close')).toEqual([])
     agent.destroy()
     expect(
       await appears(
