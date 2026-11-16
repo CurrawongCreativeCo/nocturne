@@ -37,6 +37,14 @@ Added with the capture (all under `evidence/`; `MANIFEST.md` has the provenance 
   `[e2e-diag]` lines, `commit.txt`, `exit-status.txt`, `counts.txt`. It passed and recorded no `ECONNRESET`, **and its client
   logger recorded no request at all** (section 3).
 
+Added with the corrected capture:
+
+- `job-133093273990.log.gz`: run 43804889468, attempt 1, `e2e (isolated)`, commit `4f59a8d9efe5aa83da2103f4bf6cb93216c3b2c3`
+  (merge of #217), diagnostics off; failed at "Section panels under each palette", with the signature of the first three.
+- `capture-43804915434/`: the corrected capture (run 43804915434, attempt 1, commit `4f59a8d…`): the whole Playwright log, every
+  project's own log, the `[e2e-diag]` lines, `commit.txt`, `exit-status.txt`, `diagnostics-validity.txt`, `counts.txt`. All nine
+  projects passed their tests and its validity checks, and it recorded no reset (section 2).
+
 (The attempt-1 and attempt-2 jobs are different job IDs of the same run; `gh run view --job <old id> --log` returns the
 rerun's log, which is why the direct API was used.)
 
@@ -70,6 +78,30 @@ The fourth failure (`job-133031068347.log.gz`, run 43785167062, diagnostics off)
 a **POST** `…/data/query/production` with a body, and it carries no `attemptNumber` (a POST that fails with no response is not
 retried, section 3). The error line was logged 0.19 s after a 3.5 s stall ended. The same observations hold: the lake logged no
 socket error, early close or exit; nothing here says why.
+
+The fifth failure (`job-133093273990.log.gz`, run 43804889468, commit `4f59a8d…`, diagnostics off) has the signature of the first
+three: a GET for `/blog/news-update`, `attemptNumber: 5`, `read ECONNRESET` (errno -104), and the web server does not start. The
+lake wrote no socket error, early close or exit, only 68 `event loop stalled` lines (up to 3472 ms) and 6 `slow request` lines. The
+last stall of 3 s or more (3472 ms) was logged 3.65 s before the first `fetch failed` line.
+
+**The corrected capture** (`capture-43804915434/`, run 43804915434, on the same commit `4f59a8d…`, diagnostics on) is the first
+whose client half was valid:
+
+- All nine projects passed their tests (157 tests, all on the first attempt) **and** the capture's validity checks: in every
+  project the client recorded exactly as many `/data/` requests as the lake served (187, 203, 230, 191, 174, 298, 194, 181 and 190;
+  1,848 in all), fetch requests came from production-build processes, every response-header record had its request and socket
+  records, and no process exhausted its logging budget. Those are coverage checks on aggregate counts; they do not prove that
+  every request was observed.
+- 147 processes wrote a `preload` line; **36 of them wrote `fetch-request` records** (27 in Next's `phase-production-build`, 9 in
+  other processes).
+- It recorded **no reset**: no `ECONNRESET`, no client `fetch-error` or `fetch-connect-error`, and no lake connection close with an
+  error. Coverage of the build's requests was demonstrated without reproducing the failure, so the capture says nothing about
+  what causes the failure, and nothing about stability: **ordinary CI on the same commit failed again** (the fifth failure, above).
+- The lake's longest stall was 2,627 ms; none reached 3 s (164 stalls, 28 of 1 s or more, 13 slow requests).
+
+Across the six runs, then, a lake stall of about 3.3 to 3.7 s was logged shortly before each of the five failures, and none of
+3 s or more occurred in the one run that did not fail. That is an association between observations, kept here as one; it is not
+evidence that the stall, the CPU or anything else caused a reset.
 
 Not in the logs, so not known: which side closed the connection; whether the failing sockets were reused ones; the
 sockets' ages or idle times; what undici's connection pool held; what the runner's load was; what the site's
@@ -143,9 +175,31 @@ H2. **The lake or the runner dropped connections for another reason** (backlog, 
 _Supported_ by: lake `connection-close` with `hadError: true`, an `exiting` line, or load or memory samples that show
 pressure. _Counts against_: the lake recording every affected connection closing without an error.
 
-H3. **A reset at the Node or kernel level not tied to the lake's idle timers.** _Supported_ by: a client `fetch-error` or
-`fetch-socket-close` with `hadError` on sockets that were new or recently used, and lake records that show no idle expiry
-for them. _Counts against_: the H1 pattern above.
+H3. **A reset at the Node or kernel level not tied to the lake's idle timers.** _Supported_ by: a client `fetch-error` on a
+socket that was new or recently used, and lake records that show no idle expiry for that connection. _Counts against_: the H1
+pattern above.
+
+**`fetch-socket-close` with `hadError: true` does not, by itself, establish that a request failed, and does not support H3 or
+any other reset hypothesis.** Node reports `hadError: true` on a socket's `close` whenever the socket was destroyed with an
+error object (Node v24.22.2,
+[`lib/net.js` L1174 and L1183](https://github.com/nodejs/node/blob/v24.22.2/lib/net.js#L1174-L1183):
+`const isException = exception ? true : false` … `this.emit('close', isException)`), and the undici that Node v24.22.2 bundles
+(7.30.1) retires an idle keep-alive connection exactly that way. When a response carries a `Keep-Alive: timeout=N` hint it sets
+the idle timeout to `N * 1000` less `keepAliveTimeoutThreshold`, 2000 ms by default
+([`client-h1.js` L648-L663](https://github.com/nodejs/node/blob/v24.22.2/deps/undici/src/lib/dispatcher/client-h1.js#L648-L663),
+defaults in [`client.js` L253-L255](https://github.com/nodejs/node/blob/v24.22.2/deps/undici/src/lib/dispatcher/client.js#L253-L255)),
+arms it when the connection goes idle
+([L1091-L1094](https://github.com/nodejs/node/blob/v24.22.2/deps/undici/src/lib/dispatcher/client-h1.js#L1091-L1094)), and on
+expiry calls `util.destroy(socket, new InformationalError('socket idle timeout'))`
+([L817-L819](https://github.com/nodejs/node/blob/v24.22.2/deps/undici/src/lib/dispatcher/client-h1.js#L817-L819)), which calls
+`socket.destroy(err)` ([`lib/core/util.js` L378-L389](https://github.com/nodejs/node/blob/v24.22.2/deps/undici/src/lib/core/util.js#L378-L389)).
+With the lake's `timeout=5` hint that is 5000 - 2000 = 3000 ms.
+
+In the corrected capture, which recorded no request error at all, **all 507** client `fetch-socket-close` records have
+`hadError: true`; 493 of them closed 3.0 to 3.5 s after the last response on the socket ended (the shortest 2.999 s, the longest
+4.08 s). Most of them are therefore consistent with that idle-expiry path. The records do not say which code path closed any
+given socket, and undici has other places that destroy a socket with an error, so no close, and certainly not every close, is
+attributed to idle expiry by these records alone.
 
 The stalls, the load samples and the process lists are context. A stall in the log is not evidence that CPU or the stall
 caused anything, and none of these hypotheses is accepted until a capture supports it and something else could not
@@ -184,7 +238,7 @@ Every client record carries the process (`pid`, `thread`) and Next's `phase` (`p
   `fetch-headers` (the response's **headers** arrived, with status), `fetch-complete` (undici has received the **whole
   response**; whether the application has read it is neither known nor asked), `fetch-error` (code, errno, syscall, the cause's
   code, a clipped message, time since the request began, and its socket if it had one) and `fetch-socket-close` (`hadError`,
-  requests, age). A socket's **endpoints** are address, family and port for each end (`localAddress`, `localFamily`,
+  which alone is not a request failure: see H3; requests, age). A socket's **endpoints** are address, family and port for each end (`localAddress`, `localFamily`,
   `localPort`, `remoteAddress`, `remoteFamily`, `remotePort`), as Node reports them. There is no connection-time metric: the one
   that was here read null in every record. No headers are logged, no body is read or locked, and the application's own
   `attemptNumber` is not seen.
