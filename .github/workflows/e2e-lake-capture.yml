@@ -70,29 +70,51 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       # The isolated job's projects, in its order. Each runs as in ci.yml (`npx playwright test --project=<name>
-      # --no-deps`); the output goes to the screen and to the kept log through `tee`, and the status of
-      # Playwright, not of `tee`, is each project's result. Like the job, it stops at the first failure, and the
-      # step's own exit status is that failure's.
+      # --no-deps`); the output goes to the screen, the whole kept log and the project's own log through `tee`, and the
+      # status of Playwright, not of `tee`, is each project's result. Like the job, it stops at the first failing project.
+      #
+      # After each project, scripts/e2e-capture-validity.mjs asks whether the diagnostics saw what the lake served, as a set
+      # of COVERAGE CHECKS on aggregate counts (they do not prove every request was observed): at least as many client
+      # request records as the lake's /data/ requests (fixture-control traffic left out), fetch requests from production-build
+      # processes, every response-header record matched to its request and socket records, and no process out of logging
+      # budget. Incomplete instrumentation exits 70 and truncated evidence 71; either stops the capture before any further
+      # project. Test results (exit-status.txt) and diagnostic validity (diagnostics-validity.txt) are recorded apart. The
+      # step exits with the first failing test's status; with passing tests and invalid diagnostics, with 70 or 71, so a
+      # capture that cannot tell what it was for does not pass.
       - name: Run the isolated projects with diagnostics
         timeout-minutes: 25
         run: |
           set +e
           set -o pipefail
           mkdir -p e2e-capture e2e-timings
-          status=0
+          test_status=0
+          invalid=0
           for project in experiments design design-visual panel-palettes nav-submenus blog-card-design button-style footer-divider team-divider; do
             echo "::group::$project"
-            E2E_TIMINGS_FILE="e2e-timings/isolated-$project.json" npx playwright test --project="$project" --no-deps 2>&1 | tee -a e2e-capture/playwright.log
+            E2E_TIMINGS_FILE="e2e-timings/isolated-$project.json" npx playwright test --project="$project" --no-deps 2>&1 | tee -a e2e-capture/playwright.log "e2e-capture/$project.log"
             code="${PIPESTATUS[0]}"
             echo "::endgroup::"
             echo "$project exit=$code" >> e2e-capture/exit-status.txt
+            node scripts/e2e-capture-validity.mjs "e2e-capture/$project.log" --project "$project" | tee -a e2e-capture/diagnostics-validity.txt
+            validity="${PIPESTATUS[0]}"
+            if [ "$validity" -ne 0 ]; then
+              invalid="$validity"
+              echo "::error::diagnostics not valid in $project (exit $validity): see diagnostics-validity.txt"
+            fi
             if [ "$code" -ne 0 ]; then
-              status="$code"
+              test_status="$code"
+              break
+            fi
+            if [ "$invalid" -ne 0 ]; then
               break
             fi
           done
-          echo "overall exit=$status" >> e2e-capture/exit-status.txt
-          exit "$status"
+          echo "tests overall exit=$test_status" >> e2e-capture/exit-status.txt
+          echo "diagnostics overall exit=$invalid" >> e2e-capture/diagnostics-validity.txt
+          if [ "$test_status" -ne 0 ]; then
+            exit "$test_status"
+          fi
+          exit "$invalid"
 
       - name: Pick out the diagnostic lines
         if: always()
@@ -102,9 +124,16 @@ jobs:
           grep -h '\[e2e-diag\]' e2e-capture/playwright.log > e2e-capture/e2e-diag-lines.log || true
           {
             echo "diagnostic lines: $(wc -l < e2e-capture/e2e-diag-lines.log)"
-            echo "client request errors: $(grep -c '"event":"request-error"' e2e-capture/e2e-diag-lines.log || true)"
+            echo "lake requests recorded: $(grep -c '"source":"lake".*"event":"request"' e2e-capture/e2e-diag-lines.log || true)"
+            echo "client request records (fetch or node:http): $(grep -cE '"event":"(fetch-request|request-created)"' e2e-capture/e2e-diag-lines.log || true)"
+            echo "client request errors (fetch or node:http): $(grep -cE '"event":"(fetch-error|request-error)"' e2e-capture/e2e-diag-lines.log || true)"
             echo "lake connection closes with an error: $(grep -c '"event":"connection-close".*"hadError":true' e2e-capture/e2e-diag-lines.log || true)"
             echo "ECONNRESET in the log: $(grep -c ECONNRESET e2e-capture/playwright.log || true)"
+            echo "budget exhausted (limit-reached notices): $(grep -c '"event":"limit-reached"' e2e-capture/e2e-diag-lines.log || true)"
+            echo "--- test exit statuses"
+            cat e2e-capture/exit-status.txt 2>/dev/null || true
+            echo "--- diagnostic validity"
+            cat e2e-capture/diagnostics-validity.txt 2>/dev/null || true
           } | tee e2e-capture/counts.txt >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload the capture

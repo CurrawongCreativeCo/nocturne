@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import http from 'node:http'
 import { createServer as createNetServer, connect } from 'node:net'
 import { join } from 'node:path'
@@ -649,4 +650,104 @@ describe('the client preload, response completion and watched traffic only', () 
       remotePort: watchedServer.port,
     })
   })
+})
+
+describe('what correlates a lake record with a client record', () => {
+  const key = (method, url) =>
+    createHash('sha1').update(`${method} ${url}`).digest('hex').slice(0, 8)
+
+  it('names a connection’s endpoints by address and family as well as port', async () => {
+    const { port, out } = await startLake({ E2E_LAKE_DIAGNOSTICS: '1' })
+    const agent = new http.Agent({ keepAlive: true, maxSockets: 1 })
+    const reply = await request(port, valid, { agent })
+    agent.destroy()
+    expect(reply.status).toBe(200)
+    expect(
+      await appears(
+        () => out.stderr,
+        (text) => diagLines(text).some((l) => l.event === 'connection-open'),
+      ),
+    ).toBe(true)
+    const open = diagLines(out.stderr).find((l) => l.event === 'connection-open')
+    // The lake listens on every interface, so a loopback client may be seen as an IPv4-mapped IPv6 address: the record says
+    // what Node reports, family included, and the test holds it to the address that connected and a real family.
+    expect(open.localPort).toBe(port)
+    for (const side of ['local', 'remote']) {
+      expect(open[`${side}Address`], side).toMatch(/127\.0\.0\.1$/)
+      expect(open[`${side}Family`], side).toMatch(/^IPv[46]$/)
+    }
+    expect(open.remotePort).toBeTypeOf('number')
+  })
+
+  it('gives a request the method-and-path hash the client records use, computed before the path is clipped', async () => {
+    const { port, out } = await startLake({ E2E_LAKE_DIAGNOSTICS: '1' })
+    const long = `/v2026-10-01/data/query/production?query=${'a'.repeat(400)}`
+    const reply = await request(port, long)
+    expect(reply.status).toBeGreaterThan(0)
+    expect(
+      await appears(
+        () => out.stderr,
+        (text) => diagLines(text).some((l) => l.event === 'request'),
+      ),
+    ).toBe(true)
+    const record = diagLines(out.stderr).find((l) => l.event === 'request')
+    // The path is clipped for the log; the hash is of the whole of it, so two requests that differ only past the clip differ.
+    expect(record.path.length).toBeLessThan(long.length)
+    expect(record.urlKey).toBe(key('GET', long))
+    expect(record.urlKey).not.toBe(key('GET', record.path))
+    const other = `${long}b`
+    await request(port, other)
+    expect(
+      await appears(
+        () => out.stderr,
+        (text) => diagLines(text).filter((l) => l.event === 'request').length >= 2,
+      ),
+    ).toBe(true)
+    expect(diagLines(out.stderr).filter((l) => l.event === 'request')[1].urlKey).toBe(
+      key('GET', other),
+    )
+  })
+
+  it('matches the client record of the same request by that hash, through the real lake and the real preload', async () => {
+    const { port, out } = await startLake({ E2E_LAKE_DIAGNOSTICS: '1' })
+    const long = `/v2026-10-01/data/query/production?query=${'b'.repeat(500)}`
+    const CLIENT = `
+      const [port, path] = process.argv.slice(1)
+      await (await fetch('http://127.0.0.1:' + port + path, { headers: { authorization: 'Bearer t' } })).text()
+      process.exit(0)
+    `
+    const client = await new Promise((resolve) => {
+      const child = spawn(
+        process.execPath,
+        [
+          '--import',
+          pathToFileURL(preload).href,
+          '--input-type=module',
+          '-e',
+          CLIENT,
+          String(port),
+          long,
+        ],
+        {
+          env: { ...process.env, E2E_HTTP_DIAGNOSTICS: '1', E2E_DIAGNOSTICS_PORTS: String(port) },
+          stdio: ['ignore', 'pipe', 'pipe'],
+        },
+      )
+      children.add(child)
+      let stderr = ''
+      child.stderr.on('data', (chunk) => (stderr += chunk))
+      child.once('exit', () => resolve(stderr))
+    })
+    expect(
+      await appears(
+        () => out.stderr,
+        (text) => diagLines(text).some((l) => l.event === 'request'),
+      ),
+    ).toBe(true)
+    const lake = diagLines(out.stderr).find((l) => l.event === 'request')
+    const fetched = diagLines(client).find((l) => l.event === 'fetch-request')
+    expect(fetched.urlKey).toBe(lake.urlKey)
+    // A shared key correlates records; it is a hash, and is not by itself proof that they are one request.
+    expect(fetched.urlKey).toBe(key('GET', long))
+  }, 20_000)
 })
