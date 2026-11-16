@@ -7,6 +7,8 @@
  * It never throws: a diagnostic that fails is dropped, because a diagnostic must not change what the process does.
  */
 
+import { createHash } from 'node:crypto'
+
 const PREFIX = '[e2e-diag]'
 const MAX_LINES = Math.max(1, Number(process.env.E2E_DIAGNOSTICS_MAX_LINES) || 4000)
 
@@ -41,6 +43,14 @@ function emit(source, event, fields = {}) {
   }
 }
 
+/**
+ * A short hash of a request's method and whole path (query string included), computed BEFORE any clipping, written by the
+ * lake and by both client loggers as `urlKey`. Two records with the same key are a lead that they describe the same
+ * request: it is 32 bits of a hash, so a collision is possible and equality is a correlation key, not proof.
+ */
+const requestKey = (method, path) =>
+  createHash('sha1').update(`${method} ${path}`).digest('hex').slice(0, 8)
+
 const stats = () => ({ written, dropped })
 
-export { PREFIX, clip, emit, stats }
+export { PREFIX, clip, emit, requestKey, stats }

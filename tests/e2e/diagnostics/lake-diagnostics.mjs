@@ -1,7 +1,7 @@
 import { execFile } from 'node:child_process'
 import { freemem, loadavg, totalmem, cpus } from 'node:os'
 
-import { clip, emit } from './diagnostics-log.mjs'
+import { clip, emit, requestKey } from './diagnostics-log.mjs'
 
 /**
  * Opt-in diagnostics for the fake Content Lake (task 151 CI investigation): E2E_LAKE_DIAGNOSTICS=1.
@@ -90,7 +90,11 @@ export function installLakeDiagnostics(server, { port } = {}) {
       emit('lake', 'connection-open', {
         connId: id,
         remotePort: socket.remotePort ?? null,
+        remoteAddress: socket.remoteAddress ?? null,
+        remoteFamily: socket.remoteFamily ?? null,
         localPort: socket.localPort ?? null,
+        localAddress: socket.localAddress ?? null,
+        localFamily: socket.localFamily ?? null,
         open: open.size,
       })
       socket.once('close', (hadError) => {
@@ -133,6 +137,8 @@ export function installLakeDiagnostics(server, { port } = {}) {
         seq,
         method: req.method,
         path: clip(req.url, 120),
+        // Of the whole URL, not of the clipped path above: the key the client records carry for the same request.
+        urlKey: requestKey(req.method, req.url),
         idleMsBeforeRequest: idleMs,
         httpVersion: req.httpVersion,
         connectionHeader: clip(req.headers.connection, 40) || null,

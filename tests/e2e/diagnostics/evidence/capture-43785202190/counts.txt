@@ -1,0 +1,4 @@
+diagnostic lines: 6343
+client request errors: 0
+lake connection closes with an error: 0
+ECONNRESET in the log: 0

@@ -172,5 +172,7 @@ export default defineConfig([
     'src/config/tokens.generated.ts',
     'src/config/studio-brand/assets.generated.ts',
     'public/**',
+    // Review evidence kept byte-for-byte as it ran (MANIFEST.md there); never imported or run by CI.
+    'tests/e2e/diagnostics/evidence/**',
   ]),
 ])

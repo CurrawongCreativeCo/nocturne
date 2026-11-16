@@ -60,12 +60,44 @@ test.describe('hero dividers', () => {
     await context.addCookies([{ name: 'visited', value: '1', url: baseURL ?? '' }])
     await page.goto('/hero-dividers')
     const root = hero(page, 'Hero greeting')
-    const rule = await divider(root).boundingBox()
-    const greeting = await root.getByText('Welcome back!').boundingBox()
-    const text = await root.getByText('An introduction under the divider.').boundingBox()
-    if (!rule || !greeting || !text) throw new Error('Missing boxes')
-    expect(Math.round(greeting.y - (rule.y + rule.height))).toBe(24)
-    expect(Math.round(text.y - (greeting.y + greeting.height))).toBe(24)
+    // The greeting is a request-time part of the page (`ReturningVisitor`, inside Suspense), so it streams in after the
+    // prerendered shell. Until it arrives the divider is followed directly by the intro, so boxes read one after another
+    // could come from two different layouts (the divider's before the greeting existed, the greeting's after). Wait for the
+    // greeting, then read all three boxes in ONE browser evaluation so they are from one layout.
+    await expect(root.getByText('Welcome back!')).toBeVisible()
+    const measure = () =>
+      root.evaluate((section) => {
+        const box = (element: Element | undefined | null) => {
+          if (!element) return null
+          const { y, height } = element.getBoundingClientRect()
+          return { y, height }
+        }
+        const paragraphs = [...section.querySelectorAll('p')]
+        const rule = box(section.querySelector('[data-decorative-divider]'))
+        const greeting = box(paragraphs.find((p) => p.textContent.trim() === 'Welcome back!'))
+        const text = box(
+          paragraphs.find((p) => p.textContent.includes('An introduction under the divider.')),
+        )
+        return {
+          rects: { rule, greeting, text },
+          gaps:
+            rule && greeting && text
+              ? {
+                  dividerToGreeting: Math.round(greeting.y - (rule.y + rule.height)),
+                  greetingToIntro: Math.round(text.y - (greeting.y + greeting.height)),
+                }
+              : null,
+        }
+      })
+    // Both gaps stay exactly 24px. The complete measurement is retried together (5s, Playwright's own default for
+    // `expect`; `toPass` alone has no limit), and the last attempt's rectangles are in the failure message.
+    await expect(async () => {
+      const { gaps, rects } = await measure()
+      expect(gaps, `measured rectangles: ${JSON.stringify(rects)}`).toEqual({
+        dividerToGreeting: 24,
+        greetingToIntro: 24,
+      })
+    }).toPass({ timeout: 5_000 })
   })
 
   test('a hero with none chosen draws none and keeps its usual space under the title', async ({
