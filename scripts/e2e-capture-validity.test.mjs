@@ -86,12 +86,41 @@ describe('assessCapture', () => {
     expect(result.status).toBe('incomplete')
     expect(result.reasons).toEqual(['partial-coverage'])
     expect(result.coverage).toBeCloseTo(0.1, 5)
-    // The threshold is a parameter, and the figure is a coverage check, not proof that every request was seen.
-    expect(
-      assessCapture([...lake(100), ...fetches(10)].join('\n'), { minCoverage: 0.05 }).status,
-    ).toBe('valid')
+    // The figure is a coverage check on aggregate counts, not proof that every request was seen.
     expect(describeResult(result)).toMatch(/coverage check/i)
     expect(describeResult(result)).toMatch(/not proof/i)
+  })
+
+  it('wants at least as many client records as lake data requests: fewer is incomplete, however close', () => {
+    for (const [client, lakeCount] of [
+      [80, 100],
+      [99, 100],
+    ]) {
+      const result = assessCapture([...lake(lakeCount), ...fetches(client)].join('\n'))
+      expect(result.status, `${client}/${lakeCount}`).toBe('incomplete')
+      expect(result.reasons, `${client}/${lakeCount}`).toEqual(['partial-coverage'])
+    }
+  })
+
+  it('passes at as many client records as lake data requests, or more, when the other checks pass', () => {
+    for (const [client, lakeCount] of [
+      [100, 100],
+      [101, 100],
+    ]) {
+      const result = assessCapture([...lake(lakeCount), ...fetches(client)].join('\n'))
+      expect(result.status, `${client}/${lakeCount}`).toBe('valid')
+      expect(result.reasons, `${client}/${lakeCount}`).toEqual([])
+    }
+    // Equal counts pass the count, not the other checks: no fetch from the build is still incomplete.
+    const notBuild = assessCapture([...lake(100), ...fetches(100, { phase: null })].join('\n'))
+    expect(notBuild.reasons).toEqual(['no-production-build-fetch'])
+  })
+
+  it('has no adjustable threshold', () => {
+    // An options object, if one is passed, does not lower the bar.
+    expect(
+      assessCapture([...lake(100), ...fetches(99)].join('\n'), { minCoverage: 0.05 }).status,
+    ).toBe('incomplete')
   })
 
   it('wants fetch requests from production-build processes, not only from other processes', () => {
@@ -201,9 +230,10 @@ describe('assessCapture', () => {
     ])
     expect(truncated.status).toBe(71)
     expect(truncated.stdout).toMatch(/status=truncated/)
-    expect(
-      run([file('half.log', [...lake(100), ...fetches(10)]), '--min-coverage', '0.05']).status,
-    ).toBe(0)
+    // The threshold option is gone: passing it is a usage error, not a quiet lower bar.
+    const half = file('half.log', [...lake(100), ...fetches(10)])
+    expect(run([half]).status).toBe(70)
+    expect(run([half, '--min-coverage', '0.05']).status).toBe(2)
     expect(run([]).status).toBe(2)
   })
 })

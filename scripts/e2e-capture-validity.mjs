@@ -11,11 +11,12 @@ import { pathToFileURL } from 'node:url'
  * project this asks, in order:
  *
  * 1. **Coverage.** The lake's `/data/` requests (fixture-control traffic, `/__fixture/…`, left out) against the client's
- *    request records for `/data/` paths (undici `fetch-request` and node:http `request-created`). No client record at all is
- *    `no-client-requests`; fewer than a fraction of the lake's (default 0.8, `--min-coverage`) is `partial-coverage`. These
- *    are COVERAGE CHECKS on aggregate counts. They catch a client half that sees nothing or little; they do not prove that
- *    every request was observed, and a client count above the lake's is not an error (a request can fail before the lake
- *    logs it).
+ *    request records for `/data/` paths (undici `fetch-request` and node:http `request-created`). The client must have
+ *    recorded AT LEAST AS MANY as the lake served: none at all is `no-client-requests`, any fewer is `partial-coverage`.
+ *    There is no adjustable threshold. These are COVERAGE CHECKS on aggregate counts: they catch a client half that saw
+ *    nothing or less than the lake did, and they do not prove that every request was observed (equal counts can hide a
+ *    missed request and an extra one). A client count above the lake's is not an error (a request can fail before the lake
+ *    logs it, or be retried).
  * 2. **Production-build processes.** At least one `fetch-request` from a process in Next's `phase-production-build` (the
  *    phase is on the record, or on the process's `preload` line): the failing requests are made while the site is built,
  *    so a capture with no fetch from the build has not watched them (`no-production-build-fetch`).
@@ -31,21 +32,20 @@ import { pathToFileURL } from 'node:url'
  * This is a statement about the diagnostics, not about the tests: it never looks at a test's result, and the workflow
  * keeps the two apart (exit-status.txt for tests, diagnostics-validity.txt for this).
  *
- * `node scripts/e2e-capture-validity.mjs <log> [--project <name>] [--min-coverage <0..1>]` prints one line and exits 0, 70
- * or 71 (2 for bad usage).
+ * `node scripts/e2e-capture-validity.mjs <log> [--project <name>]` prints one line and exits 0, 70 or 71 (2 for bad usage,
+ * including any other option).
  */
 
 const PREFIX = '[e2e-diag] '
 export const INCOMPLETE_EXIT = 70
 export const TRUNCATED_EXIT = 71
-export const DEFAULT_MIN_COVERAGE = 0.8
 const BUILD_PHASE = 'phase-production-build'
 
 const isData = (path) => String(path ?? '').includes('/data/')
 const isFixture = (path) => String(path ?? '').startsWith('/__fixture')
 const key = (r) => `${r.pid}:${r.thread ?? ''}:${r.reqSeq}`
 
-export function assessCapture(text, { minCoverage = DEFAULT_MIN_COVERAGE } = {}) {
+export function assessCapture(text) {
   const counts = {
     lakeDataRequests: 0,
     lakeFixtureRequests: 0,
@@ -105,7 +105,7 @@ export function assessCapture(text, { minCoverage = DEFAULT_MIN_COVERAGE } = {})
     counts.lakeDataRequests === 0 ? null : counts.clientDataRequests / counts.lakeDataRequests
   if (counts.lakeDataRequests > 0) {
     if (counts.clientDataRequests === 0) reasons.push('no-client-requests')
-    else if (coverage < minCoverage) reasons.push('partial-coverage')
+    else if (counts.clientDataRequests < counts.lakeDataRequests) reasons.push('partial-coverage')
     if (counts.productionBuildFetchRequests === 0) reasons.push('no-production-build-fetch')
   }
   if (counts.headersWithoutRequest > 0 || counts.headersWithoutSocket > 0)
@@ -147,22 +147,15 @@ export function describe({ status, reasons, counts, coverage }, project) {
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const args = process.argv.slice(2)
-  const file = args.find((a, i) => !a.startsWith('--') && !(args[i - 1] ?? '').startsWith('--'))
-  const flag = (name) => {
-    const at = args.indexOf(name)
-    return at >= 0 ? args[at + 1] : undefined
-  }
-  if (!file) {
-    console.error(
-      'usage: e2e-capture-validity.mjs <log> [--project <name>] [--min-coverage <0..1>]',
-    )
+  const projectAt = args.indexOf('--project')
+  const project = projectAt >= 0 ? args[projectAt + 1] : undefined
+  const rest = args.filter((_, i) => projectAt < 0 || (i !== projectAt && i !== projectAt + 1))
+  // One log, and `--project` only: an unknown option (such as the removed `--min-coverage`) is a usage error.
+  if (rest.length !== 1 || rest[0].startsWith('--') || (projectAt >= 0 && !project)) {
+    console.error('usage: e2e-capture-validity.mjs <log> [--project <name>]')
     process.exit(2)
   }
-  const min = flag('--min-coverage')
-  const result = assessCapture(
-    readFileSync(file, 'utf8'),
-    min === undefined ? {} : { minCoverage: Number(min) },
-  )
-  console.log(describe(result, flag('--project')))
+  const result = assessCapture(readFileSync(rest[0], 'utf8'))
+  console.log(describe(result, project))
   process.exit(exitCodeOf(result))
 }

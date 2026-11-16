@@ -227,8 +227,9 @@ What is recorded (facts) and what may be read into it (interpretation) are kept 
   closed it first, or why. The timestamps do not either (section 4).
 - `requestsOnSocket` and `msSinceSocketLastResponseEnd` are counts and times from the client process's callbacks. undici
   publishes no "reused" flag and no pool state, so nothing here says what its pool did.
-- Aggregate counts in the capture's validity check are **coverage checks**: they catch a client half that saw nothing or
-  little, and they do not prove that every request was observed.
+- Aggregate counts in the capture's validity check are **coverage checks**: they catch a client half that recorded fewer
+  requests than the lake served, and they do not prove that every request was observed (equal counts can hide a missed
+  request and an extra one).
 
 ## 6. The one manual capture mechanism (not dispatched)
 
@@ -257,10 +258,12 @@ It is the only way the diagnostics are switched on in CI, and it is reviewable a
 - **Exact commit recorded.** The input is a full 40-character SHA, checked against that pattern and against what was
   checked out; `commit.txt` (requested and checked-out SHA, run id, attempt) is in the artifact and the run summary.
 - **Capture validity** (`scripts/e2e-capture-validity.mjs`, after each project). Aggregate **coverage checks**, which catch a
-  client half that saw nothing or little and do **not** prove that every request was observed: (1) the lake's `/data/`
-  requests, fixture-control traffic (`/__fixture/…`) left out, against the client's request records for `/data/` paths
-  (`fetch-request`, or `request-created` for `node:http`): none at all is `no-client-requests`, fewer than 0.8 of the lake's
-  (`--min-coverage`) is `partial-coverage`, and a client count above the lake's is not an error; (2) at least one
+  client half that recorded fewer requests than the lake served and do **not** prove that every request was observed: (1) the
+  lake's `/data/` requests, fixture-control traffic (`/__fixture/…`) left out, against the client's request records for
+  `/data/` paths (`fetch-request`, or `request-created` for `node:http`). The client must have recorded **at least as many** as
+  the lake served: none at all is `no-client-requests`, any fewer (99 of 100 included) is `partial-coverage`, and there is no
+  adjustable threshold. A client count above the lake's is not an error (a request can fail before the lake logs it, or be
+  retried), and equal counts can still hide a missed request and an extra one; (2) at least one
   `fetch-request` from a `phase-production-build` process (the failing requests are made while the site is built), else
   `no-production-build-fetch`; (3) every `fetch-headers` record has the `fetch-request` and `fetch-socket` records of the same
   request, else `unmatched-response-headers`; (4) no process hit its line budget (`limit-reached`), else `truncated`.

@@ -74,8 +74,8 @@ jobs:
       # status of Playwright, not of `tee`, is each project's result. Like the job, it stops at the first failing project.
       #
       # After each project, scripts/e2e-capture-validity.mjs asks whether the diagnostics saw what the lake served, as a set
-      # of COVERAGE CHECKS on aggregate counts (they do not prove every request was observed): the lake's /data/ requests
-      # (fixture-control traffic left out) against the client's request records, fetch requests from production-build
+      # of COVERAGE CHECKS on aggregate counts (they do not prove every request was observed): at least as many client
+      # request records as the lake's /data/ requests (fixture-control traffic left out), fetch requests from production-build
       # processes, every response-header record matched to its request and socket records, and no process out of logging
       # budget. Incomplete instrumentation exits 70 and truncated evidence 71; either stops the capture before any further
       # project. Test results (exit-status.txt) and diagnostic validity (diagnostics-validity.txt) are recorded apart. The
