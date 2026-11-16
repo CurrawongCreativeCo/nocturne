@@ -308,7 +308,18 @@ async function handle(req, res) {
 // A request that throws (a malformed body or parameter, say) used to reject outside every try, and Node
 // ends the process on an unhandled rejection: every in-flight connection is reset (ECONNRESET) and every
 // later one refused, for the rest of the run. It now answers that one request and the lake stays up.
-const server = createServer((req, res) => {
+//
+// keepAliveTimeout: 0, on purpose: the lake never times out an idle keep-alive connection. With Node's default (5000 ms,
+// plus keepAliveTimeoutBuffer's 1000 ms, so the socket's timer is 6000 ms) a race was demonstrated with Node 24.22.2 and
+// undici 7.30.1 (tests/e2e/diagnostics/evidence/keepalive-race-2026-11-16/): the client reuses a connection well inside
+// its own idle limit, the lake's one thread is busy (GROQ evaluation is synchronous) past the 6000 ms deadline, and when
+// the thread frees, the timer fires before the request already sent is read; Node destroys the socket and the client
+// gets ECONNRESET. With no server idle timer that cannot happen. Idle connections are closed instead by the client (undici
+// retires idle sockets itself: 4000 ms by default now that no `Keep-Alive: timeout=5` hint is sent, 3000 ms with it) and,
+// for any client that never does, by the lake's exit at the end of the run. Only this one setting changes:
+// headersTimeout, requestTimeout and server.timeout keep Node's defaults. That race is the mechanism this removes; it is
+// not shown to be the cause of any particular CI failure.
+const server = createServer({ keepAliveTimeout: 0 }, (req, res) => {
   const started = Date.now()
   // Diagnostics only: a request that took over a second, or that the client gave up on before it was answered.
   res.on('close', () => {
