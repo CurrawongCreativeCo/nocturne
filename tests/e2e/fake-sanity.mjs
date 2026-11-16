@@ -370,6 +370,14 @@ process.on('exit', (code) => {
   if (code) console.error(`fake-sanity exiting with code ${code}`)
 })
 
+// Opt-in connection and request diagnostics for the CI investigation of the build's connection resets
+// (E2E_LAKE_DIAGNOSTICS=1; see tests/e2e/diagnostics/README.md). Off, nothing is loaded and nothing changes; on, it
+// only adds listeners and a low-frequency sampler, and answers, times out and pools exactly as above.
+if (process.env.E2E_LAKE_DIAGNOSTICS === '1') {
+  const { installLakeDiagnostics } = await import('./diagnostics/lake-diagnostics.mjs')
+  installLakeDiagnostics(server, { port: PORT })
+}
+
 server.listen(PORT, () => {
   console.log(`fake Content Lake on http://localhost:${PORT}`)
 })
