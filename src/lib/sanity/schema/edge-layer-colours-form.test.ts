@@ -22,7 +22,11 @@ interface Loose {
   initialValue?: unknown
   hidden?: unknown
   fields?: Loose[]
-  options?: { list: { value: string; title: string }[] }
+  options?: {
+    list: { value: string; title: string }[]
+    inheritable?: unknown
+    layerOverridesReset?: boolean
+  }
 }
 const group = (sectionStyle.fields as unknown as Loose[]).find(
   (field) => field.name === 'edgeLayerColours',
@@ -159,7 +163,14 @@ describe('the warnings', () => {
     expect(message('above1', 'colour', { edge: 'wave' }, 'ink')).toMatch(
       /Still water, Lagoon and Reef/,
     )
-    expect(message('above2', 'colour', { edge: 'still-water' }, 'ink')).toMatch(/Clear it/)
+    // Each names the control that clears it: the field's own first choice, never a field menu (which has no Clear).
+    expect(message('above2', 'colour', { edge: 'still-water' }, 'ink')).toMatch(
+      /Choose “Use recipe colour” to clear it\.$/,
+    )
+    expect(message('below', 'strength', { edge: 'lagoon' }, 'strong')).toMatch(
+      /Choose “Use Layer strength” to clear it\.$/,
+    )
+    expect(message('above2', 'colour', { edge: 'still-water' }, 'ink')).not.toMatch(/menu/)
   })
 
   it('warns about a value that is not a choice on a drawn layer', () => {
@@ -167,6 +178,8 @@ describe('the warnings', () => {
       /not one of the choices/,
     )
     expect(message('above1', 'strength', { edge: 'reef' }, 'loud')).toMatch(/shared Layer strength/)
+    expect(message('above1', 'colour', { edge: 'reef' }, 'purple')).toMatch(/“Use recipe colour”/)
+    expect(message('above1', 'strength', { edge: 'reef' }, 'loud')).toMatch(/“Use Layer strength”/)
   })
 
   it('warns on the group, naming only the layers that are kept but not drawn', () => {
@@ -180,7 +193,46 @@ describe('the warnings', () => {
       ctx('still-water'),
     )
     expect(text).toMatch(/second layer above and the layer below/)
+    expect(text).toMatch(/“Use recipe colour” or “Use Layer strength” on each field/)
+    expect(text).toMatch(/“Reset all layer overrides” for every layer\.$/)
+    expect(text).not.toMatch(/menu/)
     expect(text).not.toMatch(/first layer/)
     expect(staleLayerColoursMessage({ below: 'ink' }, ctx('lagoon'))).toMatch(/layer below/)
+  })
+})
+
+describe('the clearing controls (task 151, Slice 8 Studio check)', () => {
+  // The real Studio's field menu offers only Copy and Paste, so the group and its fields carry their own controls.
+  const fields = group?.fields ?? []
+  const inheritable = (name: string) =>
+    (fields.find((field) => field.name === name)?.options as { inheritable?: unknown } | undefined)
+      ?.inheritable
+
+  it('gives every colour field a first choice, “Use recipe colour”, that clears it', () => {
+    for (const slot of ['above1', 'above2', 'below'])
+      expect(inheritable(slot)).toBe('Use recipe colour')
+  })
+
+  it('gives every strength field a first choice, “Use Layer strength”, that clears it', () => {
+    for (const slot of ['above1', 'above2', 'below'])
+      expect(inheritable(`${slot}Strength`)).toBe('Use Layer strength')
+  })
+
+  it('keeps the stored values the choices of each field: no sentinel is added to the list', () => {
+    const values = (name: string) =>
+      (fields.find((field) => field.name === name)?.options?.list ?? []).map(
+        (option) => option.value,
+      )
+    expect(values('above1')).toEqual(['accent', 'accent-2', 'highlight', 'ink'])
+    expect(values('belowStrength')).toEqual(['light', 'standard', 'strong'])
+  })
+
+  it('asks Studio for the group’s reset button, and says in its description which controls clear', () => {
+    expect(group?.options).toMatchObject({ layerOverridesReset: true })
+    const description = (group as unknown as { description: string }).description
+    expect(description).toContain('“Use recipe colour”')
+    expect(description).toContain('“Use Layer strength”')
+    expect(description).toContain('“Reset all layer overrides”')
+    expect(description).not.toMatch(/menu/)
   })
 })

@@ -58,9 +58,12 @@ import {
   SECTION_EDGE_HEIGHTS,
   SECTION_EDGE_HEIGHT_TITLES,
   SECTION_EDGE_LAYERS,
+  SECTION_EDGE_LAYER_COLOUR_INHERIT,
+  SECTION_EDGE_LAYER_RESET,
   SECTION_EDGE_LAYER_ROLE_TITLES,
   SECTION_EDGE_LAYER_ROLES,
   SECTION_EDGE_LAYER_SLOT_TITLES,
+  SECTION_EDGE_LAYER_STRENGTH_INHERIT,
   SECTION_EDGE_LAYER_SLOTS,
   SECTION_EDGE_LAYER_TITLES,
   SECTION_EDGE_LINE_COLOURS,
@@ -328,6 +331,11 @@ declare module 'sanity' {
   interface ObjectOptions {
     /** Show the object's fields without its own title and frame (the Studio field is in features/studio/components/frameless-field). */
     frameless?: boolean
+    /**
+     * The section edge's per-layer colours: the Studio adds a "Reset all layer overrides" button under the fields
+     * that unsets the whole object (features/studio/components/edge-layer-colours-input).
+     */
+    layerOverridesReset?: boolean
   }
   interface StringOptions {
     /** The field holds the slug of a brand gradient: the Studio draws the picker (features/studio/components/gradient-picker). */
@@ -1313,12 +1321,14 @@ export const sectionStyle = defineType({
     defineField({
       name: 'edgeLayerColours',
       title: 'Layer colours',
-      description:
-        'Give a layer above or below the edge its own brand colour or strength. Anything left empty follows Colours and Layer strength above. Clear a field from its menu; clear them all to return to the recipe.',
+      description: `Give a layer above or below the edge its own brand colour or strength. A colour on “${SECTION_EDGE_LAYER_COLOUR_INHERIT}” follows Colours above, and a strength on “${SECTION_EDGE_LAYER_STRENGTH_INHERIT}” follows Layer strength. Choose those to clear one field, or “${SECTION_EDGE_LAYER_RESET}” to return every layer to the recipe.`,
       type: 'object',
       fieldset: 'edgeAdvanced',
       hidden: edgeLayerColoursHidden,
+      // Studio adds the reset button under the fields (features/studio/components/edge-layer-colours-input).
+      options: { layerOverridesReset: true },
       // No initial value: nothing is stored until a layer is given its own, and an empty group is the recipe.
+      // Each field's first choice ("Use recipe colour", "Use Layer strength") unsets it: no sentinel is ever stored.
       fields: SECTION_EDGE_LAYER_SLOTS.flatMap((slot) => {
         const layer = SECTION_EDGE_LAYER_SLOT_TITLES[slot]
         return [
@@ -1326,7 +1336,10 @@ export const sectionStyle = defineType({
             name: slot,
             title: `${layer}: colour`,
             type: 'string',
-            options: radio(SECTION_EDGE_LAYER_ROLES, SECTION_EDGE_LAYER_ROLE_TITLES),
+            options: {
+              ...radio(SECTION_EDGE_LAYER_ROLES, SECTION_EDGE_LAYER_ROLE_TITLES),
+              inheritable: SECTION_EDGE_LAYER_COLOUR_INHERIT,
+            },
             hidden: edgeLayerColourFieldHidden(slot),
             validation: (rule) =>
               rule.custom(staleLayerColourFieldMessage(slot, 'colour')).warning(),
@@ -1335,7 +1348,10 @@ export const sectionStyle = defineType({
             name: `${slot}Strength`,
             title: `${layer}: strength`,
             type: 'string',
-            options: radio(SECTION_EDGE_STRENGTHS, SECTION_EDGE_STRENGTH_TITLES),
+            options: {
+              ...radio(SECTION_EDGE_STRENGTHS, SECTION_EDGE_STRENGTH_TITLES),
+              inheritable: SECTION_EDGE_LAYER_STRENGTH_INHERIT,
+            },
             hidden: edgeLayerColourFieldHidden(slot),
             validation: (rule) =>
               rule.custom(staleLayerColourFieldMessage(slot, 'strength')).warning(),

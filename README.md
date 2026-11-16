@@ -4784,11 +4784,15 @@ Diagonal, Wave, Curve, Arch, Layered wave, Tide, Contour, Still water, Lagoon, R
   colour are both fine. A set field wins for that layer only: the other layers keep following Colours and Layer strength,
   and changing either later never moves a set field. A strength replaces the shared one for its layer with the same cap
   and the same layer ratios (the second layer at 60% of the first, the layer below at 85%), and Standard beats a shared
-  Strong. An empty, null or unknown value counts as unset. **Clearing:** clear any field from its menu to return that field
-  to the recipe or the shared strength; clear the whole group and every layer is exactly what it was before the group
-  existed (a frozen test holds the unset output). **Layers a shape does not draw** (a second layer above on Still water, a
+  Strong. An empty, null or unknown value counts as unset. **Clearing:** each colour field's first choice, **Use recipe
+  colour**, and each strength field's, **Use Layer strength**, clears that field alone and returns it to the recipe or the
+  shared strength (it unsets the field; nothing is stored in its place). **Reset all layer overrides**, under the group,
+  unsets the whole `edgeLayerColours` object in one step and touches no other style setting; it is disabled while nothing
+  is stored and in read-only mode. With the group cleared, every layer is exactly what it was before the group existed (a
+  frozen test holds the unset output). Studio's field menu (the "…" beside a field) offers only Copy and Paste, so the
+  warnings name these controls instead. **Layers a shape does not draw** (a second layer above on Still water, a
   layer below on Lagoon, or on Still water with the switch off or at Shallow) keep what is stored, draw nothing for it, and
-  show it with a warning, on the field and on the group, until it is cleared; once cleared the field is hidden. Geometry is
+  show it with a warning, on the field and on the group, naming the control that clears it; once cleared the field is hidden. Geometry is
   untouched: the cut and every layer's path are the same with and without these fields. **Deferred, not implemented:** Reef's
   hairline and its White veil colour (a hairline-only option), which wait for the hairline itself, a geometry change.
 - **Visibility advisory, the layer below** (task 151, Slice 8; Studio only): the layer below the edge sits in the edge frame, over

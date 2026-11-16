@@ -20,9 +20,12 @@ import {
   GENERATED_EDGE_HEIGHTS,
   SECTION_EDGE_DEPTHS,
   SECTION_EDGE_HEIGHTS,
+  SECTION_EDGE_LAYER_COLOUR_INHERIT,
+  SECTION_EDGE_LAYER_RESET,
   SECTION_EDGE_LAYER_ROLES,
   SECTION_EDGE_LAYER_SLOTS,
   SECTION_EDGE_LAYER_SLOT_TITLES,
+  SECTION_EDGE_LAYER_STRENGTH_INHERIT,
   SECTION_EDGE_STRENGTHS,
   SECTION_EDGE_TITLES,
   SECTION_MOTIONS,
@@ -547,13 +550,15 @@ export const staleLayerColourFieldMessage =
   (slot: EdgeLayerSlot, kind: 'colour' | 'strength') =>
   (value: unknown, context: LayerColoursContext): string | true => {
     if (!value) return true
+    // The control that clears it: the field's own first choice, which unsets the field.
+    const clear = `Choose “${kind === 'colour' ? SECTION_EDGE_LAYER_COLOUR_INHERIT : SECTION_EDGE_LAYER_STRENGTH_INHERIT}” to clear it.`
     const reason = inactiveLayerReason(styleOfLayerField(context.document, context.path), slot)
-    if (reason) return `${reason} Clear it from the field menu.`
+    if (reason) return `${reason} ${clear}`
     const choices: readonly unknown[] =
       kind === 'colour' ? SECTION_EDGE_LAYER_ROLES : SECTION_EDGE_STRENGTHS
     return choices.includes(value)
       ? true
-      : `This is not one of the choices, so it is ignored and ${kind === 'colour' ? 'the recipe’s colour' : 'the shared Layer strength'} is used. Clear it from the field menu.`
+      : `This is not one of the choices, so it is ignored and ${kind === 'colour' ? 'the recipe’s colour' : 'the shared Layer strength'} is used. ${clear}`
   }
 
 /** The warning on the group: layers it holds values for that the shape does not draw here. Kept, not drawn. */
@@ -568,7 +573,7 @@ export function staleLayerColoursMessage(
   )
   if (inactive.length === 0) return true
   const names = inactive.map((slot) => SECTION_EDGE_LAYER_SLOT_TITLES[slot].toLowerCase())
-  return `Colours set for the ${names.join(' and the ')} are ignored here, because this edge does not draw ${inactive.length > 1 ? 'those layers' : 'that layer'}. They stay saved and show again if it does. Clear them from the field menus.`
+  return `Colours set for the ${names.join(' and the ')} are ignored here, because this edge does not draw ${inactive.length > 1 ? 'those layers' : 'that layer'}. They stay saved and show again if it does. Clear them with “${SECTION_EDGE_LAYER_COLOUR_INHERIT}” or “${SECTION_EDGE_LAYER_STRENGTH_INHERIT}” on each field, or “${SECTION_EDGE_LAYER_RESET}” for every layer.`
 }
 
 /** Small is not drawn for a generated shape: Studio refuses it, and the page draws Medium. */
