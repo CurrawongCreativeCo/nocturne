@@ -465,7 +465,8 @@ describe('the app’s real client options, and the export conditions that decide
       ),
       'utf8',
     )
-    const at = source.indexOf('await client.fetch(query, await params, {')
+    const at = source.indexOf('await client.fetch(query, ')
+    expect(at, 'the export still calls client.fetch(query, …)').toBeGreaterThan(-1)
     return source.slice(at, source.indexOf('});', at))
   }
 
