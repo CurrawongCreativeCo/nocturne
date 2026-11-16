@@ -29,6 +29,14 @@ SHA-256 of the uncompressed logs:
 - `132980429213`: `7f8647a02945a57971fecf35c24737acd2bddecf8892cde40f6a0893680d4ca9`
 - `132987480244`: `94b17dec7e7120bffc4f60c26d01897defb8b15918f7c435bf05aa6ca4e5f196`
 
+Added with the capture (all under `evidence/`; `MANIFEST.md` has the provenance and the SHA-256 of every file):
+
+- `job-133031068347.log.gz`: run 43785167062, attempt 1, `e2e (isolated)`, commit `eb3fcbb59311d1da82a41257a32ebd3218f4baa4`
+  (merge of #216), diagnostics off; failed at "Design settings", on page `/edge-layer-colours`, on a **POST**.
+- `capture-43785202190/`: the manual capture (run 43785202190, attempt 1, commit `eb3fcbb…`): the whole Playwright log, the
+  `[e2e-diag]` lines, `commit.txt`, `exit-status.txt`, `counts.txt`. It passed and recorded no `ECONNRESET`, **and its client
+  logger recorded no request at all** (section 3).
+
 (The attempt-1 and attempt-2 jobs are different job IDs of the same run; `gh run view --job <old id> --log` returns the
 rerun's log, which is why the direct API was used.)
 
@@ -57,65 +65,91 @@ The same in all three logs:
 Different between them: only the step (the first is the app's own build in a shard; the others are the isolated job's
 steps) and the amount of earlier noise.
 
+The fourth failure (`job-133031068347.log.gz`, run 43785167062, diagnostics off) differs: the failing page is
+`/edge-layer-colours` (the fixture page added by #215, which is also prerendered in every successful build), the request is
+a **POST** `…/data/query/production` with a body, and it carries no `attemptNumber` (a POST that fails with no response is not
+retried, section 3). The error line was logged 0.19 s after a 3.5 s stall ended. The same observations hold: the lake logged no
+socket error, early close or exit; nothing here says why.
+
 Not in the logs, so not known: which side closed the connection; whether the failing sockets were reused ones; the
-sockets' ages or idle times; how many sockets the client's Agent held; what the runner's load was; what the site's
+sockets' ages or idle times; what undici's connection pool held; what the runner's load was; what the site's
 build workers were doing.
 
-## 3. The transport that is actually used
+## 3. The transport that is actually used (corrected)
 
-`src/lib/sanity/client.ts` creates its client with `createClient` from `next-sanity` (13.3.4). That package carries its
-own `@sanity/client` **7.27.0** with its own `get-it` **8.8.3** (the top-level `@sanity/client` 8.9.0 and `get-it` 9.6.1,
-which use undici's `fetch`, are not on this path). Reading those sources:
+The first version of this document, and the description of PR #216 that merged it, said the site's Sanity reads use
+`node:http` through a keep-alive `http.Agent` (30 sockets). **That was wrong for the path that failed.** The first
+capture showed it: the lake served 2,142 requests and the client logger, which watched `node:http`, recorded none. The
+trace, from the installed sources and the failing logs:
 
-- get-it 8.8.3's Node adapter calls `node:http`'s `request` (`maxRedirects: 0` selects the native `http` module, not
-  `follow-redirects`). A GET is a GET; there is no POST on the failing path (the POSTs in the log are other, slow queries).
-- `@sanity/client` 7.27.0 adds get-it's `agent({ keepAlive: true, maxSockets: 30, maxTotalSockets: 256 })` middleware:
-  one keep-alive `http.Agent` per client, up to 30 sockets. It does **not** add get-it's separate `keepAlive` middleware
-  (the one that retries once on `ECONNRESET` over a reused socket).
-- Retries are get-it's `retry` middleware with `@sanity/client`'s `shouldRetry`: up to `maxRetries` (default 5), delay
-  `100 * 2^attempt + random(0..100)` ms (so 100, 200, 400, 800, 1600 plus up to 100 each, **3.1 to 3.6 s** in all), for
-  a GET with no response and an error `is-retry-allowed` accepts (`ECONNRESET` is).
-- `attemptNumber` is set by that middleware on the options of each retry: **zero-based, the number of retries already
-  made** for this request. `attemptNumber: 5` with `maxRetries` 5 is the last attempt the budget allows, the sixth try
-  in all, and its failure is the one thrown. The raw counter stays in the error Next prints; the diagnostics do not
-  reinterpret it (they count HTTP attempts per URL as `sameUrlOrdinal`, a different thing, named differently).
-- The 3.1 to 3.6 s of backoff matches the 3.43 to 3.57 s above. That is arithmetic, noted in case it helps; it does not say
-  why every attempt failed.
+1. **The export Next selects.** The app reads through `sanityFetch` from `defineLive` (`src/lib/sanity/live.ts`, from
+   `next-sanity/live`). The failing requests carry the tag `next-loader.fetch.cache-components`, which appears only in
+   `node_modules/next-sanity/dist/live/conditions/next-js/index.js` (next-sanity **13.3.4**), so that is the file in use. Its
+   `sanityFetch` calls `client.fetch(query, params, { filterResponse: false, perspective, variant, stega, useCdn,
+cacheMode, tag, token })`, with no `next` or `cache` option.
+2. **The nested SDK.** `client` is `createClient` from `next-sanity`, which uses next-sanity's own nested `@sanity/client`
+   **7.27.0**. The top-level `@sanity/client` 8.9.0 and `get-it` 9.6.1 are not on this path.
+3. **The builds Next's `react-server` condition selects.** That client's `exports["."]["react-server"]` is
+   `dist/index.browser.js`. Its HTTP layer is next-sanity's nested **get-it 8.8.3**, whose `exports["."]["react-server"]`
+   is `dist/index.react-server.js` and `exports["./middleware"]["react-server"]` is `dist/middleware.browser.js`.
+4. **The adapter.** `get-it` 8.8.3's `index.react-server.js` is an `XMLHttpRequest`-shaped adapter whose `send` calls the
+   global **`fetch`** (`fetch(this.#t, r)`), and it marks a failure `isNetworkError = true` and attaches the request:
+   the `isNetworkError: true` and `request: {…}` in the logs, under `TypeError: fetch failed`, undici's message. In a
+   server process the global `fetch` is Next's patched fetch over Node's own **undici**.
+5. **So** GET and POST alike go through undici and its connection pool. The `agent({ keepAlive: true, maxSockets: 30,
+… })` middleware and the `node:http` adapter belong to the Node build (`index.js`), which this path does not use.
+   (Where the Node build is used, the call's own `next` or `cache` option also selects `fetch`.) `http.Agent` metrics
+   therefore say nothing about this traffic and are not used as a stand-in.
+
+**Retries, by what failed** (the `react-server` builds above; `maxRetries` unset means 5 in `get-it`'s `retry`
+middleware, delay `100 * 2^attempt + random(0..100)` ms, so 100, 200, 400, 800, 1600 plus up to 100 each, **3.1 to 3.6 s**
+in all, and the retry stops when `attemptNumber` reaches `maxRetries`):
+
+- a **GET or HEAD** that fails with no response (`isNetworkError`) is retried up to that budget;
+- a **POST** to `/data/query…` that fails with no response (a reset connection) is **not** retried;
+- a GET, a HEAD or **a POST to `/data/query…`** that is answered `429`, `502` or `503` **is** retried;
+- any other response status is not retried.
+
+`attemptNumber` is set by that middleware on each retry's options: **zero-based, the number of retries already made**.
+`attemptNumber: 5` is the last attempt the budget allows, the sixth in all, and its failure is the one thrown. This is
+what the logs show: the three failures on a GET carry `attemptNumber: 5`, and the failure on a POST (run 43785167062)
+carries none. The raw counter stays in the error Next prints; the diagnostics do not reinterpret it (they count fetches
+per URL as `sameUrlOrdinal`, a different thing, named differently). The 3.1 to 3.6 s of backoff matches the 3.43 to 3.57 s
+in section 2 for the GET failures; that is arithmetic, and does not say why every attempt failed.
 
 ## 4. Hypotheses (unproven; each says what would support or count against it)
 
 How to read the capture: the lake and the site write their lines from callbacks in different processes, through
 different pipes, and Playwright interleaves them. A line's timestamp says when that process ran its callback and wrote
 the line, **not when a packet crossed the wire**, and two lines a millisecond apart say nothing about which side closed a
-connection first. So the records are used to ask what each side _saw_ (a socket reused after this long idle; a
-connection closed after this idle, with or without an error) and whether those are consistent with a hypothesis. Which
-side closed first on the wire cannot be settled from them; that would need a packet capture, which this does not take.
-Within one process, `mono` orders its own lines; across processes, only the connection (the two ports) ties records
-together.
+connection first. So the records are used to ask what each side _saw_ and whether those are consistent with a
+hypothesis; which side closed first on the wire cannot be settled from them (that would need a packet capture, which this
+does not take). Within one process, `mono` orders its own lines; across processes, only the connection (the two ports)
+ties records together. undici's channels name a request's socket only when the request is written to one, publish no
+"reused" flag and no pool state, so none is reported or inferred beyond a count of the requests written to a socket.
 
-H1. **Stale pooled sockets.** The client's Agent keeps idle keep-alive sockets. The lake advertises `Keep-Alive:
-timeout=5` (checked with Node 25.8 locally) and, per Node's documentation, closes an idle socket after
-`keepAliveTimeout` **plus** `keepAliveTimeoutBuffer` where the running Node has that setting (1000 ms by default on
-that Node, so 6 s with the other default; the `settings` line records the real values and null means Node has none, so
-neither is assumed). If the lake's one thread is stalled, an idle socket's timer can expire while a request sits unread
-on it, and the request then meets a closed socket. With several such sockets pooled, each retry could pick another.
-_Supported_ by: failed attempts with `reusedSocket: true` and an idle time before use near or beyond
-`keepAliveTimeout` + `keepAliveTimeoutBuffer`; lake `connection-close` records for those connections with an idle time at
-close of about that length; an Agent holding several free sockets. _Counts against_: failed attempts on fresh sockets
-(`reusedSocket: false`), or idle times well inside the timeouts. The idle time is measured from when the Agent took the
-socket back after a response was completely read, not from when its headers arrived.
+H1. **A pooled connection that the lake has closed (or is closing) is used again.** undici (Node's global dispatcher) keeps
+idle keep-alive connections and retires them on its own timers (documented to take the server's `Keep-Alive` hint, which
+the lake sends as `timeout=5`, less a threshold of its own; **not measured here**). The lake closes an idle socket after
+`keepAliveTimeout` **plus** `keepAliveTimeoutBuffer` where Node has that setting (1000 ms by default in the capture's Node,
+so 6 s with the other default; the `settings` line records the real values). If a request is written to a connection the
+lake closes in that gap, for example while the building process's thread is busy, it would meet a closed socket.
+_Supported_ by: client `fetch-error` records with `ECONNRESET` on a socket whose `requestsOnSocket` is above 1 and whose
+`msSinceSocketLastResponseEnd` is near or beyond what the lake allows, and lake `connection-close` records for the same two
+ports with an idle time at close of about that length. _Counts against_: errors on a socket's first request
+(`requestsOnSocket` 1), or idle times well inside the lake's allowance.
 
 H2. **The lake or the runner dropped connections for another reason** (backlog, resource limits, a signal).
 _Supported_ by: lake `connection-close` with `hadError: true`, an `exiting` line, or load or memory samples that show
 pressure. _Counts against_: the lake recording every affected connection closing without an error.
 
-H3. **A reset at the Node or kernel level not tied to the lake's idle timers.** _Supported_ by: a client `socket-close`
-with `hadError` on sockets that were fresh or recently used, and lake records that show no idle expiry for them.
-_Counts against_: the H1 pattern above.
+H3. **A reset at the Node or kernel level not tied to the lake's idle timers.** _Supported_ by: a client `fetch-error` or
+`fetch-socket-close` with `hadError` on sockets that were new or recently used, and lake records that show no idle expiry
+for them. _Counts against_: the H1 pattern above.
 
 The stalls, the load samples and the process lists are context. A stall in the log is not evidence that CPU or the stall
 caused anything, and none of these hypotheses is accepted until a capture supports it and something else could not
-explain it equally well.
+explain it equally well. A capture that does not reproduce the failure shows nothing about stability.
 
 ## 5. What the diagnostics record
 
@@ -135,21 +169,22 @@ Lake (`lake-diagnostics.mjs`):
 - `sample` every 5 s (at most 240): load average, free memory, open connections, and up to 12 processes that look like the
   build or tests (`ps`: pid, ppid, %cpu, rss, elapsed, a clipped command line). Context only.
 
-Client (`http-client-diagnostics.mjs`), for requests to the lake's port only, through `node:http`'s diagnostics channels:
+Client, for requests to the lake's port only (`http-client-diagnostics.mjs`, which loads both loggers):
 
 - `preload` once per process (pid, ppid, script, thread). It is the only line a process writes for traffic it is not
-  watching: sockets and requests to other ports are never logged and spend none of the line budget (a socket's creation
-  time is only noted, and reported with the first watched request that uses it, as `createdAgoMs`).
-- `socket-created`, `socket-connected` (both ports) and `socket-close` (`hadError`, requests, age, idle at close), for
-  sockets a watched request used.
-- `request-created` (the Agent's free, in-use and queued socket counts once it has chosen a socket for the request),
-  `request-socket` (socket id, **`reusedSocket`**, socket age, **`idleMsSinceLastResponse`**: since the Agent last took the
-  socket back, which happens when a response has been read to its end, not when its headers arrived), `request-start`,
-  `response` (the **headers** arrived, with the time to them), `response-complete` (the body was read to its end, with the
-  time to it) or `response-closed` (the response closed without that), and `request-error` (code, errno, syscall, time
-  since start, socket id, reuse, age, idle). The body's end is observed with `end` and `close` listeners on the
-  response, which do not read, resume or consume it; if the application never reads the body there is no
-  `response-complete`.
+  watching: other origins are never logged and spend none of the line budget.
+- **The site's reads (`undici-client-diagnostics.mjs`, undici's `undici:*` channels, the transport of section 3):**
+  `fetch-request` (method, origin, a clipped path, `sameUrlOrdinal`), `fetch-socket-connected` (both ports, time to
+  connect) and `fetch-connect-error`, `fetch-socket` (the request written to a socket: socket id, **`requestsOnSocket`**, the
+  socket's age, the time since the last response on it ended, both ports; the only point at which undici's channels tie a
+  request to a socket, so a request that failed earlier has none), `fetch-headers` (the response's **headers** arrived, with
+  status), `fetch-complete` (undici has received the **whole response**; whether the application has read it is neither
+  known nor asked), `fetch-error` (code, errno, syscall, the cause's code, a clipped message, time since the request began,
+  and its socket if it had one) and `fetch-socket-close` (`hadError`, requests, age). No headers are logged, no body is
+  read or locked, and the application's own `attemptNumber` is not seen.
+- **Anything using `node:http` (a first logger, kept for any other traffic; it recorded none of the site's reads):**
+  `request-created`, `request-socket` (with `reusedSocket`, which is `node:http`'s), `request-start`, `response`,
+  `response-complete` / `response-closed`, `request-error`, `socket-created`, `socket-connected`, `socket-close`.
 
 What it never does: change a request, header, status, body, timeout, retry or pool setting; read or consume a stream;
 add a `clientError` listener to the server (which would replace Node's default answer) or an `error` listener to a
@@ -163,29 +198,35 @@ the diagnostics on and off).
 
 ## 6. The one manual capture mechanism (not dispatched)
 
-`.github/workflows/e2e-lake-capture.yml`, run by hand with `workflow_dispatch` after this has been reviewed and merged.
-It is the only way the diagnostics are switched on in CI, and it is reviewable as a file:
+`.github/workflows/e2e-lake-capture.yml`, run by hand with `workflow_dispatch`. **No capture is to be dispatched again
+until the demonstrated coverage of this client logger has been reviewed** (the tests in `scripts/undici-diagnostics.test.mjs`
+run the installed next-sanity client as Next resolves it and show the logger recording GET and POST requests, their sockets,
+headers, completion and errors). It is the only way the diagnostics are switched on in CI, and it is reviewable as a file:
 
 - **Default off.** It has no `push`, `pull_request` or `schedule` trigger, and `E2E_DIAGNOSTICS` is set nowhere else, so
-  the ordinary pipeline is unchanged and this change adds no job to it.
+  the ordinary pipeline is unchanged and this adds no job to it.
 - **One isolated job**, `ubuntu-latest`, running the `e2e (isolated)` job's own steps in its order with its commands
   (`npx playwright test --project=<name> --no-deps`, with the same `E2E_TIMINGS_FILE` values), plus `E2E_DIAGNOSTICS=1`.
   Like the job, it stops at the first failing project.
 - **Bounded runtime.** The capture step has `timeout-minutes: 25` and the job `35`, so a hang there is stopped while the
   steps that keep the log can still run. There is no loop, no retry and no rerun.
 - **Exact commit recorded.** The input is a full 40-character SHA, checked against that pattern and against what was
-  checked out; `commit.txt` (requested and checked-out SHA, run id, attempt) is written to the artifact and the run
-  summary. A mismatch stops the job before anything runs.
-- **Logs kept on success or failure.** `tee` writes the Playwright output (which includes the lake's and the site's
-  `[e2e-diag]` lines) to `e2e-capture/playwright.log`; the `[e2e-diag]` lines are picked out, counted in the summary, and the
-  whole directory, with `playwright-report` and `test-results`, is uploaded by steps with `if: always()`, 30 days.
-- **Exit status preserved.** `set -o pipefail` and `PIPESTATUS[0]` make each project's result Playwright's, not `tee`'s;
-  `exit-status.txt` records each project's code, and the step exits with the first failing one, so a failure fails the
-  run and a pass passes it.
+  checked out; `commit.txt` (requested and checked-out SHA, run id, attempt) is in the artifact and the run summary.
+- **Capture validity.** After each project, `scripts/e2e-capture-validity.mjs` compares the lake's request records with
+  the client's request records (`fetch-request`, or `request-created` for `node:http`). **Lake traffic with zero client request
+  records is reported as incomplete instrumentation, exits 70, and stops the capture before any further project**, so a capture
+  whose client half saw nothing cannot pass quietly. No lake traffic is not a failure of the diagnostics. The first capture
+  would have stopped after its first project.
+- **Test status and diagnostic validity are kept apart.** `exit-status.txt` holds each project's test result,
+  `diagnostics-validity.txt` each project's validity. The step exits with the first failing test's status; with passing tests
+  and incomplete instrumentation it exits 70. Both files, the whole log, the project logs, the `[e2e-diag]` lines and counts
+  (including how many processes exhausted their line budget) are uploaded by `if: always()` steps, 30 days.
+- **Exit status preserved.** `set -o pipefail` and `PIPESTATUS[0]` make each project's result Playwright's, not `tee`'s.
+  `scripts/e2e-capture-validity.test.mjs` runs the step's own script against a stand-in `npx` to show each of these.
 
-Using it: after merge, dispatch it once with the commit that contains it. The failure is intermittent, so one capture may
-not catch it; if it does not, say so and stop (do not dispatch it again to chase the failure). If it does, read the
-failing client `request-error` records (code, `reusedSocket`, socket age and idle time, Agent counts), the lake
-`connection-close` records for the same two ports, and the `settings` line, and weigh H1 to H3 as described in section 4,
-remembering what the timestamps cannot say. Any mitigation (a timeout, a keep-alive setting, a retry) is a separate change,
-decided after reading the capture.
+Using it: after review, dispatch it once with the exact commit that contains it. The failure is intermittent, so a
+capture may not catch it; if it does not, say so and stop (do not dispatch it again to chase the failure). If it does, read
+the failing client `fetch-error` records (code, `requestsOnSocket`, the socket's age and the time since its last response),
+the lake `connection-close` records for the same two ports, and the `settings` line, and weigh H1 to H3 as described in
+section 4, remembering what the timestamps cannot say. Any mitigation (a timeout, a keep-alive setting, a retry) is a separate
+change, decided after reading the capture.

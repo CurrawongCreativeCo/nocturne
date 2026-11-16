@@ -4,6 +4,7 @@ import path from 'node:path'
 import { isMainThread, threadId } from 'node:worker_threads'
 
 import { clip, emit } from './diagnostics-log.mjs'
+import { installUndiciDiagnostics } from './undici-client-diagnostics.mjs'
 
 /**
  * Opt-in diagnostics for the site's HTTP requests to the fake Content Lake (task 151 CI investigation), loaded with
@@ -144,6 +145,9 @@ function install() {
     phase: process.env.NEXT_PHASE ?? null,
     ports: [...ports],
   })
+
+  // The site's Sanity reads use `fetch` (undici), not node:http: see undici-client-diagnostics.mjs.
+  installUndiciDiagnostics({ ports, where })
 
   // Every socket the process creates is announced here, including the many that have nothing to do with the lake, so
   // this only notes when it was made. Nothing is logged and no listener is added until a watched request uses it.
