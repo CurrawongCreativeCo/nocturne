@@ -1,7 +1,9 @@
 # Diagnostics for the build's connection resets
 
-Status: **diagnostics only, cause unresolved.** Nothing here mitigates anything. No timeout, retry, pooling, response or
-failure behaviour of the lake or the site changes, and the diagnostics are off unless `E2E_DIAGNOSTICS=1` is set.
+Status: **diagnostics, plus one narrow mitigation of a demonstrated mechanism (section 7); the cause of the historical CI
+failures is unresolved.** The diagnostics themselves change no timeout, retry, pooling, response or failure behaviour of the
+lake or the site, and are off unless `E2E_DIAGNOSTICS=1` is set. The one deliberate change is the lake's keep-alive policy
+(`keepAliveTimeout: 0`, section 7); every capture and job log preserved here ran with the earlier, default policy.
 
 The failure being investigated is the one that stopped CI jobs while the site was being built for the end-to-end tests:
 
@@ -44,6 +46,14 @@ Added with the corrected capture:
 - `capture-43804915434/`: the corrected capture (run 43804915434, attempt 1, commit `4f59a8d…`): the whole Playwright log, every
   project's own log, the `[e2e-diag]` lines, `commit.txt`, `exit-status.txt`, `diagnostics-validity.txt`, `counts.txt`. All nine
   projects passed their tests and its validity checks, and it recorded no reset (section 2).
+
+Added with the keep-alive policy change (section 7), **not a CI capture**:
+
+- `keepalive-race-2026-11-16/`: a Node-only, two-process experiment run locally on 16 November 2026 (Node 24.22.2, undici
+  7.30.1, macOS): both harness versions (kept as they ran, so excluded from ESLint and Prettier), the five records
+  (`control`, `race`, `default-get`, `candidate-get`, `candidate-post`) and `SHA256SUMS`. It shows a mechanism outside CI; it
+  says nothing about which CI failure, if any, it explains. Its own `MANIFEST.md` holds the commands and outcomes, and this
+  directory's `MANIFEST.md` the hash and size of every file.
 
 (The attempt-1 and attempt-2 jobs are different job IDs of the same run; `gh run view --job <old id> --log` returns the
 rerun's log, which is why the direct API was used.)
@@ -162,9 +172,10 @@ ties records together. undici's channels name a request's socket only when the r
 
 H1. **A pooled connection that the lake has closed (or is closing) is used again.** undici (Node's global dispatcher) keeps
 idle keep-alive connections and retires them on its own timers (documented to take the server's `Keep-Alive` hint, which
-the lake sends as `timeout=5`, less a threshold of its own; **not measured here**). The lake closes an idle socket after
-`keepAliveTimeout` **plus** `keepAliveTimeoutBuffer` where Node has that setting (1000 ms by default in the capture's Node,
-so 6 s with the other default; the `settings` line records the real values). If a request is written to a connection the
+the lake sent as `timeout=5`, less a threshold of its own; **not measured here**). With the settings every preserved capture
+and log ran with (Node's defaults; section 7 has the policy since), the lake closed an idle socket after `keepAliveTimeout`
+**plus** `keepAliveTimeoutBuffer` where Node has that setting (1000 ms by default in the capture's Node, so 6 s with the
+other default; the `settings` line records the real values). If a request is written to a connection the
 lake closes in that gap, for example while the building process's thread is busy, it would meet a closed socket.
 _Supported_ by: client `fetch-error` records with `ECONNRESET` on a socket whose `requestsOnSocket` is above 1 and whose
 `msSinceSocketLastResponseEnd` is near or beyond what the lake allows, and lake `connection-close` records for the same two
@@ -193,7 +204,10 @@ arms it when the connection goes idle
 expiry calls `util.destroy(socket, new InformationalError('socket idle timeout'))`
 ([L817-L819](https://github.com/nodejs/node/blob/v24.22.2/deps/undici/src/lib/dispatcher/client-h1.js#L817-L819)), which calls
 `socket.destroy(err)` ([`lib/core/util.js` L378-L389](https://github.com/nodejs/node/blob/v24.22.2/deps/undici/src/lib/core/util.js#L378-L389)).
-With the lake's `timeout=5` hint that is 5000 - 2000 = 3000 ms.
+With the lake's `timeout=5` hint that is 5000 - 2000 = 3000 ms. That is the policy of every preserved capture and log; since
+section 7 the lake sends no hint, and undici uses its own default idle limit of 4000 ms instead (source-based, not measured), so
+a capture taken after that change should show idle closes nearer 4 s than 3 s and is not comparable one-for-one with the counts
+below.
 
 In the corrected capture, which recorded no request error at all, **all 507** client `fetch-socket-close` records have
 `hadError: true`; 493 of them closed 3.0 to 3.5 s after the last response on the socket ended (the shortest 2.999 s, the longest
@@ -215,7 +229,8 @@ and server processes and their workers). Every line is `[e2e-diag] {json}` on st
 Lake (`lake-diagnostics.mjs`):
 
 - `settings` once: Node version, port, `keepAliveTimeout`, `keepAliveTimeoutBuffer` (null where Node has no such
-  setting), `headersTimeout`, `requestTimeout`, `timeout`, `maxRequestsPerSocket`, `maxHeadersCount`.
+  setting), `headersTimeout`, `requestTimeout`, `timeout`, `maxRequestsPerSocket`, `maxHeadersCount`. Captures before
+  section 7's change record `keepAliveTimeout: 5000`; since it, `0` (the buffer still reads 1000 and no longer applies).
 - `connection-open` / `connection-close`: a connection id, both endpoints (address, family, port), requests served, lifetime,
   idle time at close, bytes, `hadError`.
 - `request` / `response-finish` / `response-closed-early`: connection id, sequence on the connection, method, a clipped
@@ -338,4 +353,41 @@ capture may not catch it; if it does not, say so and stop (do not dispatch it ag
 the failing client `fetch-error` records (code, `requestsOnSocket`, the socket's age and the time since its last response),
 the lake `connection-close` records for the same two ports, and the `settings` line, and weigh H1 to H3 as described in
 section 4, remembering what the timestamps cannot say. Any mitigation (a timeout, a keep-alive setting, a retry) is a separate
-change, decided after reading the capture.
+change; the one made so far, for a mechanism shown outside CI rather than read from a capture, is section 7. A capture taken
+after it runs with the new policy, so its records are not comparable one-for-one with the preserved ones.
+
+## 7. The lake's keep-alive policy: no server idle expiry (a mitigation of a demonstrated mechanism)
+
+`tests/e2e/fake-sanity.mjs` creates its server with `keepAliveTimeout: 0`. That is the only setting it changes:
+`headersTimeout`, `requestTimeout`, `server.timeout`, `maxRequestsPerSocket` and the rest keep Node's defaults, and
+`scripts/lake-diagnostics.test.mjs` checks the real lake's `settings` line against a server made with Node's defaults, with
+only `keepAliveTimeout` expected to differ.
+
+**The mechanism it removes (demonstrated, Node-only).** With Node's defaults the lake's socket timer after a keep-alive
+response is `keepAliveTimeout + keepAliveTimeoutBuffer` = 6000 ms (Node 24.22.2 `lib/_http_server.js`; on expiry
+`socketOnTimeout` destroys the socket). A synthetic two-process harness, run once per case with Node 24.22.2 and undici 7.30.1
+on macOS, showed: a client reuses a warm connection about 2000 ms after its last response, inside its own idle limit; the
+server's one thread is kept busy (a deliberate busy-wait on another connection) past the 6000 ms deadline; when the thread
+frees, the timer fires before the already-sent request is read, Node destroys the socket, and the client gets
+`ECONNRESET` (read). With a 3000 ms block the same reuse succeeded; with `keepAliveTimeout: 0` and the 6000 ms block, a GET and
+a POST on the reused connection both succeeded. Harness, records, provenance and hashes:
+`evidence/keepalive-race-2026-11-16/MANIFEST.md`. The busy-wait exists only in that harness, which CI never runs.
+
+**What it does not show.** That any historical CI failure was this race (none of the preserved captures recorded a reset with
+the client records needed to say so), that the same happens on Linux, or that it happens in the real lake under a real build.
+The second reset in a local fault-injection production build (Node 25.8.1, its archive not preserved here) had the same signature (a reused connection the lake closed after more than
+6 s idle, with the client's next request unread, during lake and client stalls); that is consistent with this mechanism, not
+proof of it. Other reset causes (section 4, H2 and H3) are untouched, and so is the SDK's separate retry problem (a reset GET
+whose SDK retries never reach the network).
+
+**What changes for clients (from source, not measured).** The lake no longer sends `Keep-Alive: timeout=5`; responses carry
+`Connection: keep-alive` and no `Keep-Alive` header (checked in the same test file). undici, which carries the site's reads
+(section 3), sets a connection's idle limit to the hint less `keepAliveTimeoutThreshold` (2000 ms), so **3000 ms** before;
+with no hint it uses its default `keepAliveTimeout`, **4000 ms** (undici 7.30.1, as bundled with Node 24.22.2). So idle sockets
+are kept about a second longer on the client.
+
+**Who closes idle connections now.** Never the lake: there is no server idle expiry. Each client closes its own idle sockets
+(undici on its timer above; a `node:http` agent according to its own settings, not examined here), and any connection a client
+leaves open ends when the lake exits at the end of the run. This reliance on client closure and per-run teardown is
+deliberate: the lake is a per-run test fixture, not a long-lived server, so connections it holds open are bounded by the run.
+Whether Node's `headersTimeout`/`requestTimeout` checks cover a connection idle between requests was not verified.

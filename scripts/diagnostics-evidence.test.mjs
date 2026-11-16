@@ -31,6 +31,22 @@ const PROJECTS = [
   'footer-divider',
   'team-divider',
 ]
+// The keep-alive experiment (added by #223): a local Node-only run, not a CI log. Its own MANIFEST.md is metadata.
+const EXPERIMENT = 'keepalive-race-2026-11-16'
+const EXPERIMENT_FILES = [
+  'harness/server.mjs',
+  'harness/client.mjs',
+  'harness/runner.mjs',
+  'harness-policy/server.mjs',
+  'harness-policy/client.mjs',
+  'harness-policy/runner.mjs',
+  'records/control.jsonl',
+  'records/race.jsonl',
+  'records/default-get.jsonl',
+  'records/candidate-get.jsonl',
+  'records/candidate-post.jsonl',
+  'SHA256SUMS',
+]
 const rows = manifest
   .split('\n')
   .filter((row) => row.startsWith('| `'))
@@ -60,6 +76,7 @@ describe('the evidence manifest', () => {
         'capture-43804915434/exit-status.txt',
         'capture-43804915434/diagnostics-validity.txt',
         'capture-43804915434/counts.txt',
+        ...EXPERIMENT_FILES.map((file) => `${EXPERIMENT}/${file}`),
       ]),
     )
   })
@@ -110,5 +127,18 @@ describe('the evidence manifest', () => {
       PROJECTS.map((project) => gunzipSync(readFileSync(join(capture, `${project}.log.gz`)))),
     )
     expect(combined.equals(parts)).toBe(true)
+  })
+
+  it('keeps the keep-alive experiment’s own SHA256SUMS consistent with the root manifest', () => {
+    const sums = readFileSync(join(dir, EXPERIMENT, 'SHA256SUMS'), 'utf8')
+      .trim()
+      .split('\n')
+      .map((line) => line.split(/\s+/))
+    expect(sums.map(([, file]) => file).sort()).toEqual(
+      EXPERIMENT_FILES.filter((file) => file !== 'SHA256SUMS').sort(),
+    )
+    for (const [sha, file] of sums) {
+      expect(rows.find((r) => r.file === `${EXPERIMENT}/${file}`)?.sha).toBe(sha)
+    }
   })
 })
