@@ -162,29 +162,36 @@ Lake (`lake-diagnostics.mjs`):
 
 - `settings` once: Node version, port, `keepAliveTimeout`, `keepAliveTimeoutBuffer` (null where Node has no such
   setting), `headersTimeout`, `requestTimeout`, `timeout`, `maxRequestsPerSocket`, `maxHeadersCount`.
-- `connection-open` / `connection-close`: a connection id, both ports, requests served, lifetime, idle time at close,
-  bytes, `hadError`.
+- `connection-open` / `connection-close`: a connection id, both endpoints (address, family, port), requests served, lifetime,
+  idle time at close, bytes, `hadError`.
 - `request` / `response-finish` / `response-closed-early`: connection id, sequence on the connection, method, a clipped
-  path, idle time before the request, status, duration.
+  path, `urlKey` (of the whole URL, before clipping), idle time before the request, status, duration.
 - `sample` every 5 s (at most 240): load average, free memory, open connections, and up to 12 processes that look like the
   build or tests (`ps`: pid, ppid, %cpu, rss, elapsed, a clipped command line). Context only.
 
-Client, for requests to the lake's port only (`http-client-diagnostics.mjs`, which loads both loggers):
+Client, for requests to a watched **port** (`http-client-diagnostics.mjs`, which loads both loggers). The filter is a port
+number and nothing else: the watched ports are `E2E_DIAGNOSTICS_PORTS`, else `FAKE_SANITY_PORT`, else 9999, and a request is
+watched when its port is one of them, whatever host it names; hosts, origins and addresses are not compared, only recorded.
+Every client record carries the process (`pid`, `thread`) and Next's `phase` (`phase-production-build` in the build's workers).
 
-- `preload` once per process (pid, ppid, script, thread). It is the only line a process writes for traffic it is not
-  watching: other origins are never logged and spend none of the line budget.
+- `preload` once per process (pid, ppid, script, thread). It is the only line a process writes for traffic on ports it is not
+  watching, which write nothing and spend none of the line budget.
 - **The site's reads (`undici-client-diagnostics.mjs`, undici's `undici:*` channels, the transport of section 3):**
-  `fetch-request` (method, origin, a clipped path, `sameUrlOrdinal`), `fetch-socket-connected` (both ports, time to
-  connect) and `fetch-connect-error`, `fetch-socket` (the request written to a socket: socket id, **`requestsOnSocket`**, the
-  socket's age, the time since the last response on it ended, both ports; the only point at which undici's channels tie a
-  request to a socket, so a request that failed earlier has none), `fetch-headers` (the response's **headers** arrived, with
-  status), `fetch-complete` (undici has received the **whole response**; whether the application has read it is neither
-  known nor asked), `fetch-error` (code, errno, syscall, the cause's code, a clipped message, time since the request began,
-  and its socket if it had one) and `fetch-socket-close` (`hadError`, requests, age). No headers are logged, no body is
-  read or locked, and the application's own `attemptNumber` is not seen.
-- **Anything using `node:http` (a first logger, kept for any other traffic; it recorded none of the site's reads):**
-  `request-created`, `request-socket` (with `reusedSocket`, which is `node:http`'s), `request-start`, `response`,
-  `response-complete` / `response-closed`, `request-error`, `socket-created`, `socket-connected`, `socket-close`.
+  `fetch-request` (method, origin, a clipped path, `urlKey`, `sameUrlOrdinal`), `fetch-socket-connected` (a connection was
+  made: the socket's id and both endpoints) and `fetch-connect-error` (code, errno, syscall, port), `fetch-socket` (the request
+  written to a socket: socket id, **`requestsOnSocket`**, the socket's age, the time since the last response on it ended, both
+  endpoints; the only point at which undici's channels tie a request to a socket, so a request that failed earlier has none),
+  `fetch-headers` (the response's **headers** arrived, with status), `fetch-complete` (undici has received the **whole
+  response**; whether the application has read it is neither known nor asked), `fetch-error` (code, errno, syscall, the cause's
+  code, a clipped message, time since the request began, and its socket if it had one) and `fetch-socket-close` (`hadError`,
+  requests, age). A socket's **endpoints** are address, family and port for each end (`localAddress`, `localFamily`,
+  `localPort`, `remoteAddress`, `remoteFamily`, `remotePort`), as Node reports them. There is no connection-time metric: the one
+  that was here read null in every record. No headers are logged, no body is read or locked, and the application's own
+  `attemptNumber` is not seen.
+- **Anything using `node:http` (a first logger, kept for any other traffic and for the Node build of the SDK; it recorded none of
+  the site's reads in the first capture):** `request-created`, `request-socket` (with `reusedSocket`, which is `node:http`'s,
+  and the endpoints), `request-start`, `response`, `response-complete` / `response-closed`, `request-error`, `socket-created`,
+  `socket-connected`, `socket-close`.
 
 What it never does: change a request, header, status, body, timeout, retry or pool setting; read or consume a stream;
 add a `clientError` listener to the server (which would replace Node's default answer) or an `error` listener to a
@@ -196,12 +203,49 @@ Each handler is guarded and the log has a line budget (`E2E_DIAGNOSTICS_MAX_LINE
 which it writes one notice and counts the rest. Tests: `scripts/lake-diagnostics.test.mjs` (real child processes, with
 the diagnostics on and off).
 
+## Correlating records
+
+What is recorded (facts) and what may be read into it (interpretation) are kept apart here.
+
+**Recorded facts, and the keys that tie them together.**
+
+- `urlKey`: the first 8 hex digits of a SHA-1 of `<METHOD> <whole path including the query string>`, computed before any
+  clipping, on the lake's `request` records and on both client loggers' request records. It is the same function
+  (`requestKey` in `diagnostics-log.mjs`) on each, so the same request has the same key at both ends.
+- A connection's **endpoints**: address, family and port at each end, on the lake's `connection-open` and on the client's
+  `fetch-socket-connected`, `fetch-socket` and (for `node:http`) `request-socket`. A client socket's local endpoint is the
+  lake connection's remote one, and the other way round.
+- `reqSeq` with `pid` and `thread` identifies a client request within a capture; `socketId` a client socket within a process;
+  `connId` a lake connection.
+- `mono` orders one process's own lines; timestamps across processes are only when each callback ran.
+
+**What these support, and what they do not.**
+
+- Equal `urlKey`s are a correlation key, not proof that two records are one request: it is a 32-bit hash, and requests to the
+  same URL (a client's retry, two pages asking for the same data) share it. It is not proof that they are not one request either.
+- Matching endpoints on a client socket and a lake connection identify the same TCP connection; they do not say which side
+  closed it first, or why. The timestamps do not either (section 4).
+- `requestsOnSocket` and `msSinceSocketLastResponseEnd` are counts and times from the client process's callbacks. undici
+  publishes no "reused" flag and no pool state, so nothing here says what its pool did.
+- Aggregate counts in the capture's validity check are **coverage checks**: they catch a client half that saw nothing or
+  little, and they do not prove that every request was observed.
+
 ## 6. The one manual capture mechanism (not dispatched)
 
 `.github/workflows/e2e-lake-capture.yml`, run by hand with `workflow_dispatch`. **No capture is to be dispatched again
-until the demonstrated coverage of this client logger has been reviewed** (the tests in `scripts/undici-diagnostics.test.mjs`
-run the installed next-sanity client as Next resolves it and show the logger recording GET and POST requests, their sockets,
-headers, completion and errors). It is the only way the diagnostics are switched on in CI, and it is reviewable as a file:
+until the demonstrated coverage of this client logger has been reviewed.** What is demonstrated, and what is not:
+
+- **Adapter-path coverage (tested).** `scripts/undici-diagnostics.test.mjs` runs the installed next-sanity client, and the
+  app's real client options read from `src/lib/sanity/client.ts`, in a plain Node process against a local server, resolved as
+  Next resolves it (`--conditions=react-server`). It shows the logger recording GET and POST requests, their sockets, response
+  headers, completion and errors (a reset, a reset on a socket the records show was used before, a refused connection with no
+  socket) on that adapter path, and that under the default conditions the same client reaches the lake over `node:http`
+  instead. This is the adapter path, **not coverage of Next's own build**: Next patches `fetch`, bundles the SDK and makes the
+  requests from its build workers, none of which those tests run.
+- **Next's build (not yet shown).** Only a capture can show whether the logger sees what the build requests; the validity
+  check below is what makes a capture that cannot show it fail.
+
+It is the only way the diagnostics are switched on in CI, and it is reviewable as a file:
 
 - **Default off.** It has no `push`, `pull_request` or `schedule` trigger, and `E2E_DIAGNOSTICS` is set nowhere else, so
   the ordinary pipeline is unchanged and this adds no job to it.
@@ -212,11 +256,19 @@ headers, completion and errors). It is the only way the diagnostics are switched
   steps that keep the log can still run. There is no loop, no retry and no rerun.
 - **Exact commit recorded.** The input is a full 40-character SHA, checked against that pattern and against what was
   checked out; `commit.txt` (requested and checked-out SHA, run id, attempt) is in the artifact and the run summary.
-- **Capture validity.** After each project, `scripts/e2e-capture-validity.mjs` compares the lake's request records with
-  the client's request records (`fetch-request`, or `request-created` for `node:http`). **Lake traffic with zero client request
-  records is reported as incomplete instrumentation, exits 70, and stops the capture before any further project**, so a capture
-  whose client half saw nothing cannot pass quietly. No lake traffic is not a failure of the diagnostics. The first capture
-  would have stopped after its first project.
+- **Capture validity** (`scripts/e2e-capture-validity.mjs`, after each project). Aggregate **coverage checks**, which catch a
+  client half that saw nothing or little and do **not** prove that every request was observed: (1) the lake's `/data/`
+  requests, fixture-control traffic (`/__fixture/…`) left out, against the client's request records for `/data/` paths
+  (`fetch-request`, or `request-created` for `node:http`): none at all is `no-client-requests`, fewer than 0.8 of the lake's
+  (`--min-coverage`) is `partial-coverage`, and a client count above the lake's is not an error; (2) at least one
+  `fetch-request` from a `phase-production-build` process (the failing requests are made while the site is built), else
+  `no-production-build-fetch`; (3) every `fetch-headers` record has the `fetch-request` and `fetch-socket` records of the same
+  request, else `unmatched-response-headers`; (4) no process hit its line budget (`limit-reached`), else `truncated`.
+  Incomplete instrumentation exits 70, truncated-only evidence 71, and either **stops the capture before any further
+  project**. No lake `/data/` traffic is not a failure of the diagnostics. The preserved first capture (1,855 lake `/data/`
+  requests, no client request) is `no-client-requests`, and with one synthetic client request added it is `partial-coverage`
+  (1 of 1,855); both are tested. Whether the logger sees the requests of **Next's own build** is shown only by a capture; this
+  check is what makes a capture that cannot show it fail.
 - **Test status and diagnostic validity are kept apart.** `exit-status.txt` holds each project's test result,
   `diagnostics-validity.txt` each project's validity. The step exits with the first failing test's status; with passing tests
   and incomplete instrumentation it exits 70. Both files, the whole log, the project logs, the `[e2e-diag]` lines and counts

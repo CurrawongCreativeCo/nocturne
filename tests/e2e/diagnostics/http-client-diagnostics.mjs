@@ -1,21 +1,30 @@
-import { createHash } from 'node:crypto'
 import dc from 'node:diagnostics_channel'
 import path from 'node:path'
 import { isMainThread, threadId } from 'node:worker_threads'
 
-import { clip, emit } from './diagnostics-log.mjs'
+import { clip, emit, requestKey } from './diagnostics-log.mjs'
 import { installUndiciDiagnostics } from './undici-client-diagnostics.mjs'
 
 /**
- * Opt-in diagnostics for the site's HTTP requests to the fake Content Lake (task 151 CI investigation), loaded with
- * `node --import` through NODE_OPTIONS by playwright.config.ts when E2E_DIAGNOSTICS is set, so it runs in the build,
- * its workers and the server, and in nothing else. Without E2E_HTTP_DIAGNOSTICS=1 it does nothing at all.
+ * Opt-in client diagnostics for requests to the fake Content Lake (task 151 CI investigation), loaded with `node --import`
+ * through NODE_OPTIONS by playwright.config.ts when E2E_DIAGNOSTICS is set, so it runs in the build, its workers and the
+ * server, and in nothing else. Without E2E_HTTP_DIAGNOSTICS=1 it does nothing at all.
  *
- * The transport it watches is the real one: next-sanity 13's bundled @sanity/client 7.27 calls get-it 8.8's Node
- * adapter, which uses `node:http` through a keep-alive `http.Agent` (keepAlive, 30 sockets), and retries a failed GET
- * itself. So this watches `node:http`'s own diagnostics channels, which publish without any change to a request:
- * - `http.client.request.created` a request exists, before it has a socket (the Agent's free/busy counts are read
- *                                 here, and a `socket` listener is added; Node publishes `start` after `socket`);
+ * It installs TWO loggers, because Node has two HTTP clients:
+ * - **undici** (`undici-client-diagnostics.mjs`): the transport of the site's Sanity reads. next-sanity's `next-js` export
+ *   uses the nested @sanity/client 7.27 and get-it 8.8, whose `react-server` builds call the global `fetch`. This is the
+ *   logger that records the requests the investigation is about.
+ * - **`node:http`** (this file): for any other traffic, and for the Node build of the same SDK (default conditions, where
+ *   get-it uses `node:http` and an `http.Agent`). It recorded none of the site's reads in the first capture, and is kept as
+ *   the second, narrower logger, not as the one that explains the site.
+ *
+ * WHICH TRAFFIC. Both filter on a PORT NUMBER only (E2E_DIAGNOSTICS_PORTS, else FAKE_SANITY_PORT, else 9999): a request is
+ * watched when its port is in the set, whatever host it names. Everything else writes nothing and spends none of the line
+ * budget; each process writes one `preload` line.
+ *
+ * The `node:http` logger watches `node:http`'s own diagnostics channels, which publish without any change to a request:
+ * - `http.client.request.created` a request exists, before it has a socket (the Agent's free/busy counts are read here,
+ *                                 and a `socket` listener is added; Node publishes `start` after `socket`);
  * - `http.client.request.start`   its headers are about to be written;
  * - `http.client.request.error`   a request failed (the error is reported here; the request's own handling is
  *                                 untouched, and no `error` listener is added, so an unhandled one still throws);
@@ -24,12 +33,12 @@ import { installUndiciDiagnostics } from './undici-client-diagnostics.mjs'
  * and, for a watched request only, `socket`, `connect`, `free` and `close` listeners on its socket and `end` and
  * `close` listeners on its response (events with no default behaviour; none reads, resumes or consumes anything).
  *
- * It records per-request: process, thread, a per-process request sequence, an ordinal for requests to the same URL
- * (`sameUrlOrdinal`, a count of HTTP attempts in this process; NOT get-it's `attemptNumber`, which lives above this
- * layer and is kept raw in the error Next prints), the socket's id, whether Node reused it, its age and how long it
- * idled since the Agent last took it back (`free`: a response completely read, not just begun), when the response's
- * headers arrived and when its body ended, and how the request and the socket ended. Events are scoped to watched
- * traffic: a socket no watched request uses is never logged and spends none of the log budget.
+ * It records per request: process, thread, Next's phase, a per-process request sequence, `urlKey` (a hash of the method and
+ * whole path, shared with the lake and the undici logger as a correlation key), `sameUrlOrdinal` (a count of requests to
+ * that URL in this process; NOT get-it's `attemptNumber`, which lives above this layer), the socket's id, its endpoints
+ * (address, family, port), whether Node reused it, its age and how long it idled since the Agent last took it back
+ * (`free`: a response completely read, not just begun), when the response's headers arrived and when its body ended, and
+ * how the request and the socket ended.
  *
  * It never changes a request, a response, a timeout, a retry or the pool, and never reads or consumes a body.
  */
@@ -49,12 +58,26 @@ function install() {
       .map((p) => p.trim())
       .filter(Boolean),
   )
-  const where = { thread: isMainThread ? 'main' : `worker-${threadId}` }
+  const where = {
+    thread: isMainThread ? 'main' : `worker-${threadId}`,
+    // Next's phase for this process (`phase-production-build` in the build's workers): which kind of process a record is from.
+    phase: process.env.NEXT_PHASE ?? null,
+  }
   const hostPort = (request) => String(request.getHeader?.('host') ?? '')
   const watching = (request) => {
     const port = hostPort(request).split(':')[1] ?? '80'
     return ports.has(port)
   }
+
+  /** Both endpoints of a socket, as Node reports them: address, family and port. */
+  const endpoints = (socket) => ({
+    localAddress: socket.localAddress ?? null,
+    localFamily: socket.localFamily ?? null,
+    localPort: socket.localPort ?? null,
+    remoteAddress: socket.remoteAddress ?? null,
+    remoteFamily: socket.remoteFamily ?? null,
+    remotePort: socket.remotePort ?? null,
+  })
 
   let requestSeq = 0
   let socketSeq = 0
@@ -86,8 +109,7 @@ function install() {
           emit('client', 'socket-connected', {
             ...where,
             socketId: info.id,
-            localPort: socket.localPort ?? null,
-            remotePort: socket.remotePort ?? null,
+            ...endpoints(socket),
             connectMs: Date.now() - created,
           })
         } catch {
@@ -142,7 +164,6 @@ function install() {
     node: process.version,
     ppid: process.ppid,
     script: path.basename(String(process.argv[1] ?? '')),
-    phase: process.env.NEXT_PHASE ?? null,
     ports: [...ports],
   })
 
@@ -164,7 +185,7 @@ function install() {
     let state = requests.get(request)
     if (state) return state
     const url = String(request.path ?? '')
-    const key = createHash('sha1').update(`${request.method} ${url}`).digest('hex').slice(0, 8)
+    const key = requestKey(request.method, url)
     const ordinal = (urlCounts.get(key) ?? 0) + 1
     if (urlCounts.size < URL_COUNT_CAP || urlCounts.has(key)) urlCounts.set(key, ordinal)
     state = {
@@ -213,8 +234,7 @@ function install() {
         socketAgeMs: Date.now() - info.created,
         socketRequests: info.requests,
         idleMsSinceLastResponse: state.idleMs,
-        localPort: socket.localPort ?? null,
-        remotePort: socket.remotePort ?? null,
+        ...endpoints(socket),
         socketDestroyed: socket.destroyed,
       })
     } catch {

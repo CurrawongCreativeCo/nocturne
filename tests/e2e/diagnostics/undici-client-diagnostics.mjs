@@ -1,21 +1,19 @@
-import { createHash } from 'node:crypto'
 import dc from 'node:diagnostics_channel'
 
-import { clip, emit } from './diagnostics-log.mjs'
+import { clip, emit, requestKey } from './diagnostics-log.mjs'
 
 /**
  * Diagnostics for the site's `fetch` requests to the fake Content Lake (task 151 CI investigation), through undici's own
  * diagnostics channels. Installed by http-client-diagnostics.mjs, so it shares its gate (E2E_HTTP_DIAGNOSTICS=1), its
- * watched ports (E2E_DIAGNOSTICS_PORTS, default the lake's) and its bounded, guarded log.
+ * watched ports and its bounded, guarded log.
  *
  * Why undici: the site reads Sanity through next-sanity's `sanityFetch` (the `next-js` export of `next-sanity/live`),
  * whose nested @sanity/client 7.27 and get-it 8.8 resolve under Next's `react-server` condition to builds that call the
  * global `fetch`: Node's undici, with its own connection pool, not `node:http` and not an `http.Agent`. (A first logger
  * watched only `node:http` and saw none of this.) The channels used are undici's published ones:
  * - `undici:request:create`          a fetch becomes an undici request (method, origin, path);
- * - `undici:client:beforeConnect`    a connection is about to be made (when it started is noted, for the watched port);
- * - `undici:client:connected`        it connected (the socket, and so both ports);
- * - `undici:client:connectError`     it could not connect;
+ * - `undici:client:connected`        a connection was made (the socket, and so both endpoints);
+ * - `undici:client:connectError`     a connection could not be made;
  * - `undici:client:sendHeaders`      the request is being written to a socket: the one place undici's channels tie a
  *                                    request to a socket, so only requests that got that far have one;
  * - `undici:request:headers`         the response's status and headers arrived;
@@ -24,16 +22,22 @@ import { clip, emit } from './diagnostics-log.mjs'
  * - `undici:request:error`           the request failed.
  * and, for a socket a watched request was written to, a `close` listener (an event with no default behaviour).
  *
- * What it does not do: log headers (the authorization header never leaves undici's request), read or lock any body,
- * change a request, a retry, a timeout or the pool, add an `error` listener to anything, or substitute `node:http`
- * Agent metrics for what undici does not expose. undici publishes no "reused" flag or pool state, so none is reported:
- * `requestsOnSocket` is only a count of the watched requests written to that socket, and which side closed a
- * connection first is not something these channels can say.
+ * WHICH TRAFFIC. The filter is a PORT NUMBER and nothing else: a request or connection is watched when its port is one of
+ * the watched ports (E2E_DIAGNOSTICS_PORTS, default the lake's), whatever host it names. It does not compare hosts,
+ * origins or addresses; the origin is only recorded. Everything else writes nothing and spends none of the line budget.
+ *
+ * WHAT IS RECORDED, as facts: each endpoint of a socket by address, family and port; counts and times from this
+ * process's own callbacks. WHAT IS NOT: headers (the authorization header never leaves undici's request), any body (none
+ * is read or locked), and any claim undici's channels cannot support: they publish no "reused" flag and no pool state, so
+ * `requestsOnSocket` is only a count of the watched requests written to that socket, and which side closed a connection
+ * first is not something they can say. There is no connection-time metric: the one that was here read null
+ * in every record, and a time keyed only by host and port could not tell connections apart.
+ *
+ * It changes no request, retry, timeout or pool, and adds no `error` listener to anything.
  */
 export function installUndiciDiagnostics({ ports, where }) {
   const requests = new WeakMap()
   const sockets = new WeakMap()
-  const connecting = new WeakMap()
   const urlCounts = new Map()
   const URL_COUNT_CAP = 500
   let requestSeq = 0
@@ -47,6 +51,15 @@ export function installUndiciDiagnostics({ ports, where }) {
       return ''
     }
   }
+  /** Both endpoints of a socket, as Node reports them: address, family and port. */
+  const endpoints = (socket) => ({
+    localAddress: socket.localAddress ?? null,
+    localFamily: socket.localFamily ?? null,
+    localPort: socket.localPort ?? null,
+    remoteAddress: socket.remoteAddress ?? null,
+    remoteFamily: socket.remoteFamily ?? null,
+    remotePort: socket.remotePort ?? null,
+  })
   const watchedRequest = (request) => ports.has(portOf(request?.origin))
   const watchedConnection = (params) => ports.has(String(params?.port ?? ''))
 
@@ -81,7 +94,7 @@ export function installUndiciDiagnostics({ ports, where }) {
       const request = message?.request
       if (!request || !watchedRequest(request)) return
       const path = String(request.path ?? '')
-      const key = createHash('sha1').update(`${request.method} ${path}`).digest('hex').slice(0, 8)
+      const key = requestKey(request.method, path)
       const ordinal = (urlCounts.get(key) ?? 0) + 1
       if (urlCounts.size < URL_COUNT_CAP || urlCounts.has(key)) urlCounts.set(key, ordinal)
       const state = { seq: ++requestSeq, started: Date.now(), key, ordinal, socketId: null }
@@ -101,28 +114,16 @@ export function installUndiciDiagnostics({ ports, where }) {
     }
   })
 
-  dc.subscribe('undici:client:beforeConnect', (message) => {
-    try {
-      const params = message?.connectParams
-      if (params && watchedConnection(params)) connecting.set(params, Date.now())
-    } catch {
-      // Dropped on purpose.
-    }
-  })
-
   dc.subscribe('undici:client:connected', (message) => {
     try {
       const params = message?.connectParams
       const socket = message?.socket
       if (!socket || !params || !watchedConnection(params)) return
       const info = socketInfo(socket)
-      const began = connecting.get(params)
       emit('client', 'fetch-socket-connected', {
         ...where,
         socketId: info.id,
-        localPort: socket.localPort ?? null,
-        remotePort: socket.remotePort ?? null,
-        connectMs: began === undefined ? null : Date.now() - began,
+        ...endpoints(socket),
       })
     } catch {
       // Dropped on purpose.
@@ -166,8 +167,7 @@ export function installUndiciDiagnostics({ ports, where }) {
         socketAgeMs: Date.now() - info.created,
         msSinceSocketLastResponseEnd:
           info.lastResponseEnd === null ? null : Date.now() - info.lastResponseEnd,
-        localPort: socket.localPort ?? null,
-        remotePort: socket.remotePort ?? null,
+        ...endpoints(socket),
       })
     } catch {
       // Dropped on purpose.
