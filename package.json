@@ -52,7 +52,7 @@
     "test:studio-perf": "playwright test --config tests/studio-perf/playwright.config.ts"
   },
   "dependencies": {
-    "@portabletext/editor": "^8.2.4",
+    "@portabletext/editor": "^8.2.12",
     "@sanity/assist": "^6.2.4",
     "@sanity/icons": "^5.2.3",
     "@sanity/image-url": "^2.1.1",
