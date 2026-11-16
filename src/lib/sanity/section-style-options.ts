@@ -405,6 +405,14 @@ export const SECTION_EDGE_LAYER_SLOT_TITLES: Record<EdgeLayerSlot, string> = {
   above2: 'Second layer above',
   below: 'Layer below',
 }
+/**
+ * The controls that clear the per-layer colours, named once so Studio's buttons, its warnings and the docs agree: the
+ * first choice of each colour and strength field (unsets that field, stores nothing), and the group's one button
+ * (unsets the whole `edgeLayerColours` object).
+ */
+export const SECTION_EDGE_LAYER_COLOUR_INHERIT = 'Use recipe colour'
+export const SECTION_EDGE_LAYER_STRENGTH_INHERIT = 'Use Layer strength'
+export const SECTION_EDGE_LAYER_RESET = 'Reset all layer overrides'
 /** The stored fields of `style.edgeLayerColours`: a slot's colour is named for it, its strength `<slot>Strength`. */
 export type EdgeLayerColoursInput = Partial<
   Record<EdgeLayerSlot | `${EdgeLayerSlot}Strength`, string | null>
