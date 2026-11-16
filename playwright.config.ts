@@ -1,3 +1,6 @@
+import { resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
+
 import { defineConfig, devices } from '@playwright/test'
 
 import {
@@ -12,6 +15,24 @@ import {
 } from './tests/e2e/constants'
 
 const CI = Boolean(process.env.CI)
+// Opt-in diagnostics for the CI investigation of the build's connection resets (tests/e2e/diagnostics/README.md).
+// Unset, both are empty and the servers start exactly as before. Set (E2E_DIAGNOSTICS=1), the fake lake logs its
+// connections and requests, and the site's processes log their HTTP requests to it through a preload.
+const DIAGNOSTICS = process.env.E2E_DIAGNOSTICS === '1'
+const LAKE_DIAGNOSTICS_ENV: Record<string, string> = DIAGNOSTICS
+  ? { E2E_LAKE_DIAGNOSTICS: '1' }
+  : {}
+const APP_DIAGNOSTICS_ENV: Record<string, string> = DIAGNOSTICS
+  ? {
+      E2E_HTTP_DIAGNOSTICS: '1',
+      NODE_OPTIONS: [
+        process.env.NODE_OPTIONS,
+        `--import "${pathToFileURL(resolve('tests/e2e/diagnostics/http-client-diagnostics.mjs')).href}"`,
+      ]
+        .filter(Boolean)
+        .join(' '),
+    }
+  : {}
 // node_modules/.cache is ignored by git, ESLint and Prettier.
 const OFF_DIST_DIR = 'node_modules/.cache/e2e-enquiries-off'
 const PRELAUNCH_DIST_DIR = 'node_modules/.cache/e2e-prelaunch'
@@ -164,7 +185,7 @@ export default defineConfig({
     {
       command: 'node tests/e2e/fake-sanity.mjs',
       port: FAKE_SANITY_PORT,
-      env: { FAKE_SANITY_PORT: String(FAKE_SANITY_PORT) },
+      env: { FAKE_SANITY_PORT: String(FAKE_SANITY_PORT), ...LAKE_DIAGNOSTICS_ENV },
       reuseExistingServer: !CI,
     },
     {
@@ -173,7 +194,7 @@ export default defineConfig({
       timeout: 300_000,
       reuseExistingServer: !CI,
       // E2E_GALLERY switches on /section-gallery, which visual.spec.ts screenshots.
-      env: { ...APP_ENV, E2E_GALLERY: '1' },
+      env: { ...APP_ENV, E2E_GALLERY: '1', ...APP_DIAGNOSTICS_ENV },
     },
     {
       // The same build with enquiry storage off, to show a send then writes nothing. Playwright starts
@@ -188,6 +209,7 @@ export default defineConfig({
         E2E_GALLERY: '1',
         ENQUIRIES_STORE: '0',
         NEXT_DIST_DIR: OFF_DIST_DIR,
+        ...APP_DIAGNOSTICS_ENV,
       },
     },
     {
@@ -204,6 +226,7 @@ export default defineConfig({
         PREVIEW_ACCESS_SECRET,
         PRELAUNCH_PREVIEW_TOKEN,
         NEXT_DIST_DIR: PRELAUNCH_DIST_DIR,
+        ...APP_DIAGNOSTICS_ENV,
       },
     },
   ],

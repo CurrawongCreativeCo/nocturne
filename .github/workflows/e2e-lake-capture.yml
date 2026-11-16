@@ -1,0 +1,120 @@
+name: E2E lake capture (manual)
+
+# A manual, one-off capture for the CI investigation of the build's connection resets
+# (tests/e2e/diagnostics/README.md). It is OFF by default: it has no push, pull_request or schedule trigger, and
+# nothing else sets E2E_DIAGNOSTICS, so the ordinary pipeline is unchanged. It runs the isolated job's own steps, in
+# the same order with the same commands, with the diagnostics on, for a commit named exactly, within a fixed time
+# limit, and keeps the log whether the run passes or fails.
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: The exact commit to capture, as a full 40-character SHA (it must contain the diagnostics).
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-lake-capture
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    name: e2e (isolated) with diagnostics
+    runs-on: ubuntu-latest
+    # The whole job, including the steps that keep the log. The capture step has its own, shorter limit so a hang
+    # there is stopped while those steps can still run.
+    timeout-minutes: 35
+    env:
+      E2E_DIAGNOSTICS: '1'
+      INPUT_COMMIT: ${{ inputs.commit }}
+    steps:
+      - name: Check the commit input
+        run: |
+          if ! printf '%s' "$INPUT_COMMIT" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo '::error::commit must be a full 40-character lowercase SHA'
+            exit 1
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.commit }}
+          persist-credentials: false
+
+      - name: Record the exact commit
+        run: |
+          mkdir -p e2e-capture
+          actual="$(git rev-parse HEAD)"
+          {
+            echo "requested_commit=$INPUT_COMMIT"
+            echo "checked_out_commit=$actual"
+            echo "run_id=${{ github.run_id }}"
+            echo "run_attempt=${{ github.run_attempt }}"
+            echo "runner_os=$RUNNER_OS"
+          } | tee e2e-capture/commit.txt >> "$GITHUB_STEP_SUMMARY"
+          if [ "$actual" != "$INPUT_COMMIT" ]; then
+            echo '::error::the checked-out commit is not the one requested'
+            exit 1
+          fi
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      # The isolated job's projects, in its order. Each runs as in ci.yml (`npx playwright test --project=<name>
+      # --no-deps`); the output goes to the screen and to the kept log through `tee`, and the status of
+      # Playwright, not of `tee`, is each project's result. Like the job, it stops at the first failure, and the
+      # step's own exit status is that failure's.
+      - name: Run the isolated projects with diagnostics
+        timeout-minutes: 25
+        run: |
+          set +e
+          set -o pipefail
+          mkdir -p e2e-capture e2e-timings
+          status=0
+          for project in experiments design design-visual panel-palettes nav-submenus blog-card-design button-style footer-divider team-divider; do
+            echo "::group::$project"
+            E2E_TIMINGS_FILE="e2e-timings/isolated-$project.json" npx playwright test --project="$project" --no-deps 2>&1 | tee -a e2e-capture/playwright.log
+            code="${PIPESTATUS[0]}"
+            echo "::endgroup::"
+            echo "$project exit=$code" >> e2e-capture/exit-status.txt
+            if [ "$code" -ne 0 ]; then
+              status="$code"
+              break
+            fi
+          done
+          echo "overall exit=$status" >> e2e-capture/exit-status.txt
+          exit "$status"
+
+      - name: Pick out the diagnostic lines
+        if: always()
+        run: |
+          mkdir -p e2e-capture
+          touch e2e-capture/playwright.log
+          grep -h '\[e2e-diag\]' e2e-capture/playwright.log > e2e-capture/e2e-diag-lines.log || true
+          {
+            echo "diagnostic lines: $(wc -l < e2e-capture/e2e-diag-lines.log)"
+            echo "client request errors: $(grep -c '"event":"request-error"' e2e-capture/e2e-diag-lines.log || true)"
+            echo "lake connection closes with an error: $(grep -c '"event":"connection-close".*"hadError":true' e2e-capture/e2e-diag-lines.log || true)"
+            echo "ECONNRESET in the log: $(grep -c ECONNRESET e2e-capture/playwright.log || true)"
+          } | tee e2e-capture/counts.txt >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the capture
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-lake-capture-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            e2e-capture
+            playwright-report
+            test-results
+          if-no-files-found: warn
+          retention-days: 30
