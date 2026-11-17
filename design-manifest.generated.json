@@ -43585,7 +43585,8 @@
       {
         "path": "edgeTideLayer",
         "kind": "string",
-        "required": false,
+        "required": null,
+        "max": null,
         "list": [
           {
             "value": "accent",
@@ -43606,7 +43607,8 @@
       {
         "path": "edgeLineColour",
         "kind": "string",
-        "required": false,
+        "required": null,
+        "max": null,
         "list": [
           {
             "value": "accent",
@@ -43623,7 +43625,8 @@
       {
         "path": "edgeShadow",
         "kind": "string",
-        "required": false,
+        "required": null,
+        "max": null,
         "list": [
           {
             "value": "soft",

@@ -4629,6 +4629,13 @@ or a small picture. Not to be confused with [Section dividers](#section-dividers
 Words also offer **Letter spacing**: Normal, Wide or Extra wide. Unset preserves the previous
 spacing (including the wider capitals). This is the same choice as Link list service categories.
 
+**Clearing in Studio:** In the middle, Letters, Letter spacing, Size in the middle, Length and Thickness each start with
+**Use divider default**, which unsets that field alone; the divider then draws its default (Nothing, As typed, the previous
+spacing, Medium, Medium, Thin). Studio's own clear icon has no accessible name and its field menu offers only Copy and
+Paste, so this labelled choice is the way to clear. Which fields show is unchanged: a value hidden by the style (a middle,
+length or thickness under Three dots, a line colour under Gradient) stays stored and comes back with the style. In
+read-only mode every choice is disabled.
+
 Each option appears only once it applies (three dots take no middle and no length). A fading line fades towards its outer
 ends around a middle. **Double** is two fine lines with a 3px gap, **Dotted line** a line made of dots (it takes a middle,
 where Three dots does not) and **Gradient** a line from the Primary to the Secondary colour, fading at its ends; a Gradient
@@ -4738,6 +4745,10 @@ Diagonal, Wave, Curve, Arch, Layered wave, Tide, Contour, Still water, Lagoon, R
   is Primary.
 - **Line colour** (Contour only): its three lines in **Primary** (the default) or the **muted text** colour, in the
   colours of the section below.
+- **Clearing Crest colour, Line colour and Shadow:** each starts with **Use shape default**, which unsets that field alone
+  (the shape then draws its default: Primary, Primary, Soft). A value saved before the shape changed is kept, not drawn,
+  and stays visible with a warning naming the shape it belongs to and **Use shape default**; once cleared, the field is
+  hidden. Choosing the owning shape again draws the kept value. In read-only mode every choice is disabled.
 - **Still water only**: one calm crest with a soft layer above it, and an optional layer below. **Crest position**
   (Standard, Centred, Shifted), **Depth** (Shallow, Standard, Deep: how far the layers reach), **Layer strength** (Light,
   Standard, Strong), **Colours** (Tint: Primary; Ink: text over Primary; Highlight: Highlight over Secondary) and **Layer

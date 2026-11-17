@@ -131,6 +131,7 @@ import {
   edgeLayerHidden,
   edgeLineColourHidden,
   edgeShadowHidden,
+  staleShapeOptionMessage,
   edgeOptionsHidden,
   edgeTideLayerHidden,
   motionCustomHidden,
@@ -1190,8 +1191,14 @@ export const sectionStyle = defineType({
       description:
         'The softer crest behind the edge: Primary (the default) or Secondary, lightly, or Echo, this section’s own colour. A picture or a gradient has no single colour to echo, so over one the crest is Primary.',
       type: 'string',
-      options: radio(SECTION_EDGE_TIDE_LAYERS, SECTION_EDGE_TIDE_LAYER_TITLES),
+      // "Use shape default" first unsets the field (the shape draws its own default); Studio's field menu has
+      // only Copy and Paste. A value left on another shape stays visible, with this warning, until it is cleared.
+      options: {
+        ...radio(SECTION_EDGE_TIDE_LAYERS, SECTION_EDGE_TIDE_LAYER_TITLES),
+        inheritable: SECTION_EDGE_SHAPE_DEFAULT,
+      },
       hidden: edgeTideLayerHidden,
+      validation: (rule) => rule.custom(staleShapeOptionMessage('tide')).warning(),
     }),
     defineField({
       name: 'edgeLineColour',
@@ -1199,8 +1206,14 @@ export const sectionStyle = defineType({
       description:
         'The three lines below the cut, in the colours of the section below: Primary (the default) or its muted text colour.',
       type: 'string',
-      options: radio(SECTION_EDGE_LINE_COLOURS, SECTION_EDGE_LINE_COLOUR_TITLES),
+      // "Use shape default" first unsets the field (the shape draws its own default); Studio's field menu has
+      // only Copy and Paste. A value left on another shape stays visible, with this warning, until it is cleared.
+      options: {
+        ...radio(SECTION_EDGE_LINE_COLOURS, SECTION_EDGE_LINE_COLOUR_TITLES),
+        inheritable: SECTION_EDGE_SHAPE_DEFAULT,
+      },
       hidden: edgeLineColourHidden,
+      validation: (rule) => rule.custom(staleShapeOptionMessage('contour')).warning(),
     }),
     defineField({
       name: 'edgeShadow',
@@ -1208,8 +1221,14 @@ export const sectionStyle = defineType({
       description:
         'How far the shadow reaches onto the section below, and how dark it is. Soft is the default; Deep is stronger and reaches further. It is a decoration over the next section, so it takes no room and never covers its content.',
       type: 'string',
-      options: radio(SECTION_EDGE_SHADOWS, SECTION_EDGE_SHADOW_TITLES),
+      // "Use shape default" first unsets the field (the shape draws its own default); Studio's field menu has
+      // only Copy and Paste. A value left on another shape stays visible, with this warning, until it is cleared.
+      options: {
+        ...radio(SECTION_EDGE_SHADOWS, SECTION_EDGE_SHADOW_TITLES),
+        inheritable: SECTION_EDGE_SHAPE_DEFAULT,
+      },
       hidden: edgeShadowHidden,
+      validation: (rule) => rule.custom(staleShapeOptionMessage('elevated')).warning(),
     }),
     ...(
       [

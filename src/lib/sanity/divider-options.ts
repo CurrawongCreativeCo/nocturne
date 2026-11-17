@@ -83,6 +83,12 @@ export const DIVIDER_FINISH_DESCRIPTIONS: Record<DividerFinish, string> = {
 }
 
 /** The styles that can glow. A finish stored for any other style is kept and not drawn. */
+/**
+ * The first choice of every divider radio (Studio): it unsets the field, so the divider draws its own default (Nothing in
+ * the middle, Medium length, and so on). Studio's field menu has only Copy and Paste, and its own clear icon has no name.
+ */
+export const DIVIDER_DEFAULT_CHOICE = 'Use divider default'
+
 export const GLOW_STYLES: readonly DividerStyle[] = ['line', 'double', 'gradient']
 
 /** The whole divider's length, centre included. */

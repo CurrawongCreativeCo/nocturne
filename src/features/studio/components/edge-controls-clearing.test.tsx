@@ -19,8 +19,8 @@ import { InheritableChoiceInput } from './inheritable-choice-input'
 import { withPresetPicker } from './preset-picker/with-preset-picker'
 
 /**
- * Clearing a section's Alignment and the generated edge's Crest position, Depth, Layer strength, Colours and Layer
- * below in Studio (task 151). Studio's field menu offers only Copy and Paste, so each string field starts with a
+ * Clearing a section's Alignment, the generated edge's Crest position, Depth, Layer strength, Colours and Layer
+ * below, and Tide's Crest colour, Contour's Line colour and Elevated's Shadow in Studio (task 151). Studio's field menu offers only Copy and Paste, so each string field starts with a
  * labelled choice that unsets it (InheritableChoiceInput, as the per-layer colours do), and Layer below has a
  * labelled button beside its switch that unsets a saved true or false. The controls are built from the real schema
  * field definitions, and their patches are placed where Studio would place them, so the tests show exactly which
@@ -133,6 +133,10 @@ const STRING_FIELDS = [
   ['edgeDepth', 'Depth', 'Use shape default', ['Shallow', 'Standard', 'Deep'], 'deep'],
   ['edgeStrength', 'Layer strength', 'Use shape default', ['Light', 'Standard', 'Strong'], 'light'],
   ['edgePalette', 'Colours', 'Use shape default', ['Tint', 'Ink', 'Highlight'], 'ink'],
+  // Tide's, Contour's and Elevated's own choices: once Studio radios whose only clear was an unnamed icon.
+  ['edgeTideLayer', 'Crest colour', 'Use shape default', ['Primary', 'Echo', 'Secondary'], 'echo'],
+  ['edgeLineColour', 'Line colour', 'Use shape default', ['Primary', 'Muted text'], 'muted'],
+  ['edgeShadow', 'Shadow', 'Use shape default', ['Soft', 'Deep'], 'deep'],
 ] as const
 
 describe.each(STRING_FIELDS)(
