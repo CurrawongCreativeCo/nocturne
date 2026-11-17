@@ -10,7 +10,7 @@ vi.mock('server-only', () => ({}))
 
 /**
  * The client diagnostics must see the requests the site really makes. They are made by next-sanity's `sanityFetch` (Next's
- * `next-js` export), whose nested @sanity/client 7.27 and get-it 8.8 resolve, under Next's `react-server` condition, to
+ * `next-js` export), whose nested @sanity/client and get-it (7.28 and 8.8 with next-sanity 13.4.0) resolve, under Next's `react-server` condition, to
  * builds that call the global `fetch`: Node's undici, not `node:http`. An earlier logger watched only `node:http`'s channels
  * and recorded none of them (a capture saw 2,142 requests at the lake and no client request).
  *
@@ -57,7 +57,12 @@ async function serve(mode = 'ok') {
     let bytes = 0
     req.on('data', (chunk) => (bytes += chunk.length))
     req.on('end', () => {
-      seen.push({ method: req.method, url: req.url, bytes })
+      seen.push({
+        method: req.method,
+        url: req.url,
+        bytes,
+        authorization: req.headers.authorization,
+      })
       if (mode === 'reset') return req.socket.resetAndDestroy()
       res.setHeader('content-type', 'application/json')
       res.end(JSON.stringify({ ms: 1, query: 'q', result: 'ok' }))
@@ -436,7 +441,7 @@ describe('failures the logger must describe without inventing', () => {
   }, 20_000)
 })
 
-describe('the app’s real client options, and the export conditions that decide the transport', () => {
+describe('adapter-path coverage: the app’s real client options, and the export conditions that decide the transport', () => {
   /** The app's own client (src/lib/sanity/client.ts), built with the env the e2e site is given, and its resolved config. */
   async function productionConfig() {
     vi.resetModules()
@@ -450,9 +455,8 @@ describe('the app’s real client options, and the export conditions that decide
     return config
   }
 
-  /** The options the installed `next-js` export of next-sanity/live passes to `client.fetch`: read from the file. */
-  const exportCall = () => {
-    const source = readFileSync(
+  const exportSource = () =>
+    readFileSync(
       join(
         root,
         'node_modules',
@@ -465,16 +469,75 @@ describe('the app’s real client options, and the export conditions that decide
       ),
       'utf8',
     )
-    const at = source.indexOf('await client.fetch(query, await params, {')
-    return source.slice(at, source.indexOf('});', at))
+
+  /** One `const <name> = <expression>;` line of the installed export's sanityFetch, as written there. */
+  const exportExpression = (source, name) => {
+    const match = source.match(new RegExp(`const ${name} = (.+);\\n`))
+    expect(match, `the export still declares ${name}`).not.toBeNull()
+    return match[1]
   }
+
+  /** The object the export passes as the third argument of \`client.fetch\`, whitespace-normalised. */
+  const exportCallOptions = (source) => {
+    const at = source.indexOf('await client.fetch(query, ')
+    expect(at, 'the export still calls client.fetch(query, …)').toBeGreaterThan(-1)
+    const open = source.indexOf('{', source.indexOf(', ', at + 'await client.fetch(query, '.length))
+    return source.slice(open, source.indexOf('})', open) + 1).replace(/\s+/g, ' ')
+  }
+
+  /**
+   * The options next-sanity 13.4.0's `next-js` sanityFetch passes to `client.fetch`, modelled for one call. \`strict\` is
+   * on in the app (src/lib/sanity/live.ts), so every call names \`perspective\` and \`stega\`. \`phase\` is 'runtime' or
+   * 'build': production builds (NEXT_PHASE=phase-production-build) pass an undefined \`cacheMode\`. \`serverToken\` is the
+   * token given to defineLive, passed per call only for non-published perspectives or stega. It is NOT the client's
+   * configured token, which the client sends on every request by itself.
+   */
+  const modelOptions = ({
+    perspective,
+    stega,
+    variant,
+    phase,
+    requestTag = 'next-loader.fetch.cache-components',
+    ...rest
+  }) => {
+    // An explicit `serverToken: undefined` means defineLive was given none, so only a missing key takes the default.
+    const serverToken = 'serverToken' in rest ? rest.serverToken : 'viewer-server-token'
+    const useCdn = perspective ? perspective === 'published' : undefined
+    return {
+      filterResponse: false,
+      perspective,
+      variant,
+      stega,
+      returnQuery: false,
+      useCdn,
+      cacheMode: useCdn !== false && phase !== 'build' ? 'noStale' : undefined,
+      tag: requestTag,
+      token:
+        ((perspective && perspective !== 'published') || stega) && serverToken
+          ? serverToken
+          : undefined,
+    }
+  }
+
+  /** The published read the site makes under \`strict\`: the case the transport tests below use. */
+  const PUBLISHED = { perspective: 'published', stega: false, variant: undefined }
+
+  const MATRIX = [
+    { perspective: 'published', stega: false },
+    { perspective: 'published', stega: true },
+    { perspective: 'drafts', stega: false },
+    { perspective: 'drafts', stega: true },
+    { perspective: 'raw', stega: false },
+    { perspective: undefined, stega: false },
+    { perspective: undefined, stega: undefined },
+  ]
 
   const PRODUCTION = `
     const { createClient } = await import('next-sanity')
     const config = JSON.parse(process.argv[1])
+    // The app's client keeps its configured (Viewer) token in its config; the per-call token is in the model's options.
+    const options = JSON.parse(process.argv[3])
     const client = createClient({ ...config, apiHost: 'http://127.0.0.1:' + process.argv[2], maxRetries: 0 })
-    // What next-sanity's next-js sanityFetch passes (see the test that reads it from the installed export).
-    const options = { filterResponse: false, perspective: 'published', stega: false, useCdn: true, cacheMode: 'noStale', tag: 'next-loader.fetch.cache-components', token: config.token }
     const long = '*[_type == "page" && title match "' + 'a'.repeat(12000) + '"]{_id}'
     const out = []
     for (const [name, query] of [['GET', '*[_type == "page"][0]{_id}'], ['POST', long]]) {
@@ -483,21 +546,67 @@ describe('the app’s real client options, and the export conditions that decide
     console.log(JSON.stringify(out))
     process.exit(0)
   `
+  const productionArgs = (
+    config,
+    port,
+    model = modelOptions({ ...PUBLISHED, phase: 'runtime' }),
+  ) => [JSON.stringify(config), String(port), JSON.stringify(model)]
 
-  it('reads the options from the installed export, so the test cannot drift from what Next calls', () => {
-    const call = exportCall()
-    for (const option of [
-      'filterResponse: false',
+  it('models the installed export exactly: its option object, and its useCdn, cacheMode and token conditions, over a matrix', () => {
+    const source = exportSource()
+    // The option object, value for value (an added, removed or changed option fails here, not only a renamed one).
+    expect(exportCallOptions(source)).toBe(
+      '{ filterResponse: false, perspective, variant, stega, returnQuery: false, useCdn, cacheMode, tag: requestTag, token }',
+    )
+    // The three conditions, as written, and the phase test they depend on.
+    expect(exportExpression(source, 'useCdn')).toBe(
+      'perspective ? perspective === "published" : void 0',
+    )
+    expect(exportExpression(source, 'isBuildPhase')).toBe(
+      'process.env["NEXT_PHASE"] === PHASE_PRODUCTION_BUILD',
+    )
+    expect(exportExpression(source, 'cacheMode')).toBe(
+      'useCdn !== false && !isBuildPhase ? "noStale" : void 0',
+    )
+    expect(exportExpression(source, 'token')).toBe(
+      '(perspective && perspective !== "published" || stega) && serverToken ? serverToken : void 0',
+    )
+    expect(source).toMatch(/requestTag = "next-loader\.fetch\.cache-components"/)
+    // And the expressions, evaluated as written, agree with the model for every case (and the phase and token being off).
+    const evaluate = new Function(
       'perspective',
-      'useCdn',
-      'cacheMode',
-      'tag: requestTag',
-      'token',
-    ]) {
-      expect(call, option).toContain(option)
-    }
+      'stega',
+      'serverToken',
+      'isBuildPhase',
+      `const useCdn = ${exportExpression(source, 'useCdn')}; const cacheMode = ${exportExpression(source, 'cacheMode')}; const token = ${exportExpression(source, 'token')}; return { useCdn, cacheMode, token }`,
+    )
+    for (const phase of ['runtime', 'build'])
+      for (const serverToken of ['viewer-server-token', undefined])
+        for (const input of MATRIX) {
+          const model = modelOptions({ ...input, phase, serverToken })
+          expect(
+            { useCdn: model.useCdn, cacheMode: model.cacheMode, token: model.token },
+            JSON.stringify({ ...input, phase, serverToken }),
+          ).toEqual(evaluate(input.perspective, input.stega, serverToken, phase === 'build'))
+        }
+    // The values this test relies on: a strict published read passes no token and uses the CDN; builds pass no cacheMode.
+    expect(modelOptions({ ...PUBLISHED, phase: 'runtime' })).toEqual({
+      filterResponse: false,
+      perspective: 'published',
+      variant: undefined,
+      stega: false,
+      returnQuery: false,
+      useCdn: true,
+      cacheMode: 'noStale',
+      tag: 'next-loader.fetch.cache-components',
+      token: undefined,
+    })
+    expect(modelOptions({ ...PUBLISHED, phase: 'build' }).cacheMode).toBeUndefined()
+    expect(modelOptions({ perspective: 'drafts', stega: false, phase: 'runtime' }).token).toBe(
+      'viewer-server-token',
+    )
     // No `next` or `cache` option: under this export the SDK build, not an option, decides that fetch is used.
-    expect(call).not.toMatch(/\bnext:|\bcache:/)
+    expect(exportCallOptions(source)).not.toMatch(/\bnext:|\bcache:/)
   })
 
   it('builds the app’s real client as the production site configures it', async () => {
@@ -517,11 +626,11 @@ describe('the app’s real client options, and the export conditions that decide
   it('records a long POST and a GET made with the app’s client and the export’s options, under the react-server condition', async () => {
     const config = await productionConfig()
     const { server, seen, port } = await serve('ok')
-    const plain = await run(PRODUCTION, [JSON.stringify(config), String(port)], {
+    const plain = await run(PRODUCTION, productionArgs(config, port), {
       conditions: ['react-server'],
       withPreload: false,
     })
-    const watched = await run(PRODUCTION, [JSON.stringify(config), String(port)], {
+    const watched = await run(PRODUCTION, productionArgs(config, port), {
       conditions: ['react-server'],
       env: watch(port),
     })
@@ -533,6 +642,12 @@ describe('the app’s real client options, and the export conditions that decide
     expect(seen[3].bytes).toBeGreaterThan(12000)
     expect(seen[3].url).toContain('tag=next-loader.fetch.cache-components')
     expect(seen[3].url).toContain('perspective=published')
+    // The configured Viewer token is what authorises a published read: the export passes no per-call token for it.
+    expect(config.token).toBe('e2e-token')
+    expect(seen.slice(2).map((s) => s.authorization)).toEqual([
+      'Bearer e2e-token',
+      'Bearer e2e-token',
+    ])
 
     const lines = diagLines(watched.stderr)
     expect(only(lines, 'request-created')).toEqual([])
@@ -542,10 +657,28 @@ describe('the app’s real client options, and the export conditions that decide
     expect(only(lines, 'fetch-complete')).toHaveLength(2)
   }, 30_000)
 
+  it('sends the per-call token, not the configured one, when the export passes one (a non-published perspective)', async () => {
+    const config = await productionConfig()
+    const { server, seen, port } = await serve('ok')
+    const model = modelOptions({ perspective: 'drafts', stega: false, phase: 'runtime' })
+    expect(model.token).toBe('viewer-server-token')
+    const out = await run(PRODUCTION, productionArgs(config, port, model), {
+      conditions: ['react-server'],
+      withPreload: false,
+    })
+    server.close()
+    expect(JSON.parse(out.stdout)).toEqual(['GET "ok"', 'POST "ok"'])
+    expect(seen.map((s) => s.authorization)).toEqual([
+      'Bearer viewer-server-token',
+      'Bearer viewer-server-token',
+    ])
+    expect(config.token).toBe('e2e-token')
+  }, 30_000)
+
   it('is a different transport under the default conditions: the same client and options reach the lake over node:http, which the fetch logger does not see', async () => {
     const config = await productionConfig()
     const { server, seen, port } = await serve('ok')
-    const watched = await run(PRODUCTION, [JSON.stringify(config), String(port)], {
+    const watched = await run(PRODUCTION, productionArgs(config, port), {
       env: watch(port),
     })
     server.close()
