@@ -58,7 +58,9 @@ import {
   SECTION_EDGE_HEIGHTS,
   SECTION_EDGE_HEIGHT_TITLES,
   SECTION_EDGE_LAYERS,
+  SECTION_ALIGN_LAYOUT_DEFAULT,
   SECTION_EDGE_LAYER_COLOUR_INHERIT,
+  SECTION_EDGE_SHAPE_DEFAULT,
   SECTION_EDGE_LAYER_RESET,
   SECTION_EDGE_LAYER_ROLE_TITLES,
   SECTION_EDGE_LAYER_ROLES,
@@ -314,6 +316,13 @@ const radio = (values: readonly string[], titles: Record<string, string>) => ({
 })
 
 declare module 'sanity' {
+  interface BooleanOptions {
+    /**
+     * Studio draws a button with this label beside the switch that unsets the field, a saved false included
+     * (features/studio/components/clearable-boolean-input). Use it where unset and false must both be clearable.
+     */
+    clearable?: string
+  }
   interface NumberOptions {
     /** Draw the number as a slider (features/studio/components/slider-input). */
     slider?: {
@@ -1239,7 +1248,12 @@ export const sectionStyle = defineType({
         title,
         description,
         type: 'string',
-        options: radio(values, titles as Record<(typeof values)[number], string>),
+        // The first choice, "Use shape default", unsets the field (the page draws the shape's own default). It is
+        // the one way to clear a value: Studio's field menu has only Copy and Paste.
+        options: {
+          ...radio(values, titles as Record<(typeof values)[number], string>),
+          inheritable: SECTION_EDGE_SHAPE_DEFAULT,
+        },
         // Crest position and depth are offered only where a shape has a choice; strength and colours always.
         hidden:
           name === 'edgeCrest'
@@ -1305,6 +1319,9 @@ export const sectionStyle = defineType({
       description:
         'A second soft layer below the edge, over the section that follows. Still water only; not offered at Shallow depth.',
       type: 'boolean',
+      // Studio adds a "Use shape default" button beside the switch (features/studio/components/clearable-boolean-input):
+      // it unsets a saved true or false, which turning the switch off cannot do.
+      options: { clearable: SECTION_EDGE_SHAPE_DEFAULT },
       hidden: edgeLayerBelowHidden,
       validation: (rule) =>
         rule.custom((value, context) => staleLayerBelowMessage(value, context)).warning(),
@@ -1415,7 +1432,11 @@ export const sectionStyle = defineType({
       description: 'Headings and intro text.',
       type: 'string',
       fieldset: 'layoutOptions',
-      options: radio(SECTION_ALIGNS, { start: 'Start', center: 'Centre' }),
+      // "Use layout default" first: it unsets the value, so the layout's own alignment is used.
+      options: {
+        ...radio(SECTION_ALIGNS, { start: 'Start', center: 'Centre' }),
+        inheritable: SECTION_ALIGN_LAYOUT_DEFAULT,
+      },
       // Layouts that set their own alignment don't offer it.
       hidden: alignmentHidden,
       validation: (rule) =>

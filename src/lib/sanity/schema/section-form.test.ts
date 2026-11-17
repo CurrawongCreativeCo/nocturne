@@ -22,6 +22,7 @@ import {
   motionOptionHidden,
   visibleMotions,
 } from './section-form'
+import { sectionStyle } from './section-style'
 
 /** A document with one section, and the path Studio gives that section's `style.<field>`. */
 function inPage(section: Record<string, unknown>, field = 'motion') {
@@ -327,5 +328,56 @@ describe('Lagoon and Reef’s Studio rules (task 151, Slice 4)', () => {
       /^Reef is drawn between 40 and 64 px/,
     )
     expect(generatedCustomHeightMessage('desktop', 160, { parent: shape('lagoon') })).toBe(true)
+  })
+})
+
+describe('every stale-value warning names the control that clears it (task 151)', () => {
+  // Studio's field menu has only Copy and Paste, so a warning that sends the editor there is wrong.
+  registerSectionRules('clear-check', { fixesAlignment: () => true })
+  const fields = sectionStyle.fields as unknown as {
+    name: string
+    options?: { inheritable?: unknown; clearable?: unknown }
+  }[]
+  const controlOf = (name: string) => {
+    const options = fields.find((field) => field.name === name)?.options
+    const label = options?.inheritable ?? options?.clearable
+    if (typeof label !== 'string') throw new Error(`${name} has no labelled clear control`)
+    return label
+  }
+  const shape = (edge: string, extra = {}) => ({ parent: { edge, ...extra } })
+
+  // Each field, a stale value, and where it is stale; every case is a real warning (not true).
+  const cases: [string, string | true][] = [
+    ['align', staleAlignmentMessage('center', inPage({ _type: 'clear-check' }, 'align'))],
+    ['edgeCrest', staleStepMessage('crest')('shifted', shape('lagoon'))],
+    ['edgeCrest', staleStepMessage('crest')('shifted', shape('wave'))],
+    ['edgeDepth', staleStepMessage('depth')('deep', shape('reef'))],
+    ['edgeDepth', staleStepMessage('depth')('deep', shape('wave'))],
+    ['edgeStrength', staleGeneratedOptionMessage('light', shape('tide'))],
+    ['edgePalette', staleGeneratedOptionMessage('ink', shape('contour'))],
+    ['edgeLayerBelow', staleLayerBelowMessage(true, shape('lagoon'))],
+    ['edgeLayerBelow', staleLayerBelowMessage(true, shape('reef'))],
+    [
+      'edgeLayerBelow',
+      staleLayerBelowMessage(true, shape('still-water', { edgeDepth: 'shallow' })),
+    ],
+  ]
+
+  it.each(cases)('%s: names its own first choice or clear button', (name, message) => {
+    expect(typeof message).toBe('string')
+    expect(message).toContain(`“${controlOf(name)}”`)
+    expect(message).not.toMatch(/field menu/i)
+  })
+
+  it('names Alignment’s own choice, not the shape’s', () => {
+    expect(controlOf('align')).toBe('Use layout default')
+    for (const name of ['edgeCrest', 'edgeDepth', 'edgeStrength', 'edgePalette', 'edgeLayerBelow'])
+      expect(controlOf(name)).toBe('Use shape default')
+  })
+
+  it('still offers Standard or Deep for a layer below saved at Shallow', () => {
+    expect(staleLayerBelowMessage(true, shape('still-water', { edgeDepth: 'shallow' }))).toMatch(
+      /Choose Standard or Deep to show it, or “Use shape default” to clear it\.$/,
+    )
   })
 })

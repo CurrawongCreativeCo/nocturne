@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react'
 import {
   isArrayOfObjectsInputProps,
+  isBooleanInputProps,
   isNumberInputProps,
   isObjectInputProps,
   isStringInputProps,
@@ -13,6 +14,7 @@ import { framingKeyOf } from '@/lib/sanity/schema/image-framing-option'
 import { PresetBarInput } from './preset-bar-input'
 import { PresetPickerInput } from './preset-picker-input'
 import { AnchorPickerInput } from '../anchor-picker/anchor-picker-input'
+import { ClearableBooleanInput } from '../clearable-boolean-input'
 import { DesignSummaryInput } from '../design-summary-input'
 import { EdgeLayerColoursInput } from '../edge-layer-colours-input'
 import { FrameReferenceInput } from '../frame-reference-input'
@@ -32,7 +34,7 @@ import { SpacingUsageInput } from '../spacing-usage-note'
 
 /**
  * Wraps the Studio-wide input override (`form.components.input`): a string field with
- * `options.presetPicker` gets the picture picker, `options.iconPicker` the icon grid, `options.inheritable` the Inherit-first buttons, an object type with `options.presets` gets the
+ * `options.presetPicker` gets the picture picker, `options.iconPicker` the icon grid, `options.inheritable` the Inherit-first buttons, a boolean with `options.clearable` the switch with a clear button, an object type with `options.presets` gets the
  * preset bar above its fields, an object with `options.designSummary` the design summary and resets (a Link list link's Appearance, or any section, card or item design), an object with `options.layerOverridesReset` the section edge's "Reset all layer overrides" button, an image with `options.framing` gets "Adjust picture" under it, a string field with `options.gradientPicker` gets the gradient list, `options.headingGradientPicker` the heading highlight's gradient picker, an array with `options.slot` gets the one-item slot input, and everything else goes to `Fallback` (the role-aware input).
  */
 export function withPresetPicker(Fallback: ComponentType<InputProps>) {
@@ -73,6 +75,9 @@ export function withPresetPicker(Fallback: ComponentType<InputProps>) {
     }
     if (isStringInputProps(props) && props.schemaType.options?.inheritable) {
       return <InheritableChoiceInput {...props} />
+    }
+    if (isBooleanInputProps(props) && props.schemaType.options?.clearable) {
+      return <ClearableBooleanInput {...props} />
     }
     if (isStringInputProps(props) && props.schemaType.options?.anchorPicker === true) {
       return <AnchorPickerInput {...props} />
