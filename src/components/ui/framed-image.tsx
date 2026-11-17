@@ -171,9 +171,8 @@ export function FramedImage({
   const box = (
     <div
       data-framed-image={shape}
-      className={`relative ${ASPECT_CLASS[ratio ?? '4/3']} ${reach ? '' : className} ${depth?.className ?? ''}`
-        .replace(/\s+/g, ' ')
-        .trim()}
+      // Without a reserved room the class list is exactly what it always was; with one, the wrapper takes the layout's.
+      className={`relative ${ASPECT_CLASS[ratio ?? '4/3']} ${reach ? '' : className} ${depth?.className ?? ''}`.trim()}
       style={reach ? { ...depth?.style, ...reserveStyle(reach) } : depth?.style}
     >
       {under ? frameLayer : null}
