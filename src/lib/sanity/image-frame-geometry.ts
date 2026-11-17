@@ -389,6 +389,25 @@ const videoPoster: FramingResolver = {
   },
 }
 
+/**
+ * A team member's portrait (task 177): one field on the member document, drawn square everywhere, so one
+ * framing serves all of them, previewed together:
+ * - the member's own page: all four card corners (team-member-page.tsx, 800 x 800);
+ * - Team grid and slider cards: the portrait fills the top of a card that clips it, so only the top
+ *   corners round (team-card.tsx, 600 x 600); a section whose Image design is Circle or Arch cuts it to
+ *   that shape around the same hotspot;
+ * - the Team list: a small rounded square (ProfileImage, `rounded-card`).
+ * Every one is requested at its own square size, so the CDN cuts exactly this editor's area.
+ */
+const teamPortrait: FramingResolver = {
+  designPath: { drop: 1 },
+  resolve: () => [
+    { label: 'Team member page', aspect: 1, corner: 'card', insetPct: 0, drawnPx: 384 },
+    { label: 'Team grid and slider card', aspect: 1, corner: 'cardTop', insetPct: 0, drawnPx: 384 },
+    { label: 'Team list', aspect: 1, corner: 'card', insetPct: 0, drawnPx: 128 },
+  ],
+}
+
 /** Registry keys, set on an image field with `framing('…')` (lib/sanity/schema/image-framing-option.ts). */
 export const FRAMING_RESOLVERS = {
   linkListProfile,
@@ -399,6 +418,7 @@ export const FRAMING_RESOLVERS = {
   mediaTextImage,
   mediaTextLegacyImage,
   videoPoster,
+  teamPortrait,
   // new-framing: resolver
 } satisfies Record<string, FramingResolver>
 

@@ -242,3 +242,15 @@ describe('videoPoster (task 177, QA-052)', () => {
     )
   })
 })
+
+describe('teamPortrait (task 177)', () => {
+  it('previews one square framing in every place the portrait is drawn', () => {
+    const shapes = FRAMING_RESOLVERS.teamPortrait.resolve(undefined)
+    expect(FRAMING_RESOLVERS.teamPortrait.designPath).toEqual({ drop: 1 })
+    expect(shapes.map((shape) => [shape.label, shape.aspect, shape.corner])).toEqual([
+      ['Team member page', 1, 'card'],
+      ['Team grid and slider card', 1, 'cardTop'],
+      ['Team list', 1, 'card'],
+    ])
+  })
+})
