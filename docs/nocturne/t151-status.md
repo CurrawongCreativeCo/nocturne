@@ -1,6 +1,6 @@
 # Task 151: working status (decorative dividers and section transitions)
 
-**Reconciled on 17 November 2026** against `main` at `314feac` and the owner decisions recorded during the task.
+**Reconciled on 17 November 2026** against `main` at `6989101` and the owner decisions recorded during the task.
 **Task 151 is not Done.** Every planned code slice has merged, but Done acceptance needs the manual checks and owner
 sign-offs listed under _Pending acceptance_. This file records status only. It changes no plan, task status or
 capability baseline (see `t275-canonical-patch/t151-plan-amendments.md` for the unapplied Task 280 amendment).
@@ -21,15 +21,20 @@ capability baseline (see `t275-canonical-patch/t151-plan-amendments.md` for the 
 | Slice 7 batch 2: Glow finish and the Ornament centre                                        | #212 | `1e164bf`    | 15 Nov |
 | Slice 8: per-layer colours and the layer-below advisory                                     | #215 | `55d59c3`    | 15 Nov |
 | Slice 8 fix: clearing the per-layer colours in Studio                                       | #225 | `4dd5dcb`    | 16 Nov |
+| Clearing Alignment and the generated edge's controls in Studio                              | #227 | `6989101`    | 17 Nov |
 
-**This PR** fixes the last controls whose warnings sent editors to the field menu, which offers only Copy and Paste
-(found in the 16 November real-Studio check):
+**This PR** fixes the controls the 17 November real-Studio check found still clearing only through Studio's unnamed
+icon:
 
-- Alignment now starts with **Use layout default**.
-- Crest position, Depth, Layer strength and Colours now start with **Use shape default**.
-- Layer below gets a **Use shape default** button that unsets a saved true or false.
+- Tide's **Crest colour**, Contour's **Line colour** and Elevated's **Shadow** now start with **Use shape default**. A
+  value left on another shape stays visible with a warning naming its shape and that choice, and is hidden once cleared
+  (they used to be hidden with the value kept and no way to clear it).
+- The shared divider's **In the middle**, **Letters**, **Letter spacing**, **Size in the middle**, **Length** and
+  **Thickness** now start with **Use divider default**. Their hiding rules are unchanged.
+- Every choice is disabled in read-only mode (the edge radios' clear icon used to stay enabled on an earlier revision,
+  though clicking it did nothing).
 
-Rendering, stored values, which fields show and which values are kept are all unchanged.
+Stored values, defaults and rendering are unchanged.
 
 ## Owner decisions in force
 
@@ -60,13 +65,15 @@ Rendering, stored values, which fields show and which values are kept are all un
 
 ## Manual checks completed
 
-| Check                                                                                                                  | When      | Result                                                                                                                                                                                                                                                              |
-| ---------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Playwright WebKit (local `playwright.webkit.config.ts`; this is not Safari and not an iPhone)                          | 13–16 Nov | Slice 2: 140/140. Slice 4: 231/231 (Chromium 333/333). B1: all 14 selectors accepted by WebKit 27.2. Slice 8 `section-edge-layer-colours.spec.ts`: 8/8 (16 Nov), plus a read-only visual inspection of `/edge-layer-colours` in WebKit (desktop and phone captures) |
-| Real Studio, Slice 8 (local `next dev`, project r4kwvgkz, a temporary draft, writes guarded, draft deleted afterwards) | 16 Nov    | Passed: applicability, saves, retention, advisory, Preview note. Found two problems: the field menu has no Clear, and the inline clear icon has no accessible name. Both are fixed by #225                                                                          |
-| Real Studio, #225 recheck                                                                                              | 16 Nov    | 31/31                                                                                                                                                                                                                                                               |
-| Real Studio, #221 (Sanity 6.22) clearing recheck                                                                       | 17 Nov    | 31/31                                                                                                                                                                                                                                                               |
-| Real Studio, this PR (the same target, guards and cleanup)                                                             | 17 Nov    | 50/50: warning text, group names, mouse and keyboard clearing, one field changed per action, persistence after reopening, read-only on an earlier revision                                                                                                          |
+| Check                                                                                                                                    | When      | Result                                                                                                                                                                                                                                                                                                                                                                               |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Playwright WebKit (local `playwright.webkit.config.ts`; this is not Safari and not an iPhone)                                            | 13–16 Nov | Slice 2: 140/140. Slice 4: 231/231 (Chromium 333/333). B1: all 14 selectors accepted by WebKit 27.2. Slice 8 `section-edge-layer-colours.spec.ts`: 8/8 (16 Nov), plus a read-only visual inspection of `/edge-layer-colours` in WebKit (desktop and phone captures)                                                                                                                  |
+| Real Studio, Slice 8 (local `next dev`, project r4kwvgkz, a temporary draft, writes guarded, draft deleted afterwards)                   | 16 Nov    | Passed: applicability, saves, retention, advisory, Preview note. Found two problems: the field menu has no Clear, and the inline clear icon has no accessible name. Both are fixed by #225                                                                                                                                                                                           |
+| Real Studio, #225 recheck                                                                                                                | 16 Nov    | 31/31                                                                                                                                                                                                                                                                                                                                                                                |
+| Real Studio, #221 (Sanity 6.22) clearing recheck                                                                                         | 17 Nov    | 31/31                                                                                                                                                                                                                                                                                                                                                                                |
+| Real Studio, #227 (the same target, guards and cleanup)                                                                                  | 17 Nov    | 50/50: warning text, group names, mouse and keyboard clearing, one field changed per action, persistence after reopening, read-only on an earlier revision                                                                                                                                                                                                                           |
+| Real Studio, remaining controls on merged `main` (draft `task151-remaining-qa`, deleted)                                                 | 17 Nov    | Tide Crest colour, Contour Line colour, Elevated Shadow: 58/62; the four failures are the unnamed clear icon (3) and its enabled state on an earlier revision, fixed by this PR. Hero divider (Slice 7: labels, Finish, Dotted line centres, Gradient keeps line colour, Ornament size) all passed; Part A in a page draft (Link list, FAQ header, Rich text blocks as agency) 24/24 |
+| Real Studio, this PR (draft `task151-option-clear-qa`, deleted; before the fix the six divider radios' clear icon was confirmed unnamed) | 17 Nov    | 56/56: named groups with the default choice first, mouse and keyboard clearing of one field each, leftover warnings naming Tide, Contour and Elevated and hidden once cleared, Three dots and Gradient retention, reopen, read-only on an earlier revision                                                                                                                           |
 
 ## Pending acceptance (needed before Done)
 
@@ -74,10 +81,10 @@ Rendering, stored values, which fields show and which values are kept are all un
 - **S3 top-overscroll follow-up** (B1). Deferred, still open.
 - **Owner visual QA** of the full edge set in light and dark. That includes Elevated and the Slice 7 rules on real
   content. It also includes owner screenshots of two palettes for Slice 8.
-- **Real-Studio checks never done:**
-  - Tide, Contour, Elevated and the Slice 7 divider fields.
-  - Part A's signed-in Studio QA, and the Rich text role guard.
-  - Presentation preview of the edges.
+- **Real-Studio checks still pending** (each needs another role or document type; not simulated):
+  - The Rich text role guard as a client (the agency-only note, not a blank dialog).
+  - Dividers on other document types: Navigation (header and footer), Team page settings, Blog settings.
+  - Presentation preview of the edges (needs a Viewer token).
 - **Deployed Sanity schema.** The post-merge `deploy-schema` job skips because no `SANITY_DEPLOY_TOKEN` is configured.
   The deployed schema lacks the fields added since Slice 2 until someone deploys it by hand.
 - **Windows High Contrast** (forced colours is covered only by Playwright emulation).
@@ -86,6 +93,11 @@ Rendering, stored values, which fields show and which values are kept are all un
   name the reviewer.
 
 ## Deferred or follow-up (outside Task 151's remaining code)
+
+- **Operations: the QA project's trial notice.** The Studio for r4kwvgkz (the approved QA target) shows "Your free
+  trial is ending soon" (Private Datasets, User Roles, Comments, Scheduled drafts, AI Assist). Nothing was changed. The
+  owner should decide whether the plan change affects QA (for example, the user roles a client-role check would need)
+  before the trial ends.
 
 - **Issue #205:** a plain Surface section is see-through under its bottom edge. The proposed fix gives framed Surface
   sections an opaque background. It needs owner approval because it changes Classic's visuals.

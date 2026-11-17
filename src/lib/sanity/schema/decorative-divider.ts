@@ -8,6 +8,7 @@ import {
   DIVIDER_CENTRE_SIZE_TITLES,
   DIVIDER_CENTRE_TITLES,
   DIVIDER_COLOUR_CHOICES,
+  DIVIDER_DEFAULT_CHOICE,
   DIVIDER_FINISHES,
   DIVIDER_FINISH_DESCRIPTIONS,
   DIVIDER_FINISH_TITLES,
@@ -63,10 +64,16 @@ const centreIs =
   ({ parent }) =>
     isOffOrDots(parent) || !kinds.includes(divider(parent).centre ?? 'none')
 
+/**
+ * A divider's choices, drawn by InheritableChoiceInput: "Use divider default" first, which unsets the field, then the
+ * stored values. Hiding is unchanged: a value under a style that does not use it (Three dots, Gradient's line colour)
+ * stays stored and hidden, and is drawn again when the style comes back.
+ */
 const radio = <T extends string>(values: readonly T[], titles: Record<T, string>) => ({
   list: values.map((value) => ({ value, title: titles[value] })),
   layout: 'radio' as const,
   direction: 'horizontal' as const,
+  inheritable: DIVIDER_DEFAULT_CHOICE,
 })
 
 /**

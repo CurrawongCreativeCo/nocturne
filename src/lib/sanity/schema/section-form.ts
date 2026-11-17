@@ -364,9 +364,12 @@ const hasEdge = (edge: string | undefined) => !!edge && edge !== 'none'
 export const edgeOptionsHidden: ConditionalPropertyCallback = ({ parent }) =>
   !hasEdge(edgeOf(parent)) || edgeOf(parent) === 'elevated'
 
-/** Only Elevated has a shadow to choose. */
-export const edgeShadowHidden: ConditionalPropertyCallback = ({ parent }) =>
-  edgeOf(parent) !== 'elevated'
+/**
+ * Only Elevated has a shadow to choose. A shadow stored before the shape changed stays visible, so the editor can read
+ * its warning and clear it; it is hidden once cleared (see `staleShapeOptionMessage`).
+ */
+export const edgeShadowHidden: ConditionalPropertyCallback = ({ parent, value }) =>
+  edgeOf(parent) !== 'elevated' && !value
 
 /** Curve and Arch are symmetrical, so mirroring them would change nothing. */
 export const edgeFlipHidden: ConditionalPropertyCallback = ({ parent }) =>
@@ -384,13 +387,13 @@ export const edgeLayerHidden: ConditionalPropertyCallback = ({ parent }) =>
 export const edgeAccentHidden: ConditionalPropertyCallback = ({ parent }) =>
   !edgeAllowsAccent(edgeOf(parent))
 
-/** Only Tide has a back crest to colour. */
-export const edgeTideLayerHidden: ConditionalPropertyCallback = ({ parent }) =>
-  edgeOf(parent) !== 'tide'
+/** Only Tide has a back crest to colour; a stored one is shown on another shape until cleared. */
+export const edgeTideLayerHidden: ConditionalPropertyCallback = ({ parent, value }) =>
+  edgeOf(parent) !== 'tide' && !value
 
-/** Only Contour has lines to colour. */
-export const edgeLineColourHidden: ConditionalPropertyCallback = ({ parent }) =>
-  edgeOf(parent) !== 'contour'
+/** Only Contour has lines to colour; a stored one is shown on another shape until cleared. */
+export const edgeLineColourHidden: ConditionalPropertyCallback = ({ parent, value }) =>
+  edgeOf(parent) !== 'contour' && !value
 
 interface GeneratedEdgeParent extends EdgeParent {
   edgeDepth?: string
@@ -422,6 +425,17 @@ export function staleGeneratedOptionMessage(
   if (!value || isGeneratedEdge(edgeOf(context.parent))) return true
   return `This choice belongs to Still water, Lagoon and Reef and is ignored by the shape chosen above. ${CLEAR_TO_SHAPE_DEFAULT}`
 }
+
+/**
+ * The warning for Tide's Crest colour, Contour's Line colour or Elevated's Shadow left on another shape; true when there
+ * is nothing to say. The value is kept (and drawn again if the shape comes back) until the editor clears it.
+ */
+export const staleShapeOptionMessage =
+  (owner: 'tide' | 'contour' | 'elevated') =>
+  (value: unknown, context: { parent?: unknown }): string | true => {
+    if (!value || edgeOf(context.parent) === owner) return true
+    return `This choice belongs to ${SECTION_EDGE_TITLES[owner]} and is ignored by the shape chosen above. ${CLEAR_TO_SHAPE_DEFAULT}`
+  }
 
 type EdgeStep = 'crest' | 'depth'
 
