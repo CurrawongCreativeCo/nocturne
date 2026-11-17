@@ -17,6 +17,8 @@ const NEAR = 0.6
 
 test.beforeEach(async ({ page }) => {
   await page.goto(PAGE)
+  // The page streams and hydrates: until the network is quiet a tile may still be replaced.
+  await page.waitForLoadState('networkidle')
 })
 
 const section = (page: Page, heading: string) =>
@@ -27,8 +29,10 @@ const boxes = (scope: Locator) => scope.locator('[data-framed-image]')
 const buttons = (scope: Locator) => scope.locator('button[aria-haspopup="dialog"]')
 /** Its box on screen, once it is on screen: a section below the fold may not be laid out until it is scrolled to. */
 const rectOf = async (el: Locator) => {
-  await el.scrollIntoViewIfNeeded()
   await expect(el).toBeVisible()
+  await expect(async () => {
+    await el.scrollIntoViewIfNeeded({ timeout: 2000 })
+  }).toPass()
   // In page coordinates, so boxes measured at different scroll positions compare.
   return el.evaluate((node) => {
     const { left, right, top, bottom, width, height } = node.getBoundingClientRect()
@@ -165,7 +169,9 @@ test('framed tiles stay the Gallery’s buttons: the frame never takes the click
 }) => {
   const scope = section(page, 'Gallery saved as Framed with an offset border')
   const second = buttons(scope).nth(1)
-  await second.scrollIntoViewIfNeeded()
+  await expect(async () => {
+    await second.scrollIntoViewIfNeeded({ timeout: 2000 })
+  }).toPass()
   // A click on the offset border's own line, outside the picture, still lands on the tile's button.
   const hit = await second.evaluate((button) => {
     const tile = button.getBoundingClientRect()

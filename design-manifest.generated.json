@@ -24113,9 +24113,7 @@
               ],
               "availability": {
                 "grid": "verified",
-                "masonry": {
-                  "notApplicable": "Keeps each photo’s own shape: nothing is cropped"
-                },
+                "masonry": "pending",
                 "slider": "verified"
               }
             },

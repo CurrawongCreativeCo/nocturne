@@ -112,6 +112,14 @@
       "closingTask": 159
     },
     {
+      "component": "gallery",
+      "capability": "framing",
+      "scope": "card",
+      "part": "tile",
+      "layouts": ["masonry"],
+      "closingTask": 177
+    },
+    {
       "component": "team",
       "capability": "framing",
       "scope": "card",

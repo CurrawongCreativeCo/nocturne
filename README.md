@@ -2551,7 +2551,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | Pricing table (`pricingTable`)           | R✓      | R✓   | R✓     | R✓   | R✓    | C✓   | –      | C…      | –          | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
 | Newsletter signup (`newsletterSignup`)   | R✓      | –    | R✓     | R✓   | R✓    | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
 | Stats (`stats`), 2 layouts               | R✓*     | R✓*  | R✓     | R✓*  | C✓*   | –    | –      | C…      | –          | R✓      | R◐*   | R✓      | R✓   | R✓     | –     |
-| Gallery (`gallery`), 3 layouts           | –       | –    | R✓     | R✓   | –     | –    | –      | R◐*     | R✓         | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Gallery (`gallery`), 3 layouts           | –       | –    | R✓     | R✓   | –     | –    | –      | R◐      | R✓         | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
 | Location (`location`)                    | R✓      | R✓   | R✓     | R✓   | R✓    | R✓   | –      | C…      | C✓         | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
 | Team (`team`), 3 layouts                 | R✓      | R✓   | R✓     | R✓   | R✓    | –    | R✓     | R…      | R✓         | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
 | Video (`video`), 2 layouts               | –       | –    | R✓     | –    | –     | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
@@ -2574,7 +2574,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 
 | Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
 | -------------------------------------------------------- | -------- | --------------- | ------- |
-| Required                                                 | 275      | 0               | 39      |
+| Required                                                 | 274      | 1               | 39      |
 | Conditional                                              | 13       | 0               | 31      |
 
 A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
@@ -2583,7 +2583,7 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | ------------ | ---------------- | ------------------- |
 | 157          | 1                | 0                   |
 | 159          | 3                | 8                   |
-| 177          | 8                | 20                  |
+| 177          | 9                | 20                  |
 | 213          | 7                | 0                   |
 | 276          | 2                | 3                   |
 | 280          | 18               | 0                   |
