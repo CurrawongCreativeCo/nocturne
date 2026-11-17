@@ -8,6 +8,7 @@ import {
 import type { Placement } from './image-framing'
 import { thumbnailShapes } from './link-thumbnail-framing'
 import {
+  resolveAvatar,
   resolveProfileImage,
   type ProfileImageDesignInput,
   type ProfileImageSize,
@@ -408,6 +409,23 @@ const teamPortrait: FramingResolver = {
   ],
 }
 
+/** The testimonials avatar's drawn widths (quote-card.tsx AVATAR_SCALE): 40, 48 or 64px. */
+const AVATAR_DRAWN_PX = { small: 40, medium: 48, large: 64 } as const
+
+/**
+ * A testimonial's avatar (task 177): the section's Avatar design (a circle by default, a ring or not)
+ * through the same ProfileImage geometry the card draws (`resolveAvatar`, `profileFrameShape`), at the
+ * avatar's own size. The avatar is in `items[_key].avatar`, so the section is three segments up.
+ */
+const testimonialAvatar: FramingResolver = {
+  designPath: { drop: 3, field: 'avatarDesign' },
+  resolve: (design) => {
+    const resolved = resolveAvatar(design as Parameters<typeof resolveAvatar>[0], 'circle')
+    const shape = profileFrameShape(resolved)
+    return shape ? [{ ...shape, label: 'Avatar', drawnPx: AVATAR_DRAWN_PX[resolved.size] }] : []
+  },
+}
+
 /** Registry keys, set on an image field with `framing('…')` (lib/sanity/schema/image-framing-option.ts). */
 export const FRAMING_RESOLVERS = {
   linkListProfile,
@@ -419,6 +437,7 @@ export const FRAMING_RESOLVERS = {
   mediaTextLegacyImage,
   videoPoster,
   teamPortrait,
+  testimonialAvatar,
   // new-framing: resolver
 } satisfies Record<string, FramingResolver>
 

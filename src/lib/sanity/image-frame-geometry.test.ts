@@ -254,3 +254,18 @@ describe('teamPortrait (task 177)', () => {
     ])
   })
 })
+
+describe('testimonialAvatar (task 177)', () => {
+  const { designPath, resolve } = FRAMING_RESOLVERS.testimonialAvatar
+  it('reads the section’s Avatar design three segments up: a 48px circle by default', () => {
+    expect(designPath).toEqual({ drop: 3, field: 'avatarDesign' })
+    expect(resolve(undefined)).toEqual([
+      { label: 'Avatar', aspect: 1, corner: 'circle', insetPct: 0, drawnPx: 48 },
+    ])
+  })
+
+  it('follows the chosen size and ring', () => {
+    expect(resolve({ size: 'large' })[0]?.drawnPx).toBe(64)
+    expect(resolve({ ring: 'line' })[0]?.ring).toBeDefined()
+  })
+})

@@ -10,7 +10,8 @@ import {
   headerDesignField,
 } from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
-import { imageField } from '@/lib/sanity/schema/image-field'
+import { imageField, imageOptions } from '@/lib/sanity/schema/image-field'
+import { framing } from '@/lib/sanity/schema/image-framing-option'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
 import { pictureDepthFields } from '@/lib/sanity/schema/surface-design'
@@ -131,7 +132,14 @@ export const testimonials = defineType({
                 type: 'string',
                 description: 'An extra line under the name, e.g. "Client since 2019". Optional.',
               }),
-              imageField({ name: 'avatar', requireAlt: false, aspect: '1:1', minWidth: 800 }),
+              imageField({
+                name: 'avatar',
+                requireAlt: false,
+                aspect: '1:1',
+                minWidth: 800,
+                // "Adjust picture" (task 177): in the section's Avatar shape.
+                options: { ...imageOptions, ...framing('testimonialAvatar') },
+              }),
               defineField({
                 name: 'source',
                 title: 'Where it came from',
