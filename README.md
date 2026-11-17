@@ -2541,7 +2541,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | ---------------------------------------- | ------- | ---- | ------ | ---- | ----- | ---- | ------ | ------- | ---------- | ------- | ----- | ------- | ---- | ------ | ----- |
 | Hero (`hero`), 4 layouts                 | –       | R…   | R…     | R✓   | –     | –    | C✓     | R◐*     | R✓*        | R…*     | R✓*   | R✓      | R✓   | R✓     | R◐    |
 | Rich text (`richText`)                   | –       | –    | –      | R✓   | –     | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
-| Image + text (`mediaText`), 3 layouts    | –       | –    | R✓     | R✓   | –     | –    | C✓     | C…*     | R✓*        | R✓*     | R✓    | R✓      | R✓   | R✓     | R✓    |
+| Image + text (`mediaText`), 3 layouts    | –       | –    | R✓     | R✓   | –     | –    | C✓     | R◐*     | R✓*        | R✓*     | R✓    | R✓      | R✓   | R✓     | R✓    |
 | Features grid (`featuresGrid`)           | C…      | R…   | R✓     | R✓   | C…    | R✓   | C…     | C…      | –          | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
 | Logo strip (`logoCloud`), 2 layouts      | –       | –    | R✓     | R✓   | –     | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
 | Testimonials (`testimonials`), 2 layouts | R✓      | R✓   | R✓     | R✓   | R✓    | –    | –      | R◐      | R✓         | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
@@ -2574,7 +2574,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 
 | Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
 | -------------------------------------------------------- | -------- | --------------- | ------- |
-| Required                                                 | 277      | 0               | 37      |
+| Required                                                 | 278      | 0               | 37      |
 | Conditional                                              | 13       | 0               | 31      |
 
 A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
@@ -2588,7 +2588,7 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | 276          | 2                | 3                   |
 | 280          | 18               | 0                   |
 
-**Evidence.** 305 capability entries, 568 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
+**Evidence.** 306 capability entries, 570 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
 **Capabilities and their owners**
 
@@ -5935,6 +5935,40 @@ Masonry is a reviewed "not applicable" (owner, 18 November 2026). The lightbox a
 every width (the tile's ratio is the same on a phone and a desktop). A photo with neither keeps today's URL and centred cut.
 A photo that already had a hotspot from Sanity's own tool is now cut around that hotspot by the CDN, as the editor shows it,
 instead of being positioned by CSS percentages.
+
+**Every picture field, and where it stands (task 177).** A picture is _offered_ when the site crops it into a shape and the
+shape is previewed in the editor; _on request_ when it is cropped but nobody has asked for it and no placement needs it yet;
+_not suitable_ when cropping would remove content or the picture is not drawn in a shape. A field moves to "offered" with a
+resolver in `FRAMING_RESOLVERS` and `framing('…')` on the field.
+
+| Picture                                                       | Status              | Notes                                                                                                  |
+| ------------------------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------ |
+| Link list profile picture and link thumbnails                 | Offered             | Task 174                                                                                               |
+| Gallery photos (Grid and Slider tile)                         | Offered             | Masonry has no fixed tile: reviewed not applicable (a saved crop still applies)                        |
+| Event image (Featured card, event page)                       | Offered             | Two masks: top corners only in Featured, all four on the page or with a depth                          |
+| Hero picture (Split layout)                                   | Offered             | Shape from Image design, 4:3                                                                           |
+| Image + text picture (Side and Stacked; the Slot image block) | Offered             | Side 4:3, Stacked 16:9; the older picture field too. Text over media draws it as the background        |
+| Video section poster                                          | Offered             | Follows the frame's ratio (16:9, 4:3, 1:1, 21:9). Ambient and uploaded videos have no poster to adjust |
+| Team member portrait                                          | Offered             | One square framing, previewed on the member page, the grid and slider cards, and the list              |
+| Testimonial avatar                                            | Offered             | Circle at the section's Avatar size                                                                    |
+| Blog post main image                                          | Task 178            | The card and the post page draw it at different ratios, so one framing cannot serve both               |
+| Hero and Image + text backgrounds, other section backgrounds  | Task 177, last step | Focus mode: the hotspot only, at phone, tablet and desktop, as CSS `object-position`                   |
+| Service image                                                 | On request          | Drawn 16:9 beside the summary                                                                          |
+| Place (location) image                                        | On request          | Drawn 16:9 on its own page                                                                             |
+| Blog author photo                                             | On request          | A 1:1 photo under each post                                                                            |
+| Hero small picture (Editorial)                                | On request          | A small 1:1 picture beside the heading                                                                 |
+| Video slot block poster                                       | On request          | 16:9, shown before the video plays                                                                     |
+| Panel text picture                                            | On request          | An optional picture in a panel                                                                         |
+| Site logo, browser icon, default social share image           | Not suitable        | Shown whole or generated at fixed sizes elsewhere; the share image is cropped by each platform         |
+| Custom frame picture                                          | Not suitable        | Outline artwork on a transparent background: cropping would cut the frame                              |
+| Process and Features grid icons, Logo strip logos             | Not suitable        | Marks and logos are never cropped                                                                      |
+| Location section map image                                    | Not suitable        | An exported map: its edges are content                                                                 |
+
+**Evidence still pending (in `capability-baseline.json`, task 177).** The contract's harness renders a section from its own
+fields. The Events section's Featured picture and the Team section's portraits are drawn from _reference documents_ (an event, a
+team member), whose crop is stored on that document, so the harness has no field of the section to probe. Both stay Pending, not
+"not applicable": the placements are built and measured by `tests/e2e/event-image-framing.spec.ts` and the placement specs, and the
+pairs close when the harness can probe a referenced document's field.
 
 **What it changes.** Sanity's own `crop` and `hotspot` on that image field, and nothing else. The crop box is the visible area (zoom and position); the hotspot is set to the crop box's centre and size. Both live on the field in the document, never on the asset, so the same photo used elsewhere keeps its own framing. `SanityImage` already passes both to `@sanity/image-url`, so there is no new rendering path, no canvas, no new asset and no public JavaScript.
 

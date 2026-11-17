@@ -451,6 +451,8 @@ exports[`the design capability contract > mediaText: reports what it offers toda
     "action conditional item @side: verified",
     "action conditional item @stacked: verified",
     "action conditional item @overlay: verified",
+    "framing required section/picture @side: verified",
+    "framing required section/picture @stacked: verified",
     "framing conditional section/background @side: pending (177)",
     "framing conditional section/background @stacked: pending (177)",
     "pictureDepth required section @side: verified",

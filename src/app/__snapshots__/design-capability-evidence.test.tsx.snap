@@ -1760,6 +1760,18 @@ exports[`design capability evidence > mediaText.edge.section@stacked: the probe 
 ]
 `;
 
+exports[`design capability evidence > mediaText.framing.picture@side: the probe changes the registered target 1`] = `
+[
+  "4008490c03edfa1d (701 characters)",
+]
+`;
+
+exports[`design capability evidence > mediaText.framing.picture@stacked: the probe changes the registered target 1`] = `
+[
+  "079c879a75b4ba95 (701 characters)",
+]
+`;
+
 exports[`design capability evidence > mediaText.glass.section@overlay: the probe changes the registered target 1`] = `
 [
   "<div class="mx-auto w-full max-w-content" data-reveal="" style="opacity:0;transform:translateY(24px)">",

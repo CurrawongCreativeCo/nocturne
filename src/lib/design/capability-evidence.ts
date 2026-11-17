@@ -1175,6 +1175,27 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { media: SLOT_IMAGE, imageDesign: { appearance: 'framed' } },
     probe: { 'pictureDepthDesign.shadow': 'floating' },
   },
+  // "Adjust picture" on the section's picture (task 177): the slot's image is drawn by FramedImage, which serves
+  // the editor's area (`visibleArea`) at the picture's ratio through the URL builder (`urlFor`).
+  {
+    id: 'mediaText.framing.picture',
+    component: 'mediaText',
+    capability: 'framing',
+    scope: 'section',
+    part: 'picture',
+    layouts: ['side', 'stacked'],
+    field: 'media[].image',
+    resolvers: [
+      { module: '@/lib/sanity/image-framing', export: 'isFramed' },
+      { module: '@/lib/sanity/image-framing', export: 'visibleArea' },
+      { module: '@/lib/sanity/image', export: 'urlFor' },
+    ],
+    render: 'src/features/pages/components/sections/media-text.tsx',
+    target: '[data-framed-image]',
+    change: 'content',
+    base: { media: SLOT_IMAGE, imageDesign: { appearance: 'framed' } },
+    probe: { 'media.0.image.crop': CROPPED },
+  },
   {
     id: 'mediaText.slots.media',
     component: 'mediaText',
