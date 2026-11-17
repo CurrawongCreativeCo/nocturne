@@ -75,18 +75,18 @@ Stored values, defaults and rendering are unchanged.
 | Real Studio, #227 (the same target, guards and cleanup)                                                                                          | 17 Nov    | 50/50: warning text, group names, mouse and keyboard clearing, one field changed per action, persistence after reopening, read-only on an earlier revision                                                                                                                                                                                                                        |
 | Real Studio, remaining controls on merged `main` (draft `task151-remaining-qa`, deleted)                                                         | 17 Nov    | Tide Crest colour, Contour Line colour, Elevated Shadow: 58/62; the four failures are the unnamed clear icon (3) and its enabled state on an earlier revision, fixed by #228. Hero divider (Slice 7: labels, Finish, Dotted line centres, Gradient keeps line colour, Ornament size) all passed; Part A in a page draft (Link list, FAQ header, Rich text blocks as agency) 24/24 |
 | Real Studio, #228 fix branch (draft `task151-option-clear-qa`, deleted; before the fix the six divider radios' clear icon was confirmed unnamed) | 17 Nov    | 56/56: named groups with the default choice first, mouse and keyboard clearing of one field each, leftover warnings naming Tide, Contour and Elevated and hidden once cleared, Three dots and Gradient retention, reopen, read-only on an earlier revision                                                                                                                        |
+| Real Studio, **Navigation settings** (the Footer divider; the Navigation divider belongs under Footer) (**agent-run**)                           | 17 Nov    | **22/22 passed**                                                                                                                                                                                                                                                                                                                                                                  |
+| Real Studio, **Team page settings** divider (**agent-run**)                                                                                      | 17 Nov    | **16/16 genuine checks passed.** A further Diamond-visibility assertion also failed. It was a mistaken test expectation, not a product defect, and is not counted as a check                                                                                                                                                                                                      |
+| **Blog settings** divider                                                                                                                        | 17 Nov    | **Not applicable.** Blog settings has no divider field                                                                                                                                                                                                                                                                                                                            |
+| **Device pass, Mac Safari and real iPhone Safari** (**owner-run**), against `c127ab7`, default palette, with the preview image adaptation below  | 17 Nov    | Confirmed by the owner, with **clean top and bottom overscroll** on both. Orientations, zoom levels and the pages reviewed were **not recorded**                                                                                                                                                                                                                                  |
+| **Light fixture palette on Mac Safari** (**owner-run**)                                                                                          | 17 Nov    | Approved by the owner                                                                                                                                                                                                                                                                                                                                                             |
+| **Light fixture palette on real iPhone Safari** (**owner-run**)                                                                                  | 17 Nov    | Approved by the owner                                                                                                                                                                                                                                                                                                                                                             |
+| **Dark fixture palette on Mac Safari** (**owner-run**)                                                                                           | 17 Nov    | Approved by the owner                                                                                                                                                                                                                                                                                                                                                             |
+| **Dark fixture palette on real iPhone Safari** (**owner-run**)                                                                                   | 17 Nov    | Approved by the owner                                                                                                                                                                                                                                                                                                                                                             |
 
-| Real Studio, **Navigation settings** (the Footer divider; the Navigation divider belongs under Footer) (**agent-run**) | 17 Nov | **22/22 passed** |
-| Real Studio, **Team page settings** divider (**agent-run**) | 17 Nov | **16/16 genuine checks passed.** A further Diamond-visibility assertion also failed. It was a mistaken test expectation, not a product defect, and is not counted as a check |
-| **Blog settings** divider | 17 Nov | **Not applicable.** Blog settings has no divider field |
-| **Device pass, Mac Safari and real iPhone Safari** (**owner-run**), against `c127ab7`, default palette, with the preview image adaptation below | 17 Nov | Confirmed by the owner, with **clean top and bottom overscroll** on both. Orientations, zoom levels and the pages reviewed were **not recorded** |
-| **Light fixture palette on Mac Safari** (**owner-run**) | 17 Nov | Approved by the owner |
-| **Light fixture palette on real iPhone Safari** (**owner-run**) | 17 Nov | Approved by the owner |
-| **Dark fixture palette on Mac Safari** (**owner-run**) | 17 Nov | Approved by the owner |
-| **Dark fixture palette on real iPhone Safari** (**owner-run**) | 17 Nov | Approved by the owner |
-
-The palette approvals are each recorded per device and per palette. Pages, orientations and zoom levels were **not
-recorded** for any of them. Before the owner's review, an agent-side Playwright scan of the light palette (WebKit,
+The device pass and the palette approvals are each recorded per device and per palette. **They are complete within
+their reported scope and are not requested again.** Pages, orientations and zoom levels were **not recorded** for any
+of them, and that coverage stays unrecorded. Before the owner's review, an agent-side Playwright scan of the light palette (WebKit,
 iPhone-13 emulation, Chromium: 93 section boundaries, no seam rows, no horizontal overflow) and a colour-and-pictures
 check of the dark palette (57 of 57 pictures loaded) were run. Neither replaced the owner's review.
 
@@ -109,21 +109,34 @@ this record.
 
 ## Pending acceptance (needed before Done)
 
-Done is the owner's call. The items below are what is still open. They are listed in three groups so that what needs
-access or an operations action is not mixed with the rest.
+Done is the owner's call. This section separates what is **complete within its reported scope**, what is blocked by
+**access**, what is a **pending device or manual check**, what needs an **operations action**, and the remaining
+**decisions**.
+
+### Complete within reported scope (not requested again)
+
+- **Device pass, Mac Safari and real iPhone Safari** (owner-run, 17 Nov): clean top and bottom overscroll on both.
+  Pages, orientations and zoom levels are **unrecorded**; that coverage is not claimed.
+- **Light and dark fixture-palette approvals** on Mac Safari and on real iPhone Safari (owner-run, 17 Nov): four
+  separate approvals, with the same unrecorded coverage.
+- **S3 top-overscroll follow-up (B1) stays open as its own technical item.** The clean overscroll result above is
+  recorded, but it is a device observation, not a closure of that follow-up.
 
 ### Access blockers (cannot be run without the access named)
 
 - **Rich text role guard as a client** (the agency-only note, not a blank dialog). Needs a client-role sign-in. The QA
   project's trial notice is relevant (see Operations).
 - **Presentation preview of the edges.** Needs a Viewer or preview token. No new token is to be created without approval.
+
+### Pending device and manual checks (not yet run)
+
 - **Windows High Contrast** (forced colours is covered only by Playwright emulation). Needs Edge on Windows.
-
-### Pending manual checks (no access blocker; not yet run)
-
 - **Tide's Echo control in a real Studio.** It is not named in any recorded pass.
 - **VoiceOver in Studio** (Safari): the new "Use shape default" and "Use layout default" controls announced inside their
   named groups, and "Layer below: Use shape default" dimmed while nothing is saved.
+- **Part A dividers as drawn on the pages** (`/hero-dividers`, `/link-dividers`, `/media-text-dividers`,
+  `/rich-text-dividers`). The agent Studio passes covered **editing and persistence** in a Studio draft, not visual
+  inspection of these four fixture pages. Whether any were part of the owner's device pass is unrecorded.
 
 ### Operations (owner action)
 
@@ -137,11 +150,6 @@ access or an operations action is not mixed with the rest.
 
 ### Remaining product and owner decisions
 
-- **S6 and S7 (Safari on macOS and a real iPhone):** the owner confirmed a pass on both devices on 17 Nov with clean
-  overscroll. Pages, orientations and zoom levels were not recorded. Whether that closes S6, S7 and the **S3
-  top-overscroll follow-up** is the owner's call.
-- **Other Part A dividers on real content** (`/hero-dividers`, `/link-dividers`, `/media-text-dividers`,
-  `/rich-text-dividers`) are covered by the agent Studio passes above, not by an owner visual review.
 - **Dark-mode visibility advisory** (Studio judges the light scene only): decide whether it is needed before Done.
 - **Issue #205** (see below).
 - **Deferred, not reopened:** the Reef hairline and White veil, and the smoother-wave design reference (see below).
