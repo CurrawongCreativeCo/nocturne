@@ -22,6 +22,7 @@ import { SanityImage } from './sanity-image'
 const CORNER_CLASS: Record<FrameCorner, string> = {
   none: '',
   card: 'rounded-card',
+  cardTop: 'rounded-t-card',
   control: 'rounded-control',
   rounded: 'rounded-3xl',
   circle: 'rounded-full',

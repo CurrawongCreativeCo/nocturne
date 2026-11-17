@@ -166,6 +166,18 @@ export function PictureFramingExamples() {
         title="Link thumbnail: Glass rows"
         shapes={LINK_THUMBNAIL_GLASS}
       />
+    </Stack>
+  )
+}
+
+/**
+ * Task 177's placements (Gallery photos and the event image), from the resolvers the Studio uses. Drawn in a
+ * block of their own at the end of the page, so nothing above them (the screenshot baselines of the other
+ * examples) moves.
+ */
+export function PlacementFramingExamples() {
+  return (
+    <Stack gap={4} data-framing-examples="placements">
       <Example
         id="gallery-tile"
         title="Gallery photo: Grid, nothing chosen (4:3)"

@@ -20,7 +20,8 @@ import {
  * and no Studio imports. A placement's resolver turns the component's design into descriptors, so
  * the editor's stage and the page come from the same answer and can't drift.
  */
-export type FrameCorner = 'none' | 'card' | 'control' | 'rounded' | 'circle' | 'arch'
+/** `cardTop`: the card's corners at the top only, where a picture fills the top of a card that clips it. */
+export type FrameCorner = 'none' | 'card' | 'cardTop' | 'control' | 'rounded' | 'circle' | 'arch'
 
 /**
  * The corner each Image design shape is cut with: the one place FramedImage's clip, a frame that
@@ -177,8 +178,9 @@ const GALLERY_TILE_PX = 640
 /**
  * A Gallery photo, drawn as a tile (task 177). Grid and Slider cut every tile to the section's Image
  * design: 4:3, or the ratio its shape forces (Circle 1:1, Arch 4:5 or its chosen ratio). Masonry
- * keeps each photo's own shape, and the lightbox always shows the whole photo, so neither is
- * cropped. The section is two segments up: `images[_key]`.
+ * keeps each photo's own proportions, so there is no fixed tile to reposition it within (a crop
+ * saved on the photo still applies there), and the lightbox always shows the whole photo. The
+ * section is two segments up: `images[_key]`.
  */
 const galleryTile: FramingResolver = {
   designPath: { drop: 2 },
@@ -208,16 +210,27 @@ const galleryTile: FramingResolver = {
 const EVENT_IMAGE_PX = 768
 
 /**
- * An event's picture (task 177): 16:9 on the Events section's Featured card and on the event's own page,
- * both requested from the CDN at 1200 x 675, so the CDN cuts exactly the area this editor shows
- * (`servedRect`). One shape, whichever section shows the event. The List and Agenda layouts draw no
- * picture. The field sits on the event document, so the design path is the document itself.
+ * An event's picture (task 177): 16:9 wherever it is drawn, and requested from the CDN at 1200 x 675, so
+ * the CDN cuts exactly the area this editor shows (`servedRect`). Two masks, both shown in the editor:
+ * - the Featured card's default picture fills the top of the card, which clips it, so only its top
+ *   corners are rounded (events/featured.tsx: the card's `rounded-card overflow-hidden`);
+ * - the event's own page, and a Featured picture inset for its depth, round all four corners
+ *   (`rounded-card` on the picture).
+ * The List and Agenda layouts draw no picture. The field sits on the event document, so the design path
+ * is the document itself, and which mask a visitor sees depends on where the event is shown.
  */
 const eventImage: FramingResolver = {
   designPath: { drop: 1 },
   resolve: () => [
     {
-      label: 'Featured card and event page',
+      label: 'Featured card',
+      aspect: 16 / 9,
+      corner: 'cardTop',
+      insetPct: 0,
+      drawnPx: EVENT_IMAGE_PX,
+    },
+    {
+      label: 'Event page, and a Featured picture with depth',
       aspect: 16 / 9,
       corner: 'card',
       insetPct: 0,

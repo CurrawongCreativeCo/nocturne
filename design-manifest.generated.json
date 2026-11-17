@@ -1823,7 +1823,7 @@
           "list": [
             {
               "value": "4/5",
-              "title": "4:5 (default)"
+              "title": "4:5"
             },
             {
               "value": "3/4",
@@ -4515,7 +4515,7 @@
           "list": [
             {
               "value": "4/5",
-              "title": "4:5 (default)"
+              "title": "4:5"
             },
             {
               "value": "3/4",
@@ -22973,7 +22973,7 @@
           "list": [
             {
               "value": "4/5",
-              "title": "4:5 (default)"
+              "title": "4:5"
             },
             {
               "value": "3/4",
@@ -24113,7 +24113,9 @@
               ],
               "availability": {
                 "grid": "verified",
-                "masonry": "pending",
+                "masonry": {
+                  "notApplicable": "Fixed-tile framing does not apply: Masonry keeps each picture’s own proportions, so there is no fixed tile to reposition it within. A crop saved on the picture still applies there."
+                },
                 "slider": "verified"
               }
             },
@@ -26986,7 +26988,7 @@
           "list": [
             {
               "value": "4/5",
-              "title": "4:5 (default)"
+              "title": "4:5"
             },
             {
               "value": "3/4",

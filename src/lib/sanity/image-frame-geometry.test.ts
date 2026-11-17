@@ -1,9 +1,13 @@
+import { readFileSync } from 'node:fs'
+import { resolve as resolvePath } from 'node:path'
+
 import { describe, expect, it } from 'vitest'
 
 import {
   FRAMING_RESOLVERS,
   PROFILE_DRAWN_PX,
   PROFILE_FRAME_INSET_PCT,
+  CORNER_PX,
   appearanceCorner,
   isFramingKey,
 } from './image-frame-geometry'
@@ -135,18 +139,28 @@ describe('galleryTile (task 177)', () => {
 })
 
 describe('eventImage (task 177)', () => {
-  it('is 16:9 with the card corner, wherever the event is shown', () => {
+  it('previews both masks the site draws: the Featured card’s top corners, and all four elsewhere', () => {
     const { designPath, resolve } = FRAMING_RESOLVERS.eventImage
     expect(designPath).toEqual({ drop: 1 })
     expect(resolve(undefined)).toEqual([
+      { label: 'Featured card', aspect: 16 / 9, corner: 'cardTop', insetPct: 0, drawnPx: 768 },
       {
-        label: 'Featured card and event page',
+        label: 'Event page, and a Featured picture with depth',
         aspect: 16 / 9,
         corner: 'card',
         insetPct: 0,
         drawnPx: 768,
       },
     ])
+  })
+
+  it('uses the card corner the site draws: --radius-card, 1rem (16px)', () => {
+    const tokens = readFileSync(
+      resolvePath(process.cwd(), 'src/styles/tokens.generated.css'),
+      'utf8',
+    )
+    expect(tokens).toContain('--radius-card: 1rem;')
+    expect(CORNER_PX.card).toBe(16)
   })
 })
 

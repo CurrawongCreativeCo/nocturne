@@ -51,6 +51,17 @@ describe('cornerRadius', () => {
       '50% 50% 0 0 / 33.3% 33.3% 0 0',
     )
   })
+
+  it('keeps a fixed corner round on a shape that is not square: its own share of the height', () => {
+    // 16px on a 768px-wide 16:9 picture (432px tall): 2.1% across, 3.7% down.
+    expect(cornerRadius({ corner: 'card', drawnPx: 768, aspect: 16 / 9 })).toBe('2.1% / 3.7%')
+  })
+
+  it('rounds only the top corners for a picture at the top of a card that clips it (task 177)', () => {
+    expect(cornerRadius({ corner: 'cardTop', drawnPx: 768, aspect: 16 / 9 })).toBe(
+      '2.1% 2.1% 0 0 / 3.7% 3.7% 0 0',
+    )
+  })
 })
 
 describe('pictureStyle', () => {

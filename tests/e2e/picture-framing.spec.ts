@@ -146,7 +146,8 @@ test.describe('with touch', () => {
 for (const scheme of SCHEMES) {
   test(`has no accessibility violations, ${scheme}`, async ({ page }) => {
     await openPreview(page)
-    const holder = page.locator(`[data-framing-scheme="${scheme}"]`)
+    // The first block (the placements block at the end of the page has the same attribute).
+    const holder = page.locator(`[data-framing-scheme="${scheme}"]`).first()
     await holder.scrollIntoViewIfNeeded()
     const results = await new AxeBuilder({ page })
       .include(`[data-framing-scheme="${scheme}"]`)
@@ -239,6 +240,12 @@ test.describe('on Gallery photos and the event image (task 177)', () => {
     ] as const) {
       const dialog = await openDialog(page, 'light', id)
       expect(await ratioOf(dialog), id).toBeCloseTo(ratio, 1)
+      // The event image is drawn with two masks: the Featured card's is the stage, the other an outline.
+      if (id === 'event-image') {
+        await expect(
+          dialog.getByText('Also shown as: Event page, and a Featured picture with depth'),
+        ).toBeVisible()
+      }
       await dialog.getByRole('button', { name: 'Cancel' }).click()
       await expect(dialog).toBeHidden()
     }

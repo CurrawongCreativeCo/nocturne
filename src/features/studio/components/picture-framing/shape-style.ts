@@ -28,23 +28,32 @@ export function shapeBoxStyle(aspect: number, insetPct = 0): CSSProperties {
   }
 }
 
+const tenth = (value: number) => Math.round(value * 10) / 10
+
 /**
- * The corner as the page draws it, kept in proportion: percentages of the picture's drawn size. An
- * arch's top is a half circle as wide as the picture (`rounded-t-full`), so its height share
- * depends on the ratio: half the width, as a share of the height.
+ * The corner as the page draws it, kept in proportion: percentages of the picture's drawn size. A
+ * percentage radius is a share of the width across and of the height down, so a fixed corner (16px
+ * on the page) gets its own height share when the shape is not square, or it would be drawn as an
+ * ellipse. An arch's top is a half circle as wide as the picture (`rounded-t-full`), so its height
+ * share is half the width, as a share of the height.
  */
 export function cornerRadius(shape: Pick<FrameShape, 'corner' | 'drawnPx' | 'aspect'>): string {
   switch (shape.corner) {
     case 'circle':
       return '50%'
     case 'arch': {
-      const down = Math.round(50 * shape.aspect * 10) / 10
+      const down = tenth(50 * shape.aspect)
       return `50% 50% 0 0 / ${down}% ${down}% 0 0`
     }
     case 'none':
       return '0'
-    default:
-      return `${Math.round((CORNER_PX[shape.corner] / shape.drawnPx) * 1000) / 10}%`
+    default: {
+      const px = CORNER_PX[shape.corner === 'cardTop' ? 'card' : shape.corner]
+      const across = tenth((px / shape.drawnPx) * 100)
+      const down = tenth((px / shape.drawnPx) * 100 * shape.aspect)
+      if (shape.corner === 'cardTop') return `${across}% ${across}% 0 0 / ${down}% ${down}% 0 0`
+      return across === down ? `${across}%` : `${across}% / ${down}%`
+    }
   }
 }
 

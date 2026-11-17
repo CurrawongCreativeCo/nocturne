@@ -82,6 +82,11 @@ const hiddenUnless =
     return !applies(imageDesignUses(design), design)
   }
 
+/** The first Arch ratio choice: it unsets the field (4:5). */
+export const ARCH_DEFAULT_CHOICE = 'Use default (4:5)'
+/** Allow frame overlap's clear button: it unsets the field, so the layout keeps the frame's room. */
+export const OVERLAP_DEFAULT_CHOICE = 'Use default (keep room)'
+
 const radio = <T extends string>(values: readonly T[], titles: Record<T, string>) => ({
   list: values.map((value) => ({ title: titles[value], value })),
   layout: 'radio' as const,
@@ -247,8 +252,12 @@ export const imageDesign = defineType({
       title: 'Arch ratio',
       type: 'string',
       fieldset: 'more',
-      description: 'Width to height. Empty is 4:5.',
-      options: radio(IMAGE_ARCH_RATIOS, IMAGE_ARCH_RATIO_TITLES),
+      description: 'Width to height.',
+      // The first choice clears the field, so the arch goes back to 4:5 without storing a value of its own.
+      options: {
+        ...radio(IMAGE_ARCH_RATIOS, IMAGE_ARCH_RATIO_TITLES),
+        inheritable: ARCH_DEFAULT_CHOICE,
+      },
       hidden: hiddenUnless((uses) => uses.archRatio),
     }),
     defineField({
@@ -276,6 +285,8 @@ export const imageDesign = defineType({
       fieldset: 'more',
       description:
         'Off: the layout keeps room for the part of the frame outside the picture, so it never runs into the space around it. On: the frame may overlap the gap or whatever is next to the picture.',
+      // A switch stores false when turned off; the button removes the value, so the default (keep room) applies.
+      options: { clearable: OVERLAP_DEFAULT_CHOICE },
       hidden: hiddenUnless((uses) => uses.frameOverlap),
     }),
   ].map(validateVisible),

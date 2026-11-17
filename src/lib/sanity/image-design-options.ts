@@ -66,7 +66,7 @@ export type ImageFramePreset = (typeof IMAGE_FRAME_PRESETS)[number]
 export const IMAGE_ARCH_RATIOS = ['4/5', '3/4', '2/3'] as const
 export type ImageArchRatio = (typeof IMAGE_ARCH_RATIOS)[number]
 export const IMAGE_ARCH_RATIO_TITLES: Record<ImageArchRatio, string> = {
-  '4/5': '4:5 (default)',
+  '4/5': '4:5',
   '3/4': '3:4',
   '2/3': '2:3',
 }

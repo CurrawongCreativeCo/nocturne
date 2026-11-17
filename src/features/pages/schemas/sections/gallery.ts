@@ -67,7 +67,8 @@ const { name: _name, ...pictureMember } = imageField({
   minWidth: 1600,
   description: 'Click an image on the site to see it full screen, with its caption.',
   // "Adjust picture" (task 177): drag and zoom the photo inside its tile. The tile only: the lightbox
-  // always shows the whole photo, and Masonry keeps each photo's own shape (nothing to adjust).
+  // always shows the whole photo, and Masonry keeps each photo's proportions (no fixed tile to reposition within;
+  // a saved crop still applies there).
   options: { ...imageOptions, ...framing('galleryTile') },
   fields: [
     defineField({

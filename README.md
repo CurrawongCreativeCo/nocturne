@@ -2551,7 +2551,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | Pricing table (`pricingTable`)           | R✓      | R✓   | R✓     | R✓   | R✓    | C✓   | –      | C…      | –          | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
 | Newsletter signup (`newsletterSignup`)   | R✓      | –    | R✓     | R✓   | R✓    | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
 | Stats (`stats`), 2 layouts               | R✓*     | R✓*  | R✓     | R✓*  | C✓*   | –    | –      | C…      | –          | R✓      | R◐*   | R✓      | R✓   | R✓     | –     |
-| Gallery (`gallery`), 3 layouts           | –       | –    | R✓     | R✓   | –     | –    | –      | R◐      | R✓         | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Gallery (`gallery`), 3 layouts           | –       | –    | R✓     | R✓   | –     | –    | –      | R◐*     | R✓         | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
 | Location (`location`)                    | R✓      | R✓   | R✓     | R✓   | R✓    | R✓   | –      | C…      | C✓         | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
 | Team (`team`), 3 layouts                 | R✓      | R✓   | R✓     | R✓   | R✓    | –    | R✓     | R…      | R✓         | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
 | Video (`video`), 2 layouts               | –       | –    | R✓     | –    | –     | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
@@ -2574,7 +2574,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 
 | Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
 | -------------------------------------------------------- | -------- | --------------- | ------- |
-| Required                                                 | 274      | 1               | 39      |
+| Required                                                 | 275      | 0               | 39      |
 | Conditional                                              | 13       | 0               | 31      |
 
 A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
@@ -2583,7 +2583,7 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | ------------ | ---------------- | ------------------- |
 | 157          | 1                | 0                   |
 | 159          | 3                | 8                   |
-| 177          | 9                | 20                  |
+| 177          | 8                | 20                  |
 | 213          | 7                | 0                   |
 | 276          | 2                | 3                   |
 | 280          | 18               | 0                   |
@@ -5927,8 +5927,10 @@ A dialog under an image field where an editor sees the picture inside the exact 
 
 **Gallery photos.** Each photo's editor shows the tile's real shape: 4:3, or the ratio and corners of the section's Image design
 (Circle 1:1, Arch 4:5 or its chosen ratio, Rounded's 24 px corners), from the `galleryTile` resolver, which reads the same
-`resolveImageDesign` the tile draws from. Masonry keeps each photo's own shape, so it offers no editor, and the lightbox always shows
-the whole photo whatever is stored. A photo with a stored crop or hotspot is served as exactly the area the editor shows
+`resolveImageDesign` the tile draws from. Masonry keeps each photo's own proportions, so there is no fixed tile to reposition it
+within and the field offers no editor; a crop already saved on the photo (from a Grid or Slider, or Sanity's own tool) is kept and
+still applies there, and applies again if the section switches back. In the design capability contract, fixed-tile framing on
+Masonry is a reviewed "not applicable" (owner, 18 November 2026). The lightbox always shows the whole photo whatever is stored. A photo with a stored crop or hotspot is served as exactly the area the editor shows
 (`FramedImage`'s `framing`, which passes `visibleArea` to `SanityImage` as its `placement`), so the editor and the page agree at
 every width (the tile's ratio is the same on a phone and a desktop). A photo with neither keeps today's URL and centred cut.
 A photo that already had a hotspot from Sanity's own tool is now cut around that hotspot by the CDN, as the editor shows it,

@@ -62,10 +62,34 @@ test('a photo with nothing stored keeps its URL; an adjusted one is served as th
   expect((await srcOf(plain)).searchParams.get('rect')).toBeNull()
 })
 
-test('Masonry offers no framing: it keeps each photo’s own shape', async ({ page }) => {
+test('Masonry has no fixed tile to adjust, and keeps a crop saved in another layout', async ({
+  page,
+}) => {
   const scope = section(page, 'Gallery masonry with an adjusted photo')
   await expect(buttons(scope)).toHaveCount(3)
   await expect(boxes(scope)).toHaveCount(0)
+  // The same stored crop as the Grid's adjusted photo: switching layouts keeps it, and Masonry still applies it,
+  // cut to the photo's own proportions (1200 x 630) around its hotspot, so always inside the saved crop.
+  const grid = (
+    await srcOf(boxes(section(page, 'Gallery nothing chosen')).first())
+  ).searchParams.get('rect')
+  expect(grid).toBe('60,63,672,504')
+  const masonry = (await srcOf(buttons(scope).first())).searchParams.get('rect')
+  const [left = 0, top = 0, width = 0, height = 0] = (masonry ?? '').split(',').map(Number)
+  expect(masonry).not.toBeNull()
+  expect(left).toBeGreaterThanOrEqual(60)
+  expect(top).toBeGreaterThanOrEqual(63)
+  expect(left + width).toBeLessThanOrEqual(60 + 672)
+  expect(top + height).toBeLessThanOrEqual(63 + 504)
+  expect(width / height).toBeCloseTo(1200 / 630, 1)
+  // A photo with nothing stored keeps its own proportions: the whole photo, give or take the pixel the CDN's
+  // rounding of 900 x 473 trims.
+  const whole = (await srcOf(buttons(scope).nth(1))).searchParams.get('rect')
+  if (whole) {
+    const [, , w = 0, h = 0] = whole.split(',').map(Number)
+    expect(w).toBeGreaterThanOrEqual(1198)
+    expect(h).toBeGreaterThanOrEqual(629)
+  }
 })
 
 test('a saved Framed section draws as before: Standard corners and its offset border as artwork', async ({
