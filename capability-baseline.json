@@ -270,7 +270,7 @@
       "capability": "divider",
       "scope": "section",
       "layouts": [null],
-      "closingTask": 151
+      "closingTask": 280
     },
     {
       "component": "searchResults",
