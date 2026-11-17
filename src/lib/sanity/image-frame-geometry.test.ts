@@ -174,3 +174,44 @@ describe('appearanceCorner', () => {
     expect(appearanceCorner('arch')).toBe('arch')
   })
 })
+
+describe('heroImage (task 177)', () => {
+  const { designPath, resolve, wholeNote } = FRAMING_RESOLVERS.heroImage
+  it('finds the section one segment up, and has a shape only in Split', () => {
+    expect(designPath).toEqual({ drop: 1 })
+    expect(resolve({ variant: 'split' })[0]).toMatchObject({ aspect: 4 / 3, corner: 'card' })
+    for (const variant of ['overlay', 'full-bleed', 'editorial', undefined]) {
+      expect(resolve({ variant })).toEqual([])
+    }
+    expect(wholeNote?.saved).toMatch(/covers the section/)
+  })
+
+  it('takes the older Image shape, and the Image design over it', () => {
+    expect(resolve({ variant: 'split', imageShape: 'circle' })[0]).toMatchObject({
+      aspect: 1,
+      corner: 'circle',
+    })
+    expect(
+      resolve({ variant: 'split', imageShape: 'circle', imageDesign: { appearance: 'arch' } })[0],
+    ).toMatchObject({ aspect: 4 / 5, corner: 'arch' })
+  })
+})
+
+describe('Image + text pictures (task 177)', () => {
+  it('reads the section three segments up from the slot block, one up from the older field', () => {
+    expect(FRAMING_RESOLVERS.mediaTextImage.designPath).toEqual({ drop: 3 })
+    expect(FRAMING_RESOLVERS.mediaTextLegacyImage.designPath).toEqual({ drop: 1 })
+  })
+
+  it('is 4:3 side by side, 16:9 stacked, and has no fixed shape as the background', () => {
+    const { resolve } = FRAMING_RESOLVERS.mediaTextImage
+    expect(resolve({ variant: 'side' })[0]).toMatchObject({ aspect: 4 / 3 })
+    expect(resolve({})[0]).toMatchObject({ aspect: 4 / 3 })
+    expect(resolve({ variant: 'stacked' })[0]).toMatchObject({ aspect: 16 / 9 })
+    expect(resolve({ variant: 'overlay' })).toEqual([])
+    expect(resolve({ variant: 'side', imageDesign: { appearance: 'circle' } })[0]).toMatchObject({
+      aspect: 1,
+      corner: 'circle',
+    })
+  })
+})

@@ -177,6 +177,8 @@ export function MediaText({ data, isFirst = false }: SectionProps<'mediaText'>) 
         width={1200}
         sizes={stacked ? '(min-width: 1024px) 1100px, 100vw' : '(min-width: 1024px) 50vw, 100vw'}
         aspect={stacked ? '16/9' : '4/3'}
+        // Served as "Adjust picture" shows it (task 177), once a crop or hotspot is stored.
+        framing
       />
     )
 

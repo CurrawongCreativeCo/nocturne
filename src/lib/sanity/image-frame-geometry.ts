@@ -1,4 +1,5 @@
 import {
+  appearanceFromHeroShape,
   aspectValue,
   resolveImageDesign,
   type ImageAppearance,
@@ -239,12 +240,104 @@ const eventImage: FramingResolver = {
   ],
 }
 
+/** The field's line where a section draws its picture as its background, which covers the section. */
+const BACKGROUND_NOTE: WholeNote = {
+  saved:
+    'In this layout the picture covers the section behind the text, so there’s no fixed shape to adjust here. The saved positioning still applies to it.',
+  unsaved:
+    'In this layout the picture covers the section behind the text, so there’s no fixed shape to adjust here.',
+}
+
+/**
+ * A section picture drawn by FramedImage with the section's Image design: the ratio the shape forces,
+ * else the layout's own, and the shape's corner, as the page draws it.
+ */
+function sectionPicture(
+  label: string,
+  design: ImageDesignInput | null | undefined,
+  ratio: '4/3' | '16/9',
+  drawnPx: number,
+  fallbackShape?: ImageAppearance,
+): FrameShape {
+  const resolved = resolveImageDesign(design, { aspect: ratio, fallbackShape })
+  return {
+    label,
+    aspect: aspectValue(resolved.ratio ?? ratio),
+    corner: appearanceCorner(resolved.shape),
+    insetPct: 0,
+    drawnPx,
+  }
+}
+
+interface StoredHeroSection {
+  variant?: string | null
+  imageShape?: string | null
+  imageDesign?: ImageDesignInput | null
+}
+
+/**
+ * The hero's picture (task 177). Split draws it beside the text, 4:3 or the shape its Image design (or
+ * its older "Image shape") forces (hero/split.tsx). Full background and Image with panel draw it behind
+ * the text, covering the section: no fixed shape here. Editorial never draws it. The field is on the section.
+ */
+const heroImage: FramingResolver = {
+  designPath: { drop: 1 },
+  wholeNote: BACKGROUND_NOTE,
+  resolve: (design) => {
+    const section = design as StoredHeroSection | null | undefined
+    if (section?.variant !== 'split') return []
+    return [
+      sectionPicture(
+        'Split picture',
+        section.imageDesign,
+        '4/3',
+        // The picture's column at its widest: 60% of the 80rem container.
+        768,
+        appearanceFromHeroShape(section.imageShape),
+      ),
+    ]
+  },
+}
+
+interface StoredMediaTextSection {
+  variant?: string | null
+  imageDesign?: ImageDesignInput | null
+}
+
+/** Image + text's picture: 16:9 when stacked, else 4:3 (media-text.tsx), or the shape's own ratio. */
+function mediaTextShapes(design: unknown): FrameShape[] {
+  const section = design as StoredMediaTextSection | null | undefined
+  // The stored layouts (features/pages/utils/split-layout.ts, which a shared module may not import; a test
+  // keeps the two in step): anything but these two is the side-by-side default.
+  if (section?.variant === 'overlay') return []
+  return section?.variant === 'stacked'
+    ? [sectionPicture('Image + text picture', section.imageDesign, '16/9', 1100)]
+    : [sectionPicture('Image + text picture', section?.imageDesign, '4/3', 640)]
+}
+
+/** Image + text's media slot picture (`slotImage`, allowed only there): the section is three segments up. */
+const mediaTextImage: FramingResolver = {
+  designPath: { drop: 3 },
+  wholeNote: BACKGROUND_NOTE,
+  resolve: mediaTextShapes,
+}
+
+/** Image + text's older picture field, kept for sections saved before the media slot: on the section itself. */
+const mediaTextLegacyImage: FramingResolver = {
+  designPath: { drop: 1 },
+  wholeNote: BACKGROUND_NOTE,
+  resolve: mediaTextShapes,
+}
+
 /** Registry keys, set on an image field with `framing('…')` (lib/sanity/schema/image-framing-option.ts). */
 export const FRAMING_RESOLVERS = {
   linkListProfile,
   linkListThumbnail,
   galleryTile,
   eventImage,
+  heroImage,
+  mediaTextImage,
+  mediaTextLegacyImage,
   // new-framing: resolver
 } satisfies Record<string, FramingResolver>
 
