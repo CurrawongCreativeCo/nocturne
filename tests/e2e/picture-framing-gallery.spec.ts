@@ -25,11 +25,18 @@ const section = (page: Page, heading: string) =>
     .filter({ has: page.getByRole('heading', { name: heading, exact: true }) })
 const boxes = (scope: Locator) => scope.locator('[data-framed-image]')
 const buttons = (scope: Locator) => scope.locator('button[aria-haspopup="dialog"]')
-const rectOf = (el: Locator) =>
-  el.evaluate((node) => {
+/** Its box on screen, once it is on screen: a section below the fold may not be laid out until it is scrolled to. */
+const rectOf = async (el: Locator) => {
+  await el.scrollIntoViewIfNeeded()
+  await expect(el).toBeVisible()
+  // In page coordinates, so boxes measured at different scroll positions compare.
+  return el.evaluate((node) => {
     const { left, right, top, bottom, width, height } = node.getBoundingClientRect()
-    return { left, right, top, bottom, width, height }
+    const x = window.scrollX
+    const y = window.scrollY
+    return { left: left + x, right: right + x, top: top + y, bottom: bottom + y, width, height }
   })
+}
 const srcOf = (scope: Locator) =>
   scope
     .locator('img')
@@ -160,17 +167,16 @@ test('framed tiles stay the Gallery’s buttons: the frame never takes the click
   const second = buttons(scope).nth(1)
   await second.scrollIntoViewIfNeeded()
   // A click on the offset border's own line, outside the picture, still lands on the tile's button.
-  const picture = await rectOf(boxes(scope).nth(1))
-  const tile = await rectOf(second)
-  const x = (picture.right + tile.right) / 2
-  const y = picture.top + picture.height / 2
-  const hit = await page.evaluate(
-    ({ px, py }) => {
-      const target = document.elementFromPoint(px, py)
-      return target?.closest('button')?.getAttribute('aria-label') ?? null
-    },
-    { px: x, py: y },
-  )
+  const hit = await second.evaluate((button) => {
+    const tile = button.getBoundingClientRect()
+    const picture = button.querySelector('[data-framed-image]')?.getBoundingClientRect()
+    if (!picture) return null
+    const target = document.elementFromPoint(
+      (picture.right + tile.right) / 2,
+      picture.top + picture.height / 2,
+    )
+    return target?.closest('button')?.getAttribute('aria-label') ?? null
+  })
   expect(hit).toMatch(/^Open image 2 of 3/)
 
   await second.focus()

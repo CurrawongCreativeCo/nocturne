@@ -287,7 +287,7 @@ test.describe('on Gallery photos and the event image (task 177)', () => {
     await openPreview(page)
     const holder = example(page, 'light', 'gallery-arch')
     const dialog = await openDialog(page, 'light', 'gallery-arch')
-    await dialog.getByRole('slider', { name: 'Zoom' }).fill('180')
+    await dialog.getByRole('slider', { name: 'Zoom' }).fill('120')
     await dialog.getByRole('button', { name: 'Cancel' }).click()
     await dialog.getByRole('button', { name: 'Discard' }).click()
     await expect(holder.locator('[data-framing-values]')).toHaveText('{}')
