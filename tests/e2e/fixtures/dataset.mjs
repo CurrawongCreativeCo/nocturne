@@ -3643,6 +3643,84 @@ documents.push({
 })
 
 /**
+ * Shared picture framing on the Gallery (task 177; tests/e2e/picture-framing-gallery.spec.ts): shape and frame
+ * chosen separately, frames that keep their own room, Arch ratios, a saved Framed section, and one photo adjusted
+ * in "Adjust picture" (its crop and hotspot as the editor writes them for a 4:3 tile). Three photos each, so a
+ * grid row has neighbours to collide with.
+ */
+const framingGallery = (id, title, variant, design, extra = {}) => ({
+  _key: id,
+  _type: 'gallery',
+  variant,
+  title,
+  columns: 3,
+  images: galleryImages(id, 3),
+  ...(design ? { imageDesign: imageDesign(design) } : {}),
+  ...extra,
+})
+/** What Adjust picture stores for the fixture's 1200 x 630 picture in a 4:3 tile, zoomed in on its left side. */
+export const ADJUSTED_TILE = {
+  crop: { _type: 'sanity.imageCrop', top: 0.1, bottom: 0.1, left: 0.05, right: 0.39 },
+  hotspot: { _type: 'sanity.imageHotspot', x: 0.33, y: 0.5, width: 0.56, height: 0.8 },
+}
+documents.push({
+  _id: 'page-picture-framing-gallery',
+  _type: 'page',
+  title: 'Picture framing, gallery',
+  slug: { _type: 'slug', current: 'picture-framing-gallery' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    framingGallery('frame-g-none', 'Gallery nothing chosen', 'grid', null, {
+      images: [
+        { ...image('frame-g-none picture 1'), _key: 'frame-g-none-1', ...ADJUSTED_TILE },
+        ...galleryImages('frame-g-none', 3).slice(1),
+      ],
+    }),
+    framingGallery('frame-g-legacy', 'Gallery saved as Framed with an offset border', 'grid', {
+      appearance: 'framed',
+      frame: 'offset-border',
+    }),
+    framingGallery('frame-g-overlap', 'Gallery offset border allowed to overlap', 'grid', {
+      appearance: 'framed',
+      frame: 'offset-border',
+      frameOverlap: true,
+    }),
+    framingGallery('frame-g-rounded', 'Gallery rounded with an offset border', 'grid', {
+      appearance: 'rounded',
+      frameStyle: 'offset-border',
+    }),
+    framingGallery('frame-g-circle', 'Gallery circle with a double line', 'grid', {
+      appearance: 'circle',
+      frameStyle: 'double-line',
+    }),
+    framingGallery('frame-g-arch', 'Gallery arch 2:3 with a simple line', 'grid', {
+      appearance: 'arch',
+      archRatio: '2/3',
+      frameStyle: 'thin-line',
+    }),
+    framingGallery('frame-g-brackets', 'Gallery rounded with brackets on the edge', 'grid', {
+      appearance: 'rounded',
+      frameStyle: 'corner-brackets',
+      frameInset: 0,
+    }),
+    framingGallery('frame-g-leftover', 'Gallery circle with an older frame left over', 'grid', {
+      appearance: 'circle',
+      frame: 'double-line',
+    }),
+    framingGallery('frame-g-slider', 'Gallery slider arch with an offset border', 'slider', {
+      appearance: 'arch',
+      frameStyle: 'offset-border',
+    }),
+    framingGallery('frame-g-masonry', 'Gallery masonry with an adjusted photo', 'masonry', null, {
+      images: [
+        { ...image('frame-g-masonry picture 1'), _key: 'frame-g-masonry-1', ...ADJUSTED_TILE },
+        ...galleryImages('frame-g-masonry', 3).slice(1),
+      ],
+    }),
+  ],
+})
+
+/**
  * Picture depth on the Gallery (tests/e2e/picture-depth-gallery.spec.ts): grids and sliders of six pictures with
  * nothing chosen and at each depth level, and a section of a transparent picture and a cropped one.
  */

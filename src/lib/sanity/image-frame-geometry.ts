@@ -1,3 +1,9 @@
+import {
+  aspectValue,
+  resolveImageDesign,
+  type ImageAppearance,
+  type ImageDesignInput,
+} from './image-design-options'
 import type { Placement } from './image-framing'
 import { thumbnailShapes } from './link-thumbnail-framing'
 import {
@@ -14,7 +20,28 @@ import {
  * and no Studio imports. A placement's resolver turns the component's design into descriptors, so
  * the editor's stage and the page come from the same answer and can't drift.
  */
-export type FrameCorner = 'none' | 'card' | 'control' | 'circle' | 'arch'
+export type FrameCorner = 'none' | 'card' | 'control' | 'rounded' | 'circle' | 'arch'
+
+/**
+ * The corner each Image design shape is cut with: the one place FramedImage's clip, a frame that
+ * follows the shape (components/ui/image-frames.tsx) and the Studio's "Adjust picture" mask read it.
+ * Standard and the older Framed use the site's card corner; Rounded is 24px (1.5rem).
+ */
+export function appearanceCorner(shape: ImageAppearance): FrameCorner {
+  switch (shape) {
+    case 'rounded':
+    case 'circle':
+    case 'arch':
+      return shape
+    case 'square':
+      return 'none'
+    default:
+      return 'card'
+  }
+}
+
+/** CSS pixels of the fixed corners (`--radius-card`, `--radius-control`, Tailwind's rounded-3xl). */
+export const CORNER_PX = { card: 16, control: 8, rounded: 24 } as const
 
 export type FrameRing = Extract<ResolvedProfileBorder, { kind: 'ring' }>
 
@@ -61,6 +88,14 @@ export interface FramingResolver {
    * cropped. `path` is the image field's own path, for placements that depend on which item it sits in.
    */
   resolve: (design: unknown, frameUrl?: string | null, path?: FormPath) => FrameShape[]
+  /** What the field says when `resolve` returns no shape, if not the profile picture's uncropped wording. */
+  wholeNote?: WholeNote
+}
+
+/** The field's line when a picture has no shape to adjust: with a positioning saved, and without. */
+export interface WholeNote {
+  saved: string
+  unsaved: string
 }
 
 /**
@@ -131,10 +166,72 @@ const linkListThumbnail: FramingResolver = {
   },
 }
 
+interface StoredGallerySection {
+  variant?: string | null
+  imageDesign?: ImageDesignInput | null
+}
+
+/** A Grid or Slider tile's widest drawn width: one of two columns of the 80rem container (columnSizes). */
+const GALLERY_TILE_PX = 640
+
+/**
+ * A Gallery photo, drawn as a tile (task 177). Grid and Slider cut every tile to the section's Image
+ * design: 4:3, or the ratio its shape forces (Circle 1:1, Arch 4:5 or its chosen ratio). Masonry
+ * keeps each photo's own shape, and the lightbox always shows the whole photo, so neither is
+ * cropped. The section is two segments up: `images[_key]`.
+ */
+const galleryTile: FramingResolver = {
+  designPath: { drop: 2 },
+  // Masonry draws each photo at its own proportions: nothing to adjust, but a stored crop still trims it.
+  wholeNote: {
+    saved:
+      'Masonry shows each photo at its own proportions, so there’s nothing to adjust here. The saved positioning still applies to this photo.',
+    unsaved: 'Masonry shows each photo at its own proportions, so there’s nothing to adjust.',
+  },
+  resolve: (design) => {
+    const section = design as StoredGallerySection | null | undefined
+    if (section?.variant === 'masonry') return []
+    const { shape, ratio } = resolveImageDesign(section?.imageDesign, { aspect: '4/3' })
+    return [
+      {
+        label: 'Gallery tile',
+        aspect: aspectValue(ratio ?? '4/3'),
+        corner: appearanceCorner(shape),
+        insetPct: 0,
+        drawnPx: GALLERY_TILE_PX,
+      },
+    ]
+  },
+}
+
+/** The Featured card's picture column: 3fr of 5 across the 80rem container (events/featured.tsx). */
+const EVENT_IMAGE_PX = 768
+
+/**
+ * An event's picture (task 177): 16:9 on the Events section's Featured card and on the event's own page,
+ * both requested from the CDN at 1200 x 675, so the CDN cuts exactly the area this editor shows
+ * (`servedRect`). One shape, whichever section shows the event. The List and Agenda layouts draw no
+ * picture. The field sits on the event document, so the design path is the document itself.
+ */
+const eventImage: FramingResolver = {
+  designPath: { drop: 1 },
+  resolve: () => [
+    {
+      label: 'Featured card and event page',
+      aspect: 16 / 9,
+      corner: 'card',
+      insetPct: 0,
+      drawnPx: EVENT_IMAGE_PX,
+    },
+  ],
+}
+
 /** Registry keys, set on an image field with `framing('…')` (lib/sanity/schema/image-framing-option.ts). */
 export const FRAMING_RESOLVERS = {
   linkListProfile,
   linkListThumbnail,
+  galleryTile,
+  eventImage,
   // new-framing: resolver
 } satisfies Record<string, FramingResolver>
 

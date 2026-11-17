@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 
 import { resolvePictureDepth } from '@/lib/sanity/depth-options'
+import { FRAMING_RESOLVERS } from '@/lib/sanity/image-frame-geometry'
 
 import { FramedImage } from './framed-image'
 
@@ -12,13 +13,16 @@ vi.mock('./sanity-image', () => ({
     className,
     fill,
     style,
+    placement,
   }: {
     className?: string
     fill?: boolean
     style?: CSSProperties
+    placement?: { aspect: number }
   }) =>
     createElement('img', {
       'data-fill': fill ? '' : undefined,
+      'data-placement': placement ? String(placement.aspect) : undefined,
       className,
       style,
       alt: 'A team at work',
@@ -233,5 +237,108 @@ describe('FramedImage', () => {
       const box = html.indexOf('data-framed-image')
       expect(html.indexOf('data-image-frame')).toBeGreaterThan(box)
     })
+  })
+})
+
+describe('FramedImage and Adjust picture agree (task 177)', () => {
+  const PHOTO = {
+    asset: {
+      _id: 'image-abc-1200x630-jpg',
+      metadata: { dimensions: { width: 1200, height: 630 } },
+    },
+    crop: { top: 0.1, bottom: 0.1, left: 0.05, right: 0.39 },
+    hotspot: { x: 0.33, y: 0.5, width: 0.56, height: 0.8 },
+  }
+  const ASPECT_CLASS: Record<string, string> = {
+    [String(4 / 3)]: 'aspect-[4/3]',
+    '1': 'aspect-square',
+    [String(4 / 5)]: 'aspect-[4/5]',
+    [String(3 / 4)]: 'aspect-[3/4]',
+    [String(2 / 3)]: 'aspect-[2/3]',
+  }
+  const CORNER_CLASS: Record<string, string> = {
+    card: 'rounded-card',
+    rounded: 'rounded-3xl',
+    circle: 'rounded-full',
+    arch: 'rounded-t-full',
+  }
+  const designs = [
+    {},
+    { appearance: 'rounded' },
+    { appearance: 'circle', frameStyle: 'double-line' },
+    { appearance: 'arch' },
+    { appearance: 'arch', archRatio: '3/4', frameStyle: 'offset-border' },
+    { appearance: 'arch', archRatio: '2/3' },
+    { appearance: 'framed', frame: 'offset-border' },
+    { appearance: 'rounded', frameStyle: 'corner-brackets', frameInset: 0 },
+  ]
+
+  for (const design of designs) {
+    it(`draws the shape the editor shows: ${JSON.stringify(design)}`, () => {
+      const [shape] = FRAMING_RESOLVERS.galleryTile.resolve({
+        variant: 'grid',
+        imageDesign: design,
+      })
+      const html = renderToStaticMarkup(
+        createElement(FramedImage, {
+          image: PHOTO as never,
+          design,
+          sizes: '100vw',
+          clip: true,
+          framing: true,
+          aspect: '4/3',
+        }),
+      )
+      if (!shape) throw new Error('No tile shape')
+      expect(html).toContain(ASPECT_CLASS[String(shape.aspect)])
+      expect(html).toContain(`isolate overflow-hidden bg-surface-alt ${CORNER_CLASS[shape.corner]}`)
+      // Served as the editor's area at the same ratio.
+      expect(html).toContain(`data-placement="${shape.aspect}"`)
+    })
+  }
+
+  it('keeps today’s URL and position for a photo with no crop or hotspot', () => {
+    const html = renderToStaticMarkup(
+      createElement(FramedImage, {
+        image: { asset: PHOTO.asset },
+        sizes: '100vw',
+        clip: true,
+        framing: true,
+        aspect: '4/3',
+      }),
+    )
+    expect(html).not.toContain('data-placement')
+  })
+
+  it('serves nothing new without `framing`, whatever is stored', () => {
+    const html = renderToStaticMarkup(
+      createElement(FramedImage, {
+        image: PHOTO as never,
+        sizes: '100vw',
+        clip: true,
+        aspect: '4/3',
+      }),
+    )
+    expect(html).not.toContain('data-placement')
+  })
+
+  it('reserves an offset border’s reach in a flow-root wrapper, and not when overlap is allowed', () => {
+    const render = (design: Record<string, unknown>) =>
+      renderToStaticMarkup(
+        createElement(FramedImage, {
+          image: PHOTO as never,
+          design,
+          sizes: '100vw',
+          clip: true,
+          aspect: '4/3',
+        }),
+      )
+    const reserved = render({ frameStyle: 'offset-border' })
+    expect(reserved).toContain('data-frame-room=""')
+    expect(reserved).toContain('width:calc((100% - 1px) / 1.05)')
+    expect(render({ frameStyle: 'offset-border', frameOverlap: true })).not.toContain(
+      'data-frame-room',
+    )
+    expect(render({ frameStyle: 'thin-line' })).not.toContain('data-frame-room')
   })
 })

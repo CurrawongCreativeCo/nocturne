@@ -121,6 +121,17 @@ export function walkFields(
       const inside = [...ancestors, field]
       if (field.type === 'array') {
         for (const { member, path: memberPath } of membersOf(field, path)) {
+          // A member that is itself a capability (a framed photo in a list of photos, task 177) is
+          // checked like a field, at its member path (`images[]`).
+          if (member.options?.capability) {
+            visit({
+              path: memberPath,
+              field: member,
+              marker: markerOf(member, lookup),
+              top: root,
+              ancestors: inside,
+            })
+          }
           const memberFields = member.fields ?? lookup(member.type)?.fields
           if (memberFields && !recurs(member.type)) {
             walk(memberFields, `${memberPath}.`, root, enter(member.type), inside)
@@ -359,20 +370,27 @@ export function resolveFieldPath(
 ): { field: SchemaField; marker: Marker } | { missing: string } {
   let fields: readonly SchemaField[] | undefined = type.fields
   let found: SchemaField | undefined
+  // A path that ends on a member (`images[]`) names the member itself: a framed photo in a list.
+  let endsOnMember: SchemaField | undefined
   for (const segment of parseFieldPath(path)) {
     found = fields?.find((field) => field.name === segment.name)
     if (!found) return { missing: `${type.name} has no field ${path}` }
+    endsOnMember = undefined
     if (segment.member !== undefined) {
       const member = (found.of ?? []).find((candidate) =>
         segment.member ? candidate.type === segment.member : true,
       )
       if (!member) return { missing: `${path} has no member ${segment.member ?? ''}` }
       fields = member.fields ?? lookup(member.type)?.fields
+      endsOnMember = member
     } else {
       fields = fieldsOf(found, lookup)
     }
   }
   if (!found) return { missing: `${type.name} has no field ${path}` }
+  if (endsOnMember?.options?.capability) {
+    return { field: endsOnMember, marker: markerOf(endsOnMember, lookup) }
+  }
   return { field: found, marker: markerOf(found, lookup) }
 }
 

@@ -6,7 +6,8 @@ import { accessField } from '@/lib/sanity/schema/access-field'
 import { eyebrowField, headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageDesignField } from '@/lib/sanity/schema/image-design'
-import { imageField } from '@/lib/sanity/schema/image-field'
+import { imageField, imageOptions } from '@/lib/sanity/schema/image-field'
+import { framing } from '@/lib/sanity/schema/image-framing-option'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
@@ -65,6 +66,9 @@ const { name: _name, ...pictureMember } = imageField({
   aspect: '4:3',
   minWidth: 1600,
   description: 'Click an image on the site to see it full screen, with its caption.',
+  // "Adjust picture" (task 177): drag and zoom the photo inside its tile. The tile only: the lightbox
+  // always shows the whole photo, and Masonry keeps each photo's own shape (nothing to adjust).
+  options: { ...imageOptions, ...framing('galleryTile') },
   fields: [
     defineField({
       name: 'caption',

@@ -4,6 +4,7 @@ import {
   FRAMING_RESOLVERS,
   PROFILE_DRAWN_PX,
   PROFILE_FRAME_INSET_PCT,
+  appearanceCorner,
   isFramingKey,
 } from './image-frame-geometry'
 import {
@@ -84,5 +85,78 @@ describe('isFramingKey', () => {
     expect(isFramingKey('linkListProfile')).toBe(true)
     expect(isFramingKey('toString')).toBe(false)
     expect(isFramingKey(undefined)).toBe(false)
+  })
+})
+
+describe('galleryTile (task 177)', () => {
+  const { designPath, resolve } = FRAMING_RESOLVERS.galleryTile
+  const shapeOf = (variant: string, imageDesign?: Record<string, unknown>) =>
+    resolve({ variant, imageDesign })
+
+  it('finds the section two segments up: images[_key]', () => {
+    expect(designPath).toEqual({ drop: 2 })
+  })
+
+  it('cuts Grid and Slider tiles 4:3 with the card corner when nothing is chosen', () => {
+    for (const variant of ['grid', 'slider']) {
+      expect(shapeOf(variant)).toEqual([
+        { label: 'Gallery tile', aspect: 4 / 3, corner: 'card', insetPct: 0, drawnPx: 640 },
+      ])
+    }
+  })
+
+  it('takes the shape the tile draws: Circle 1:1, Arch 4:5 or its ratio, Rounded corners', () => {
+    expect(shapeOf('grid', { appearance: 'circle' })[0]).toMatchObject({
+      aspect: 1,
+      corner: 'circle',
+    })
+    expect(shapeOf('grid', { appearance: 'arch' })[0]).toMatchObject({
+      aspect: 4 / 5,
+      corner: 'arch',
+    })
+    expect(shapeOf('grid', { appearance: 'arch', archRatio: '2/3' })[0]).toMatchObject({
+      aspect: 2 / 3,
+      corner: 'arch',
+    })
+    expect(shapeOf('grid', { appearance: 'rounded' })[0]).toMatchObject({ corner: 'rounded' })
+    // A saved Framed section keeps Standard's card corner; a frame never changes the shape.
+    expect(shapeOf('grid', { appearance: 'framed', frame: 'offset-border' })[0]).toMatchObject({
+      aspect: 4 / 3,
+      corner: 'card',
+    })
+    expect(shapeOf('grid', { appearance: 'circle', frameStyle: 'offset-border' })[0]).toEqual(
+      shapeOf('grid', { appearance: 'circle' })[0],
+    )
+  })
+
+  it('offers nothing on Masonry, which keeps each photo’s own shape', () => {
+    expect(shapeOf('masonry', { appearance: 'circle' })).toEqual([])
+  })
+})
+
+describe('eventImage (task 177)', () => {
+  it('is 16:9 with the card corner, wherever the event is shown', () => {
+    const { designPath, resolve } = FRAMING_RESOLVERS.eventImage
+    expect(designPath).toEqual({ drop: 1 })
+    expect(resolve(undefined)).toEqual([
+      {
+        label: 'Featured card and event page',
+        aspect: 16 / 9,
+        corner: 'card',
+        insetPct: 0,
+        drawnPx: 768,
+      },
+    ])
+  })
+})
+
+describe('appearanceCorner', () => {
+  it('is the one corner map for the clip, the outline and the editor', () => {
+    expect(appearanceCorner('standard')).toBe('card')
+    expect(appearanceCorner('framed')).toBe('card')
+    expect(appearanceCorner('square')).toBe('none')
+    expect(appearanceCorner('rounded')).toBe('rounded')
+    expect(appearanceCorner('circle')).toBe('circle')
+    expect(appearanceCorner('arch')).toBe('arch')
   })
 })

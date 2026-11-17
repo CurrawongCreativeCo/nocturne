@@ -2551,7 +2551,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | Pricing table (`pricingTable`)           | R✓      | R✓   | R✓     | R✓   | R✓    | C✓   | –      | C…      | –          | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
 | Newsletter signup (`newsletterSignup`)   | R✓      | –    | R✓     | R✓   | R✓    | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
 | Stats (`stats`), 2 layouts               | R✓*     | R✓*  | R✓     | R✓*  | C✓*   | –    | –      | C…      | –          | R✓      | R◐*   | R✓      | R✓   | R✓     | –     |
-| Gallery (`gallery`), 3 layouts           | –       | –    | R✓     | R✓   | –     | –    | –      | R…      | R✓         | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Gallery (`gallery`), 3 layouts           | –       | –    | R✓     | R✓   | –     | –    | –      | R◐*     | R✓         | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
 | Location (`location`)                    | R✓      | R✓   | R✓     | R✓   | R✓    | R✓   | –      | C…      | C✓         | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
 | Team (`team`), 3 layouts                 | R✓      | R✓   | R✓     | R✓   | R✓    | –    | R✓     | R…      | R✓         | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
 | Video (`video`), 2 layouts               | –       | –    | R✓     | –    | –     | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
@@ -2574,7 +2574,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 
 | Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
 | -------------------------------------------------------- | -------- | --------------- | ------- |
-| Required                                                 | 274      | 0               | 40      |
+| Required                                                 | 275      | 0               | 39      |
 | Conditional                                              | 13       | 0               | 31      |
 
 A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
@@ -2583,12 +2583,12 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | ------------ | ---------------- | ------------------- |
 | 157          | 1                | 0                   |
 | 159          | 3                | 8                   |
-| 177          | 9                | 20                  |
+| 177          | 8                | 20                  |
 | 213          | 7                | 0                   |
 | 276          | 2                | 3                   |
 | 280          | 18               | 0                   |
 
-**Evidence.** 302 capability entries, 563 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
+**Evidence.** 303 capability entries, 565 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
 **Capabilities and their owners**
 
@@ -3498,24 +3498,43 @@ to the layout. Both are agency only, in the Design tab, and empty means the pict
 
 - **Testimonials → Design → Avatar:** Medium circle (48 px) with no ring by default.
 - **Testimonials → Design → Cards and Section header:** the title is `heading` when it has words, otherwise the old `title`, never both. Below it: the default card with nothing set; presets Quiet, Outlined, Tinted and Statement write theme colour names into the box. Each quote can carry highlighted words (exact phrases, the stored quote stays plain), a source (plain words only, never a badge; Other is an internal classification and is never shown, so the date stands alone), a date, a rating for that quote alone, an attribution line and a permission confirmation (Studio warns until confirmed, never drawn). No review structured data: live Google reviews are task 277's.
-- **Team (List layout only) → Design → Portrait:** the list's small portraits are drawn by `ProfileImage` (a rounded square, the card's corners), Medium with no ring by default, which is the same size and corners the list always had. A list whose **Image design still changes how its portraits look** keeps drawing with it (`FramedImage`), and Studio shows Image design, with a note above Image shape on how to reach Portrait, instead of Portrait, so one picture never has both. Set **Image shape to Standard and Picture motion to None** and Portrait appears (and Image design goes). Nothing saved is deleted or moved: the rest of the Image design stays stored and is ignored. What counts as "changes how it looks": Rounded, Square corners, Circle or Arch; Framed with a frame; Subtle or Medium parallax. Standard, Framed with no frame, and motion None draw what the list draws anyway, and a frame, its colour or inset on anything but Framed, or Custom, travel, direction or scale on a picture that is not moving, are inactive leftovers (including `custom: false`, which Studio writes on every Image design). Grid and Slider show Image design only. The one rule is `hasImageDesign` in `src/lib/sanity/team-portrait.ts`, used by Studio's controls, its note and the site's drawing.
+- **Team (List layout only) → Design → Portrait:** the list's small portraits are drawn by `ProfileImage` (a rounded square, the card's corners), Medium with no ring by default, which is the same size and corners the list always had. A list whose **Image design still changes how its portraits look** keeps drawing with it (`FramedImage`), and Studio shows Image design, with a note above Image shape on how to reach Portrait, instead of Portrait, so one picture never has both. Set **Image shape to Standard and Picture motion to None** and Portrait appears (and Image design goes). Nothing saved is deleted or moved: the rest of the Image design stays stored and is ignored. What counts as "changes how it looks": Rounded, Square corners, Circle or Arch; any frame that is drawn (a Frame on any shape, or Framed with a frame); Subtle or Medium parallax. Standard, Framed with no frame, and motion None draw what the list draws anyway, and an older frame, its colour or inset on anything but Framed, or Custom, travel, direction or scale on a picture that is not moving, are inactive leftovers (including `custom: false`, which Studio writes on every Image design). Grid and Slider show Image design only. The one rule is `hasImageDesign` in `src/lib/sanity/team-portrait.ts`, used by Studio's controls, its note and the site's drawing.
 
 **For editors (agency only: Design tab → Image design).** Three pictures to choose from, in this order; leave them alone and
 the picture looks exactly as it always did.
 
-1. **Image shape:** _Standard_ (the site's corners), _Rounded_, _Circle_ (always square), _Arch_ (a tall picture with a rounded top)
-   or _Framed_. A hero that already had an "Image shape" keeps it and shows it here until it is changed
-   (_Square corners_ is offered where a section already used it).
+1. **Image shape:** _Standard_ (the site's corners), _Rounded_ (24 px corners), _Circle_ (always 1:1) or _Arch_ (a tall picture
+   with a rounded top, 4:5 unless another **Arch ratio** is chosen). A hero that already had an "Image shape" keeps it and shows
+   it here until it is changed (_Square corners_ is offered where a section already used it).
 2. **Picture motion:** _None_, _Subtle parallax_ or _Medium parallax_. The picture moves inside its frame; the frame never does.
-3. **Frame** (only for _Framed_): _No frame_, _Simple line_, _Double line_, _Offset border_, _Organic brush_, _Corner brackets_ or
-   an **approved custom frame**.
+3. **Frame**, on any shape: _No frame_, _Simple line_, _Double line_, _Offset border_, _Organic brush_, _Corner brackets_ or an
+   **approved custom frame**. Shape and frame are separate choices (task 177): changing one keeps the other and every photo's
+   position. On Rounded, Circle and Arch the Simple, Double and Offset lines follow the shape's outline (the offset outline sits
+   behind the picture); Brackets, Organic brush and custom frames keep their own artwork. On Standard every frame draws exactly
+   as before.
 
-A collapsed **Advanced: image** holds the exact values, and shows only those the choices above use:
+**Saved "Framed" pictures.** _Framed_ was a shape that chose Standard corners plus a frame. It is no longer offered, but a section
+that has it keeps it, shows it in the picker, and draws exactly as before: Standard corners with its stored frame (the Simple
+line when none was chosen). Choosing **Frame** replaces that frame; choosing another shape replaces Framed. The site reads the
+frame through one rule, `chosenFrame` (`src/lib/sanity/image-design-options.ts`): **Frame** (`frameStyle`) when set, else the
+older `frame` only beside Framed. An older `frame` left on any other shape is ignored, as it always was, so nothing saved
+changes its look.
+
+**Frames keep their own room.** A frame that draws past the picture (the Offset border always, down and to the right by its
+inset; a line drawn on the edge at inset 0, by half its stroke on every side) gets that room inside the space the layout gives
+the picture: the picture is drawn a little smaller so picture plus frame fill exactly the old space, and the gap between Gallery
+tiles stays the gap that was set (`frameReach` and `reserveStyle`; the wrapper is `[data-frame-room]`). **Allow frame overlap**
+(Advanced, shown only for a frame that reaches past the picture) turns this off, so the frame may run into the gap or a
+neighbour: an explicit choice, never the default. This is a deliberate layout change for content that already had an Offset
+border: its picture is now drawn smaller by the frame's reach instead of the frame running into the next tile.
+
+A collapsed **Advanced: image** holds the exact values, and shows only those the choices above use: **Arch ratio** (4:5,
+3:4 or 2:3; Arch only, empty is 4:5), **Allow frame overlap** (see above),
 _Set exact motion values_ (parallax only) reveals **Travel distance** (2–7 % of the picture's height each way; phones get half),
 **Direction** (down drifts with the scroll, up goes against it) and **Picture scale** (1.05–1.15; empty uses just enough for the
 travel). A frame has a **Frame colour** (a design token: accent, second accent, highlight or text colour) and a **Frame inset**
 (how far it sits in from the edge, 0–12 %; for the offset border, how far it sticks out). Hidden fields keep their values, but the
-site ignores a value the current choices do not use (a frame on a circle, a travel on a still picture). Hidden
+site ignores a value the current choices do not use (an older frame on a circle, a travel on a still picture). Hidden
 controls also skip validation, including Sanity’s built-in reference checks. Switching a shape or frame keeps the
 saved choices; unused frame references stay weak so an unpublished frame cannot block publishing. Switching back
 checks the frame again. The same rule applies to Link list design controls and their nested custom colours.
@@ -5904,7 +5923,16 @@ The thumbnails sit in `src/lib/sanity/schema/` beside `presetField`, free of Stu
 
 ### Adjust picture (Studio)
 
-A dialog under an image field where an editor sees the picture inside the exact shape the site draws it in, drags it into place, zooms with a slider and applies. Nothing is uploaded and the file never changes. It is on the **Link list's profile picture and link thumbnails** (see [Link list pictures](#link-list-pictures)); any image field can opt in.
+A dialog under an image field where an editor sees the picture inside the exact shape the site draws it in, drags it into place, zooms with a slider and applies. Nothing is uploaded and the file never changes. It is on the **Link list's profile picture and link thumbnails** (see [Link list pictures](#link-list-pictures)) and on **Gallery photos** in Grid and Slider (the tile only, task 177); any image field can opt in.
+
+**Gallery photos.** Each photo's editor shows the tile's real shape: 4:3, or the ratio and corners of the section's Image design
+(Circle 1:1, Arch 4:5 or its chosen ratio, Rounded's 24 px corners), from the `galleryTile` resolver, which reads the same
+`resolveImageDesign` the tile draws from. Masonry keeps each photo's own shape, so it offers no editor, and the lightbox always shows
+the whole photo whatever is stored. A photo with a stored crop or hotspot is served as exactly the area the editor shows
+(`FramedImage`'s `framing`, which passes `visibleArea` to `SanityImage` as its `placement`), so the editor and the page agree at
+every width (the tile's ratio is the same on a phone and a desktop). A photo with neither keeps today's URL and centred cut.
+A photo that already had a hotspot from Sanity's own tool is now cut around that hotspot by the CDN, as the editor shows it,
+instead of being positioned by CSS percentages.
 
 **What it changes.** Sanity's own `crop` and `hotspot` on that image field, and nothing else. The crop box is the visible area (zoom and position); the hotspot is set to the crop box's centre and size. Both live on the field in the document, never on the asset, so the same photo used elsewhere keeps its own framing. `SanityImage` already passes both to `@sanity/image-url`, so there is no new rendering path, no canvas, no new asset and no public JavaScript.
 

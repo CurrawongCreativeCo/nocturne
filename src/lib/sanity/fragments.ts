@@ -48,8 +48,11 @@ export const imageDesignFields = /* groq */ `
   direction,
   scale,
   frame,
+  frameStyle,
   frameColour,
   frameInset,
+  archRatio,
+  frameOverlap,
   "customFrameUrl": customFrame->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url
 `
 

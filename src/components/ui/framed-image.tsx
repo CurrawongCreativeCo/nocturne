@@ -4,31 +4,35 @@ import type { CSSProperties } from 'react'
 import { LazyParallax } from '@/components/motion/parallax-lazy'
 import type { ElementDepth } from '@/lib/sanity/depth-options'
 import {
-  forcedAspect,
+  aspectValue,
+  reserveStyle,
   resolveImageDesign,
-  type ImageAppearance,
   type ImageDesignContext,
   type ImageDesignInput,
 } from '@/lib/sanity/image-design-options'
 import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
+import { appearanceCorner, type FrameCorner } from '@/lib/sanity/image-frame-geometry'
+import { isFramed } from '@/lib/sanity/image-framing'
 import type { SanityImageData } from '@/types/sanity'
 
-import { ImageFrame } from './image-frames'
+import { ImageFrame, ShapeOutline } from './image-frames'
 import { SanityImage } from './sanity-image'
 
-/** Full class names, so Tailwind's scanner sees them. `standard` is the site's card corner. */
-const SHAPE_CLASS: Record<ImageAppearance, string> = {
-  standard: 'rounded-card',
+/** Full class names, so Tailwind's scanner sees them, for the corner each shape is cut with (`appearanceCorner`). */
+const CORNER_CLASS: Record<FrameCorner, string> = {
+  none: '',
+  card: 'rounded-card',
+  control: 'rounded-control',
   rounded: 'rounded-3xl',
-  square: '',
   circle: 'rounded-full',
   arch: 'rounded-t-full',
-  framed: 'rounded-card',
 }
 
 const ASPECT_CLASS = {
   '1/1': 'aspect-square',
   '4/5': 'aspect-[4/5]',
+  '3/4': 'aspect-[3/4]',
+  '2/3': 'aspect-[2/3]',
   '4/3': 'aspect-[4/3]',
   '3/2': 'aspect-[3/2]',
   '16/9': 'aspect-video',
@@ -52,10 +56,16 @@ interface Props {
   /** Overrides the editor-supplied alt text. */
   alt?: string
   /**
-   * The picture's ratio. A circle (1:1) and an arch (4:5) force their own. Unset, a plain picture
-   * keeps the shape of its upload and a framed or moving one is 4:3.
+   * The picture's ratio. A circle (1:1) and an arch (4:5, or its chosen ratio) force their own.
+   * Unset, a plain picture keeps the shape of its upload and a framed or moving one is 4:3.
    */
   aspect?: Aspect
+  /**
+   * Serve what "Adjust picture" shows (task 177): when the image stores a crop or hotspot, the CDN
+   * is asked for exactly that area at the box's ratio (`visibleArea`, as SanityImage's `placement`),
+   * so the page and the editor agree. A picture with neither keeps today's URL and centred cut.
+   */
+  framing?: boolean
   /** Its place in the layout (width, max width, `justify-self`), on the outer box. */
   className?: string
   /** Classes for the <img>, e.g. a hover zoom. */
@@ -99,11 +109,22 @@ export function FramedImage({
   imageClassName = '',
   clip = false,
   depth,
+  framing = false,
 }: Props) {
-  const { shape, motion, frame } = resolveImageDesign(stegaClean(design), context)
-  const ratio = forcedAspect(shape) ?? aspect
-  const shapeClass = SHAPE_CLASS[shape]
-  const style = { objectPosition: hotspotObjectPosition(image), ...depth?.style }
+  const resolved = resolveImageDesign(stegaClean(design), { ...context, aspect: aspect ?? '4/3' })
+  const { shape, motion, frame, outline, reach } = resolved
+  const ratio = resolved.ratio ?? aspect
+  const shapeClass = CORNER_CLASS[appearanceCorner(shape)]
+  // The editor's area, served at the drawn ratio: the CDN cuts it, so nothing is left to position.
+  const boxRatio = ratio ?? (motion || frame || clip ? '4/3' : undefined)
+  const placement =
+    framing && boxRatio && isFramed(stegaClean(image))
+      ? { aspect: aspectValue(boxRatio) }
+      : undefined
+  const style = {
+    objectPosition: placement ? undefined : hotspotObjectPosition(image),
+    ...depth?.style,
+  }
 
   if (!motion && !frame && !clip) {
     return (
@@ -112,6 +133,7 @@ export function FramedImage({
         alt={alt}
         width={width}
         height={height}
+        placement={placement}
         sizes={sizes}
         preload={preload}
         loading={loading}
@@ -128,6 +150,7 @@ export function FramedImage({
       image={image}
       alt={alt}
       fill
+      placement={placement}
       sizes={sizes}
       preload={preload}
       loading={loading}
@@ -136,12 +159,24 @@ export function FramedImage({
     />
   )
 
-  return (
+  // A Simple, Double or Offset frame follows Rounded, Circle and Arch; the offset one sits under the picture.
+  const shaped = frame?.kind === 'preset' && outline === 'shape' ? frame : null
+  const under = shaped?.preset === 'offset-border'
+  const frameLayer = shaped ? (
+    <ShapeOutline frame={shaped} shape={shape} />
+  ) : frame ? (
+    <ImageFrame frame={frame} />
+  ) : null
+
+  const box = (
     <div
       data-framed-image={shape}
-      className={`relative ${ASPECT_CLASS[ratio ?? '4/3']} ${className} ${depth?.className ?? ''}`.trim()}
-      style={depth?.style}
+      className={`relative ${ASPECT_CLASS[ratio ?? '4/3']} ${reach ? '' : className} ${depth?.className ?? ''}`
+        .replace(/\s+/g, ' ')
+        .trim()}
+      style={reach ? { ...depth?.style, ...reserveStyle(reach) } : depth?.style}
     >
+      {under ? frameLayer : null}
       {/* `isolate` keeps a rounded clip honest in Safari while the picture inside is transformed. */}
       <div className={`absolute inset-0 isolate overflow-hidden bg-surface-alt ${shapeClass}`}>
         {motion ? (
@@ -164,7 +199,16 @@ export function FramedImage({
           picture
         )}
       </div>
-      {frame ? <ImageFrame frame={frame} /> : null}
+      {under ? null : frameLayer}
+    </div>
+  )
+
+  // A frame that reaches past the picture gets that room inside the space the layout gives it, so it
+  // never runs into a neighbour (task 177). The wrapper takes the layout's classes and holds the margins.
+  if (!reach) return box
+  return (
+    <div data-frame-room="" className={`flow-root ${className}`.trim()}>
+      {box}
     </div>
   )
 }

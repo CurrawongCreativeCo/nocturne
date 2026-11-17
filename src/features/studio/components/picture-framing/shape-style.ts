@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
 
-import type { FrameShape } from '@/lib/sanity/image-frame-geometry'
+import { CORNER_PX, type FrameShape } from '@/lib/sanity/image-frame-geometry'
 import { boxAt, coverBox, type AssetSize, type FramingState } from '@/lib/sanity/image-framing'
 
 /** The shape fills this much of the stage's longer side; the rest shows the picture dimmed. */
@@ -28,16 +28,19 @@ export function shapeBoxStyle(aspect: number, insetPct = 0): CSSProperties {
   }
 }
 
-/** CSS pixels of a card and control corner (`--radius-card`, `--radius-control` in the design tokens). */
-const CORNER_PX = { card: 16, control: 8 }
-
-/** The corner as the page draws it, kept in proportion: percentages of the picture's drawn size. */
-export function cornerRadius(shape: Pick<FrameShape, 'corner' | 'drawnPx'>): string {
+/**
+ * The corner as the page draws it, kept in proportion: percentages of the picture's drawn size. An
+ * arch's top is a half circle as wide as the picture (`rounded-t-full`), so its height share
+ * depends on the ratio: half the width, as a share of the height.
+ */
+export function cornerRadius(shape: Pick<FrameShape, 'corner' | 'drawnPx' | 'aspect'>): string {
   switch (shape.corner) {
     case 'circle':
       return '50%'
-    case 'arch':
-      return '50% 50% 0 0 / 25% 25% 0 0'
+    case 'arch': {
+      const down = Math.round(50 * shape.aspect * 10) / 10
+      return `50% 50% 0 0 / ${down}% ${down}% 0 0`
+    }
     case 'none':
       return '0'
     default:
