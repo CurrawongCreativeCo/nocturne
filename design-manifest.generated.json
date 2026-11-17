@@ -1699,6 +1699,43 @@
           "clientEditable": false
         },
         {
+          "path": "imageDesign.frameStyle",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "No frame"
+            },
+            {
+              "value": "thin-line",
+              "title": "Simple line"
+            },
+            {
+              "value": "double-line",
+              "title": "Double line"
+            },
+            {
+              "value": "offset-border",
+              "title": "Offset border"
+            },
+            {
+              "value": "organic-brush",
+              "title": "Organic brush"
+            },
+            {
+              "value": "corner-brackets",
+              "title": "Corner brackets"
+            },
+            {
+              "value": "custom",
+              "title": "Approved custom frame"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
           "path": "imageDesign.frame",
           "kind": "string",
           "required": null,
@@ -1779,6 +1816,27 @@
           "clientEditable": false
         },
         {
+          "path": "imageDesign.archRatio",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "4/5",
+              "title": "4:5"
+            },
+            {
+              "value": "3/4",
+              "title": "3:4"
+            },
+            {
+              "value": "2/3",
+              "title": "2:3"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
           "path": "imageDesign.frameColour",
           "kind": "string",
           "required": null,
@@ -1808,6 +1866,12 @@
           "kind": "number",
           "required": null,
           "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "imageDesign.frameOverlap",
+          "kind": "boolean",
+          "required": null,
           "clientEditable": false
         },
         {
@@ -4327,6 +4391,43 @@
           "clientEditable": false
         },
         {
+          "path": "imageDesign.frameStyle",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "No frame"
+            },
+            {
+              "value": "thin-line",
+              "title": "Simple line"
+            },
+            {
+              "value": "double-line",
+              "title": "Double line"
+            },
+            {
+              "value": "offset-border",
+              "title": "Offset border"
+            },
+            {
+              "value": "organic-brush",
+              "title": "Organic brush"
+            },
+            {
+              "value": "corner-brackets",
+              "title": "Corner brackets"
+            },
+            {
+              "value": "custom",
+              "title": "Approved custom frame"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
           "path": "imageDesign.frame",
           "kind": "string",
           "required": null,
@@ -4407,6 +4508,27 @@
           "clientEditable": false
         },
         {
+          "path": "imageDesign.archRatio",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "4/5",
+              "title": "4:5"
+            },
+            {
+              "value": "3/4",
+              "title": "3:4"
+            },
+            {
+              "value": "2/3",
+              "title": "2:3"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
           "path": "imageDesign.frameColour",
           "kind": "string",
           "required": null,
@@ -4436,6 +4558,12 @@
           "kind": "number",
           "required": null,
           "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "imageDesign.frameOverlap",
+          "kind": "boolean",
+          "required": null,
           "clientEditable": false
         },
         {
@@ -22640,6 +22768,13 @@
           "clientEditable": true
         },
         {
+          "path": "images[]",
+          "kind": "image",
+          "required": null,
+          "capability": "framing",
+          "clientEditable": true
+        },
+        {
           "path": "images[].alt",
           "kind": "string",
           "required": null,
@@ -22709,6 +22844,43 @@
             {
               "value": "medium",
               "title": "Medium parallax"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
+          "path": "imageDesign.frameStyle",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "No frame"
+            },
+            {
+              "value": "thin-line",
+              "title": "Simple line"
+            },
+            {
+              "value": "double-line",
+              "title": "Double line"
+            },
+            {
+              "value": "offset-border",
+              "title": "Offset border"
+            },
+            {
+              "value": "organic-brush",
+              "title": "Organic brush"
+            },
+            {
+              "value": "corner-brackets",
+              "title": "Corner brackets"
+            },
+            {
+              "value": "custom",
+              "title": "Approved custom frame"
             }
           ],
           "clientEditable": false
@@ -22794,6 +22966,27 @@
           "clientEditable": false
         },
         {
+          "path": "imageDesign.archRatio",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "4/5",
+              "title": "4:5"
+            },
+            {
+              "value": "3/4",
+              "title": "3:4"
+            },
+            {
+              "value": "2/3",
+              "title": "2:3"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
           "path": "imageDesign.frameColour",
           "kind": "string",
           "required": null,
@@ -22823,6 +23016,12 @@
           "kind": "number",
           "required": null,
           "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "imageDesign.frameOverlap",
+          "kind": "boolean",
+          "required": null,
           "clientEditable": false
         },
         {
@@ -23909,11 +24108,15 @@
               "scope": "card",
               "part": "tile",
               "closingTask": 177,
-              "fields": [],
+              "fields": [
+                "images[]"
+              ],
               "availability": {
-                "grid": "pending",
-                "masonry": "pending",
-                "slider": "pending"
+                "grid": "verified",
+                "masonry": {
+                  "notApplicable": "Fixed-tile framing does not apply: Masonry keeps each picture’s own proportions, so there is no fixed tile to reposition it within. A crop saved on the picture still applies there."
+                },
+                "slider": "verified"
               }
             },
             {
@@ -23935,7 +24138,22 @@
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "gallery.framing.tile",
+              "field": "images[]",
+              "resolvers": [
+                "@/lib/sanity/image-framing#visibleArea",
+                "@/lib/sanity/image#urlFor"
+              ],
+              "render": "src/features/pages/components/sections/gallery/shared.tsx",
+              "target": "[data-framed-image]",
+              "cases": [
+                "gallery.framing.tile@grid",
+                "gallery.framing.tile@slider"
+              ]
+            }
+          ]
         },
         "pictureDepth": {
           "policies": [
@@ -26646,6 +26864,43 @@
           "clientEditable": false
         },
         {
+          "path": "imageDesign.frameStyle",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "none",
+              "title": "No frame"
+            },
+            {
+              "value": "thin-line",
+              "title": "Simple line"
+            },
+            {
+              "value": "double-line",
+              "title": "Double line"
+            },
+            {
+              "value": "offset-border",
+              "title": "Offset border"
+            },
+            {
+              "value": "organic-brush",
+              "title": "Organic brush"
+            },
+            {
+              "value": "corner-brackets",
+              "title": "Corner brackets"
+            },
+            {
+              "value": "custom",
+              "title": "Approved custom frame"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
           "path": "imageDesign.frame",
           "kind": "string",
           "required": null,
@@ -26726,6 +26981,27 @@
           "clientEditable": false
         },
         {
+          "path": "imageDesign.archRatio",
+          "kind": "string",
+          "required": null,
+          "max": null,
+          "list": [
+            {
+              "value": "4/5",
+              "title": "4:5"
+            },
+            {
+              "value": "3/4",
+              "title": "3:4"
+            },
+            {
+              "value": "2/3",
+              "title": "2:3"
+            }
+          ],
+          "clientEditable": false
+        },
+        {
           "path": "imageDesign.frameColour",
           "kind": "string",
           "required": null,
@@ -26755,6 +27031,12 @@
           "kind": "number",
           "required": null,
           "max": null,
+          "clientEditable": false
+        },
+        {
+          "path": "imageDesign.frameOverlap",
+          "kind": "boolean",
+          "required": null,
           "clientEditable": false
         },
         {

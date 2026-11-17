@@ -10,7 +10,23 @@ export const galleryCapabilities = declareCapabilities<'grid' | 'masonry' | 'sli
   depth: NOT_APPLICABLE.noShadowSurface,
   icon: NOT_APPLICABLE.noIcon,
   action: notApplicable('Slider and lightbox controls are excluded (137 item 5)'),
-  framing: [{ policy: 'required', scope: 'card', part: 'tile' }, backgroundFraming()],
+  framing: [
+    {
+      policy: 'required',
+      scope: 'card',
+      part: 'tile',
+      layouts: {
+        grid: 'applies',
+        slider: 'applies',
+        // Reviewed downgrade (capability-baseline-changes.ts, 18 November 2026).
+        masonry: {
+          notApplicable:
+            'Fixed-tile framing does not apply: Masonry keeps each picture’s own proportions, so there is no fixed tile to reposition it within. A crop saved on the picture still applies there.',
+        },
+      },
+    },
+    backgroundFraming(),
+  ],
   pictureDepth: { policy: 'required', scope: 'card', note: 'Tiles, never the lightbox' },
   overlay: { policy: 'required', scope: 'section' },
   glass: { policy: 'required', scope: 'section' },

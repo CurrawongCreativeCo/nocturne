@@ -26,7 +26,7 @@ import { DesignInputExamples } from './design-input-examples'
 import { LaunchExample } from './launch-example'
 import { PageBreadcrumbExamples } from './page-breadcrumb-examples'
 import { PickerExamples } from './picker-examples'
-import { PictureFramingExamples } from './picture-framing-examples'
+import { PictureFramingExamples, PlacementFramingExamples } from './picture-framing-examples'
 import { SetupExample } from './setup-example'
 import { ThumbnailGallery, type SectionPreview } from './thumbnail-gallery'
 import { StudioLogoView } from '../components/studio-logo'
@@ -332,6 +332,19 @@ function InputExamples({
               </Card>
               <Card padding={2} radius={3} border marginTop={4}>
                 <SetupExample mode="explanations" />
+              </Card>
+            </ThemeProvider>
+          </div>
+        ))}
+      </div>
+      {/* Last on the page, so adding placements never moves a screenshot above it. */}
+      <h3 className="mt-10 text-base font-semibold">Adjust picture: placements</h3>
+      <div className="mt-4 grid gap-6 lg:grid-cols-2">
+        {SCHEMES.map((scheme) => (
+          <div key={scheme} data-framing-scheme={scheme}>
+            <ThemeProvider scheme={scheme} theme={theme}>
+              <Card padding={4} radius={3} border>
+                <PlacementFramingExamples />
               </Card>
             </ThemeProvider>
           </div>

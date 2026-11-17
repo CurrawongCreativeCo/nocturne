@@ -1678,6 +1678,34 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Our work', intro: 'An intro.' },
     probe: { 'pictureDepthDesign.shadow': 'floating' },
   },
+  // "Adjust picture" on a Grid or Slider tile (task 177): a framed photo is served as exactly the area the
+  // editor shows (`visibleArea`, through SanityImage's placement), at the tile's ratio; the URL builder
+  // (`urlFor`) carries that rect, as it carried a stored crop before.
+  {
+    id: 'gallery.framing.tile',
+    component: 'gallery',
+    capability: 'framing',
+    scope: 'card',
+    part: 'tile',
+    layouts: ['grid', 'slider'],
+    field: 'images[]',
+    resolvers: [
+      { module: '@/lib/sanity/image-framing', export: 'visibleArea' },
+      { module: '@/lib/sanity/image', export: 'urlFor' },
+    ],
+    render: 'src/features/pages/components/sections/gallery/shared.tsx',
+    target: '[data-framed-image]',
+    change: 'content',
+    base: {
+      eyebrow: 'Our work',
+      intro: 'An intro.',
+      images: [
+        { ...PICTURE, _key: 'tile-1' },
+        { ...PICTURE, _key: 'tile-2' },
+      ],
+    },
+    probe: { 'images.0.crop': CROPPED },
+  },
   ...frameEvidence('gallery', {
     mark: ['grid', 'masonry', 'slider'],
     overlay: ['grid', 'masonry', 'slider'],

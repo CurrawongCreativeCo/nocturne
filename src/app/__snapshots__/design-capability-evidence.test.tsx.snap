@@ -623,6 +623,20 @@ exports[`design capability evidence > gallery.edge.section@slider: the probe cha
 ]
 `;
 
+exports[`design capability evidence > gallery.framing.tile@grid: the probe changes the registered target 1`] = `
+[
+  "8aa881f8db987ec5 (404 characters)",
+  "8aa881f8db987ec5 (404 characters)",
+]
+`;
+
+exports[`design capability evidence > gallery.framing.tile@slider: the probe changes the registered target 1`] = `
+[
+  "8aa881f8db987ec5 (404 characters)",
+  "8aa881f8db987ec5 (404 characters)",
+]
+`;
+
 exports[`design capability evidence > gallery.glass.section@grid: the probe changes the registered target 1`] = `
 [
   "<div class="mx-auto w-full max-w-content" data-reveal="" style="opacity:0;transform:translateY(24px)">",

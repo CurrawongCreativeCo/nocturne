@@ -22,7 +22,7 @@ import {
   resolveCardLift,
   resolvePictureDepth,
 } from '@/lib/sanity/depth-options'
-import { forcedAspect, resolveImageDesign } from '@/lib/sanity/image-design-options'
+import { aspectValue, resolveImageDesign } from '@/lib/sanity/image-design-options'
 import { resolveAvatar } from '@/lib/sanity/profile-image-options'
 import { hasImageDesign } from '@/lib/sanity/team-portrait'
 import { textRoleProps } from '@/lib/sanity/text-role'
@@ -146,7 +146,7 @@ export function TeamCard({
   tone,
 }: CardProps) {
   // The default portrait fills the top of the card; a shape of its own (a circle, an arch) sits inside it.
-  const { shape } = resolveImageDesign(stegaClean(design), PORTRAIT_SHAPE)
+  const { shape, ratio } = resolveImageDesign(stegaClean(design), PORTRAIT_SHAPE)
   const inset = shape !== 'square'
   // The card clips, so a portrait's shadow would be cut off at the card's edge. When a depth is chosen the
   // portrait is inset by the room that depth needs, inside the space it already has: the card keeps its size
@@ -157,7 +157,7 @@ export function TeamCard({
   const room = clearance && !inset ? pictureInset(clearance) : undefined
   const wider =
     clearance && inset
-      ? pictureInsetBeyond(clearance, SHAPED_MARGIN, forcedAspect(shape) === '4/5' ? 5 / 4 : 1)
+      ? pictureInsetBeyond(clearance, SHAPED_MARGIN, ratio ? 1 / aspectValue(ratio) : 1)
       : undefined
   const look = resolveCardDesign(cardDesign, ROLES)
   const motion = liftOf(member, cardDesign)

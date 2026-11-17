@@ -2,7 +2,7 @@ import { Button, Card, Flex, Stack, Text } from '@sanity/ui'
 import { useEffect, useRef, useState } from 'react'
 import { unset, type FormPatch } from 'sanity'
 
-import type { FrameShape } from '@/lib/sanity/image-frame-geometry'
+import type { FrameShape, WholeNote } from '@/lib/sanity/image-frame-geometry'
 import { isFramed, type Crop, type Hotspot } from '@/lib/sanity/image-framing'
 
 import { AdjustPictureDialog, type PictureSource } from './adjust-picture-dialog'
@@ -23,16 +23,31 @@ export interface PictureFramingProps {
   source: PictureSource | undefined
   readOnly?: boolean
   onChange: (patches: FormPatch[]) => void
+  /** What the field says when the picture is shown whole here (`FramingResolver.wholeNote`). */
+  wholeNote?: WholeNote
 }
 
 const REMOVE = [unset(['crop']), unset(['hotspot'])]
+
+/** A profile picture set to Logo, uncropped: a saved positioning is kept but not used. */
+const UNCROPPED: WholeNote = {
+  saved: 'Your image positioning is saved but isn’t applied in uncropped mode.',
+  unsaved: 'Shown whole, so there’s nothing to adjust.',
+}
 
 /**
  * The row under Sanity's own image input: an "Adjust picture" button and one line of state. The
  * dialog is `AdjustPictureDialog`. Reset removes the saved positioning (after asking); nothing
  * else ever clears it, so changing a shape never loses an adjustment.
  */
-export function PictureFraming({ value, shapes, source, readOnly, onChange }: PictureFramingProps) {
+export function PictureFraming({
+  value,
+  shapes,
+  source,
+  readOnly,
+  onChange,
+  wholeNote = UNCROPPED,
+}: PictureFramingProps) {
   const [open, setOpen] = useState(false)
   const [removing, setRemoving] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -96,9 +111,7 @@ export function PictureFraming({ value, shapes, source, readOnly, onChange }: Pi
       <Stack gap={2} data-picture-framing="whole">
         <Flex align="center" gap={2} wrap="wrap">
           <Text size={1} muted>
-            {framed
-              ? 'Your image positioning is saved but isn’t applied in uncropped mode.'
-              : 'Shown whole, so there’s nothing to adjust.'}
+            {framed ? wholeNote.saved : wholeNote.unsaved}
           </Text>
           {resetButton}
         </Flex>

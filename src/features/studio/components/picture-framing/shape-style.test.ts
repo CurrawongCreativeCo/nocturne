@@ -40,6 +40,28 @@ describe('cornerRadius', () => {
     expect(cornerRadius({ ...base, corner: 'card' })).toBe('12.5%')
     expect(cornerRadius({ ...base, corner: 'none' })).toBe('0')
   })
+
+  it('draws Rounded at 24px and an arch as a half circle as wide as the picture (task 177)', () => {
+    expect(cornerRadius({ ...base, corner: 'rounded', drawnPx: 640 })).toBe('3.8%')
+    // rounded-t-full: the top's height is half the width, so a share of the height that grows with the ratio.
+    expect(cornerRadius({ ...base, corner: 'arch', aspect: 4 / 5 })).toBe(
+      '50% 50% 0 0 / 40% 40% 0 0',
+    )
+    expect(cornerRadius({ ...base, corner: 'arch', aspect: 2 / 3 })).toBe(
+      '50% 50% 0 0 / 33.3% 33.3% 0 0',
+    )
+  })
+
+  it('keeps a fixed corner round on a shape that is not square: its own share of the height', () => {
+    // 16px on a 768px-wide 16:9 picture (432px tall): 2.1% across, 3.7% down.
+    expect(cornerRadius({ corner: 'card', drawnPx: 768, aspect: 16 / 9 })).toBe('2.1% / 3.7%')
+  })
+
+  it('rounds only the top corners for a picture at the top of a card that clips it (task 177)', () => {
+    expect(cornerRadius({ corner: 'cardTop', drawnPx: 768, aspect: 16 / 9 })).toBe(
+      '2.1% 2.1% 0 0 / 3.7% 3.7% 0 0',
+    )
+  })
 })
 
 describe('pictureStyle', () => {

@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
 
-import type { FrameShape } from '@/lib/sanity/image-frame-geometry'
+import { CORNER_PX, type FrameShape } from '@/lib/sanity/image-frame-geometry'
 import { boxAt, coverBox, type AssetSize, type FramingState } from '@/lib/sanity/image-framing'
 
 /** The shape fills this much of the stage's longer side; the rest shows the picture dimmed. */
@@ -28,20 +28,32 @@ export function shapeBoxStyle(aspect: number, insetPct = 0): CSSProperties {
   }
 }
 
-/** CSS pixels of a card and control corner (`--radius-card`, `--radius-control` in the design tokens). */
-const CORNER_PX = { card: 16, control: 8 }
+const tenth = (value: number) => Math.round(value * 10) / 10
 
-/** The corner as the page draws it, kept in proportion: percentages of the picture's drawn size. */
-export function cornerRadius(shape: Pick<FrameShape, 'corner' | 'drawnPx'>): string {
+/**
+ * The corner as the page draws it, kept in proportion: percentages of the picture's drawn size. A
+ * percentage radius is a share of the width across and of the height down, so a fixed corner (16px
+ * on the page) gets its own height share when the shape is not square, or it would be drawn as an
+ * ellipse. An arch's top is a half circle as wide as the picture (`rounded-t-full`), so its height
+ * share is half the width, as a share of the height.
+ */
+export function cornerRadius(shape: Pick<FrameShape, 'corner' | 'drawnPx' | 'aspect'>): string {
   switch (shape.corner) {
     case 'circle':
       return '50%'
-    case 'arch':
-      return '50% 50% 0 0 / 25% 25% 0 0'
+    case 'arch': {
+      const down = tenth(50 * shape.aspect)
+      return `50% 50% 0 0 / ${down}% ${down}% 0 0`
+    }
     case 'none':
       return '0'
-    default:
-      return `${Math.round((CORNER_PX[shape.corner] / shape.drawnPx) * 1000) / 10}%`
+    default: {
+      const px = CORNER_PX[shape.corner === 'cardTop' ? 'card' : shape.corner]
+      const across = tenth((px / shape.drawnPx) * 100)
+      const down = tenth((px / shape.drawnPx) * 100 * shape.aspect)
+      if (shape.corner === 'cardTop') return `${across}% ${across}% 0 0 / ${down}% ${down}% 0 0`
+      return across === down ? `${across}%` : `${across}% / ${down}%`
+    }
   }
 }
 
