@@ -43,6 +43,36 @@ function setup() {
   return { dialog, opener, state, onClose, binding }
 }
 
+/** Like FakeDialog, but `close` arrives later, as a queued task, the way browsers fire it. */
+class QueuedCloseDialog extends FakeDialog {
+  override close = vi.fn(() => {
+    this.open = false
+    queueMicrotask(() => this.dispatchEvent(new Event('close')))
+  })
+}
+
+describe('bindModalDialog under Strict Mode (issue #188)', () => {
+  it('stays open when a binding is destroyed, rebound and shown again before the old close event arrives', async () => {
+    const dialog = new QueuedCloseDialog()
+    const env: DialogEnvironment = { activeElement: () => null, lockScroll: () => () => undefined }
+    const onClose = vi.fn()
+    // Mount, simulated unmount, mount again: what React does to effects in development.
+    const first = bindModalDialog(dialog, env, onClose)
+    first.show()
+    first.destroy()
+    const second = bindModalDialog(dialog, env, onClose)
+    second.show()
+    await Promise.resolve()
+    expect(dialog.open).toBe(true)
+    expect(onClose).not.toHaveBeenCalled()
+
+    // A real close afterwards is still reported, once.
+    dialog.close()
+    await Promise.resolve()
+    expect(onClose).toHaveBeenCalledOnce()
+  })
+})
+
 describe('bindModalDialog', () => {
   it('opens as a modal and locks the page', () => {
     const { binding, dialog, state } = setup()
