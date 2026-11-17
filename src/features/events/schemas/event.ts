@@ -4,7 +4,8 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 import { formatEventSubtitle } from '@/lib/events/format'
 import { DEFAULT_EVENT_TIME_ZONE, resolveTiming } from '@/lib/events/recurrence'
 import { daysBetween, localDateKey, parseDateKey } from '@/lib/events/time-zone'
-import { imageField } from '@/lib/sanity/schema/image-field'
+import { imageField, imageOptions } from '@/lib/sanity/schema/image-field'
+import { framing } from '@/lib/sanity/schema/image-framing-option'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { TIME_ZONES } from '@/lib/time-zones'
 
@@ -222,6 +223,8 @@ export const event = defineType({
       aspect: '16:9',
       minWidth: 1200,
       description: 'Shown on the event’s page and the featured card. Alt text is required.',
+      // "Adjust picture" (task 177): both places draw it 16:9.
+      options: { ...imageOptions, ...framing('eventImage') },
     }),
     defineField({
       name: 'location',

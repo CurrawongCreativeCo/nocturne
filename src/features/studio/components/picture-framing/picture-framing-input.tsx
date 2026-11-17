@@ -105,6 +105,7 @@ export function PictureFramingInput(props: ObjectInputProps) {
         source={source}
         readOnly={Boolean(readOnly)}
         onChange={onChange}
+        wholeNote={resolver?.wholeNote}
       />
     </Stack>
   )

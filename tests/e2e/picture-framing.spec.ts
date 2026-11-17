@@ -211,3 +211,85 @@ test.describe('on the Link list', () => {
     await expect(glass.getByText('Also shown as: Tallest row')).toBeVisible()
   })
 })
+
+test.describe('on Gallery photos and the event image (task 177)', () => {
+  test.skip(({ isMobile }) => isMobile, 'Desktop only')
+
+  const ratioOf = async (dialog: Locator) => {
+    const box = await dialog.locator('[data-picture-shape]').boundingBox()
+    if (!box) throw new Error('No shape')
+    return box.width / box.height
+  }
+  const storedRatio = async (holder: Locator) => {
+    const { crop } = JSON.parse(
+      (await holder.locator('[data-framing-values]').textContent()) ?? '{}',
+    ) as { crop?: { top: number; bottom: number; left: number; right: number } }
+    if (!crop) throw new Error('No crop saved')
+    // The sample picture is 1600 x 1200.
+    return ((1 - crop.left - crop.right) * 1600) / ((1 - crop.top - crop.bottom) * 1200)
+  }
+
+  test('each opens in the shape its placement draws', async ({ page }) => {
+    await openPreview(page)
+    for (const [id, ratio] of [
+      ['gallery-tile', 4 / 3],
+      ['gallery-arch', 2 / 3],
+      ['gallery-circle', 1],
+      ['event-image', 16 / 9],
+    ] as const) {
+      const dialog = await openDialog(page, 'light', id)
+      expect(await ratioOf(dialog), id).toBeCloseTo(ratio, 1)
+      await dialog.getByRole('button', { name: 'Cancel' }).click()
+      await expect(dialog).toBeHidden()
+    }
+  })
+
+  test('keys move and zoom a tile; Apply saves a crop at the tile’s ratio; Reset removes both values', async ({
+    page,
+  }) => {
+    await openPreview(page)
+    const holder = example(page, 'light', 'gallery-tile')
+    const dialog = await openDialog(page, 'light', 'gallery-tile')
+    await dialog.locator('[data-picture-stage]').focus()
+    for (const key of ['+', '+', '+', 'ArrowLeft', 'ArrowUp']) await page.keyboard.press(key)
+    await dialog.getByRole('button', { name: 'Apply' }).click()
+    await expect(dialog).toBeHidden()
+    await expect(holder.locator('[data-framing-values]')).toContainText('"hotspot"')
+    expect(await storedRatio(holder)).toBeCloseTo(4 / 3, 2)
+
+    // Reset goes back to inheriting the automatic fit: both values are removed, nothing centred is saved.
+    await holder.getByRole('button', { name: 'Reset picture positioning' }).click()
+    await holder.getByRole('button', { name: 'Remove' }).click()
+    await expect(holder.getByText('Automatic fit')).toBeVisible()
+    await expect(holder.locator('[data-framing-values]')).toHaveText('{}')
+  })
+
+  test('Reset inside the dialog, then Apply, removes a saved positioning too', async ({ page }) => {
+    await openPreview(page)
+    const holder = example(page, 'light', 'gallery-circle')
+    await expect(holder.locator('[data-framing-values]')).toContainText('"crop"')
+    const dialog = await openDialog(page, 'light', 'gallery-circle')
+    await dialog.getByRole('button', { name: 'Reset' }).click()
+    await dialog.getByRole('button', { name: 'Apply' }).click()
+    await expect(holder.locator('[data-framing-values]')).toHaveText('{}')
+  })
+
+  test('Masonry says why there is nothing to adjust, and keeps what is saved', async ({ page }) => {
+    await openPreview(page)
+    const holder = example(page, 'light', 'gallery-masonry')
+    await holder.scrollIntoViewIfNeeded()
+    await expect(holder.getByRole('button', { name: 'Adjust picture' })).toHaveCount(0)
+    await expect(holder.getByText(/^Masonry shows each photo at its own proportions/)).toBeVisible()
+    await expect(holder.locator('[data-framing-values]')).toContainText('"crop"')
+  })
+
+  test('Cancel after a change asks first, and Discard keeps the saved values', async ({ page }) => {
+    await openPreview(page)
+    const holder = example(page, 'light', 'gallery-arch')
+    const dialog = await openDialog(page, 'light', 'gallery-arch')
+    await dialog.getByRole('slider', { name: 'Zoom' }).fill('180')
+    await dialog.getByRole('button', { name: 'Cancel' }).click()
+    await dialog.getByRole('button', { name: 'Discard' }).click()
+    await expect(holder.locator('[data-framing-values]')).toHaveText('{}')
+  })
+})

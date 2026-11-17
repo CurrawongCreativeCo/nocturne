@@ -6,6 +6,7 @@ import {
   FRAMING_RESOLVERS,
   type FrameShape,
   type FrameShapes,
+  type WholeNote,
 } from '@/lib/sanity/image-frame-geometry'
 import type { Crop, Hotspot } from '@/lib/sanity/image-framing'
 
@@ -57,6 +58,21 @@ const LINK_THUMBNAIL_GLASS = THUMBNAIL.resolve(
   null,
   thumbnailPath,
 )
+// Gallery photos and the event image (task 177), from the same resolvers.
+const GALLERY = FRAMING_RESOLVERS.galleryTile
+const GALLERY_TILE = GALLERY.resolve({ variant: 'grid' })
+const GALLERY_ARCH = GALLERY.resolve({
+  variant: 'grid',
+  imageDesign: { appearance: 'arch', archRatio: '2/3', frameStyle: 'offset-border' },
+})
+const GALLERY_CIRCLE = GALLERY.resolve({
+  variant: 'slider',
+  imageDesign: { appearance: 'circle', frameStyle: 'double-line' },
+})
+// Masonry keeps each photo's own shape: no editor, and a saved adjustment is kept.
+const GALLERY_MASONRY = GALLERY.resolve({ variant: 'masonry' })
+const EVENT_IMAGE = FRAMING_RESOLVERS.eventImage.resolve(undefined)
+
 /** A saved adjustment, to show Logo, uncropped keeping it. */
 const SAVED: Partial<Value> = {
   crop: { top: 0.1, bottom: 0.1, left: 0.1, right: 0.1 },
@@ -84,11 +100,13 @@ function Example({
   title,
   shapes,
   initial,
+  wholeNote,
 }: {
   id: string
   title: string
   shapes: FrameShape[]
   initial?: Partial<Value>
+  wholeNote?: WholeNote
 }) {
   const [value, setValue] = useState<Value>({
     asset: { _ref: 'image-sample-1600x1200-svg' },
@@ -107,6 +125,7 @@ function Example({
           onChange={(patches) => {
             setValue((current) => apply(current, patches))
           }}
+          wholeNote={wholeNote}
         />
         <Text size={0} muted data-framing-values="">
           {JSON.stringify({ crop: value.crop, hotspot: value.hotspot })}
@@ -146,6 +165,34 @@ export function PictureFramingExamples() {
         id="thumbnail-glass"
         title="Link thumbnail: Glass rows"
         shapes={LINK_THUMBNAIL_GLASS}
+      />
+      <Example
+        id="gallery-tile"
+        title="Gallery photo: Grid, nothing chosen (4:3)"
+        shapes={GALLERY_TILE}
+      />
+      <Example
+        id="gallery-arch"
+        title="Gallery photo: Arch 2:3 with an offset border"
+        shapes={GALLERY_ARCH}
+      />
+      <Example
+        id="gallery-circle"
+        title="Gallery photo: Slider, Circle with a double line"
+        shapes={GALLERY_CIRCLE}
+        initial={SAVED}
+      />
+      <Example
+        id="gallery-masonry"
+        title="Gallery photo: Masonry"
+        shapes={GALLERY_MASONRY}
+        initial={SAVED}
+        wholeNote={GALLERY.wholeNote}
+      />
+      <Example
+        id="event-image"
+        title="Event image: Featured card and event page (16:9)"
+        shapes={EVENT_IMAGE}
       />
     </Stack>
   )
