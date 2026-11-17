@@ -141,7 +141,7 @@ Open http://localhost:3000/studio:
   - **Content tab.** The **Layout** picker comes first for sections with more than one layout, because the layout decides which fields matter. The hero is the exception: its picker is a row of six named presets (_Full background image_, _Split, image right_, _Split, image left_, _Centred text, no image_, _Editorial_, _Image with panel_; see _Hero presets_), which set the layout, the image side and the background together. Then the content, showing only what the chosen layout uses: the hero's _Image side_ appears for _Split_ only, its _Small picture_ for _Editorial_ only, and _Image_ for every layout but _Editorial_. A field that is hidden keeps whatever was typed in it, so switching layout back brings it back.
   - **Design tab.** _Background_ (_Page_, _Tinted_, _Contrast_, _Brand_) is a row of swatches drawn with the site's real colours. They are named by role, not colour, because Brand colours can make any of them light or dark (_Contrast_ is light text on dark, or dark on light on a dark site). _Animation_ is a picture picker with gently moving previews (still for anyone who asks for less motion): _None_, _Fade up_, _Subtle entrance_, _Fade_, _Slide in_, _Staggered_, _Float_ and _Parallax_ in three strengths (_Subtle_, _Medium_, _Strong_). Sections start on the right one for what they are (content fades up; the hero's text enters by itself; logo strips stay still), so most never need touching. _Float_ and _Parallax_ move a picture, so they are only offered where a section has one. A collapsed **Advanced: animation** appears under the picker and shows only what the chosen animation uses (intensity, duration, delay, direction, when it plays, or exact values). The first section on a page stays still so its heading and main image appear immediately, unless you choose _On load_, which slides or rises it without ever fading it in; a first hero set to _Parallax_ keeps its picture in the page from the start and only moves it once the page scrolls. Visitors who ask for less motion or have JavaScript off see everything still. See [Section animation](#section-animation).
     - _Float_ and _Parallax_ are only offered where a section has a picture to move: the hero's _Full background_ and _Image with panel_ layouts, and _Image + text_ (where _Parallax_ moves the picture inside its still frame: see _Image design_). If a section's layout changes and leaves _Parallax_ behind, it stays selected and shows a yellow warning.
-    - **Advanced: layout** (collapsed): _Space above and below_ (_Compact_, _Default_ or _Spacious_; _Default_ is the section's usual spacing), _Content width_ (_Narrow_, _Default_, _Wide_, or _Full width_ edge to edge), _Alignment_ (_Start_ or _Centre_ for headings, intro text and buttons) and _Anchor_ (a short name such as `pricing`, so a link to `/#pricing` jumps to the section; lowercase letters, numbers and hyphens, each once per page). _Alignment_ is left out on layouts that set their own (the hero's _Split_ and _Editorial_); a value left over from another layout stays visible with a warning, and **Reset value** in the field's menu clears it.
+    - **Advanced: layout** (collapsed): _Space above and below_ (_Compact_, _Default_ or _Spacious_; _Default_ is the section's usual spacing), _Content width_ (_Narrow_, _Default_, _Wide_, or _Full width_ edge to edge), _Alignment_ (_Start_ or _Centre_ for headings, intro text and buttons) and _Anchor_ (a short name such as `pricing`, so a link to `/#pricing` jumps to the section; lowercase letters, numbers and hyphens, each once per page). _Alignment_ is left out on layouts that set their own (the hero's _Split_ and _Editorial_); a value left over from another layout stays visible with a warning. Its first choice, **Use layout default**, clears it (it unsets the field, so the layout's own alignment is used); Studio's field menu offers only Copy and Paste.
   - **Advanced** (collapsed, in the Design tab): extra controls for the few sections that have them. It does not appear when the chosen layout has none. Today that is the hero's _Proportion_ and _Image shape_, for _Split_ only.
 
   Nothing in stored content changed, and a section with nothing set looks exactly as it did. New sections start with that kind of section's usual look (a hero starts _Contrast_, testimonials _Tinted_) and _Fade up_. The _Call to action banner_'s own _Tone_ (Brand, Dark, Light) still colours its card; the Design background colours the band around it. In Studio lists a section reads like a sentence: "Hero · Split · Contrast". A hero that matches one of its presets shows the preset's name instead ("Hero · Split, image left"); a custom combination falls back to the layout and background.
@@ -2581,13 +2581,12 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 
 | Closing task | Required pending | Conditional pending |
 | ------------ | ---------------- | ------------------- |
-| 151          | 1                | 0                   |
 | 157          | 1                | 0                   |
 | 159          | 3                | 8                   |
 | 177          | 9                | 20                  |
 | 213          | 7                | 0                   |
 | 276          | 2                | 3                   |
-| 280          | 17               | 0                   |
+| 280          | 18               | 0                   |
 
 **Evidence.** 302 capability entries, 563 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
@@ -4629,6 +4628,13 @@ or a small picture. Not to be confused with [Section dividers](#section-dividers
 Words also offer **Letter spacing**: Normal, Wide or Extra wide. Unset preserves the previous
 spacing (including the wider capitals). This is the same choice as Link list service categories.
 
+**Clearing in Studio:** In the middle, Letters, Letter spacing, Size in the middle, Length and Thickness each start with
+**Use divider default**, which unsets that field alone; the divider then draws its default (Nothing, As typed, the previous
+spacing, Medium, Medium, Thin). Studio's own clear icon has no accessible name and its field menu offers only Copy and
+Paste, so this labelled choice is the way to clear. Which fields show is unchanged: a value hidden by the style (a middle,
+length or thickness under Three dots, a line colour under Gradient) stays stored and comes back with the style. In
+read-only mode every choice is disabled.
+
 Each option appears only once it applies (three dots take no middle and no length). A fading line fades towards its outer
 ends around a middle. **Double** is two fine lines with a 3px gap, **Dotted line** a line made of dots (it takes a middle,
 where Three dots does not) and **Gradient** a line from the Primary to the Secondary colour, fading at its ends; a Gradient
@@ -4738,13 +4744,21 @@ Diagonal, Wave, Curve, Arch, Layered wave, Tide, Contour, Still water, Lagoon, R
   is Primary.
 - **Line colour** (Contour only): its three lines in **Primary** (the default) or the **muted text** colour, in the
   colours of the section below.
+- **Clearing Crest colour, Line colour and Shadow:** each starts with **Use shape default**, which unsets that field alone
+  (the shape then draws its default: Primary, Primary, Soft). A value saved before the shape changed is kept, not drawn,
+  and stays visible with a warning naming the shape it belongs to and **Use shape default**; once cleared, the field is
+  hidden. Choosing the owning shape again draws the kept value. In read-only mode every choice is disabled.
 - **Still water only**: one calm crest with a soft layer above it, and an optional layer below. **Crest position**
   (Standard, Centred, Shifted), **Depth** (Shallow, Standard, Deep: how far the layers reach), **Layer strength** (Light,
   Standard, Strong), **Colours** (Tint: Primary; Ink: text over Primary; Highlight: Highlight over Secondary) and **Layer
   below** (a second layer over the section below, in that section's colours). Layer below is not offered at Shallow, where
   the layer is too thin to read; if one was saved before Shallow was chosen it is kept, not drawn, and the field says so.
-  Left empty, each is the shape's own default (Standard, Tint, no layer below). Still water offers neither Invert nor the
-  accent line.
+  Left empty, each is the shape's own default (Standard, Tint, no layer below). **Clearing:** Crest position, Depth, Layer
+  strength and Colours each start with **Use shape default**, and Layer below has a **Use shape default** button beside its
+  switch (its accessible name is "Layer below: Use shape default"); each unsets its own field and nothing else, a saved
+  Layer below of false included (turning the switch off stores false; the button removes it). The button is disabled
+  while nothing is saved and in read-only mode. Studio's field menu offers only Copy and Paste, so every warning on these
+  fields names these controls. Still water offers neither Invert nor the accent line.
 - **Lagoon and Reef only**: the two bolder layered shapes, each with **two layers above the cut** that trade places across
   the width (one rises with the crests, the other in the valleys), so each shows alone in places and the two overlap in
   others. Lagoon (the Leap Frog composition, corrected: no slivers, no pinch at the edges) has nothing below the cut; Reef
@@ -4752,7 +4766,7 @@ Diagonal, Wave, Curve, Arch, Layered wave, Tide, Contour, Still water, Lagoon, R
   depth, one arrangement; Shallow with two upper layers is not offered), so Studio offers only **Flip**, **Layer strength**
   (Light, Standard, Strong) and **Colours** (Tint: Secondary with Ink, or Secondary with Primary for Reef; Ink: text colour
   led; Highlight: Highlight led). A crest position, depth or layer-below switch saved under another shape is kept, not
-  drawn, and the field says so. Reef has no hairline in this first pass.
+  drawn, and the field says so, naming **Use shape default** to clear it. Reef has no hairline in this first pass.
 - **Elevated only**: a straight boundary that casts a soft shadow onto the section below, in place of a cut. One
   choice, **Shadow**: Soft (the default: 18 px deep, starting at 16% of the text colour) or Deep (28 px, 24%). It
   has none of the cut's settings (no height or custom heights, Flip, Invert, accent line or back wave colour); any of

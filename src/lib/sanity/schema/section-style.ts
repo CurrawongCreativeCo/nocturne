@@ -58,7 +58,9 @@ import {
   SECTION_EDGE_HEIGHTS,
   SECTION_EDGE_HEIGHT_TITLES,
   SECTION_EDGE_LAYERS,
+  SECTION_ALIGN_LAYOUT_DEFAULT,
   SECTION_EDGE_LAYER_COLOUR_INHERIT,
+  SECTION_EDGE_SHAPE_DEFAULT,
   SECTION_EDGE_LAYER_RESET,
   SECTION_EDGE_LAYER_ROLE_TITLES,
   SECTION_EDGE_LAYER_ROLES,
@@ -129,6 +131,7 @@ import {
   edgeLayerHidden,
   edgeLineColourHidden,
   edgeShadowHidden,
+  staleShapeOptionMessage,
   edgeOptionsHidden,
   edgeTideLayerHidden,
   motionCustomHidden,
@@ -314,6 +317,13 @@ const radio = (values: readonly string[], titles: Record<string, string>) => ({
 })
 
 declare module 'sanity' {
+  interface BooleanOptions {
+    /**
+     * Studio draws a button with this label beside the switch that unsets the field, a saved false included
+     * (features/studio/components/clearable-boolean-input). Use it where unset and false must both be clearable.
+     */
+    clearable?: string
+  }
   interface NumberOptions {
     /** Draw the number as a slider (features/studio/components/slider-input). */
     slider?: {
@@ -1181,8 +1191,14 @@ export const sectionStyle = defineType({
       description:
         'The softer crest behind the edge: Primary (the default) or Secondary, lightly, or Echo, this section’s own colour. A picture or a gradient has no single colour to echo, so over one the crest is Primary.',
       type: 'string',
-      options: radio(SECTION_EDGE_TIDE_LAYERS, SECTION_EDGE_TIDE_LAYER_TITLES),
+      // "Use shape default" first unsets the field (the shape draws its own default); Studio's field menu has
+      // only Copy and Paste. A value left on another shape stays visible, with this warning, until it is cleared.
+      options: {
+        ...radio(SECTION_EDGE_TIDE_LAYERS, SECTION_EDGE_TIDE_LAYER_TITLES),
+        inheritable: SECTION_EDGE_SHAPE_DEFAULT,
+      },
       hidden: edgeTideLayerHidden,
+      validation: (rule) => rule.custom(staleShapeOptionMessage('tide')).warning(),
     }),
     defineField({
       name: 'edgeLineColour',
@@ -1190,8 +1206,14 @@ export const sectionStyle = defineType({
       description:
         'The three lines below the cut, in the colours of the section below: Primary (the default) or its muted text colour.',
       type: 'string',
-      options: radio(SECTION_EDGE_LINE_COLOURS, SECTION_EDGE_LINE_COLOUR_TITLES),
+      // "Use shape default" first unsets the field (the shape draws its own default); Studio's field menu has
+      // only Copy and Paste. A value left on another shape stays visible, with this warning, until it is cleared.
+      options: {
+        ...radio(SECTION_EDGE_LINE_COLOURS, SECTION_EDGE_LINE_COLOUR_TITLES),
+        inheritable: SECTION_EDGE_SHAPE_DEFAULT,
+      },
       hidden: edgeLineColourHidden,
+      validation: (rule) => rule.custom(staleShapeOptionMessage('contour')).warning(),
     }),
     defineField({
       name: 'edgeShadow',
@@ -1199,8 +1221,14 @@ export const sectionStyle = defineType({
       description:
         'How far the shadow reaches onto the section below, and how dark it is. Soft is the default; Deep is stronger and reaches further. It is a decoration over the next section, so it takes no room and never covers its content.',
       type: 'string',
-      options: radio(SECTION_EDGE_SHADOWS, SECTION_EDGE_SHADOW_TITLES),
+      // "Use shape default" first unsets the field (the shape draws its own default); Studio's field menu has
+      // only Copy and Paste. A value left on another shape stays visible, with this warning, until it is cleared.
+      options: {
+        ...radio(SECTION_EDGE_SHADOWS, SECTION_EDGE_SHADOW_TITLES),
+        inheritable: SECTION_EDGE_SHAPE_DEFAULT,
+      },
       hidden: edgeShadowHidden,
+      validation: (rule) => rule.custom(staleShapeOptionMessage('elevated')).warning(),
     }),
     ...(
       [
@@ -1239,7 +1267,12 @@ export const sectionStyle = defineType({
         title,
         description,
         type: 'string',
-        options: radio(values, titles as Record<(typeof values)[number], string>),
+        // The first choice, "Use shape default", unsets the field (the page draws the shape's own default). It is
+        // the one way to clear a value: Studio's field menu has only Copy and Paste.
+        options: {
+          ...radio(values, titles as Record<(typeof values)[number], string>),
+          inheritable: SECTION_EDGE_SHAPE_DEFAULT,
+        },
         // Crest position and depth are offered only where a shape has a choice; strength and colours always.
         hidden:
           name === 'edgeCrest'
@@ -1305,6 +1338,9 @@ export const sectionStyle = defineType({
       description:
         'A second soft layer below the edge, over the section that follows. Still water only; not offered at Shallow depth.',
       type: 'boolean',
+      // Studio adds a "Use shape default" button beside the switch (features/studio/components/clearable-boolean-input):
+      // it unsets a saved true or false, which turning the switch off cannot do.
+      options: { clearable: SECTION_EDGE_SHAPE_DEFAULT },
       hidden: edgeLayerBelowHidden,
       validation: (rule) =>
         rule.custom((value, context) => staleLayerBelowMessage(value, context)).warning(),
@@ -1415,7 +1451,11 @@ export const sectionStyle = defineType({
       description: 'Headings and intro text.',
       type: 'string',
       fieldset: 'layoutOptions',
-      options: radio(SECTION_ALIGNS, { start: 'Start', center: 'Centre' }),
+      // "Use layout default" first: it unsets the value, so the layout's own alignment is used.
+      options: {
+        ...radio(SECTION_ALIGNS, { start: 'Start', center: 'Centre' }),
+        inheritable: SECTION_ALIGN_LAYOUT_DEFAULT,
+      },
       // Layouts that set their own alignment don't offer it.
       hidden: alignmentHidden,
       validation: (rule) =>

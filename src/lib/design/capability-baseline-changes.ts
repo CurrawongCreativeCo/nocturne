@@ -38,8 +38,8 @@ export interface BaselineChange {
 /**
  * The three views task 156 declares (the event details card, the service page and search results). Their
  * design is not stored anywhere yet, so each pair is admitted with its closing task. Task 280 ("Standalone
- * view design settings and adoption") is proposed and not yet in the canonical plan: its number is
- * provisional until the plan publishes it. Approved in principle by the owner on 7 November 2026.
+ * view design settings and adoption") is in the Build Plan (added 17 November 2026). Approved in principle by
+ * the owner on 7 November 2026.
  */
 const VIEW_ROW = {
   kind: 'admit',
@@ -126,14 +126,20 @@ export const BASELINE_CHANGES: readonly BaselineChange[] = [
     reason: 'The page’s picture has a fixed 16:9 crop, with no Adjust picture yet.',
     closingTask: 177,
   },
+  // The divider moved from task 151 to task 280 (11 November 2026): the page separates its groups with plain
+  // border-t rules and has no document to store a divider in, so where it lives is decided with the view's design.
+  // Reviewed row for the moved pair, recorded under the owner's GitHub identity on 17 November 2026.
   {
-    ...VIEW_ROW,
+    kind: 'admit',
     component: 'servicePage',
     capability: 'divider',
     scope: 'section',
+    layouts: [null],
     reason:
-      'The rules between the page’s groups are plain borders, with no decorative divider yet, as on the Team member page.',
-    closingTask: 151,
+      'The page separates its groups with plain border-t rules and has no document to store a divider in. The standalone-view design task decides where it lives (task 151 moved it there, 11 November 2026).',
+    reviewer: 'CurrawongCreativeCo',
+    reviewed: '2026-11-17',
+    closingTask: 280,
   },
   ...viewText(
     'searchResults',

@@ -296,6 +296,61 @@ describe('the bottom edge', () => {
     expect(shown('edgeCrest', undefined)).toBe(true)
   })
 
+  // Tide's Crest colour, Contour's Line colour and Elevated's Shadow (task 151): each is offered on its own shape; a
+  // value left on another shape stays visible with a warning that names its shape and its clear, until it is cleared.
+  const OWN_CHOICES = [
+    ['edgeTideLayer', 'tide', 'Tide', 'echo'],
+    ['edgeLineColour', 'contour', 'Contour', 'muted'],
+    ['edgeShadow', 'elevated', 'Elevated', 'deep'],
+  ] as const
+  const warningOf = (name: string, parent: unknown, value: unknown) => {
+    const validation = (field(name) as unknown as { validation: (rule: unknown) => unknown })
+      .validation
+    let custom: ((v: unknown, c: unknown) => unknown) | undefined
+    let level: string | undefined
+    const rule = {
+      custom: (fn: typeof custom) => ((custom = fn), rule),
+      warning: () => ((level = 'warning'), rule),
+      error: () => ((level = 'error'), rule),
+    }
+    validation(rule)
+    return { level, message: custom?.(value, { parent }) }
+  }
+
+  it.each(OWN_CHOICES)(
+    '%s: shown on its own shape, kept visible with a warning on another shape until cleared',
+    (name, edge, title, stored) => {
+      const at = (parent: unknown, value?: unknown) =>
+        (field(name)?.hidden as (c: never) => boolean)({ parent, value } as never)
+      expect(at({ edge })).toBe(false)
+      expect(at({ edge }, stored)).toBe(false)
+      for (const other of [
+        undefined,
+        'none',
+        'wave',
+        'tide',
+        'contour',
+        'elevated',
+        'still-water',
+      ].filter((shape) => shape !== edge)) {
+        expect(at({ edge: other })).toBe(true)
+        expect(at({ edge: other }, stored)).toBe(false)
+        expect(at({ edge: other }, 'retired-value')).toBe(false)
+      }
+      expect(warningOf(name, { edge }, stored).message).toBe(true)
+      expect(warningOf(name, { edge: 'wave' }, undefined).message).toBe(true)
+      const stale = warningOf(name, { edge: 'wave' }, stored)
+      expect(stale.level).toBe('warning')
+      expect(stale.message).toBe(
+        `This choice belongs to ${title} and is ignored by the shape chosen above. Choose “Use shape default” to clear it.`,
+      )
+      expect((field(name)?.options as Record<string, unknown> | undefined)?.inheritable).toBe(
+        'Use shape default',
+      )
+      expect(field(name)).not.toHaveProperty('initialValue')
+    },
+  )
+
   it('does not offer Layer below at Shallow, and keeps a stored one visible so it can be seen and cleared', () => {
     const at = (parent: unknown, value?: unknown) =>
       (field('edgeLayerBelow')?.hidden as (c: never) => boolean)({ parent, value } as never)

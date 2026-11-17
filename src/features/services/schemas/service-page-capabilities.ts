@@ -4,8 +4,8 @@ import { NOT_APPLICABLE } from '@/lib/design/common-policies'
 /**
  * A service's own page (`services/components/service-view.tsx`; task 156 declares it). It draws no card
  * and is not a section, but it styles real text, crops one picture and rules off its groups, so those are
- * Required. Text closes in 280 (a design for the view), the picture in 177 and the rules in 151, their
- * registry owners.
+ * Required. Text and the rules close in 280 (a design for the view, and where its divider is stored; task 151 moved
+ * the divider there on 11 November 2026), the picture in 177.
  */
 export const servicePageCapabilities = declareCapabilities({
   surface: notApplicable('Draws no card: its groups are separated by a rule'),
@@ -30,7 +30,7 @@ export const servicePageCapabilities = declareCapabilities({
   pictureDepth: notApplicable('Draws no shadow or glow on its picture'),
   overlay: NOT_APPLICABLE.noWashedPicture,
   glass: NOT_APPLICABLE.noCardSurface,
-  divider: { policy: 'required', scope: 'section' },
+  divider: { policy: 'required', scope: 'section', closingTask: 280 },
   edge: NOT_APPLICABLE.noEdge,
   motion: NOT_APPLICABLE.noFrameToAnimate,
   slots: NOT_APPLICABLE.notASlotFamily,

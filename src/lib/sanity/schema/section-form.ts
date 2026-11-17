@@ -20,12 +20,14 @@ import {
   GENERATED_EDGE_HEIGHTS,
   SECTION_EDGE_DEPTHS,
   SECTION_EDGE_HEIGHTS,
+  SECTION_ALIGN_LAYOUT_DEFAULT,
   SECTION_EDGE_LAYER_COLOUR_INHERIT,
   SECTION_EDGE_LAYER_RESET,
   SECTION_EDGE_LAYER_ROLES,
   SECTION_EDGE_LAYER_SLOTS,
   SECTION_EDGE_LAYER_SLOT_TITLES,
   SECTION_EDGE_LAYER_STRENGTH_INHERIT,
+  SECTION_EDGE_SHAPE_DEFAULT,
   SECTION_EDGE_STRENGTHS,
   SECTION_EDGE_TITLES,
   SECTION_MOTIONS,
@@ -307,7 +309,7 @@ export function staleImageOptionMessage(
 /** The warning for an Alignment value the chosen layout ignores; true when there is nothing to say. */
 export function staleAlignmentMessage(value: unknown, context: FieldContext): string | true {
   if (!value || allowsAlignment(sectionAtStylePath(context.document, context.path))) return true
-  return 'This layout sets its own alignment, so this choice is left over from another layout. Reset it from the field menu.'
+  return `This layout sets its own alignment, so this choice is left over from another layout. Choose “${SECTION_ALIGN_LAYOUT_DEFAULT}” to clear it.`
 }
 
 /** The warning for Float or Parallax left on a section whose layout has no picture. */
@@ -362,9 +364,12 @@ const hasEdge = (edge: string | undefined) => !!edge && edge !== 'none'
 export const edgeOptionsHidden: ConditionalPropertyCallback = ({ parent }) =>
   !hasEdge(edgeOf(parent)) || edgeOf(parent) === 'elevated'
 
-/** Only Elevated has a shadow to choose. */
-export const edgeShadowHidden: ConditionalPropertyCallback = ({ parent }) =>
-  edgeOf(parent) !== 'elevated'
+/**
+ * Only Elevated has a shadow to choose. A shadow stored before the shape changed stays visible, so the editor can read
+ * its warning and clear it; it is hidden once cleared (see `staleShapeOptionMessage`).
+ */
+export const edgeShadowHidden: ConditionalPropertyCallback = ({ parent, value }) =>
+  edgeOf(parent) !== 'elevated' && !value
 
 /** Curve and Arch are symmetrical, so mirroring them would change nothing. */
 export const edgeFlipHidden: ConditionalPropertyCallback = ({ parent }) =>
@@ -382,13 +387,13 @@ export const edgeLayerHidden: ConditionalPropertyCallback = ({ parent }) =>
 export const edgeAccentHidden: ConditionalPropertyCallback = ({ parent }) =>
   !edgeAllowsAccent(edgeOf(parent))
 
-/** Only Tide has a back crest to colour. */
-export const edgeTideLayerHidden: ConditionalPropertyCallback = ({ parent }) =>
-  edgeOf(parent) !== 'tide'
+/** Only Tide has a back crest to colour; a stored one is shown on another shape until cleared. */
+export const edgeTideLayerHidden: ConditionalPropertyCallback = ({ parent, value }) =>
+  edgeOf(parent) !== 'tide' && !value
 
-/** Only Contour has lines to colour. */
-export const edgeLineColourHidden: ConditionalPropertyCallback = ({ parent }) =>
-  edgeOf(parent) !== 'contour'
+/** Only Contour has lines to colour; a stored one is shown on another shape until cleared. */
+export const edgeLineColourHidden: ConditionalPropertyCallback = ({ parent, value }) =>
+  edgeOf(parent) !== 'contour' && !value
 
 interface GeneratedEdgeParent extends EdgeParent {
   edgeDepth?: string
@@ -406,14 +411,31 @@ export const edgeGeneratedHidden: ConditionalPropertyCallback = ({ parent }) =>
 export const edgeGeneratedOptionHidden: ConditionalPropertyCallback = ({ parent, value }) =>
   !isGeneratedEdge(edgeOf(parent)) && !value
 
-/** The warning for a generated shape's control left on another shape; true when there is nothing to say. */
+/** Every generated shape's control is cleared by its own first choice (or, for Layer below, the button beside it). */
+const CLEAR_TO_SHAPE_DEFAULT = `Choose “${SECTION_EDGE_SHAPE_DEFAULT}” to clear it.`
+
+/**
+ * The warning for a generated shape's control left on another shape; true when there is nothing to say. Used by
+ * Layer strength and Colours, and by Crest position and Depth when the shape has no steps at all.
+ */
 export function staleGeneratedOptionMessage(
   value: unknown,
   context: { parent?: unknown },
 ): string | true {
   if (!value || isGeneratedEdge(edgeOf(context.parent))) return true
-  return 'This choice belongs to Still water, Lagoon and Reef and is ignored by the shape chosen above. Clear it from the field menu.'
+  return `This choice belongs to Still water, Lagoon and Reef and is ignored by the shape chosen above. ${CLEAR_TO_SHAPE_DEFAULT}`
 }
+
+/**
+ * The warning for Tide's Crest colour, Contour's Line colour or Elevated's Shadow left on another shape; true when there
+ * is nothing to say. The value is kept (and drawn again if the shape comes back) until the editor clears it.
+ */
+export const staleShapeOptionMessage =
+  (owner: 'tide' | 'contour' | 'elevated') =>
+  (value: unknown, context: { parent?: unknown }): string | true => {
+    if (!value || edgeOf(context.parent) === owner) return true
+    return `This choice belongs to ${SECTION_EDGE_TITLES[owner]} and is ignored by the shape chosen above. ${CLEAR_TO_SHAPE_DEFAULT}`
+  }
 
 type EdgeStep = 'crest' | 'depth'
 
@@ -446,7 +468,7 @@ export const staleStepMessage =
     if (!isGeneratedEdge(edge)) return staleGeneratedOptionMessage(value, context)
     if (typeof value === 'string' && stepsOffered(edge, step).includes(value)) return true
     const title = SECTION_EDGE_TITLES[edge]
-    return `${title} draws one ${step === 'crest' ? 'crest position' : 'depth'} only, so this is ignored. Clear it from the field menu.`
+    return `${title} draws one ${step === 'crest' ? 'crest position' : 'depth'} only, so this is ignored. ${CLEAR_TO_SHAPE_DEFAULT}`
   }
 
 const depthOf = (parent: unknown) => {
@@ -477,10 +499,10 @@ export function staleLayerBelowMessage(
   if (offersLayerBelow(context.parent)) return true
   const { layerBelow } = LAYERED_PRESETS[edge]
   if (layerBelow === 'always')
-    return `${SECTION_EDGE_TITLES[edge]} always draws its layer below, so this switch is ignored. Clear it from the field menu.`
+    return `${SECTION_EDGE_TITLES[edge]} always draws its layer below, so this switch is ignored. ${CLEAR_TO_SHAPE_DEFAULT}`
   if (layerBelow === 'never')
-    return `${SECTION_EDGE_TITLES[edge]} has no layer below, so this is ignored. Clear it from the field menu.`
-  return 'A layer below is not drawn at Shallow depth, so this is ignored. Choose Standard or Deep to show it, or turn it off.'
+    return `${SECTION_EDGE_TITLES[edge]} has no layer below, so this is ignored. ${CLEAR_TO_SHAPE_DEFAULT}`
+  return `A layer below is not drawn at Shallow depth, so this is ignored. Choose Standard or Deep to show it, or “${SECTION_EDGE_SHAPE_DEFAULT}” to clear it.`
 }
 
 type LayerColoursValue = Record<string, unknown> | null | undefined
