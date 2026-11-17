@@ -21,6 +21,7 @@ import { fileURLToPath } from 'node:url'
 
 import { parseSectionArgs, toSectionNames } from './section-names.mjs'
 import {
+  capabilitiesTemplate,
   componentTemplate,
   dispatcherTemplate,
   fragmentTemplate,
@@ -45,6 +46,7 @@ const { kebab, typeName, Component, title } = names
 
 const paths = {
   schema: join(feature, 'schemas/sections', `${kebab}.ts`),
+  capabilities: join(feature, 'schemas/sections', `${kebab}-capabilities.ts`),
   registry: join(feature, 'schemas/sections/index.ts'),
   fragments: join(feature, 'api/sections.ts'),
   // A section with variants is a folder; the renderer's './sections/<kebab>' import finds its index.tsx.
@@ -54,10 +56,12 @@ const paths = {
   placeholder: join(root, 'public/section-previews/_placeholder.svg'),
   fixtures: join(root, 'tests/e2e/fixtures/dataset.mjs'),
   clientEditable: join(root, 'src/lib/sanity/client-editable.ts'),
+  sectionSurfaces: join(root, 'src/lib/design/section-surfaces.ts'),
 }
 
 if (
   existsSync(paths.schema) ||
+  existsSync(paths.capabilities) ||
   existsSync(paths.component) ||
   existsSync(`${paths.component}.tsx`) ||
   existsSync(join(feature, 'components/sections', kebab, 'index.tsx'))
@@ -78,6 +82,12 @@ const edits = [
   [paths.renderer, '  // new-section:register', `  ${typeName}: ${Component},\n`],
   [paths.fixtures, '  // new-section:gallery', galleryTemplate(names, variants)],
   [paths.clientEditable, '  // new-type:agency-only', `  '${typeName}',\n`],
+  // Until its mark capability is reviewed the section offers no section mark, as its declaration says.
+  [
+    paths.sectionSurfaces,
+    '  // new-section:no-mark',
+    `  '${typeName}', // mark not reviewed yet\n`,
+  ],
 ]
 for (const [file, marker] of edits) {
   if (!readFileSync(file, 'utf8').includes(marker)) {
@@ -99,6 +109,7 @@ const componentFiles = variants.length
   : [[paths.component, componentTemplate(names)]]
 
 writeFileSync(paths.schema, schemaTemplate(names, variants))
+writeFileSync(paths.capabilities, capabilitiesTemplate(names))
 if (variants.length) mkdirSync(paths.component)
 for (const [file, content] of componentFiles) writeFileSync(file, content)
 for (const [file, marker, text] of edits) {
@@ -113,20 +124,33 @@ if (existsSync(paths.placeholder) && !existsSync(paths.preview)) {
 }
 
 console.log(`\n✓ Created the "${title}" section (${typeName}):`)
-for (const file of [paths.schema, ...componentFiles.map(([file]) => file), paths.preview])
+for (const file of [
+  paths.schema,
+  paths.capabilities,
+  ...componentFiles.map(([file]) => file),
+  paths.preview,
+])
   console.log(`  + ${rel(file)}`)
-for (const file of [paths.registry, paths.fragments, paths.renderer, paths.fixtures])
+for (const file of [
+  paths.registry,
+  paths.fragments,
+  paths.renderer,
+  paths.fixtures,
+  paths.sectionSurfaces,
+])
   console.log(`  ~ ${rel(file)}`)
 
 // Match the project's lint and formatting even when the pre-commit hook is off
 // (e.g. imports added at the markers get sorted into place).
 const touched = [
   paths.schema,
+  paths.capabilities,
   paths.registry,
   paths.fragments,
   ...componentFiles.map(([file]) => file),
   paths.renderer,
   paths.fixtures,
+  paths.sectionSurfaces,
 ]
 const npx = (args) =>
   spawnSync('npx', args, { cwd: root, stdio: 'inherit', shell: process.platform === 'win32' })
@@ -156,8 +180,13 @@ Next:
   1. Add fields in ${rel(paths.schema)}
   2. Query them in ${typeName}Fragment (${rel(paths.fragments)}), then run \`npm run typegen\`
   3. Build the UI in ${variants.length ? `${rel(paths.component)}/ (one file per variant)` : rel(paths.component)}
-  4. Optional: replace the thumbnail at ${rel(paths.preview)}
-  5. Give the "${kebab}" entry in the section gallery real content (${rel(paths.fixtures)}), then
+  4. Review each design capability in ${rel(paths.capabilities)}: it starts Not applicable with the reason
+     "Not reviewed yet", and \`npm run check\` fails until every one is Required, Conditional (with a
+     trigger) or Not applicable (with a reason). README, "Design capability contract". The section
+     takes no decorative mark until its mark is reviewed: to offer one, declare \`mark\` Required, add its
+     evidence and delete the "${typeName}" line in ${rel(paths.sectionSurfaces)}.
+  5. Optional: replace the thumbnail at ${rel(paths.preview)}
+  6. Give the "${kebab}" entry in the section gallery real content (${rel(paths.fixtures)}), then
      add its screenshot baseline: \`npm run test:e2e:update\` on Linux or in Docker (see the
      README's "Section gallery"). Until then the visual test for "${kebab}" has no baseline and fails.
 

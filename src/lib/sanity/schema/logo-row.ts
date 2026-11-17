@@ -2,6 +2,7 @@ import { ImagesIcon } from '@sanity/icons/Images'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { imageField } from './image-field'
+import { logoRowCapabilities } from './logo-row-capabilities'
 
 /** How many logos a row holds: past six they shrink to nothing on a phone. */
 export const LOGO_ROW_ITEMS = { min: 1, max: 6 } as const
@@ -16,6 +17,7 @@ export const logoRow = defineType({
   title: 'Logos',
   type: 'object',
   icon: ImagesIcon,
+  options: { designCapabilities: logoRowCapabilities },
   fields: [
     defineField({
       name: 'logos',

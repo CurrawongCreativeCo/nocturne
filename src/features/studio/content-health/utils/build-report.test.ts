@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { isRuleId } from '@/lib/audit/finding'
 import type { CONTENT_HEALTH_QUERY_RESULT } from '@/types/sanity.types'
 
 import { buildReport } from './build-report'
@@ -142,5 +143,55 @@ describe('buildReport', () => {
   it('lists published pages nothing links to, counting links in the latest draft', () => {
     // about: linked from the team draft. team: linked from about. home: exempt. contact: not published.
     expect(groups.orphans?.map(({ id }) => id)).toEqual(['lonely'])
+  })
+
+  it('gives each group and its items the audit rule they are a finding of', () => {
+    const report = buildReport(data)
+    expect(Object.fromEntries(report.map(({ id, ruleId }) => [id, ruleId]))).toEqual({
+      'meta-description': 'seo.description-missing',
+      'alt-text': 'a11y.image-alt',
+      'broken-links': 'links.internal-broken',
+      'broken-anchors': 'links.anchor-missing',
+      'broken-panels': 'links.panel-unpublished',
+      redirects: 'links.redirect-chain',
+      orphans: 'links.orphan-page',
+    })
+    for (const group of report) {
+      expect(isRuleId(group.ruleId)).toBe(true)
+      expect(group.items.every((item) => item.ruleId === group.ruleId)).toBe(true)
+    }
+  })
+})
+
+describe('buildReport with header sub-links', () => {
+  const nested = {
+    ...data,
+    navigation: [
+      {
+        _id: 'siteNavigation',
+        headerNav: [
+          { label: 'Home', link: link('home') },
+          // A parent with no page of its own: its sub-links are still checked.
+          {
+            label: 'More',
+            children: [
+              { label: 'Lonely', link: link('lonely') },
+              { label: 'Contact', link: link('contact') },
+            ],
+          },
+        ],
+        headerCta: null,
+        footerNav: null,
+      },
+    ],
+  } as unknown as CONTENT_HEALTH_QUERY_RESULT
+  const groups = Object.fromEntries(buildReport(nested).map((group) => [group.id, group.items]))
+
+  it('lists a broken link in a sub-link against the navigation', () => {
+    expect(groups['broken-links']?.map(({ id }) => id)).toContain('siteNavigation')
+  })
+
+  it('counts a sub-link as a link to its page', () => {
+    expect(groups.orphans?.map(({ id }) => id)).toEqual([])
   })
 })

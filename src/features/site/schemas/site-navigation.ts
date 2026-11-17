@@ -2,9 +2,12 @@ import { MenuIcon } from '@sanity/icons/Menu'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { hiddenFromClients } from '@/lib/sanity/roles'
+import { iconsDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { presetField } from '@/lib/sanity/schema/preset-field'
 import { socialStyleThumbnails } from '@/lib/sanity/schema/thumbnails/link-design-thumbnails'
 import { SOCIAL_STYLES, SOCIAL_STYLE_TITLES } from '@/lib/sanity/social-style-options'
+
+import { checkFooterNav } from './nav-item'
 
 /** A singleton: the one document has `_id === 'siteNavigation'` (see SINGLETON_TYPES and the desk structure). */
 export const siteNavigation = defineType({
@@ -21,7 +24,7 @@ export const siteNavigation = defineType({
       name: 'headerNav',
       title: 'Header menu',
       description:
-        'The links across the top of every page, in this order. Up to seven fit on a laptop; put the rest in the footer.',
+        'The links across the top of every page, in this order. Up to seven fit on a laptop; put the rest in the footer. Give a link sub-links to make it a dropdown.',
       type: 'array',
       group: 'header',
       of: [defineArrayMember({ type: 'navItem' })],
@@ -43,6 +46,7 @@ export const siteNavigation = defineType({
       type: 'array',
       group: 'footer',
       of: [defineArrayMember({ type: 'navItem' })],
+      validation: (rule) => rule.custom(checkFooterNav),
     }),
     defineField({
       name: 'footerText',
@@ -77,6 +81,31 @@ export const siteNavigation = defineType({
       hidden: (context) =>
         hiddenFromClients(context) ||
         !(context.document as { footerShowSocial?: boolean } | undefined)?.footerShowSocial,
+    }),
+    // Agency only. Each choice inherits the style above, so empty draws what the footer always drew.
+    // Agency only. A rule above the copyright and links row (task 151); empty is None, and the footer draws
+    // its fixed lines as it always has.
+    defineField({
+      name: 'footerDividerDesign',
+      title: 'Divider above the copyright line',
+      type: 'decorativeDivider',
+      group: 'footer',
+      description:
+        'A rule between the footer’s details and the copyright and links. Replaces the footer’s fixed line there.',
+      hidden: hiddenFromClients,
+    }),
+    iconsDesignField({
+      name: 'footerIconDesign',
+      scope: 'section',
+      group: 'footer',
+      inherits: 'the social icon style above',
+      // Read from the parent, which is this document, so the capability check can evaluate it too.
+      hidden: (context) =>
+        !(context.parent as { footerShowSocial?: boolean } | undefined)?.footerShowSocial,
+      shapeOf: (context) =>
+        (context.parent as { iconShape?: string } | undefined)?.iconShape ??
+        (context.document as { footerSocialStyle?: string } | undefined)?.footerSocialStyle ??
+        'plain',
     }),
   ],
   preview: { prepare: () => ({ title: 'Navigation' }) },

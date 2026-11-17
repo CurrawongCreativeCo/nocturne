@@ -38,7 +38,9 @@ const COMPONENTS: { [T in SlotBlockType]: ComponentType<SlotProps<T>> } = {
   statsBar: ({ item, centred, animate }) => (
     <StatsBar items={item.items} caption={item.caption} centred={centred} animate={animate} />
   ),
-  badgeRow: ({ item, centred }) => <BadgeRow badges={item.badges} centred={centred} />,
+  badgeRow: ({ item, centred }) => (
+    <BadgeRow badges={item.badges} iconDesign={item.iconDesign} centred={centred} />
+  ),
   logoRow: ({ item, centred }) => (
     <LogoRow logos={item.logos} greyscale={item.greyscale !== false} centred={centred} />
   ),

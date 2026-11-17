@@ -1,13 +1,17 @@
 import { stegaClean } from 'next-sanity'
 
 import { CtaGroup } from '@/components/ui/cta-link'
-import { PlainText } from '@/components/ui/plain-text'
-import { RichHeading } from '@/components/ui/rich-heading'
 import { SectionFrame } from '@/components/ui/section-frame'
+import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { CARD_SHADOW_CLASS, OWN_SHADOW, resolveCardDepth } from '@/lib/sanity/depth-options'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
+import { resolveTextRoles } from '@/lib/sanity/text-role'
 
 import type { SectionProps } from '../../types'
+
+const HEADER_ROLES = ['eyebrow', 'heading', 'intro'] as const
 
 const DEFAULTS: SectionDefaults = {
   spacing: 'compact',
@@ -31,25 +35,27 @@ export function CtaBanner({ data, isFirst }: SectionProps<'ctaBanner'>) {
   const title = sectionTitle(data)
   const card = cards[stegaClean(data.tone)]
   const { block, text: textAlign, justify } = sectionTraits(data.style, DEFAULTS)
+  // The card draws no shadow of its own: a site-wide Card depth, or a depth chosen here, gives it one.
+  const depth = resolveCardDepth([data.cardDesign], OWN_SHADOW.siteCardFree)
 
   return (
-    <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst} ownsSurfaces>
+    <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst}>
       <div
         data-tone={card.tone}
-        className={`rounded-panel px-8 py-section-compact text-ink sm:px-16 ${textAlign}`}
+        className={`rounded-panel px-8 py-section-compact ${depth?.className ?? CARD_SHADOW_CLASS.free} text-ink sm:px-16 ${textAlign}`}
+        style={depth?.style}
       >
-        <RichHeading
-          as="h2"
-          blocks={heading}
-          fallback={title}
-          className="text-h2 font-semibold text-balance"
+        <SectionHeader
+          as={null}
+          eyebrow={data.eyebrow}
+          title={title}
+          heading={heading}
+          intro={text}
+          design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+          divider={resolveDivider(data.headerDesign?.divider)}
+          dividerBlock={block}
+          introClass={`mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted ${block}`}
         />
-        {text && (
-          <PlainText
-            text={text}
-            className={`mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted ${block}`}
-          />
-        )}
         <CtaGroup ctas={ctas} surface={card.surface} className={`mt-8 ${justify}`} />
       </div>
     </SectionFrame>

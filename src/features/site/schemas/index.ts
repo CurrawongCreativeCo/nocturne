@@ -4,13 +4,14 @@ import { announcement } from './announcement'
 import { businessInfo } from './business-info'
 import { cookieBanner } from './cookie-banner'
 import { designSettings } from './design-settings'
-import { navItem } from './nav-item'
+import { navItem, navSubItem } from './nav-item'
 import { siteIdentity } from './site-identity'
 import { siteNavigation } from './site-navigation'
 // new-schema:import
 
 export const siteSchemaTypes: SchemaTypeDefinition[] = [
   navItem,
+  navSubItem,
   siteIdentity,
   siteNavigation,
   announcement,

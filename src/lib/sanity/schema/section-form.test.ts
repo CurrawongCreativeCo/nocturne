@@ -11,6 +11,13 @@ import {
   sectionAtStylePath,
   staleAlignmentMessage,
   staleMotionMessage,
+  generatedCustomHeightMessage,
+  generatedHeightMessage,
+  edgeLayerBelowHidden,
+  edgeStepHidden,
+  staleStepMessage,
+  staleGeneratedOptionMessage,
+  staleLayerBelowMessage,
   motionCustomHidden,
   motionOptionHidden,
   visibleMotions,
@@ -194,5 +201,131 @@ describe('panel', () => {
     expect(allowsPanel({ _type: 'richText' })).toBe(true)
     // A path we can't resolve offers it: hiding an option wrongly is worse than showing one.
     expect(allowsPanel(undefined)).toBe(true)
+  })
+})
+
+describe('the generated shapes’ Studio rules (task 151, Slice 3)', () => {
+  const still = (extra = {}) => ({ parent: { edge: 'still-water', ...extra } })
+
+  it('refuses Small for Still water, and only for it', () => {
+    expect(generatedHeightMessage('small', still())).toMatch(/not drawn at Small/)
+    expect(generatedHeightMessage('medium', still())).toBe(true)
+    expect(generatedHeightMessage('large', still())).toBe(true)
+    expect(generatedHeightMessage(undefined, still())).toBe(true)
+    for (const edge of ['wave', 'layered', 'tide', 'contour', 'none', undefined])
+      expect(generatedHeightMessage('small', { parent: { edge } })).toBe(true)
+  })
+
+  it('holds Still water’s custom heights to 40-64 px on phones, 40-120 on tablets and 40-160 on desktops, each alone', () => {
+    const cases = {
+      mobile: [39, 40, 64, 65],
+      tablet: [39, 40, 120, 121],
+      desktop: [39, 40, 160, 161],
+    } as const
+    for (const [screen, [below, min, max, above]] of Object.entries(cases) as [
+      keyof typeof cases,
+      readonly number[],
+    ][]) {
+      expect(generatedCustomHeightMessage(screen, below, still())).toMatch(/px/)
+      expect(generatedCustomHeightMessage(screen, min, still())).toBe(true)
+      expect(generatedCustomHeightMessage(screen, max, still())).toBe(true)
+      expect(generatedCustomHeightMessage(screen, above, still())).toMatch(/px/)
+    }
+    // The three are independent: 64 is too tall for a phone and fine on the others.
+    expect(generatedCustomHeightMessage('mobile', 100, still())).toMatch(/40 and 64 px/)
+    expect(generatedCustomHeightMessage('tablet', 100, still())).toBe(true)
+    expect(generatedCustomHeightMessage('desktop', 100, still())).toBe(true)
+    // Blank is fine, and every other shape keeps its own range.
+    expect(generatedCustomHeightMessage('mobile', undefined, still())).toBe(true)
+    for (const edge of ['wave', 'layered', 'tide', 'contour'])
+      expect(generatedCustomHeightMessage('mobile', 16, { parent: { edge } })).toBe(true)
+  })
+
+  it('warns about a layer below saved at Shallow, which is not drawn, and says nothing else', () => {
+    expect(staleLayerBelowMessage(true, still({ edgeDepth: 'shallow' }))).toMatch(
+      /not drawn at Shallow/,
+    )
+    expect(staleLayerBelowMessage(true, still({ edgeDepth: 'standard' }))).toBe(true)
+    expect(staleLayerBelowMessage(true, still())).toBe(true)
+    expect(staleLayerBelowMessage(false, still({ edgeDepth: 'shallow' }))).toBe(true)
+    expect(staleLayerBelowMessage(undefined, still({ edgeDepth: 'shallow' }))).toBe(true)
+  })
+
+  it('warns about a stepped control left on another shape', () => {
+    expect(staleGeneratedOptionMessage('ink', { parent: { edge: 'wave' } })).toMatch(/Still water/)
+    expect(staleGeneratedOptionMessage('ink', still())).toBe(true)
+    expect(staleGeneratedOptionMessage(undefined, { parent: { edge: 'wave' } })).toBe(true)
+  })
+})
+
+describe('Lagoon and Reef’s Studio rules (task 151, Slice 4)', () => {
+  const shape = (edge: string, extra = {}) => ({ edge, ...extra })
+  const hiddenStep = (step: 'crest' | 'depth', parent: object, value?: string) =>
+    (edgeStepHidden(step) as (args: { parent: object; value?: string }) => boolean)({
+      parent,
+      value,
+    })
+  const hiddenBelow = (parent: object, value?: boolean) =>
+    (edgeLayerBelowHidden as (args: { parent: object; value?: boolean }) => boolean)({
+      parent,
+      value,
+    })
+
+  it('offers crest position and depth only where a shape has a choice: Still water, not Lagoon or Reef', () => {
+    for (const step of ['crest', 'depth'] as const) {
+      expect(hiddenStep(step, shape('still-water'))).toBe(false)
+      expect(hiddenStep(step, shape('lagoon'))).toBe(true)
+      expect(hiddenStep(step, shape('reef'))).toBe(true)
+      // Another shape with nothing stored: nothing to show.
+      expect(hiddenStep(step, shape('wave'))).toBe(true)
+    }
+  })
+
+  it('keeps a stored step the shape does not offer visible, with a warning, and says nothing for the default', () => {
+    // Shifted and Deep were Still water's; under Lagoon or Reef they are not drawn.
+    expect(hiddenStep('crest', shape('lagoon'), 'shifted')).toBe(false)
+    expect(hiddenStep('depth', shape('reef'), 'deep')).toBe(false)
+    expect(hiddenStep('crest', shape('lagoon'), 'standard')).toBe(true)
+    expect(staleStepMessage('crest')('shifted', { parent: shape('lagoon') })).toMatch(
+      /Lagoon draws one crest position only/,
+    )
+    expect(staleStepMessage('depth')('deep', { parent: shape('reef') })).toMatch(
+      /Reef draws one depth only/,
+    )
+    expect(staleStepMessage('depth')('standard', { parent: shape('reef') })).toBe(true)
+    expect(staleStepMessage('depth')('shallow', { parent: shape('still-water') })).toBe(true)
+    expect(staleStepMessage('crest')(undefined, { parent: shape('lagoon') })).toBe(true)
+    // Left on a shape that has no steps at all, it gets the shared warning.
+    expect(staleStepMessage('crest')('shifted', { parent: shape('wave') })).toMatch(/Still water/)
+  })
+
+  it('does not offer the layer-below switch: Reef always has one and Lagoon never does', () => {
+    expect(hiddenBelow(shape('lagoon'))).toBe(true)
+    expect(hiddenBelow(shape('reef'))).toBe(true)
+    expect(hiddenBelow(shape('still-water'))).toBe(false)
+  })
+
+  it('keeps a stored layer-below switch visible with a warning that names the shape, and keeps the value', () => {
+    expect(hiddenBelow(shape('lagoon'), true)).toBe(false)
+    expect(staleLayerBelowMessage(true, { parent: shape('lagoon') })).toMatch(
+      /Lagoon has no layer below/,
+    )
+    expect(staleLayerBelowMessage(true, { parent: shape('reef') })).toMatch(
+      /Reef always draws its layer below/,
+    )
+    expect(staleLayerBelowMessage(false, { parent: shape('reef') })).toBe(true)
+  })
+
+  it('names the shape when it refuses Small or a custom height', () => {
+    expect(generatedHeightMessage('small', { parent: shape('lagoon') })).toMatch(
+      /^Lagoon is not drawn at Small/,
+    )
+    expect(generatedHeightMessage('small', { parent: shape('reef') })).toMatch(
+      /^Reef is not drawn at Small/,
+    )
+    expect(generatedCustomHeightMessage('mobile', 100, { parent: shape('reef') })).toMatch(
+      /^Reef is drawn between 40 and 64 px/,
+    )
+    expect(generatedCustomHeightMessage('desktop', 160, { parent: shape('lagoon') })).toBe(true)
   })
 })

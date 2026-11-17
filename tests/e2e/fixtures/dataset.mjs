@@ -1403,6 +1403,117 @@ export const designSettingsVariants = {
     highlight: '#ffd166',
     _updatedAt: UPDATED,
   },
+  // Only a site-wide Card depth (tests/e2e/design-settings.spec.ts, "Card depth").
+  'card-raised': {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    cardDepth: 'raised',
+    _updatedAt: UPDATED,
+  },
+  'card-floating': {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    cardDepth: 'floating',
+    _updatedAt: UPDATED,
+  },
+  // Site-wide Density, Shape and Heading style (tests/e2e/site-decisions.spec.ts).
+  'density-airy': {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    density: 'airy',
+    _updatedAt: UPDATED,
+  },
+  'density-compact': {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    density: 'compact',
+    _updatedAt: UPDATED,
+  },
+  'shape-round': {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    shape: 'round',
+    _updatedAt: UPDATED,
+  },
+  'shape-sharp': {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    shape: 'sharp',
+    _updatedAt: UPDATED,
+  },
+  'heading-editorial': {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    headingStyle: 'editorial',
+    _updatedAt: UPDATED,
+  },
+  'heading-modern': {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    headingStyle: 'modern',
+    _updatedAt: UPDATED,
+  },
+  'heading-classic': {
+    _id: 'designSettings',
+    _type: 'designSettings',
+    headingStyle: 'classic',
+    _updatedAt: UPDATED,
+  },
+}
+
+/**
+ * The site-wide button style (task 148, tests/e2e/button-style.spec.ts): Brand colours → Buttons with a mid-tone
+ * gradient (it reads against both the page and the inverse background), Raised depth, Strong glow and a Soft
+ * secondary. Served as the `designSettings` singleton, replacing the fixture's own, like any palette.
+ */
+export const buttonStyleDesign = {
+  _id: 'designSettings',
+  _type: 'designSettings',
+  buttonFill: 'gradient',
+  buttonGradient: 'clear',
+  buttonDepth: 'raised',
+  buttonGlow: 'strong',
+  secondaryButton: 'soft',
+  gradients: [{ _key: 'g1', name: 'Clear', angle: 135, stops: ['#2563eb', '#7c3aed'] }],
+  _updatedAt: UPDATED,
+}
+
+/**
+ * What the same spec changes in the pages while the style is on: the home hero's buttons gain an arrow that
+ * nudges (so two neighbours each have an indicator), the contact form a card with a Raised depth alone, the
+ * newsletter a transparent card with a Floating depth (which draws no shadow), and the embed page's first embed
+ * a thick border with a Raised depth. Everything else, the gallery's forms included, keeps no card.
+ */
+export function withButtonStyle(doc) {
+  const first = (change) => ({
+    ...doc,
+    pageBuilder: doc.pageBuilder.map((s, i) => (i === 0 ? change(s) : s)),
+  })
+  switch (doc._id) {
+    case 'page-home':
+      return first((hero) => ({
+        ...hero,
+        ctas: hero.ctas.map((c) => ({ ...c, actionStyle: 'arrow', actionMotion: 'nudge' })),
+      }))
+    case 'page-contact':
+      return first((section) => ({ ...section, cardDesign: { shadow: 'raised' } }))
+    case 'page-newsletter':
+      return first((section) => ({
+        ...section,
+        cardDesign: { background: { colour: 'transparent' }, shadow: 'floating' },
+      }))
+    case 'page-embed':
+      return {
+        ...doc,
+        pageBuilder: doc.pageBuilder.map((s) =>
+          s._key === 'embed-typeform'
+            ? { ...s, cardDesign: { border: 'thick', shadow: 'raised' } }
+            : s,
+        ),
+      }
+    default:
+      return doc
+  }
 }
 
 /**
@@ -1461,6 +1572,126 @@ export const releaseVersions = [
 
 /** Fields the fake Content Lake applies to the experiment while it runs (tests/e2e/experiments.spec.ts). */
 export const experimentRunning = { active: true }
+
+const subItem = (label, link) => ({ _key: key(), _type: 'navSubItem', label, link })
+
+/**
+ * The header menu with dropdowns (tests/e2e/nav-submenus.spec.ts): a parent with its own page and
+ * eight sub-links (one long), a parent without a page (one unfinished sub-link, which the site
+ * leaves out), a flat link, and a last dropdown near the right edge.
+ */
+export const navigationNested = {
+  headerNav: [
+    navItem('Home', 'page-home'),
+    {
+      ...navItem('Services', 'page-about'),
+      children: [
+        subItem('Commercial fit-outs and heritage restoration consulting', internal('page-about')),
+        ...['Design', 'Build', 'Repairs', 'Landscaping', 'Painting', 'Plumbing', 'Electrical'].map(
+          (label) => subItem(label, external(`https://example.com/${label.toLowerCase()}`)),
+        ),
+      ],
+    },
+    {
+      _key: key(),
+      _type: 'navItem',
+      label: 'Resources',
+      children: [
+        subItem('Guides', external('https://example.com/guides')),
+        subItem('Unfinished', undefined),
+        subItem('Home again', internal('page-home')),
+      ],
+    },
+    navItem('About', 'page-about'),
+    {
+      _key: key(),
+      _type: 'navItem',
+      label: 'Company',
+      children: [
+        // Long enough to reach the panel's widest, so it would cross the window's edge unshifted.
+        subItem(
+          'Our story, our values and the people behind the whole business',
+          internal('page-about'),
+        ),
+        subItem('Careers', external('https://example.com/careers')),
+      ],
+    },
+  ],
+}
+
+/**
+ * Blog settings with a designed post card (tests/e2e/blog-card-design.spec.ts). Not in the fixtures: the
+ * fake Content Lake adds it only while a test asks, so no other blog test or baseline sees a designed card.
+ */
+export const blogSettingsDesigned = {
+  _id: 'blogSettings',
+  _type: 'blogSettings',
+  cardDesign: {
+    background: { colour: 'accent' },
+    backgroundStrength: 'wash',
+    border: 'thin',
+    borderColour: { colour: 'accent' },
+    meta: { weight: 'semibold' },
+    title: { size: 'small', weight: 'medium' },
+    body: { size: 'small' },
+    mark: {
+      _type: 'decorativeMark',
+      kind: 'icon',
+      icon: 'heart',
+      anchor: 'bottom-right',
+      size: 'small',
+      opacity: 12,
+    },
+  },
+}
+
+/**
+ * The same, with a Raised shadow, a glow and Lift (tests/e2e/blog-card-design.spec.ts): every post card is
+ * one link, so every card lifts.
+ */
+export const blogSettingsLifted = {
+  ...blogSettingsDesigned,
+  cardDesign: {
+    ...blogSettingsDesigned.cardDesign,
+    shadow: 'raised',
+    glow: 'soft',
+    lift: 'lift',
+  },
+}
+
+/**
+ * Picture depth on the post cards (tests/e2e/blog-card-design.spec.ts): Blog settings with a depth on the pictures
+ * only (a card draws no surface of its own), and, while one is on, a post with no picture (the index's newest).
+ */
+const depthSettings = (fields) => ({ _id: 'blogSettings', _type: 'blogSettings', ...fields })
+const pictureDepthOf = (fields) => ({ _type: 'object', ...fields })
+export const blogSettingsPictureDepth = {
+  raised: depthSettings({ pictureDepthDesign: pictureDepthOf({ shadow: 'raised' }) }),
+  floating: depthSettings({ pictureDepthDesign: pictureDepthOf({ shadow: 'floating' }) }),
+  // With a card of its own as well, so the picture's depth is shown beside a surface, a border and padding.
+  glow: depthSettings({
+    cardDesign: { border: 'thin' },
+    pictureDepthDesign: pictureDepthOf({ shadow: 'floating', glow: 'strong' }),
+  }),
+  glowOnly: depthSettings({ pictureDepthDesign: pictureDepthOf({ glow: 'strong' }) }),
+  flat: depthSettings({ pictureDepthDesign: pictureDepthOf({ shadow: 'flat', glow: 'off' }) }),
+}
+export const blogPostWithoutPicture = {
+  ...blogPost('a-post-with-no-picture', 'A post with no picture', '2026-10-20T09:00:00Z'),
+  mainImage: undefined,
+}
+
+/** Team page settings with a divider between a member's summary and biography (tests/e2e/team-divider.spec.ts). */
+export const teamPageDividerOn = {
+  _id: 'teamPageSettings',
+  _type: 'teamPageSettings',
+  dividerDesign: { _type: 'decorativeDivider', style: 'line', width: 'short' },
+}
+
+/** Navigation with a divider above the footer's bottom row (tests/e2e/footer-divider.spec.ts). */
+export const footerDividerOn = {
+  footerDividerDesign: { _type: 'decorativeDivider', style: 'line', width: 'short' },
+}
 
 /** Navigation with the footer's social icons switched on (tests/e2e/footer-social.spec.ts). */
 export const footerSocialOn = { footerShowSocial: true, footerSocialStyle: 'circle' }
@@ -2659,6 +2890,82 @@ const gallerySections = [
       }),
     ],
   }),
+  // Tide and Contour (task 151): each at its defaults, then with its other colour, Flip and Tide's Large. The
+  // section above has a colour of its own: a plain surface section is see-through under any edge (README).
+  // At the end, so no section already in the gallery moves down the page (its baseline would change).
+  ...edgePair('tide', { tone: 'alt', edge: 'tide' }, { tone: 'surface' }),
+  ...edgePair(
+    'tide-echo-large-flip',
+    { tone: 'inverse', edge: 'tide', edgeTideLayer: 'echo', edgeHeight: 'large', edgeFlip: true },
+    { tone: 'alt' },
+  ),
+  ...edgePair('contour', { tone: 'alt', edge: 'contour' }, { tone: 'inverse' }),
+  ...edgePair(
+    'contour-muted-flip',
+    { tone: 'inverse', edge: 'contour', edgeLineColour: 'muted', edgeFlip: true },
+    { tone: 'surface' },
+  ),
+  // Still water (task 151, Slice 3): the defaults, then a layer below at Large, then Ink with Strong, a shifted
+  // crest, a deep layer and a layer below, flipped. Each upper section has a colour of its own (a plain surface
+  // section is see-through under any edge). At the end, so no section already in the gallery moves.
+  ...edgePair('still-water', { tone: 'inverse', edge: 'still-water' }, { tone: 'alt' }),
+  ...edgePair(
+    'still-water-below-large',
+    { tone: 'inverse', edge: 'still-water', edgeLayerBelow: true, edgeHeight: 'large' },
+    { tone: 'alt' },
+  ),
+  ...edgePair(
+    'still-water-ink-deep-flip',
+    {
+      tone: 'alt',
+      edge: 'still-water',
+      edgePalette: 'ink',
+      edgeStrength: 'strong',
+      edgeCrest: 'shifted',
+      edgeDepth: 'deep',
+      edgeLayerBelow: true,
+      edgeFlip: true,
+    },
+    { tone: 'inverse' },
+  ),
+  // Lagoon and Reef (task 151, Slice 4): each at its defaults (Medium, the 40 px phone band), then at Large
+  // with Flip, Strong and another recipe. Each upper section has a colour of its own. Lagoon's layers are
+  // Secondary and Ink, so its upper section is light; Reef's are Secondary and Primary, so its is dark.
+  // At the end, so no section already in the gallery moves.
+  ...edgePair('lagoon', { tone: 'alt', edge: 'lagoon' }, { tone: 'accent' }),
+  ...edgePair('reef', { tone: 'inverse', edge: 'reef' }, { tone: 'alt' }),
+  ...edgePair(
+    'lagoon-large-flip',
+    {
+      tone: 'inverse',
+      edge: 'lagoon',
+      edgePalette: 'highlight',
+      edgeStrength: 'strong',
+      edgeFlip: true,
+      edgeHeight: 'large',
+    },
+    { tone: 'alt' },
+  ),
+  ...edgePair(
+    'reef-large-flip',
+    {
+      tone: 'alt',
+      edge: 'reef',
+      edgePalette: 'ink',
+      edgeStrength: 'light',
+      edgeFlip: true,
+      edgeHeight: 'large',
+    },
+    { tone: 'inverse' },
+  ),
+  // Elevated (task 151, Slice 6): a straight boundary with a shadow below it, over a light follower (Soft) and
+  // over a dark one (Deep, where the shadow all but disappears). At the end, so no section already in the gallery moves.
+  ...edgePair('elevated', { tone: 'alt', edge: 'elevated' }, { tone: 'surface' }),
+  ...edgePair(
+    'elevated-deep-dark',
+    { tone: 'alt', edge: 'elevated', edgeShadow: 'deep' },
+    { tone: 'inverse' },
+  ),
   // new-section:gallery
 ]
 
@@ -2776,6 +3083,749 @@ documents.push({
 })
 
 /**
+ * A real page of the shared card design (task 156, tests/e2e/card-design.spec.ts): each card family's
+ * tint, border, text change, highlight and decorative mark at each scope. Not indexed, and not in the
+ * section gallery, so it adds no visual baseline.
+ */
+const cardDesignQuotes = (id, extra = {}) =>
+  ['Sam Sample', 'Alex Example', 'Robin Rowe'].map((name, index) => ({
+    _key: `${id}-${String(index)}`,
+    _type: 'testimonial',
+    quote: 'They changed how we work, and every week since has been calmer and clearer.',
+    name,
+    role: 'Owner, Example Co',
+    ...extra,
+  }))
+const cardDesignSection = (id, title, extra = {}) => ({
+  _key: id,
+  _type: 'testimonials',
+  title,
+  items: cardDesignQuotes(id),
+  ...extra,
+})
+const markStyle = (extra) => ({ _type: 'decorativeMark', ...extra })
+const framePicture = { _type: 'reference', _ref: 'frame-picture' }
+const familyDesign = {
+  background: { colour: 'accent' },
+  backgroundStrength: 'wash',
+  border: 'medium',
+  borderColour: { colour: 'accent' },
+  mark: markStyle({
+    kind: 'icon',
+    icon: 'heart',
+    anchor: 'bottom-right',
+    size: 'small',
+    opacity: 10,
+  }),
+}
+/**
+ * A gallery section of this type with a header design (task 156): its own title, an eyebrow, an intro, and the
+ * heading a step smaller. `intro` names the field that section's intro is in.
+ */
+const headerFamily = (type, title, intro, extra = {}) => {
+  const seed = gallerySections.find((section) => section._type === type)
+  return {
+    ...structuredClone(seed),
+    _key: `header-${type}`,
+    title,
+    heading: undefined,
+    eyebrow: 'Eyebrow',
+    ...intro,
+    headerDesign: { heading: { size: 'small' } },
+    ...extra,
+  }
+}
+const familySection = (type, title, extra) => ({
+  _key: `family-${type}-${title.replace(/\W+/g, '-').toLowerCase()}`,
+  _type: type,
+  title,
+  eyebrow: 'Eyebrow',
+  ...extra,
+})
+/** A Link list with a card mark, a link with its own, and a link that opens a panel. */
+const familyLink = (key, link, design) => ({
+  _key: key,
+  _type: 'linkListItem',
+  eyebrow: 'Eyebrow',
+  label: `Open ${key}`,
+  description: 'A short description.',
+  link: { _type: 'link', ...link },
+  ...(design ? { design } : {}),
+})
+const linkFamily = (title, extra) =>
+  familySection('linkList', title, {
+    headingDisplay: 'text',
+    // Several Link lists on one page: social icons would draw the same named landmark in each.
+    socialSource: 'custom',
+    socialLinks: [],
+    ...extra,
+    cardDesign: {
+      mark: markStyle({ kind: 'text', text: 'Card', anchor: 'bottom-right', opacity: 10 }),
+    },
+    links: [
+      familyLink(
+        'own',
+        { linkType: 'external', url: 'https://example.com/own' },
+        {
+          appearance: 'custom',
+          mark: markStyle({ kind: 'icon', icon: 'heart', anchor: 'top-right', opacity: 12 }),
+        },
+      ),
+      familyLink('list', { linkType: 'external', url: 'https://example.com/list' }),
+      familyLink('panel', {
+        linkType: 'panel',
+        panel: { _type: 'reference', _ref: 'panel-enquire' },
+      }),
+    ],
+  })
+documents.push({
+  _id: 'page-card-design',
+  _type: 'page',
+  title: 'Card design',
+  slug: { _type: 'slug', current: 'card-design' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    cardDesignSection('plain', 'No mark'),
+    cardDesignSection('marked-section', 'Section mark', {
+      style: { mark: markStyle({ kind: 'text', text: 'Thanks', size: 'large', opacity: 10 }) },
+    }),
+    cardDesignSection('marked-card', 'Card mark', {
+      cardDesign: {
+        mark: markStyle({ kind: 'icon', icon: 'heart', anchor: 'bottom-right', opacity: 12 }),
+      },
+    }),
+    cardDesignSection('tinted', 'A tint and a highlight', {
+      cardDesign: {
+        background: { colour: 'accent' },
+        backgroundStrength: 'light',
+        border: 'none',
+        quote: { size: 'large', fontStyle: 'italic' },
+        attribution: { colour: { colour: 'ink' } },
+        label: { colour: { colour: 'ink' } },
+      },
+      items: cardDesignQuotes('tinted', {
+        highlights: ['changed how we work'],
+        source: 'client-feedback',
+        date: '2026-03-12',
+        rating: 5,
+      }),
+    }),
+    cardDesignSection('outlined', 'A border and a text change', {
+      cardDesign: {
+        background: { colour: 'transparent' },
+        backgroundStrength: 'solid',
+        border: 'medium',
+        borderColour: { colour: 'accent' },
+        attribution: { weight: 'medium', colour: { colour: 'accent' } },
+        label: { textCase: 'uppercase', size: 'small' },
+      },
+      eyebrow: 'What people say',
+      intro: 'A sentence or two about the people we have worked with.',
+    }),
+    cardDesignSection('picture-tinted', 'A picture in the theme colour', {
+      style: {
+        mark: markStyle({
+          kind: 'picture',
+          picture: framePicture,
+          anchor: 'top-right',
+          size: 'large',
+          offsetX: 20,
+          rotation: 15,
+          colour: { colour: 'accent' },
+          opacity: 30,
+        }),
+      },
+    }),
+    cardDesignSection('picture-own', 'A picture in its own colours', {
+      cardDesign: {
+        mark: markStyle({
+          kind: 'picture',
+          picture: framePicture,
+          keepColours: true,
+          anchor: 'top-left',
+          offsetX: -25,
+          offsetY: -25,
+          size: 'large',
+          opacity: 30,
+        }),
+      },
+    }),
+    cardDesignSection('panel-content', 'A mark on a panel', {
+      style: {
+        panel: 'solid',
+        mark: markStyle({ kind: 'text', text: 'Thanks', size: 'large', opacity: 10 }),
+      },
+    }),
+    cardDesignSection('panel-behind', 'A mark behind a panel', {
+      style: {
+        panel: 'solid',
+        mark: markStyle({
+          kind: 'text',
+          text: 'Thanks',
+          size: 'large',
+          layer: 'panel',
+          opacity: 10,
+        }),
+      },
+    }),
+    cardDesignSection('phone-hidden', 'A mark hidden on phones', {
+      style: {
+        mark: markStyle({ kind: 'icon', icon: 'star', phoneScale: 'hidden', opacity: 10 }),
+      },
+    }),
+    cardDesignSection('slider', 'A slider with card marks', {
+      variant: 'slider',
+      cardDesign: {
+        mark: markStyle({ kind: 'text', text: 'Thanks', anchor: 'top-right', opacity: 10 }),
+      },
+    }),
+    cardDesignSection('heavy', 'A mark too strong for its text', {
+      style: {
+        tone: 'default',
+        mark: markStyle({
+          kind: 'icon',
+          icon: 'heart',
+          size: 'large',
+          opacity: 40,
+          colour: { colour: 'ink' },
+        }),
+      },
+    }),
+    familySection('pricingTable', 'Pricing family', {
+      intro: 'An intro.',
+      cardDesign: { ...familyDesign, price: { size: 'small' } },
+      plans: [
+        plan('price_Starter1', {
+          features: ['One project', 'Email support'],
+          description: 'For small teams.',
+          meta: '90 minutes',
+        }),
+        plan('price_Pro1', {
+          features: ['Unlimited projects'],
+          highlighted: true,
+          badgeText: 'Best value',
+          design: {
+            appearance: 'custom',
+            border: 'thick',
+            mark: markStyle({ kind: 'text', text: 'Best', anchor: 'top-right', opacity: 10 }),
+          },
+        }),
+      ],
+    }),
+    familySection('team', 'Team family', {
+      text: 'An intro.',
+      selection: 'all',
+      cardDesign: { ...familyDesign, title: { size: 'small' } },
+    }),
+    familySection('team', 'Team list family', {
+      variant: 'list',
+      text: 'An intro.',
+      selection: 'all',
+      cardDesign: familyDesign,
+    }),
+    familySection('events', 'Events family', {
+      variant: 'featured',
+      text: 'An intro.',
+      cardDesign: { ...familyDesign, title: { weight: 'medium' } },
+    }),
+    familySection('events', 'Events list family', {
+      text: 'An intro.',
+      // Opens a panel no other button on this page opens, so it only works if its link brings the panel.
+      seeAllLink: panel('panel-hours', '/about'),
+      seeAllLabel: 'Open the hours',
+      cardDesign: { ...familyDesign, title: { weight: 'medium' } },
+    }),
+    familySection('faq', 'FAQ default family', {
+      intro: 'An intro.',
+      cardDesign: familyDesign,
+      items: [{ _key: 'q1', question: 'A question?', answer: [block(['An answer.'])] }],
+    }),
+    familySection('faq', 'FAQ cards family', {
+      intro: 'An intro.',
+      cardDesign: { ...familyDesign, itemStyle: 'cards' },
+      items: [
+        { _key: 'q1', question: 'A question?', answer: [block(['An answer.'])] },
+        { _key: 'q2', question: 'Another question?', answer: [block(['Another answer.'])] },
+      ],
+    }),
+    familySection('stats', 'Stats family', {
+      variant: 'cards',
+      intro: 'An intro.',
+      cardDesign: { ...familyDesign, number: { size: 'small' } },
+      items: [
+        { _key: 's1', _type: 'statItem', value: 250, decimals: 0, suffix: '+', label: 'Projects' },
+        { _key: 's2', _type: 'statItem', value: 12, decimals: 0, label: 'Years' },
+      ],
+    }),
+    headerFamily('featuresGrid', 'Features header', { intro: 'An intro.' }),
+    headerFamily('logoCloud', 'Logos header', { intro: 'An intro.' }),
+    headerFamily('ctaBanner', 'CTA header', { text: 'An intro.' }),
+    headerFamily('process', 'Process header', { intro: 'An intro.' }),
+    headerFamily('gallery', 'Gallery header', { intro: 'An intro.' }),
+    headerFamily('newsletterSignup', 'Newsletter header', { text: 'An intro.' }),
+    familySection('process', 'Process steps', {
+      variant: 'vertical',
+      cardDesign: { label: { size: 'large' }, title: { size: 'small' }, body: { size: 'small' } },
+      steps: [{ _key: 'ps1', _type: 'step', label: 'One', title: 'Meet', text: 'We talk.' }],
+    }),
+    familySection('location', 'Location family', {
+      intro: 'An intro.',
+      cardDesign: { ...familyDesign, body: { size: 'small' } },
+    }),
+    linkFamily('Links stacked family', { variant: 'stacked' }),
+    linkFamily('Links cards family', { variant: 'cards' }),
+    linkFamily('Links editorial family', { variant: 'editorial' }),
+    linkFamily('Links compact family', { variant: 'compact' }),
+    linkFamily('Links glass family', { variant: 'stacked', rowStyle: 'glass' }),
+  ],
+})
+
+/**
+ * A real page with Image + text's supporting video in each layout, with the picture, and with no
+ * picture (tests/e2e/media-text-placement.spec.ts): where each layout places the media and the extra
+ * block at phone, tablet and desktop widths. Not indexed, and not in the section gallery, so it adds
+ * no visual baseline.
+ */
+const placementVideo = (id) =>
+  slotVideoItem(`media-text-placement-${id}`, {
+    title: 'Meet the team',
+    source: 'youtube',
+    url: VIDEO_URL.youtube,
+  })
+documents.push({
+  _id: 'page-media-text-placement',
+  _type: 'page',
+  title: 'Image + text placement',
+  slug: { _type: 'slug', current: 'media-text-placement' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    galleryMediaText('placement-right', 'Media on the right', {
+      variant: 'side',
+      imagePosition: 'right',
+      media: [slotImageItem('placement-right')],
+      supporting: [placementVideo('right')],
+    }),
+    galleryMediaText('placement-left', 'Media on the left', {
+      variant: 'side',
+      imagePosition: 'left',
+      media: [slotImageItem('placement-left')],
+      supporting: [placementVideo('left')],
+    }),
+    galleryMediaText('placement-stacked', 'Media above the text', {
+      variant: 'stacked',
+      media: [slotImageItem('placement-stacked')],
+      supporting: [placementVideo('stacked')],
+    }),
+    galleryMediaText('placement-overlay', 'Text over media', {
+      variant: 'overlay',
+      media: [slotImageItem('placement-overlay')],
+      supporting: [placementVideo('overlay')],
+    }),
+    galleryMediaText('placement-no-media', 'No picture', {
+      variant: 'side',
+      supporting: [placementVideo('no-media')],
+    }),
+  ],
+})
+
+/**
+ * Picture depth on Image + text (tests/e2e/picture-depth.spec.ts): one section with nothing chosen,
+ * then each level, a glow alone, and a still frame around moving pictures. Not indexed.
+ */
+const depthText = (n) => ({
+  _key: `depth-text-${n}`,
+  _type: 'richText',
+  body: [
+    block([`Depth text ${n}`], { style: 'h2' }),
+    block(['A paragraph of copy so the page is long enough to scroll. '.repeat(8)]),
+  ],
+})
+const depthSection = (id, title, extra) =>
+  galleryMediaText(id, title, {
+    variant: 'side',
+    ctas: [],
+    media: [slotImageItem(id)],
+    ...extra,
+  })
+const pictureDepth = (fields) => ({ _type: 'object', ...fields })
+documents.push({
+  _id: 'page-picture-depth',
+  _type: 'page',
+  title: 'Picture depth',
+  slug: { _type: 'slug', current: 'picture-depth' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    depthSection('depth-none', 'Nothing chosen'),
+    depthText(1),
+    depthSection('depth-floating', 'Floating with a soft glow', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'soft' }),
+    }),
+    depthText(2),
+    {
+      ...depthSection('depth-stacked', 'Raised, stacked and framed', {
+        variant: 'stacked',
+        pictureDepthDesign: pictureDepth({ shadow: 'raised' }),
+        imageDesign: imageDesign({ appearance: 'framed', frame: 'corner-brackets' }),
+      }),
+    },
+    depthText(3),
+    depthSection('depth-glow', 'A strong glow on a circle', {
+      pictureDepthDesign: pictureDepth({
+        glow: 'strong',
+        glowColour: { _type: 'object', colour: 'highlight' },
+      }),
+      imageDesign: imageDesign({ appearance: 'circle' }),
+    }),
+    depthText(4),
+    depthSection('depth-flat', 'Flat and glow off', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthText(5),
+    depthSection('depth-moving', 'Floating on a moving picture', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+      imageDesign: imageDesign({ appearance: 'rounded', motion: 'medium' }),
+    }),
+    depthText(6),
+    depthSection('depth-section-parallax', 'Floating under section parallax', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+      style: { _type: 'sectionStyle', motion: 'parallax' },
+    }),
+    depthText(7),
+  ],
+})
+
+/**
+ * Picture depth on the Hero's Split layout (tests/e2e/picture-depth-hero.spec.ts): nothing chosen, a plain
+ * picture, an entrance, a moving picture and the hero's own parallax, then the layouts that must ignore it.
+ */
+const depthHero = (id, title, extra) =>
+  galleryHero(id, { variant: 'split', title, ctas: [], heading: undefined, ...extra })
+documents.push({
+  _id: 'page-picture-depth-hero',
+  _type: 'page',
+  title: 'Picture depth, hero',
+  slug: { _type: 'slug', current: 'picture-depth-hero' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    depthText(1),
+    depthHero('depth-hero-none', 'Hero nothing chosen'),
+    depthText(2),
+    depthHero('depth-hero-plain', 'Hero floating plain', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'soft' }),
+    }),
+    depthText(3),
+    depthHero('depth-hero-flat', 'Hero flat and glow off', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthText(4),
+    depthHero('depth-hero-entrance', 'Hero floating entrance', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+      partMotion: { enabled: true, imagePreset: 'rise' },
+    }),
+    depthText(5),
+    depthHero('depth-hero-moving', 'Hero floating moving', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+      imageDesign: imageDesign({ appearance: 'rounded', motion: 'medium' }),
+    }),
+    depthText(6),
+    depthHero('depth-hero-parallax', 'Hero floating parallax', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+      partMotion: { enabled: true, imagePreset: 'parallax' },
+    }),
+    depthText(7),
+    galleryHero('depth-hero-overlay', {
+      variant: 'overlay',
+      title: 'Hero overlay ignores it',
+      ctas: [],
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    galleryHero('depth-hero-editorial', {
+      variant: 'editorial',
+      title: 'Hero editorial ignores it',
+      ctas: [],
+      secondaryImage: image('Small picture'),
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+  ],
+})
+
+/**
+ * Picture depth on the Testimonials' avatars (tests/e2e/picture-depth-testimonials.spec.ts): a grid and a
+ * slider, each with nothing chosen and with Floating on a large, ringed avatar, plus the other levels.
+ */
+const depthQuotes = (id, count) => sliderQuotes(id).slice(0, count)
+const depthTestimonials = (id, title, variant, extra = {}) => ({
+  _key: id,
+  _type: 'testimonials',
+  variant,
+  title,
+  items: depthQuotes(id, variant === 'slider' ? 6 : 3),
+  ...extra,
+})
+documents.push({
+  _id: 'page-picture-depth-testimonials',
+  _type: 'page',
+  title: 'Picture depth, testimonials',
+  slug: { _type: 'slug', current: 'picture-depth-testimonials' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    depthText(1),
+    depthTestimonials('depth-t-grid-none', 'Grid nothing chosen', 'grid'),
+    depthTestimonials('depth-t-grid-floating', 'Grid floating', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'soft' }),
+    }),
+    depthTestimonials('depth-t-grid-flat', 'Grid flat and glow off', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthTestimonials('depth-t-grid-raised', 'Grid raised ring', 'grid', {
+      avatarDesign: { _type: 'object', size: 'large', ring: 'line' },
+      pictureDepthDesign: pictureDepth({ shadow: 'raised' }),
+    }),
+    depthTestimonials('depth-t-grid-glow', 'Grid glow only', 'grid', {
+      pictureDepthDesign: pictureDepth({ glow: 'strong' }),
+    }),
+    depthText(2),
+    depthTestimonials('depth-t-slider-none', 'Slider nothing chosen', 'slider'),
+    depthTestimonials('depth-t-slider-floating', 'Slider floating', 'slider', {
+      avatarDesign: { _type: 'object', size: 'large', ring: 'gradient' },
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(3),
+  ],
+})
+
+/**
+ * Picture depth on Events Featured (tests/e2e/picture-depth-events.spec.ts): the workshop category's next event
+ * has a picture; the talk category's has none. The spec serves a real photograph for the picture.
+ */
+const depthEvents = (id, title, category, extra = {}) => ({
+  _key: id,
+  _type: 'events',
+  variant: 'featured',
+  title,
+  category: ref(`eventCategory-${category}`),
+  ...extra,
+})
+documents.push({
+  _id: 'page-picture-depth-events',
+  _type: 'page',
+  title: 'Picture depth, events',
+  slug: { _type: 'slug', current: 'picture-depth-events' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    depthText(1),
+    depthEvents('depth-events-none', 'Events nothing chosen', 'workshop'),
+    depthEvents('depth-events-soft', 'Events soft', 'workshop', {
+      pictureDepthDesign: pictureDepth({ shadow: 'soft' }),
+    }),
+    depthEvents('depth-events-raised', 'Events raised', 'workshop', {
+      pictureDepthDesign: pictureDepth({ shadow: 'raised' }),
+    }),
+    depthEvents('depth-events-floating', 'Events floating', 'workshop', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthEvents('depth-events-glow', 'Events floating strong glow', 'workshop', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthEvents('depth-events-glow-only', 'Events strong glow only', 'workshop', {
+      pictureDepthDesign: pictureDepth({ glow: 'strong' }),
+    }),
+    depthEvents('depth-events-flat', 'Events flat and glow off', 'workshop', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthText(2),
+    depthEvents('depth-events-no-picture-none', 'Events no picture nothing chosen', 'talk'),
+    depthEvents('depth-events-no-picture', 'Events no picture floating', 'talk', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(3),
+  ],
+})
+
+/**
+ * Picture depth on the Gallery (tests/e2e/picture-depth-gallery.spec.ts): grids and sliders of six pictures with
+ * nothing chosen and at each depth level, and a section of a transparent picture and a cropped one.
+ */
+const depthGallery = (id, title, variant, extra = {}) => ({
+  _key: id,
+  _type: 'gallery',
+  variant,
+  title,
+  images: galleryImages(id, 6),
+  ...extra,
+})
+documents.push({
+  _id: 'page-picture-depth-gallery',
+  _type: 'page',
+  title: 'Picture depth, gallery',
+  slug: { _type: 'slug', current: 'picture-depth-gallery' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    depthText(1),
+    depthGallery('depth-g-none', 'Gallery nothing chosen', 'grid'),
+    depthGallery('depth-g-soft', 'Gallery soft', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'soft' }),
+    }),
+    depthGallery('depth-g-raised', 'Gallery raised', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'raised' }),
+    }),
+    depthGallery('depth-g-floating', 'Gallery floating', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthGallery('depth-g-glow', 'Gallery floating strong glow', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthGallery('depth-g-glow-only', 'Gallery strong glow only', 'grid', {
+      pictureDepthDesign: pictureDepth({ glow: 'strong' }),
+    }),
+    depthGallery('depth-g-flat', 'Gallery flat and glow off', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthGallery('depth-g-circle', 'Gallery circle floating', 'grid', {
+      imageDesign: imageDesign({ appearance: 'circle' }),
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthGallery('depth-g-odd', 'Gallery transparent and cropped', 'grid', {
+      images: [
+        { ...pattern(), _key: 'odd-transparent', alt: 'A transparent picture' },
+        {
+          _type: 'image',
+          _key: 'odd-cropped',
+          alt: 'A cropped picture',
+          asset: ref(IMAGE_ASSET_ID),
+          crop: { _type: 'sanity.imageCrop', top: 0.1, bottom: 0.1, left: 0.2, right: 0.2 },
+        },
+        ...galleryImages('depth-g-odd', 1),
+      ],
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthGallery('depth-g-masonry-none', 'Gallery masonry nothing chosen', 'masonry'),
+    depthGallery('depth-g-masonry-floating', 'Gallery masonry floating', 'masonry', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthGallery('depth-g-masonry-glow', 'Gallery masonry floating strong glow', 'masonry', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthGallery('depth-g-masonry-flat', 'Gallery masonry flat and glow off', 'masonry', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthGallery('depth-g-masonry-odd', 'Gallery masonry transparent and cropped', 'masonry', {
+      images: [
+        { ...pattern(), _key: 'modd-transparent', alt: 'A transparent picture' },
+        {
+          _type: 'image',
+          _key: 'modd-cropped',
+          alt: 'A cropped picture',
+          asset: ref(IMAGE_ASSET_ID),
+          crop: { _type: 'sanity.imageCrop', top: 0.1, bottom: 0.1, left: 0.2, right: 0.2 },
+        },
+        ...galleryImages('depth-g-modd', 1),
+      ],
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(2),
+    depthGallery('depth-g-slider-none', 'Gallery slider nothing chosen', 'slider'),
+    depthGallery('depth-g-slider-glow', 'Gallery slider floating strong glow', 'slider', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(3),
+  ],
+})
+
+/**
+ * Picture depth on the Location's map picture (tests/e2e/picture-depth-location.spec.ts): a section with a map image
+ * at each depth level, the click-to-load map, and sections with no map image (the details on cards).
+ */
+const depthLocation = (id, title, extra = {}) => ({
+  _key: id,
+  _type: 'location',
+  title,
+  showHours: false,
+  showContact: true,
+  directionsLabel: 'Get directions',
+  mapImage: image('A map of Newtown'),
+  ...extra,
+})
+documents.push({
+  _id: 'page-picture-depth-location',
+  _type: 'page',
+  title: 'Picture depth, location',
+  slug: { _type: 'slug', current: 'picture-depth-location' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    depthText(1),
+    depthLocation('depth-l-none', 'Location nothing chosen'),
+    depthLocation('depth-l-soft', 'Location soft', {
+      pictureDepthDesign: pictureDepth({ shadow: 'soft' }),
+    }),
+    depthLocation('depth-l-raised', 'Location raised', {
+      pictureDepthDesign: pictureDepth({ shadow: 'raised' }),
+    }),
+    depthLocation('depth-l-floating', 'Location floating', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthLocation('depth-l-glow', 'Location floating strong glow', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthLocation('depth-l-glow-only', 'Location strong glow only', {
+      pictureDepthDesign: pictureDepth({ glow: 'strong' }),
+    }),
+    depthLocation('depth-l-flat', 'Location flat and glow off', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthLocation('depth-l-interactive', 'Location interactive floating', {
+      interactiveMap: true,
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthLocation('depth-l-parallax', 'Location parallax floating', {
+      style: { _type: 'sectionStyle', motion: 'parallax' },
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthLocation('depth-l-no-picture-none', 'Location no picture nothing chosen', {
+      mapImage: undefined,
+    }),
+    depthLocation('depth-l-no-picture', 'Location no picture floating', {
+      mapImage: undefined,
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(2),
+  ],
+})
+
+/**
+ * The same long page twice, once with no picture depth and once with Floating on every parallax picture,
+ * for the scrolling comparison (tests/e2e/picture-depth-performance.spec.ts). Fake Content Lake only; not indexed.
+ */
+for (const [slug, floating] of [
+  ['picture-depth-perf-off', false],
+  ['picture-depth-perf-floating', true],
+]) {
+  const depth = floating ? { pictureDepthDesign: pictureDepth({ shadow: 'floating' }) } : {}
+  documents.push({
+    _id: `page-${slug}`,
+    _type: 'page',
+    title: slug,
+    slug: { _type: 'slug', current: slug },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      depthText(1),
+      ...[1, 2, 3].flatMap((n) => [
+        depthSection(`perf-design-${n}`, `Design parallax ${n}`, {
+          ...depth,
+          imageDesign: imageDesign({ appearance: 'rounded', motion: 'medium' }),
+        }),
+        depthText(n + 1),
+        depthSection(`perf-preset-${n}`, `Section parallax ${n}`, {
+          ...depth,
+          style: { _type: 'sectionStyle', motion: 'parallax' },
+        }),
+        depthText(n + 4),
+      ]),
+    ],
+  })
+}
+
+/**
  * Animated hero parts on real pages (tests/e2e/hero-parts.spec.ts), for what the gallery cannot show:
  * a MotionProvider, so the parts really play. The first page's hero is the first section (its heading
  * and picture never start hidden); the second page starts with text, so its hero is further down.
@@ -2844,6 +3894,77 @@ documents.push({
       title: 'Kind words',
       items: sliderQuotes('slider-page'),
     },
+  ],
+})
+
+/**
+ * Profile image presets (tests/e2e/profile-image-presets.spec.ts): testimonial avatars and the team list's
+ * portraits at each size and ring, a list that keeps its saved Image design, and values the site must ignore.
+ * On a page of their own, not in the section gallery, so no visual baseline is needed or moved.
+ */
+documents.push({
+  _id: 'page-profile-images',
+  _type: 'page',
+  title: 'Profile images',
+  slug: { _type: 'slug', current: 'profile-images' },
+  seo: { _type: 'seo', metaDescription: 'A page with every avatar and portrait state.' },
+  pageBuilder: [
+    {
+      _key: 'profile-images-hero',
+      _type: 'hero',
+      title: 'Profile images',
+      description: 'Hero description.',
+    },
+    ...[
+      ['small', { size: 'small' }, undefined],
+      ['large', { size: 'large' }, undefined],
+      ['ring-line', { ring: 'line' }, undefined],
+      ['ring-gradient', { size: 'large', ring: 'gradient' }, undefined],
+      [
+        'ring-inverse',
+        { ring: 'line', ringColour: { _type: 'object', colour: 'highlight' } },
+        { _type: 'sectionStyle', tone: 'inverse' },
+      ],
+      ['malformed', { size: 'huge', ring: 'frame' }, undefined],
+    ].map(([id, avatarDesign, style]) => ({
+      _key: `testimonials-avatar-${id}`,
+      _type: 'testimonials',
+      variant: 'grid',
+      title: `Avatars: ${id}`,
+      ...(style && { style }),
+      avatarDesign: { _type: 'object', ...avatarDesign },
+      items: ['Alex', 'Sam'].map((name) => ({
+        _key: key(),
+        quote: 'Great.',
+        name,
+        role: 'CEO',
+        avatar: image(`${id}-${name}`),
+      })),
+    })),
+    ...[
+      ['portrait-small', { size: 'small' }, undefined],
+      ['portrait-large-ring', { size: 'large', ring: 'line' }, undefined],
+      ['portrait-gradient', { ring: 'gradient' }, undefined],
+      ['portrait-malformed', { size: 'huge', ring: 'frame' }, undefined],
+      // Saved Image design wins; the Portrait stored beside it is hidden in Studio and ignored here.
+      [
+        'legacy-image-design',
+        { size: 'large', ring: 'line' },
+        imageDesign({ appearance: 'circle' }),
+      ],
+    ].map(([id, portraitDesign, design]) => ({
+      _key: `team-list-${id}`,
+      _type: 'team',
+      variant: 'list',
+      selection: 'picked',
+      title: `Team list: ${id}`,
+      portraitDesign: { _type: 'object', ...portraitDesign },
+      ...(design && { imageDesign: design }),
+      members: [
+        { _key: `${id}-dev`, ...ref('teamMember-dev') },
+        { _key: `${id}-ann`, ...ref('teamMember-ann') },
+      ],
+    })),
   ],
 })
 
@@ -3023,6 +4144,82 @@ const teamMember = (id, name, role, extra = {}) => ({
 })
 const memberSlug = (current) => ({ slug: { _type: 'slug', current } })
 
+/**
+ * Picture depth on Team (tests/e2e/picture-depth-team.spec.ts): a grid, a slider and a list of three members whose
+ * portraits are a real photograph (tests/e2e/fixtures/portrait-photo.jpg: NASA photo S69-31741, public domain,
+ * which the spec serves in place of the fixtures' flat picture), shown with nothing chosen and at each depth level.
+ */
+const depthTeam = (id, title, variant, extra = {}) => ({
+  _key: id,
+  _type: 'team',
+  variant,
+  title,
+  selection: 'picked',
+  // The existing members. A slider needs more than it shows at once (three, from a wide screen), or it has no arrows.
+  members: (variant === 'slider' ? ['ann', 'ben', 'cara', 'dev'] : ['ann', 'ben', 'cara']).map(
+    (m) => ref(`teamMember-${m}`),
+  ),
+  ...extra,
+})
+documents.push({
+  _id: 'page-picture-depth-team',
+  _type: 'page',
+  title: 'Picture depth, team',
+  slug: { _type: 'slug', current: 'picture-depth-team' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    depthText(1),
+    depthTeam('depth-team-none', 'Team nothing chosen', 'grid'),
+    depthTeam('depth-team-soft', 'Team soft', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'soft' }),
+    }),
+    depthTeam('depth-team-raised', 'Team raised', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'raised' }),
+    }),
+    depthTeam('depth-team-floating', 'Team floating', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthTeam('depth-team-glow', 'Team floating strong glow', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthTeam('depth-team-glow-only', 'Team strong glow only', 'grid', {
+      pictureDepthDesign: pictureDepth({ glow: 'strong' }),
+    }),
+    depthTeam('depth-team-flat', 'Team flat and glow off', 'grid', {
+      pictureDepthDesign: pictureDepth({ shadow: 'flat', glow: 'off' }),
+    }),
+    depthTeam('depth-team-circle', 'Team circle floating', 'grid', {
+      imageDesign: imageDesign({ appearance: 'circle' }),
+      pictureDepthDesign: pictureDepth({ shadow: 'floating' }),
+    }),
+    depthTeam('depth-team-circle-none', 'Team circle nothing chosen', 'grid', {
+      imageDesign: imageDesign({ appearance: 'circle' }),
+    }),
+    depthTeam('depth-team-arch-none', 'Team arch nothing chosen', 'grid', {
+      imageDesign: imageDesign({ appearance: 'arch' }),
+    }),
+    depthTeam('depth-team-circle-glow', 'Team circle floating strong glow', 'grid', {
+      imageDesign: imageDesign({ appearance: 'circle' }),
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthTeam('depth-team-arch-glow', 'Team arch floating strong glow', 'grid', {
+      imageDesign: imageDesign({ appearance: 'arch' }),
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(2),
+    depthTeam('depth-team-slider-none', 'Team slider nothing chosen', 'slider'),
+    depthTeam('depth-team-slider-glow', 'Team slider floating strong glow', 'slider', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(3),
+    depthTeam('depth-team-list-none', 'Team list nothing chosen', 'list'),
+    depthTeam('depth-team-list-glow', 'Team list floating strong glow', 'list', {
+      pictureDepthDesign: pictureDepth({ shadow: 'floating', glow: 'strong' }),
+    }),
+    depthText(4),
+  ],
+})
+
 documents.push(
   teamMember('ann', 'Ann Lee', 'Principal solicitor', {
     ...memberSlug('ann-lee'),
@@ -3033,6 +4230,7 @@ documents.push(
     publicEmail: 'ann@example.com',
     phone: '02 9876 5432',
     services: [{ _key: 'ann-emergency', ...ref('service-emergency-plumbing') }],
+    locations: [{ _key: 'ann-parramatta', ...ref('place-parramatta') }],
     socialLinks: [
       {
         _key: 'ann-linkedin',
@@ -3111,6 +4309,11 @@ documents.push(
       { _key: 'ev-page', ...ref('page-about') },
       { _key: 'ev-members', ...ref('page-members') },
     ],
+    // Offered at the Parramatta branch and in the Western Sydney area; Blocked drains lists none (everywhere).
+    locations: [
+      { _key: 'loc-parramatta', ...ref('place-parramatta') },
+      { _key: 'loc-western-sydney', ...ref('place-western-sydney') },
+    ],
     enquiry: cta('Get a quote', external('https://quotes.example.com/plumbing')),
     sections: [
       {
@@ -3130,6 +4333,65 @@ documents.push(
     slug: { _type: 'slug', current: 'blocked-drains' },
     summary: 'We clear blocked drains and tell you what caused them.',
     image: image('A drain being cleared'),
+  },
+)
+
+/**
+ * Locations (tests/e2e/locations.spec.ts). Parramatta is a branch with every field; Western Sydney is
+ * a service area that still holds a phone number and hours it must not show or mark up (it was a
+ * branch once); Newtown is a branch with only the required fields, so its phone, email, hours and
+ * people are absent, heading and markup included. Emergency plumbing lists the first two; Blocked
+ * drains lists none, so it is offered at all three.
+ */
+documents.push(
+  {
+    _id: 'place-parramatta',
+    _type: 'place',
+    name: 'Parramatta',
+    kind: 'branch',
+    slug: { _type: 'slug', current: 'parramatta' },
+    summary: 'Our Parramatta branch, two minutes from the station.',
+    image: image('The Parramatta branch front door'),
+    body: [
+      block(['Park behind the building and use the side entrance.']),
+      block(['The branch is on the first floor.']),
+    ],
+    phone: '(02) 9000 0000',
+    publicEmail: 'parramatta@example.com',
+    address: { street: '1 Church St', suburb: 'Parramatta', state: 'NSW', postcode: '2150' },
+    timeZone: 'Australia/Sydney',
+    geo: { lat: -33.8151, lng: 151.0011 },
+    openingHours: [
+      {
+        _key: 'weekdays',
+        _type: 'hoursRow',
+        days: ['mon', 'tue', 'wed', 'thu', 'fri'],
+        opens: '07:00',
+        closes: '17:00',
+      },
+      { _key: 'saturday', _type: 'hoursRow', days: ['sat'], opens: '08:00', closes: '12:00' },
+    ],
+  },
+  {
+    _id: 'place-western-sydney',
+    _type: 'place',
+    name: 'Western Sydney',
+    kind: 'serviceArea',
+    slug: { _type: 'slug', current: 'western-sydney' },
+    summary: 'We travel across Western Sydney, from Parramatta to the Blue Mountains.',
+    phone: '(02) 9111 1111',
+    address: { suburb: 'Penrith', state: 'NSW', postcode: '2750' },
+    openingHours: [
+      { _key: 'always', _type: 'hoursRow', days: ['mon'], opens: '09:00', closes: '10:00' },
+    ],
+  },
+  {
+    _id: 'place-newtown',
+    _type: 'place',
+    name: 'Newtown',
+    kind: 'branch',
+    slug: { _type: 'slug', current: 'newtown' },
+    address: { suburb: 'Newtown', state: 'NSW', postcode: '2042' },
   },
 )
 
@@ -4258,6 +5520,357 @@ documents.push(
     ],
   },
   {
+    // A divider between a section header's title and its intro (tests/e2e/header-dividers.spec.ts): in a
+    // start-aligned and a centred section with a header of their own, in two that draw their header with
+    // no wrapper (a call to action, a logo cloud), beside a header with no divider, and one with no intro.
+    _id: 'page-header-dividers',
+    _type: 'page',
+    title: 'Header dividers',
+    slug: { _type: 'slug', current: 'header-dividers' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      ...[
+        ['hd-start', 'Start header', 'start', true, 'An introduction under the divider.'],
+        ['hd-centre', 'Centre header', 'center', true, 'An introduction under the divider.'],
+        ['hd-control', 'Control header', 'center', false, 'An introduction with no divider.'],
+        ['hd-no-intro', 'Title only', 'center', true, undefined],
+      ].map(([id, title, align, divider, intro]) => ({
+        _key: id,
+        _type: 'featuresGrid',
+        title,
+        ...(intro ? { intro } : {}),
+        columns: 2,
+        style: { _type: 'sectionStyle', align },
+        ...(divider
+          ? {
+              headerDesign: {
+                _type: 'object',
+                divider: { _type: 'decorativeDivider', style: 'line', width: 'short' },
+              },
+            }
+          : {}),
+        items: [1, 2].map((i) => ({
+          _key: key(),
+          _type: 'featureItem',
+          title: `Feature ${i}`,
+          text: 'Text.',
+          icon: image(''),
+        })),
+      })),
+      {
+        _key: 'hd-cta',
+        _type: 'ctaBanner',
+        title: 'Call to action',
+        text: 'Banner text under the divider.',
+        tone: 'brand',
+        style: { _type: 'sectionStyle', align: 'center' },
+        headerDesign: {
+          _type: 'object',
+          divider: { _type: 'decorativeDivider', style: 'line', width: 'short' },
+        },
+        ctas: [cta('Get started', internal('page-about'))],
+      },
+      {
+        _key: 'hd-logos',
+        _type: 'logoCloud',
+        title: 'Trusted by',
+        intro: 'Teams we have worked with.',
+        style: { _type: 'sectionStyle', align: 'center' },
+        headerDesign: {
+          _type: 'object',
+          divider: { _type: 'decorativeDivider', style: 'line', width: 'short' },
+        },
+        logos: ['Acme', 'Globex', 'Initech'].map((name) => ({
+          _key: key(),
+          name,
+          image: image(name),
+        })),
+      },
+    ],
+  },
+  {
+    // Double, Dotted line and Gradient through real queries (tests/e2e/rules-styles.spec.ts, task 151, Slice 7): a
+    // Link list with three divider positions (one after the last icons would end the section, so it is not drawn), and
+    // four section headers (a Part A surface): one per new style, and Three dots as the unchanged control. The
+    // Gradient stores a line colour, which it must ignore.
+    _id: 'page-rules-styles',
+    _type: 'page',
+    title: 'Rules styles',
+    slug: { _type: 'slug', current: 'rules-styles' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'rs-links',
+        _type: 'linkList',
+        variant: 'stacked',
+        thumbnailSize: 'standard',
+        style: { _type: 'sectionStyle', anchorId: 'rs-links', align: 'center' },
+        profile: {
+          _type: 'object',
+          name: 'New divider styles',
+          categories: ['Move', 'Breathe'],
+          bio: 'A welcoming space for therapeutic bodywork.',
+        },
+        socialDesign: { _type: 'object', position: 'below' },
+        socialSource: 'custom',
+        socialLinks: [
+          {
+            _key: 'ig',
+            _type: 'socialLink',
+            platform: 'instagram',
+            url: 'https://instagram.com/x',
+          },
+        ],
+        dividerDesign: {
+          _type: 'object',
+          afterCategories: { _type: 'decorativeDivider', style: 'double', width: 'short' },
+          afterProfile: {
+            _type: 'decorativeDivider',
+            style: 'dotted',
+            width: 'long',
+            centre: 'diamond',
+          },
+          aboveSocial: {
+            _type: 'decorativeDivider',
+            style: 'gradient',
+            width: 'full',
+            centre: 'text',
+            text: 'Stay connected',
+            lineColour: { _type: 'object', colour: 'custom', hex: '#aa5500' },
+          },
+        },
+        links: [linkItem('rs-a', 'First link', external('https://example.com/a'))],
+      },
+      ...[
+        ['dots', { style: 'dots' }],
+        ['double', { style: 'double', width: 'long' }],
+        ['dotted', { style: 'dotted', width: 'long', thickness: 'bold' }],
+        [
+          'gradient',
+          {
+            style: 'gradient',
+            width: 'long',
+            lineColour: { _type: 'object', colour: 'custom', hex: '#aa5500' },
+          },
+        ],
+      ].map(([name, divider]) => ({
+        _key: `rs-header-${name}`,
+        _type: 'featuresGrid',
+        title: `Header with a ${name} divider`,
+        intro: 'An introduction under the divider.',
+        columns: 2,
+        style: { _type: 'sectionStyle', anchorId: `rs-header-${name}`, align: 'center' },
+        headerDesign: {
+          _type: 'object',
+          divider: { _type: 'decorativeDivider', ...divider },
+        },
+        items: [1, 2].map((i) => ({
+          _key: key(),
+          _type: 'featureItem',
+          title: `Feature ${i}`,
+          text: 'Text.',
+          icon: image(''),
+        })),
+      })),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    // Finish and the Ornament centre (tests/e2e/rules-finish.spec.ts): the same section header, one per case, so a
+    // test can hold a glowing divider against its flat twin. `rf-*-stored` carry a Glow the style never draws.
+    _id: 'page-rules-finish',
+    _type: 'page',
+    title: 'Rules finish',
+    slug: { _type: 'slug', current: 'rules-finish' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      ['line-flat', { style: 'line', width: 'long', finish: 'flat' }],
+      ['line-unset', { style: 'line', width: 'long' }],
+      ['line-glow', { style: 'line', width: 'long', finish: 'glow' }],
+      ['line-glow-bold', { style: 'line', width: 'long', thickness: 'bold', finish: 'glow' }],
+      ['double-flat', { style: 'double', width: 'long' }],
+      ['double-glow', { style: 'double', width: 'long', finish: 'glow' }],
+      ['gradient-flat', { style: 'gradient', width: 'long' }],
+      ['gradient-glow', { style: 'gradient', width: 'long', finish: 'glow' }],
+      [
+        'gradient-glow-bold',
+        { style: 'gradient', width: 'long', thickness: 'bold', finish: 'glow' },
+      ],
+      ['gradient-glow-full', { style: 'gradient', width: 'full', finish: 'glow' }],
+      // A full-width section keeps no gutters of its own (section-style.ts), so on a phone a Full width divider
+      // in its header runs from one edge of the screen to the other.
+      ['gutterless-thin', { style: 'gradient', width: 'full', finish: 'glow' }, { width: 'full' }],
+      [
+        'gutterless-bold',
+        { style: 'gradient', width: 'full', thickness: 'bold', finish: 'glow' },
+        { width: 'full' },
+      ],
+      [
+        'gutterless-centre',
+        { style: 'gradient', width: 'full', finish: 'glow', centre: 'diamond' },
+        { width: 'full' },
+      ],
+      [
+        'gradient-glow-centre',
+        { style: 'gradient', width: 'long', finish: 'glow', centre: 'diamond' },
+      ],
+      ['fade-stored', { style: 'fade', width: 'long', finish: 'glow' }],
+      ['dotted-stored', { style: 'dotted', width: 'long', finish: 'glow' }],
+      ['dots-stored', { style: 'dots', finish: 'glow' }],
+      ['ornament', { style: 'line', width: 'long', centre: 'ornament' }],
+      ['ornament-small', { style: 'line', width: 'long', centre: 'ornament', centreSize: 'small' }],
+      [
+        'ornament-own',
+        {
+          style: 'line',
+          width: 'long',
+          centre: 'ornament',
+          centreSize: 'large',
+          centreColour: { _type: 'object', colour: 'highlight' },
+        },
+      ],
+      ['ornament-glow', { style: 'line', width: 'long', finish: 'glow', centre: 'ornament' }],
+      ['dots-ornament', { style: 'dots', centre: 'ornament' }],
+    ].map(([name, divider, style]) => ({
+      _key: `rf-${name}`,
+      _type: 'featuresGrid',
+      title: `Header: ${name}`,
+      intro: 'An introduction under the divider.',
+      columns: 2,
+      style: { _type: 'sectionStyle', anchorId: `rf-${name}`, align: 'center', ...style },
+      headerDesign: {
+        _type: 'object',
+        divider: { _type: 'decorativeDivider', ...divider },
+      },
+      items: [1, 2].map((i) => ({
+        _key: key(),
+        _type: 'featureItem',
+        title: `Feature ${i}`,
+        text: 'Text.',
+        icon: image(''),
+      })),
+    })),
+    _updatedAt: UPDATED,
+  },
+  {
+    // A divider under a hero's title (tests/e2e/hero-dividers.spec.ts): one hero in each layout, each with
+    // an intro and buttons, and a Full background hero with none chosen to compare spacing against.
+    _id: 'page-hero-dividers',
+    _type: 'page',
+    title: 'Hero dividers',
+    slug: { _type: 'slug', current: 'hero-dividers' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      ['overlay', 'Hero overlay', true],
+      ['split', 'Hero split', true],
+      ['editorial', 'Hero editorial', true],
+      ['full-bleed', 'Hero panel', true],
+      ['overlay', 'Hero control', false],
+      ['overlay', 'Hero buttons', true, { description: undefined }],
+      ['split', 'Hero greeting', true, { showGreeting: true }],
+    ].map(([variant, title, divider, extra], index) => ({
+      _key: `hrd-${index}`,
+      _type: 'hero',
+      variant,
+      title,
+      description: 'An introduction under the divider.',
+      ctas: [cta('Get started', internal('page-about'))],
+      ...extra,
+      ...(variant === 'editorial' ? {} : { backgroundImage: image('') }),
+      ...(divider
+        ? { dividerDesign: { _type: 'decorativeDivider', style: 'line', width: 'short' } }
+        : {}),
+    })),
+  },
+  {
+    // A divider between Image + text's heading and its body (tests/e2e/media-text-dividers.spec.ts): in
+    // each layout, with a body that opens with a heading, and one with none chosen to compare spacing against.
+    _id: 'page-media-text-dividers',
+    _type: 'page',
+    title: 'Image and text dividers',
+    slug: { _type: 'slug', current: 'media-text-dividers' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      ['side', 'Side divider', true, undefined],
+      ['stacked', 'Stacked divider', true, undefined],
+      ['overlay', 'Overlay divider', true, undefined],
+      ['side', 'Heading first divider', true, { heading: true }],
+      ['side', 'Centred divider', true, { align: 'center' }],
+      ['side', 'No divider', false, undefined],
+    ].map(([variant, title, divider, extra], index) => ({
+      _key: `mtd-${index}`,
+      _type: 'mediaText',
+      variant,
+      title,
+      body: extra?.heading
+        ? [block(['Opening heading'], { style: 'h2' }), block(['Body text under the divider.'])]
+        : [block(['Body text under the divider.'])],
+      image: image('Picture'),
+      imagePosition: 'right',
+      ...(extra?.align ? { style: { _type: 'sectionStyle', align: extra.align } } : {}),
+      ...(divider
+        ? {
+            headerDesign: {
+              _type: 'object',
+              divider: { _type: 'decorativeDivider', style: 'line', width: 'short' },
+            },
+          }
+        : {}),
+    })),
+  },
+  {
+    // A divider block in a Rich text body (tests/e2e/rich-text-dividers.spec.ts): between two paragraphs, after a
+    // list and before a heading, in a centred section, and a body with none to compare spacing against.
+    _id: 'page-rich-text-dividers',
+    _type: 'page',
+    title: 'Rich text dividers',
+    slug: { _type: 'slug', current: 'rich-text-dividers' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'rtd-basic',
+        _type: 'richText',
+        body: [
+          block(['Before the first divider.']),
+          { _key: 'rtd-d1', _type: 'decorativeDivider', style: 'line', width: 'short' },
+          block(['After the first divider.']),
+        ],
+      },
+      {
+        _key: 'rtd-mixed',
+        _type: 'richText',
+        body: [
+          block(['A list item'], { listItem: 'bullet', level: 1 }),
+          block(['Another list item'], { listItem: 'bullet', level: 1 }),
+          { _key: 'rtd-d2', _type: 'decorativeDivider', style: 'line', width: 'short' },
+          block(['A heading after the divider'], { style: 'h2' }),
+          block(['Text under the heading.']),
+        ],
+      },
+      {
+        _key: 'rtd-centred',
+        _type: 'richText',
+        style: { _type: 'sectionStyle', align: 'center' },
+        body: [
+          block(['Centred before.']),
+          { _key: 'rtd-d3', _type: 'decorativeDivider', style: 'line', width: 'short' },
+          block(['Centred after.']),
+        ],
+      },
+      {
+        _key: 'rtd-control',
+        _type: 'richText',
+        body: [block(['Control: first paragraph.']), block(['Control: second paragraph.'])],
+      },
+    ],
+  },
+  {
     // The blur preview is only for opaque pictures (tests/e2e/image-placeholder.spec.ts): a transparent
     // logo as the profile picture and as a wordmark, and an opaque photo as a picture.
     _id: 'page-image-placeholders',
@@ -4362,6 +5975,121 @@ documents.push(
         profile: { _type: 'object', name: 'Nothing chosen' },
         socialSource: 'none',
         links: [linkItem('depth-p', 'Plain link', external('https://example.com/p'))],
+      },
+    ],
+  },
+  {
+    // Site-wide Density and Shape (tests/e2e/site-decisions.spec.ts): the same quote section with no
+    // spacing chosen, with Compact, with Default and with Spacious, so a density can be read against
+    // each. Each has a card whose corner radius follows Shape.
+    _id: 'page-site-decisions',
+    _type: 'page',
+    title: 'Site decisions',
+    slug: { _type: 'slug', current: 'site-decisions' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      ['unset', undefined],
+      ['compact', 'compact'],
+      ['default', 'default'],
+      ['spacious', 'spacious'],
+    ].map(([name, spacing]) => ({
+      _key: `sd-${name}`,
+      _type: 'testimonials',
+      title: `Spacing ${name}`,
+      ...(spacing ? { style: { _type: 'sectionStyle', spacing } } : {}),
+      items: [{ _key: key(), quote: 'Great.', name: 'Alex', role: 'CEO' }],
+    })),
+  },
+  {
+    // Card depth (tests/e2e/design-settings.spec.ts): quote cards and pricing plans with nothing
+    // chosen, a section that chooses Soft, a plan that is Flat while the others are not, and a social
+    // button, which draws the card shadow without being a card and must not follow the site's depth.
+    _id: 'page-card-depth',
+    _type: 'page',
+    title: 'Card depth',
+    slug: { _type: 'slug', current: 'card-depth' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      {
+        _key: 'cd-quote-unset',
+        _type: 'testimonials',
+        title: 'Quotes unset',
+        items: [{ _key: key(), quote: 'Great.', name: 'Alex', role: 'CEO' }],
+      },
+      {
+        _key: 'cd-quote-soft',
+        _type: 'testimonials',
+        title: 'Quotes soft',
+        cardDesign: { _type: 'object', shadow: 'soft' },
+        items: [{ _key: key(), quote: 'Great.', name: 'Sam', role: 'CEO' }],
+      },
+      {
+        _key: 'cd-plans-unset',
+        _type: 'pricingTable',
+        title: 'Plans unset',
+        plans: [plan('price_Starter1', { features: ['One project'] })],
+      },
+      {
+        _key: 'cd-plans-flat',
+        _type: 'pricingTable',
+        title: 'Plans flat',
+        plans: [
+          plan('price_Starter1', {
+            features: ['One project'],
+            design: { _type: 'object', appearance: 'custom', shadow: 'flat' },
+          }),
+          plan('price_Pro1', { features: ['Unlimited projects'] }),
+        ],
+      },
+      // Hover lift (tests/e2e/card-lift.spec.ts): a team card that links to a member's page, with Lift
+      // chosen; the same card with None (which replaces the Motion rise it has when nothing is chosen);
+      // and one with nothing chosen, which keeps that rise and draws no lift wrapper.
+      {
+        _key: 'cd-team-lift',
+        _type: 'team',
+        variant: 'grid',
+        selection: 'picked',
+        title: 'Team lift',
+        cardDesign: { _type: 'object', lift: 'lift' },
+        members: [{ _key: 'lift-dev', ...ref('teamMember-dev') }],
+      },
+      {
+        _key: 'cd-team-none',
+        _type: 'team',
+        variant: 'grid',
+        selection: 'picked',
+        title: 'Team none',
+        cardDesign: { _type: 'object', lift: 'none' },
+        members: [{ _key: 'none-dev', ...ref('teamMember-dev') }],
+      },
+      {
+        _key: 'cd-team-unset',
+        _type: 'team',
+        variant: 'grid',
+        selection: 'picked',
+        title: 'Team unset',
+        members: [{ _key: 'unset-dev', ...ref('teamMember-dev') }],
+      },
+      {
+        _key: 'cd-social',
+        _type: 'linkList',
+        variant: 'stacked',
+        thumbnailSize: 'standard',
+        style: { _type: 'sectionStyle', align: 'center' },
+        profile: { _type: 'object', name: 'Social buttons' },
+        socialDesign: { _type: 'object', style: 'circle' },
+        socialSource: 'custom',
+        socialLinks: [
+          {
+            _key: 'ig',
+            _type: 'socialLink',
+            platform: 'instagram',
+            url: 'https://instagram.com/x',
+          },
+        ],
+        links: [linkItem('cd-l', 'A link', external('https://example.com/l'))],
       },
     ],
   },
@@ -4853,6 +6581,603 @@ documents.push(
         edge: 'curve',
         edgeHeight: 'medium',
       }),
+    ],
+    _updatedAt: UPDATED,
+  },
+)
+
+// Section edge stability (tests/e2e/section-edge-stability.spec.ts, section-edge-hairlines.spec.ts; task 151).
+/** A form section with no form: it renders nothing, however its style is set. */
+const edgeEmpty = (id, style) => ({
+  _key: id,
+  _type: 'formSection',
+  style: { _type: 'sectionStyle', anchorId: id, ...style },
+})
+/**
+ * One pair per shape (and height): an inverse section over an accent one, so a gap shows the page background.
+ * Contour's lines take the section below's tone, which over an accent section is nearly the page's white, so
+ * its pair is over an inverse section instead: still nothing the page's background could be mistaken for.
+ */
+const seamPairs = [
+  ['wave', 'medium'],
+  ['curve', 'medium'],
+  ['diagonal', 'medium'],
+  ['arch', 'medium'],
+  ['layered', 'medium'],
+  ['wave', 'small'],
+  ['curve', 'large'],
+  ['tide', 'medium'],
+  ['tide', 'large'],
+  ['contour', 'medium', 'inverse'],
+  ['still-water', 'medium'],
+  ['still-water', 'large'],
+  ['lagoon', 'medium'],
+  ['lagoon', 'large'],
+  ['reef', 'medium'],
+  ['reef', 'large'],
+].flatMap(([shape, height, below = 'accent']) => [
+  edgeSection(`seam-${shape}-${height}`, `Above the ${shape} (${height})`, {
+    tone: 'inverse',
+    edge: shape,
+    edgeHeight: height,
+  }),
+  edgeSection(`seam-${shape}-${height}--below`, 'Below the edge', { tone: below }),
+])
+documents.push(
+  {
+    // An edge beside a section that draws nothing: it must not pull the next section over the last visible one.
+    _id: 'page-edge-empty',
+    _type: 'page',
+    title: 'Edges beside an empty section',
+    slug: { _type: 'slug', current: 'edge-empty' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      edgeSection('ee-before', 'Before the empty section', { tone: 'surface' }),
+      edgeEmpty('ee-empty', { tone: 'inverse', edge: 'wave', edgeHeight: 'large' }),
+      edgeSection('ee-after', 'After the empty section', { tone: 'alt' }),
+      edgeSection('ee-control-a', 'Control, with a wave', {
+        tone: 'inverse',
+        edge: 'wave',
+        edgeHeight: 'large',
+      }),
+      edgeSection('ee-control-b', 'Control, below the wave', { tone: 'alt' }),
+      // An edge right above an empty edge section: its cut shows the page, though a third section follows.
+      edgeSection('ee-mid-top', 'Above an empty edge section', {
+        tone: 'inverse',
+        edge: 'wave',
+        edgeHeight: 'large',
+      }),
+      edgeEmpty('ee-mid-empty', { tone: 'accent', edge: 'curve', edgeHeight: 'large' }),
+      edgeSection('ee-mid-after', 'After the empty edge section', { tone: 'alt' }),
+      edgeEmpty('ee-last', { tone: 'inverse', edge: 'curve', edgeHeight: 'large' }),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    // A Minimal page whose first and last sections cover the screen and have edges: no footer, so no band.
+    _id: 'page-edge-minimal',
+    _type: 'page',
+    title: 'Edges on a Minimal page',
+    slug: { _type: 'slug', current: 'edge-minimal' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      edgeSection('em-first', 'First, covering the screen', {
+        tone: 'inverse',
+        image: image(''),
+        imageSize: 'screen',
+        overlay: 'medium',
+        edge: 'wave',
+      }),
+      edgeSection('em-middle', 'Middle, with a curve', { tone: 'alt', edge: 'curve' }),
+      edgeSection('em-last', 'Last, covering the screen', {
+        tone: 'inverse',
+        image: image(''),
+        imageSize: 'screen',
+        overlay: 'medium',
+        edge: 'curve',
+      }),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    // A Minimal page whose last section covers the screen under an edge but has no edge, so no mask, of its own.
+    _id: 'page-edge-minimal-follower',
+    _type: 'page',
+    title: 'Minimal page ending under an edge',
+    slug: { _type: 'slug', current: 'edge-minimal-follower' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      edgeSection('emf-above', 'Above the edge', { tone: 'alt', edge: 'wave' }),
+      edgeSection('emf-last', 'Last, covering the screen under the wave', {
+        tone: 'inverse',
+        image: image(''),
+        imageSize: 'screen',
+        overlay: 'medium',
+      }),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    // Tide and Contour immediately before an Elevated section (section-edge-composed.spec.ts, task 151, Slice 6): the
+    // section below is Elevated, with a frame of its own between its wrapper and its section, and a tone of its own.
+    _id: 'page-edge-composed-elevated',
+    _type: 'page',
+    title: 'Composed edges before Elevated',
+    slug: { _type: 'slug', current: 'edge-composed-elevated' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      edgeSection('ce-tide', 'Tide, before Elevated', {
+        tone: 'alt',
+        edge: 'tide',
+        edgeHeight: 'large',
+      }),
+      edgeSection('ce-tide-below', 'Elevated, Contrast', { tone: 'inverse', edge: 'elevated' }),
+      edgeSection('ce-contour', 'Contour, before Elevated', {
+        tone: 'alt',
+        edge: 'contour',
+        edgeHeight: 'large',
+      }),
+      edgeSection('ce-contour-below', 'Elevated, Primary', { tone: 'accent', edge: 'elevated' }),
+      edgeSection('ce-end', 'After the Elevated sections', { tone: 'surface' }),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    // Tide and Contour in a real browser (section-edge-composed.spec.ts, task 151): each over a known section,
+    // under one with a colour of its own (a plain surface section is see-through under any edge).
+    _id: 'page-edge-composed',
+    _type: 'page',
+    title: 'Composed edges',
+    slug: { _type: 'slug', current: 'edge-composed' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      edgeSection('ct-tide', 'Tide at its defaults', { tone: 'alt', edge: 'tide' }),
+      edgeSection('ct-tide-below', 'Below Tide, surface', { tone: 'surface' }),
+      edgeSection('ct-tide-large', 'Tide, Large', {
+        tone: 'alt',
+        edge: 'tide',
+        edgeHeight: 'large',
+      }),
+      edgeSection('ct-tide-large-below', 'Below Tide, inverse', { tone: 'inverse' }),
+      edgeSection('ct-echo', 'Tide with Echo', {
+        tone: 'inverse',
+        edge: 'tide',
+        edgeTideLayer: 'echo',
+        edgeHeight: 'large',
+      }),
+      edgeSection('ct-echo-below', 'Below the echo, alternate', { tone: 'alt' }),
+      edgeSection('ct-contour', 'Contour', { tone: 'alt', edge: 'contour', edgeHeight: 'large' }),
+      edgeSection('ct-contour-below', 'Below Contour, inverse, with an edge of its own', {
+        tone: 'inverse',
+        edge: 'wave',
+      }),
+      edgeSection('ct-classic', 'Classic, with an accent line', {
+        tone: 'alt',
+        edge: 'layered',
+        edgeAccent: 'accent',
+        edgeHeight: 'large',
+      }),
+      edgeSection('ct-classic-below', 'Below Classic, inverse', { tone: 'inverse' }),
+      edgeEmpty('ct-empty', { tone: 'inverse', edge: 'tide', edgeHeight: 'large' }),
+      edgeSection('ct-after-empty', 'After an empty Tide', { tone: 'alt' }),
+      edgeSection('ct-last', 'Last, with Contour over the footer', {
+        tone: 'accent',
+        edge: 'contour',
+        edgeLineColour: 'muted',
+      }),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    // Still water in a real browser (section-edge-layered.spec.ts, task 151, Slice 3). Each upper section has a
+    // colour of its own, and the layers are chosen to contrast with it, so a pixel can tell them from the section.
+    _id: 'page-edge-layered',
+    _type: 'page',
+    title: 'Layered edges',
+    slug: { _type: 'slug', current: 'edge-layered' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      // Ink over a light section, Strong: the upper layer is dark on light. A layer below in Primary, over inverse.
+      edgeSection('ls-ink', 'Still water, Ink', {
+        tone: 'alt',
+        edge: 'still-water',
+        edgePalette: 'ink',
+        edgeStrength: 'strong',
+        edgeLayerBelow: true,
+        edgeHeight: 'large',
+      }),
+      edgeSection('ls-ink-below', 'Below Still water, inverse', { tone: 'inverse' }),
+      // Defaults, Medium: the 40 px band on a phone.
+      edgeSection('ls-default', 'Still water at its defaults', {
+        tone: 'alt',
+        edge: 'still-water',
+        edgePalette: 'ink',
+        edgeStrength: 'strong',
+        edgeLayerBelow: true,
+      }),
+      edgeSection('ls-default-below', 'Below the defaults, inverse', { tone: 'inverse' }),
+      // Shallow with a layer below stored: the layer below is not drawn.
+      edgeSection('ls-shallow', 'Shallow, with a stored layer below', {
+        tone: 'alt',
+        edge: 'still-water',
+        edgePalette: 'ink',
+        edgeStrength: 'strong',
+        edgeDepth: 'shallow',
+        edgeLayerBelow: true,
+        edgeHeight: 'large',
+      }),
+      edgeSection('ls-shallow-below', 'Below Shallow, inverse', { tone: 'inverse' }),
+      // Small is stored: drawn as Medium. Custom heights are stored out of range: held to 40-64, 40-120, 40-160.
+      edgeSection('ls-small', 'A stored Small', {
+        tone: 'alt',
+        edge: 'still-water',
+        edgeHeight: 'small',
+      }),
+      edgeSection('ls-small-below', 'Below a stored Small, inverse', { tone: 'inverse' }),
+      edgeSection('ls-custom', 'Custom heights, out of range', {
+        tone: 'alt',
+        edge: 'still-water',
+        edgeHeightMobile: 20,
+        edgeHeightTablet: 300,
+        edgeHeightDesktop: 999,
+      }),
+      edgeSection('ls-custom-below', 'Below the custom heights, inverse', { tone: 'inverse' }),
+      // The upper layer over a mark, a gradient and a picture, to read its paint order.
+      edgeSection('ls-mark', 'Still water over a mark', {
+        tone: 'alt',
+        edge: 'still-water',
+        edgePalette: 'ink',
+        edgeStrength: 'strong',
+        edgeHeight: 'large',
+        mark: { kind: 'icon', icon: 'heart' },
+      }),
+      edgeSection('ls-mark-below', 'Below the mark, inverse', { tone: 'inverse' }),
+      edgeSection('ls-gradient', 'Still water over a gradient', {
+        tone: 'inverse',
+        edge: 'still-water',
+        edgePalette: 'highlight',
+        edgeStrength: 'strong',
+        edgeHeight: 'large',
+        gradient: 'forest-dusk',
+      }),
+      edgeSection('ls-gradient-below', 'Below the gradient, alternate', { tone: 'alt' }),
+      edgeSection('ls-picture', 'Still water over a picture', {
+        tone: 'inverse',
+        edge: 'still-water',
+        edgePalette: 'highlight',
+        edgeStrength: 'strong',
+        edgeHeight: 'large',
+        image: image(''),
+        imageSize: 'cover',
+        overlay: 'medium',
+      }),
+      edgeSection('ls-picture-below', 'Below the picture, alternate', { tone: 'alt' }),
+      edgeSection('ls-flip', 'Still water, flipped', {
+        tone: 'alt',
+        edge: 'still-water',
+        edgePalette: 'ink',
+        edgeStrength: 'strong',
+        edgeLayerBelow: true,
+        edgeFlip: true,
+        edgeHeight: 'large',
+      }),
+      edgeSection('ls-flip-below', 'Below the flip, inverse', { tone: 'inverse' }),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    // Lagoon and Reef in a real browser (section-edge-lagoon-reef.spec.ts, task 151, Slice 4). Each upper
+    // section has a colour of its own and the layers contrast with it, so a pixel can tell each fill, and where
+    // two overlap, from the section. Strong, so the blends are far enough apart to read through a screenshot.
+    _id: 'page-edge-lagoon-reef',
+    _type: 'page',
+    title: 'Lagoon and Reef edges',
+    slug: { _type: 'slug', current: 'edge-lagoon-reef' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      // The defaults, Medium (the 40 px phone band and a 320 px window).
+      edgeSection('lr-lagoon-default', 'Lagoon at its defaults', { tone: 'alt', edge: 'lagoon' }),
+      edgeSection('lr-lagoon-default-below', 'Below Lagoon, Primary', { tone: 'accent' }),
+      edgeSection('lr-reef-default', 'Reef at its defaults', { tone: 'inverse', edge: 'reef' }),
+      edgeSection('lr-reef-default-below', 'Below Reef, alternate', { tone: 'alt' }),
+      // Large and Strong: the contrasting fixture the pixel checks read.
+      edgeSection('lr-lagoon', 'Lagoon, Strong at Large', {
+        tone: 'alt',
+        edge: 'lagoon',
+        edgeStrength: 'strong',
+        edgeHeight: 'large',
+      }),
+      edgeSection('lr-lagoon-below', 'Below Lagoon, inverse', { tone: 'inverse' }),
+      edgeSection('lr-reef', 'Reef, Strong at Large', {
+        tone: 'inverse',
+        edge: 'reef',
+        edgeStrength: 'strong',
+        edgeHeight: 'large',
+      }),
+      edgeSection('lr-reef-below', 'Below Reef, alternate', { tone: 'alt' }),
+      // Stored steps the shapes do not offer: drawn as the defaults, and kept.
+      edgeSection('lr-lagoon-stale', 'Lagoon with stored steps', {
+        tone: 'alt',
+        edge: 'lagoon',
+        edgeCrest: 'shifted',
+        edgeDepth: 'shallow',
+        edgeLayerBelow: true,
+      }),
+      edgeSection('lr-lagoon-stale-below', 'Below stale Lagoon, Primary', { tone: 'accent' }),
+      edgeSection('lr-reef-stale', 'Reef with stored steps', {
+        tone: 'inverse',
+        edge: 'reef',
+        edgeCrest: 'centred',
+        edgeDepth: 'deep',
+        edgeLayerBelow: false,
+      }),
+      edgeSection('lr-reef-stale-below', 'Below stale Reef, alternate', { tone: 'alt' }),
+      // Custom heights stored out of range: held to 40-64, 40-120 and 40-160 px.
+      edgeSection('lr-lagoon-custom', 'Lagoon, custom heights', {
+        tone: 'alt',
+        edge: 'lagoon',
+        edgeHeightMobile: 20,
+        edgeHeightTablet: 300,
+        edgeHeightDesktop: 999,
+      }),
+      edgeSection('lr-lagoon-custom-below', 'Below Lagoon custom, Primary', { tone: 'accent' }),
+      edgeSection('lr-reef-custom', 'Reef, custom heights', {
+        tone: 'inverse',
+        edge: 'reef',
+        edgeHeightMobile: 20,
+        edgeHeightTablet: 300,
+        edgeHeightDesktop: 999,
+      }),
+      edgeSection('lr-reef-custom-below', 'Below Reef custom, alternate', { tone: 'alt' }),
+      // Over a mark and a picture, to read paint order.
+      edgeSection('lr-lagoon-mark', 'Lagoon over a mark', {
+        tone: 'alt',
+        edge: 'lagoon',
+        edgeStrength: 'strong',
+        edgeHeight: 'large',
+        mark: { kind: 'icon', icon: 'heart' },
+      }),
+      edgeSection('lr-lagoon-mark-below', 'Below the mark, inverse', { tone: 'inverse' }),
+      edgeSection('lr-reef-picture', 'Reef over a picture', {
+        tone: 'inverse',
+        edge: 'reef',
+        edgeStrength: 'strong',
+        edgeHeight: 'large',
+        image: image(''),
+        imageSize: 'cover',
+        overlay: 'medium',
+      }),
+      edgeSection('lr-reef-picture-below', 'Below the picture, alternate', { tone: 'alt' }),
+      edgeSection('lr-lagoon-flip', 'Lagoon, flipped', {
+        tone: 'alt',
+        edge: 'lagoon',
+        edgeStrength: 'strong',
+        edgeFlip: true,
+        edgeHeight: 'large',
+      }),
+      edgeSection('lr-lagoon-flip-below', 'Below the flip, inverse', { tone: 'inverse' }),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    // Elevated in a real browser (section-edge-elevated.spec.ts, task 151, Slice 6): over a light follower and a
+    // dark one, on a section that clips its overflow, twice in a row, and right after a shaped edge. Each
+    // upper section has a colour of its own, so the boundary and the shadow can be told from the follower.
+    _id: 'page-edge-elevated',
+    _type: 'page',
+    title: 'Elevated edges',
+    slug: { _type: 'slug', current: 'edge-elevated' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      edgeSection('ev-light', 'Elevated over a light section', {
+        tone: 'inverse',
+        edge: 'elevated',
+      }),
+      edgeSection('ev-light-below', 'The light follower', { tone: 'surface' }),
+      edgeSection('ev-dark', 'Elevated, Deep, over a dark section', {
+        tone: 'alt',
+        edge: 'elevated',
+        edgeShadow: 'deep',
+      }),
+      edgeSection('ev-dark-below', 'The dark follower', { tone: 'inverse' }),
+      {
+        // A layout that clips its own overflow (text over media): the shadow is outside it.
+        _key: 'ev-clip',
+        _type: 'mediaText',
+        variant: 'overlay',
+        title: 'Elevated on a section that clips',
+        body: [block(['A paragraph of copy under the heading.'])],
+        image: image(''),
+        style: { _type: 'sectionStyle', anchorId: 'ev-clip', tone: 'inverse', edge: 'elevated' },
+      },
+      edgeSection('ev-clip-below', 'Below the clipping section', { tone: 'surface' }),
+      edgeSection('ev-chain-1', 'First of two in a row', { tone: 'inverse', edge: 'elevated' }),
+      edgeSection('ev-chain-2', 'Second of two in a row', {
+        tone: 'alt',
+        edge: 'elevated',
+        edgeShadow: 'deep',
+      }),
+      edgeSection('ev-chain-below', 'Below the pair', { tone: 'surface' }),
+      edgeSection('ev-shaped', 'A shaped edge, then Elevated', {
+        tone: 'inverse',
+        edge: 'wave',
+        edgeHeight: 'large',
+      }),
+      edgeSection('ev-after-shaped', 'Elevated right after the wave', {
+        tone: 'alt',
+        edge: 'elevated',
+      }),
+      edgeSection('ev-after-elevated', 'After Elevated that followed the wave', {
+        tone: 'surface',
+      }),
+      // Stale settings of a cut, stored under Elevated: ignored, and the section is drawn as Elevated.
+      edgeSection('ev-stale', 'Elevated with stored settings of another shape', {
+        tone: 'inverse',
+        edge: 'elevated',
+        edgeFlip: true,
+        edgeInvert: true,
+        edgeAccent: 'accent',
+        edgeHeight: 'large',
+        edgeHeightDesktop: 160,
+        edgeCrest: 'shifted',
+        edgeLayerBelow: true,
+      }),
+      edgeSection('ev-stale-below', 'After the stale settings', { tone: 'surface' }),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    // The last section of a normal page is Elevated: its shadow falls on the footer, with no band.
+    _id: 'page-edge-elevated-last',
+    _type: 'page',
+    title: 'Elevated last section',
+    slug: { _type: 'slug', current: 'edge-elevated-last' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      edgeSection('evl-first', 'First, plain', { tone: 'alt' }),
+      edgeSection('evl-last', 'Last, Elevated', { tone: 'inverse', edge: 'elevated' }),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    // The last section of a Minimal page (no header or footer) is Elevated and covers the screen; so is one in the middle.
+    _id: 'page-edge-elevated-minimal',
+    _type: 'page',
+    title: 'Elevated on a Minimal page',
+    slug: { _type: 'slug', current: 'edge-elevated-minimal' },
+    minimalLayout: true,
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      edgeSection('evm-first', 'First, plain', { tone: 'alt' }),
+      edgeSection('evm-middle', 'Middle, Elevated', { tone: 'inverse', edge: 'elevated' }),
+      edgeSection('evm-last', 'Last, covering the screen, Elevated', {
+        tone: 'inverse',
+        image: image(''),
+        imageSize: 'screen',
+        overlay: 'medium',
+        edge: 'elevated',
+      }),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    // Every shape over a section whose colour differs from the page's, to measure hairlines at the cut.
+    _id: 'page-edge-seams',
+    _type: 'page',
+    title: 'Edge seams',
+    slug: { _type: 'slug', current: 'edge-seams' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: seamPairs,
+    _updatedAt: UPDATED,
+  },
+  {
+    // Per-layer colours and strengths (section-edge-layer-colours.spec.ts, task 151, Slice 8). Each override
+    // section sits beside an identical one with nothing set, so geometry and the recipe can be compared; the
+    // followers are dark (inverse), light (alt) and Brand (accent), because the layer below takes its roles
+    // from the section that follows.
+    _id: 'page-edge-layer-colours',
+    _type: 'page',
+    title: 'Layer colours',
+    slug: { _type: 'slug', current: 'edge-layer-colours' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      // Reef: nothing set, then a colour only (first layer), a strength only (second layer) and both (below).
+      edgeSection('lc-reef-unset', 'Reef, nothing set', {
+        tone: 'alt',
+        edge: 'reef',
+        edgeHeight: 'large',
+      }),
+      edgeSection('lc-reef-unset-f', 'Dark follower', { tone: 'inverse' }),
+      edgeSection('lc-reef', 'Reef, layers set', {
+        tone: 'alt',
+        edge: 'reef',
+        edgeHeight: 'large',
+        edgeLayerColours: {
+          above1: 'ink',
+          above2Strength: 'light',
+          below: 'accent',
+          belowStrength: 'strong',
+        },
+      }),
+      edgeSection('lc-reef-f', 'Dark follower', { tone: 'inverse' }),
+      edgeSection('lc-reef-light', 'Reef, layers set, light follower', {
+        tone: 'alt',
+        edge: 'reef',
+        edgeHeight: 'large',
+        edgeLayerColours: {
+          above1: 'ink',
+          above2Strength: 'light',
+          below: 'accent',
+          belowStrength: 'strong',
+        },
+      }),
+      edgeSection('lc-reef-light-f', 'Light follower', { tone: 'alt' }),
+      edgeSection('lc-reef-brand', 'Reef, layers set, Brand follower', {
+        tone: 'alt',
+        edge: 'reef',
+        edgeHeight: 'large',
+        edgeLayerColours: {
+          above1: 'ink',
+          above2Strength: 'light',
+          below: 'accent',
+          belowStrength: 'strong',
+        },
+      }),
+      edgeSection('lc-reef-brand-f', 'Brand follower', { tone: 'accent' }),
+      // Still water: its layer below switched on, nothing set, then both layers set.
+      edgeSection('lc-still-unset', 'Still water, nothing set', {
+        tone: 'alt',
+        edge: 'still-water',
+        edgeLayerBelow: true,
+        edgeHeight: 'large',
+      }),
+      edgeSection('lc-still-unset-f', 'Dark follower', { tone: 'inverse' }),
+      edgeSection('lc-still', 'Still water, layers set', {
+        tone: 'alt',
+        edge: 'still-water',
+        edgeLayerBelow: true,
+        edgeHeight: 'large',
+        edgeLayerColours: {
+          above1: 'highlight',
+          above1Strength: 'strong',
+          below: 'ink',
+          belowStrength: 'light',
+        },
+      }),
+      edgeSection('lc-still-f', 'Dark follower', { tone: 'inverse' }),
+      // Still water with no layer below switched on: what is stored for the second layer above and the layer
+      // below is kept and not drawn.
+      edgeSection('lc-still-stale', 'Still water, stored values for layers it does not draw', {
+        tone: 'alt',
+        edge: 'still-water',
+        edgeHeight: 'large',
+        edgeLayerColours: { above2: 'highlight', above2Strength: 'strong', below: 'ink' },
+      }),
+      edgeSection('lc-still-stale-f', 'Light follower', { tone: 'alt' }),
+      // The same shape with nothing stored, which is what the section above must draw (its switch is off, so
+      // its cut differs from the layer-below sections').
+      edgeSection('lc-still-stale-unset', 'Still water, switch off, nothing stored', {
+        tone: 'alt',
+        edge: 'still-water',
+        edgeHeight: 'large',
+      }),
+      edgeSection('lc-still-stale-unset-f', 'Light follower', { tone: 'alt' }),
+      // Lagoon on a dark section over a light one: nothing set, then the second layer, and a stored layer below.
+      edgeSection('lc-lagoon-unset', 'Lagoon, nothing set', {
+        tone: 'inverse',
+        edge: 'lagoon',
+        edgeHeight: 'large',
+      }),
+      edgeSection('lc-lagoon-unset-f', 'Light follower', { tone: 'alt' }),
+      edgeSection('lc-lagoon', 'Lagoon, second layer set', {
+        tone: 'inverse',
+        edge: 'lagoon',
+        edgeHeight: 'large',
+        edgeLayerColours: { above2: 'highlight', above2Strength: 'strong', below: 'ink' },
+      }),
+      edgeSection('lc-lagoon-f', 'Light follower', { tone: 'alt' }),
     ],
     _updatedAt: UPDATED,
   },

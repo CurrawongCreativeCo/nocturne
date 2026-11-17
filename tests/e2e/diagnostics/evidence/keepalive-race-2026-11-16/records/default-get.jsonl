@@ -1,0 +1,32 @@
+{"side":"server","at":1794816153383.9,"event":"listening","policy":"default","port":64276,"keepAliveTimeout":5000,"keepAliveTimeoutBuffer":1000,"headersTimeout":60000,"requestTimeout":300000,"timeout":0,"node":"v24.22.2","undici":"7.30.1","uv":"1.52.1","pid":46493}
+{"side":"client","at":1794816153424.5,"event":"start","scenario":"default-get","method":"GET","blockMs":6000,"blockerAt":1000,"reuseAt":2000,"pid":46494,"node":"v24.22.2","undici":"7.30.1"}
+{"side":"client","at":1794816153426.9,"event":"request-create","id":1,"path":"/warm"}
+{"side":"server","at":1794816153430,"event":"connection-open","conn":1,"remotePort":64277}
+{"side":"client","at":1794816153436.5,"event":"socket-connected","socket":1,"localPort":64277}
+{"side":"client","at":1794816153436.9,"event":"send-headers","id":1,"path":"/warm","socket":1,"localPort":64277,"msSinceSocketLastComplete":null}
+{"side":"server","at":1794816153438.2,"event":"request-parsed","conn":1,"ordinal":1,"method":"GET","url":"/warm","remotePort":64277}
+{"side":"server","at":1794816153445.4,"event":"response-finish","conn":1,"ordinal":1,"url":"/warm"}
+{"side":"server","at":1794816153445.6,"event":"socket-timeout-armed","conn":1,"ordinal":1,"timeoutMs":6000}
+{"side":"client","at":1794816153447.5,"event":"response-headers","id":1,"path":"/warm","status":200,"connection":"keep-alive","keepAlive":"timeout=5"}
+{"side":"client","at":1794816153447.8,"event":"response-complete","id":1,"path":"/warm","socket":1}
+{"side":"client","at":1794816153450,"event":"warm-body-read"}
+{"side":"client","at":1794816154450.4,"event":"blocker-send","ms":6000}
+{"side":"server","at":1794816154458.6,"event":"connection-open","conn":2,"remotePort":64278}
+{"side":"client","at":1794816154459.3,"event":"blocker-connected","localPort":64278}
+{"side":"server","at":1794816154459.8,"event":"request-parsed","conn":2,"ordinal":1,"method":"GET","url":"/block?ms=6000","remotePort":64278}
+{"side":"server","at":1794816154460,"event":"block-start","conn":2,"ms":6000}
+{"side":"client","at":1794816155450.8,"event":"reuse-fetch-call","method":"GET","bodyBytes":0}
+{"side":"client","at":1794816155451.2,"event":"request-create","id":2,"path":"/reuse"}
+{"side":"client","at":1794816155451.3,"event":"send-headers","id":2,"path":"/reuse","socket":1,"localPort":64277,"msSinceSocketLastComplete":2003.5}
+{"side":"server","at":1794816160460.1,"event":"block-end","conn":2,"ms":6000}
+{"side":"server","at":1794816160461.5,"event":"response-finish","conn":2,"ordinal":1,"url":"/block?ms=6000"}
+{"side":"server","at":1794816160461.7,"event":"socket-timeout-armed","conn":2,"ordinal":1,"timeoutMs":null}
+{"side":"server","at":1794816160461.9,"event":"socket-close","conn":2,"hadError":false,"requestsParsed":1,"bytesRead":73,"bytesWritten":187}
+{"side":"server","at":1794816160461.9,"event":"socket-timeout-before-default","conn":1,"destroyed":false,"timeoutMs":6000}
+{"side":"server","at":1794816160462,"event":"socket-timeout-after-default","conn":1,"destroyed":true}
+{"side":"server","at":1794816160462,"event":"socket-close","conn":1,"hadError":false,"requestsParsed":1,"bytesRead":174,"bytesWritten":206}
+{"side":"client","at":1794816160462.1,"event":"blocker-response-end","localPort":64278}
+{"side":"client","at":1794816160463.3,"event":"request-error","id":2,"path":"/reuse","socket":1,"name":"Error","code":"ECONNRESET","message":"read ECONNRESET"}
+{"side":"client","at":1794816160463.6,"event":"socket-close","socket":1,"localPort":64277,"hadError":true,"bytesRead":206,"bytesWritten":349}
+{"side":"client","at":1794816160464.2,"event":"reuse-outcome","ok":false,"name":"TypeError","message":"fetch failed","causeCode":"ECONNRESET","causeErrno":-54,"causeSyscall":"read","causeMessage":"read ECONNRESET"}
+{"side":"client","at":1794816160765.4,"event":"done"}

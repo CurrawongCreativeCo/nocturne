@@ -2,6 +2,7 @@ import { travelForSpeed } from '@/components/motion/image-travel'
 import { MotionDiv } from '@/components/motion/motion-elements'
 import { partEnterProps, type PartPlan } from '@/components/motion/part-motion'
 import { FramedImage } from '@/components/ui/framed-image'
+import type { ElementDepth } from '@/lib/sanity/depth-options'
 import type { ImageAppearance, ImageDesignInput } from '@/lib/sanity/image-design-options'
 import type { SanityImageData } from '@/types/sanity'
 
@@ -24,6 +25,8 @@ interface Props {
   frameClassName: string
   /** ...and how big it may get (on the picture's own box). */
   imageClassName: string
+  /** Picture depth (Split only): a shadow and glow on the still picture, never on what moves inside it. */
+  depth?: ElementDepth | undefined
 }
 
 /**
@@ -45,6 +48,7 @@ export function HeroPicture({
   className,
   frameClassName,
   imageClassName,
+  depth,
 }: Props) {
   const picture = (classes: string) => (
     <FramedImage
@@ -62,6 +66,7 @@ export function HeroPicture({
       // the hotspot decides which part of the picture the crop keeps.
       aspect={aspect}
       className={classes}
+      depth={depth}
     />
   )
 

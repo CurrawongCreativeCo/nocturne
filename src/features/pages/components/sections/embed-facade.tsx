@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState, type CSSProperties } from 'react'
 
 import { reopenConsent, useConsentState } from '@/lib/consent/consent-store'
 
@@ -20,6 +20,9 @@ interface Props {
   needsMarketing: boolean
   /** Visitor-facing copy from `embedNotes`. */
   notes: { button: string; note: string; consent: string; open: string }
+  /** The card's classes and style, worked out by the section (its surface and depth, `embed.tsx`). */
+  cardClassName: string
+  cardStyle?: CSSProperties
 }
 
 /**
@@ -40,6 +43,8 @@ export function EmbedFacade({
   height,
   needsMarketing,
   notes,
+  cardClassName,
+  cardStyle,
 }: Props) {
   const [loaded, setLoaded] = useState(false)
   const consent = useConsentState()
@@ -72,10 +77,7 @@ export function EmbedFacade({
   }
 
   return (
-    <div
-      className="flex flex-col items-center justify-center gap-3 rounded-card bg-surface-alt p-6 text-center ring-1 ring-line"
-      style={{ minHeight: height }}
-    >
+    <div className={cardClassName} style={{ ...cardStyle, minHeight: height }}>
       <p className="text-small font-semibold text-ink">{provider}</p>
       <p id={noteId} className="max-w-measure-narrow text-small text-ink-muted">
         {blocked ? notes.consent : notes.note}

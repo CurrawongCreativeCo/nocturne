@@ -1,4 +1,5 @@
-import { HEX_PATTERN } from './oklch'
+import { contrastRatio } from './contrast'
+import { HEX_PATTERN, hexToRgb, rgbToHex } from './oklch'
 
 /**
  * The brand gradients from Design settings, as the site and the Studio both need them: a stable
@@ -67,4 +68,54 @@ export function brandGradients(
     })
   })
   return found
+}
+
+/** Samples per transition when checking text over a gradient: both stops, the midpoint and the points between. */
+const SAMPLES_PER_TRANSITION = 16
+
+/**
+ * The colours a browser paints along a gradient's line, in order: every stop, the midpoint of each
+ * transition and the points between. `linear-gradient()` blends in gamma-encoded sRGB by default
+ * and these buttons are opaque, so a plain per-channel blend, rounded to the 8-bit value a screen
+ * shows, is what is drawn. Every point of the box lies on that line, whatever the angle.
+ */
+export function gradientSamples(stops: readonly string[]): string[] {
+  const channels = stops.map(hexToRgb)
+  const samples: string[] = []
+  channels.forEach((from, index) => {
+    const to = channels[index + 1]
+    if (!to) return
+    for (let step = index === 0 ? 0 : 1; step <= SAMPLES_PER_TRANSITION; step++) {
+      const t = step / SAMPLES_PER_TRANSITION
+      samples.push(
+        rgbToHex(from.map((value, channel) => value + ((to[channel] ?? value) - value) * t)),
+      )
+    }
+  })
+  return samples
+}
+
+/** The site's own dark and light inks first; pure black only when neither reaches the ratio. */
+const INK_TIERS = [['#030712', '#ffffff'], ['#000000']] as const
+
+/**
+ * The text colour that reads on every point of the gradient (`minRatio` or better): of the site's
+ * dark and light inks, the one with the most contrast at its worst point, else pure black. Undefined
+ * when no single colour manages it, so the caller draws something else instead of a button whose
+ * text fails somewhere along its fill.
+ */
+export function gradientInk(
+  stops: readonly string[],
+  minRatio: number,
+): { ink: string; ratio: number } | undefined {
+  const samples = gradientSamples(stops)
+  for (const tier of INK_TIERS) {
+    let best: { ink: string; ratio: number } | undefined
+    for (const ink of tier) {
+      const ratio = Math.min(...samples.map((sample) => contrastRatio(ink, sample)))
+      if (ratio >= minRatio && (!best || ratio > best.ratio)) best = { ink, ratio }
+    }
+    if (best) return best
+  }
+  return undefined
 }

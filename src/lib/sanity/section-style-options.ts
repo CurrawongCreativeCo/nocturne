@@ -233,7 +233,20 @@ export function defaultOverlayFor(tone: string | null | undefined): 'light' | 'm
  * The shape of a section's bottom edge (README, "Section dividers"). The upper section owns the
  * edge: its background is cut to the shape and the section below shows through the cut.
  */
-export const SECTION_EDGES = ['none', 'diagonal', 'wave', 'curve', 'arch', 'layered'] as const
+export const SECTION_EDGES = [
+  'none',
+  'diagonal',
+  'wave',
+  'curve',
+  'arch',
+  'elevated',
+  'layered',
+  'tide',
+  'contour',
+  'still-water',
+  'lagoon',
+  'reef',
+] as const
 export type SectionEdge = (typeof SECTION_EDGES)[number]
 
 export const SECTION_EDGE_TITLES: Record<SectionEdge, string> = {
@@ -243,6 +256,12 @@ export const SECTION_EDGE_TITLES: Record<SectionEdge, string> = {
   curve: 'Curve',
   arch: 'Arch',
   layered: 'Layered wave',
+  tide: 'Tide',
+  contour: 'Contour',
+  'still-water': 'Still water',
+  lagoon: 'Lagoon',
+  reef: 'Reef',
+  elevated: 'Elevated',
 }
 
 /** Heights are tokens (`edge` in tokens.json), smaller on phones; "custom" is the Advanced override. */
@@ -269,17 +288,159 @@ export const SECTION_EDGE_LAYER_TITLES: Record<(typeof SECTION_EDGE_LAYERS)[numb
   highlight: 'Highlight',
 }
 
+/**
+ * Tide's back crest (task 151, Tide v2): Primary at 25% (the default), Echo at 40% (the section's own colour,
+ * echoed below the cut) or Secondary at 25%.
+ */
+export const SECTION_EDGE_TIDE_LAYERS = ['accent', 'echo', 'accent-2'] as const
+export const SECTION_EDGE_TIDE_LAYER_TITLES: Record<
+  (typeof SECTION_EDGE_TIDE_LAYERS)[number],
+  string
+> = {
+  accent: 'Primary',
+  echo: 'Echo',
+  'accent-2': 'Secondary',
+}
+
+/** The colour of Contour's three lines (task 151). */
+export const SECTION_EDGE_LINE_COLOURS = ['accent', 'muted'] as const
+export const SECTION_EDGE_LINE_COLOUR_TITLES: Record<
+  (typeof SECTION_EDGE_LINE_COLOURS)[number],
+  string
+> = {
+  accent: 'Primary',
+  muted: 'Muted text',
+}
+
+/**
+ * Elevated's shadow (task 151, Slice 6): how far, and how strongly, the straight edge casts onto the section below.
+ * Soft is the Lab's own default (18 px at 16%); Deep is a stronger one inside the Lab's slider limits (8-32 px, 6-30%).
+ */
+export const SECTION_EDGE_SHADOWS = ['soft', 'deep'] as const
+export const SECTION_EDGE_SHADOW_TITLES: Record<(typeof SECTION_EDGE_SHADOWS)[number], string> = {
+  soft: 'Soft',
+  deep: 'Deep',
+}
+
 /** The custom height range, in px, the Advanced fields accept. */
 export const EDGE_CUSTOM_MIN = 16
 export const EDGE_CUSTOM_MAX = 320
 
+/**
+ * The shapes the layered-edge generator draws (task 151, Slice 3): a shape's geometry is generated from a
+ * preset row and a few stepped controls (components/ui/edge-presets.ts), never from stored numbers.
+ */
+export const GENERATED_EDGES = ['still-water', 'lagoon', 'reef'] as const
+export type GeneratedEdge = (typeof GENERATED_EDGES)[number]
+export const isGeneratedEdge = (edge: string | null | undefined): edge is GeneratedEdge =>
+  GENERATED_EDGES.some((generated) => generated === edge)
+
+/** A generated edge is drawn at Medium or Large: at Small a band is too short for its layers to read. */
+export const GENERATED_EDGE_HEIGHTS = ['medium', 'large'] as const
+
+/**
+ * The custom heights a generated edge accepts, in px, for each screen size. They are independent of one
+ * another and of the token heights, and every one is at least 40 px, the shortest band the geometry is proven
+ * at (edge-layered.test.ts).
+ */
+export const GENERATED_EDGE_HEIGHT_BOUNDS = {
+  mobile: { min: 40, max: 64 },
+  tablet: { min: 40, max: 120 },
+  desktop: { min: 40, max: 160 },
+} as const
+export type GeneratedEdgeScreen = keyof typeof GENERATED_EDGE_HEIGHT_BOUNDS
+
+/** Where the crest of a generated edge sits: its own position, nearer the middle, or further along. */
+export const SECTION_EDGE_CRESTS = ['standard', 'centred', 'shifted'] as const
+export const SECTION_EDGE_CREST_TITLES: Record<(typeof SECTION_EDGE_CRESTS)[number], string> = {
+  standard: 'Standard',
+  centred: 'Centred',
+  shifted: 'Shifted',
+}
+
+/** How far a generated edge's layers reach from the cut: a share of the preset's own separation. */
+export const SECTION_EDGE_DEPTHS = ['shallow', 'standard', 'deep'] as const
+export const SECTION_EDGE_DEPTH_TITLES: Record<(typeof SECTION_EDGE_DEPTHS)[number], string> = {
+  shallow: 'Shallow',
+  standard: 'Standard',
+  deep: 'Deep',
+}
+
+/** How strongly a generated edge's layers show: a share of the preset's own opacity. */
+export const SECTION_EDGE_STRENGTHS = ['light', 'standard', 'strong'] as const
+export const SECTION_EDGE_STRENGTH_TITLES: Record<(typeof SECTION_EDGE_STRENGTHS)[number], string> =
+  {
+    light: 'Light',
+    standard: 'Standard',
+    strong: 'Strong',
+  }
+
+/** The colour recipes of Still water: which brand colours its layers are drawn in. */
+export const SECTION_EDGE_PALETTES = ['tint', 'ink', 'highlight'] as const
+export const SECTION_EDGE_PALETTE_TITLES: Record<(typeof SECTION_EDGE_PALETTES)[number], string> = {
+  tint: 'Tint',
+  ink: 'Ink',
+  highlight: 'Highlight',
+}
+
+/**
+ * The layers of a generated edge that Advanced can colour on their own (task 151, Slice 8): the first and second
+ * above the cut and the one below it. A colour is one of the four brand roles the recipes draw in; it is never
+ * a stored hex. (Reef's hairline and its White veil are deferred, not part of this list.)
+ */
+export const SECTION_EDGE_LAYER_SLOTS = ['above1', 'above2', 'below'] as const
+export type EdgeLayerSlot = (typeof SECTION_EDGE_LAYER_SLOTS)[number]
+export const SECTION_EDGE_LAYER_ROLES = ['accent', 'accent-2', 'highlight', 'ink'] as const
+export const SECTION_EDGE_LAYER_ROLE_TITLES: Record<
+  (typeof SECTION_EDGE_LAYER_ROLES)[number],
+  string
+> = {
+  accent: 'Primary',
+  'accent-2': 'Secondary',
+  highlight: 'Highlight',
+  ink: 'Text',
+}
+export const SECTION_EDGE_LAYER_SLOT_TITLES: Record<EdgeLayerSlot, string> = {
+  above1: 'First layer above',
+  above2: 'Second layer above',
+  below: 'Layer below',
+}
+/**
+ * The controls that clear the per-layer colours, named once so Studio's buttons, its warnings and the docs agree: the
+ * first choice of each colour and strength field (unsets that field, stores nothing), and the group's one button
+ * (unsets the whole `edgeLayerColours` object).
+ */
+export const SECTION_EDGE_LAYER_COLOUR_INHERIT = 'Use recipe colour'
+export const SECTION_EDGE_LAYER_STRENGTH_INHERIT = 'Use Layer strength'
+export const SECTION_EDGE_LAYER_RESET = 'Reset all layer overrides'
+/** The stored fields of `style.edgeLayerColours`: a slot's colour is named for it, its strength `<slot>Strength`. */
+export type EdgeLayerColoursInput = Partial<
+  Record<EdgeLayerSlot | `${EdgeLayerSlot}Strength`, string | null>
+>
+
 /** Curve and Arch are symmetrical, so mirroring them would change nothing: Flip is not offered. */
 export const edgeAllowsFlip = (edge: string | null | undefined) =>
-  edge === 'diagonal' || edge === 'wave' || edge === 'layered'
+  edge === 'diagonal' ||
+  edge === 'wave' ||
+  edge === 'layered' ||
+  edge === 'tide' ||
+  edge === 'contour' ||
+  isGeneratedEdge(edge)
 
-/** A diagonal turned upside down is the same line mirrored, so only the curved shapes offer Invert. */
+/**
+ * A diagonal turned upside down is the same line mirrored, so only the curved shapes offer Invert. Tide,
+ * Contour and the generated shapes don't: inverting them would put their layers on the wrong side of the cut.
+ */
 export const edgeAllowsInvert = (edge: string | null | undefined) =>
   edge === 'wave' || edge === 'curve' || edge === 'arch' || edge === 'layered'
+
+/** The thin accent line follows today's shapes only: Contour's lines and Tide's crest are their own ornament. */
+export const edgeAllowsAccent = (edge: string | null | undefined) =>
+  edge === 'diagonal' ||
+  edge === 'wave' ||
+  edge === 'curve' ||
+  edge === 'arch' ||
+  edge === 'layered'
 
 /** Ids the site itself uses (the skip link's target), so an anchor can't collide with them. */
 export const RESERVED_ANCHORS: readonly string[] = ['main-content']

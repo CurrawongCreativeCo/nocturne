@@ -1,4 +1,4 @@
-import { formatPath, getAt, parsePath } from './paths'
+import { formatPath, missingObjectParents, parsePath } from './paths'
 import type { AcceptedPatch, DocumentSnapshot } from './types'
 
 /**
@@ -67,23 +67,10 @@ function bare(document: DocumentSnapshot, id: string): Record<string, unknown> {
   return copy
 }
 
-/**
- * The object paths a `set` goes through that do not exist yet, outermost first. Sanity would create
- * them for a plain `set` (checked on a scratch dataset), but each gets an explicit `setIfMissing` so
- * the plan says what it creates.
- */
+/** The object paths a `set` goes through that do not exist yet, outermost first (see missingObjectParents). */
 function missingParents(document: DocumentSnapshot, path: string): string[] {
   const segments = parsePath(path)
-  if (!segments) return []
-  const missing: string[] = []
-  for (let end = 1; end < segments.length; end++) {
-    const last = segments[end - 1]
-    // Only object fields can be created; a missing array item is the proposal's mistake, not ours.
-    if (last?.kind !== 'field' || segments[end]?.kind !== 'field') continue
-    if (getAt(document, segments.slice(0, end)) !== undefined) continue
-    missing.push(formatPath(segments.slice(0, end)))
-  }
-  return missing
+  return segments ? missingObjectParents(document, segments).map(formatPath) : []
 }
 
 export function planProposal(

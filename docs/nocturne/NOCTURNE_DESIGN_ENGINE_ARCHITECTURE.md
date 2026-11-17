@@ -2,6 +2,8 @@
 
 **Status:** the direction was approved by the owner on 26 October 2026. This is **revision r2**, the same day, refining contrast and publishing (§5), glass over solid backgrounds (DE-6) and proposal splitting (§6.2). Nothing is implemented, and the canonical build plan (version 19, 214 tasks) is unchanged.
 
+**Amendment, 6 November 2026 (owner-approved):** §4's cards family is narrowed. See "The cards family" in §4, under "The model". Nothing else in this revision changes.
+
 **Companion documents:**
 
 - [E2, Content Intelligence architecture](./NOCTURNE_CONTENT_INTELLIGENCE_ARCHITECTURE.md);
@@ -9,6 +11,12 @@
 - [E4, roadmap integration proposal](./NOCTURNE_DE_CI_ROADMAP_INTEGRATION.md).
 
 They build on revision 3 (documents A–D in this folder), which you approved on 25 October. Where this document changes a revision 3 decision, it says so.
+
+**Canonical planning documents** (read these, don't copy them here):
+
+- **The build plan** is the authority for every task's scope, dependencies and status: https://claude.ai/artifact/7kWst2fHcf2eZocg9h3xwL, with progress in its database.
+- **The design capability audit and its plan revisions** (tasks 275–279) are in the private `CurrawongCreativeCo/nocturne-foundation` repository, under `docs/plan/`: `2026-11-04-design-capability-audit.md` and `2026-11-05-plan-revision.md`. Read the versions on its `main` branch.
+- **The capability rules themselves are code**, not documents: `src/lib/design/` (README, "Design capability contract"). Plan amendments that task 275 found, not yet applied, are in [t275-canonical-patch](./t275-canonical-patch/README.md).
 
 **How the evidence was gathered.** I read the source on local `main` at `2b6595c`, plus `origin/main` for task 189, and the live build plan with its progress database (111 done, 2 doing, 100 to do, 1 skipped). Labels:
 
@@ -190,11 +198,15 @@ See §4.
 1. **Family.** One schema and one renderer for a recurring layout idea:
    - **split** (Image + text);
    - **hero**;
-   - **cards** (features, services, testimonials, team);
+   - **cards** (feature-style cards, and document-backed listings of Services, Locations and Posts; see the principle below);
    - **call to action** (CTA banner, newsletter);
    - **editorial** (rich text).
 
    Specialised sections stay as they are: gallery, stats, logo cloud, process, video, embed, location, events, link list, FAQ and pricing. Families are for recurring layouts, not for everything.
+
+   **The cards family (amended 6 November 2026, owner-approved; build plan task 276).** The cards family provides feature-style cards and document-backed listings for Services, Locations and Posts. It shares styling, typography, actions, decoration and responsive behaviour with other card components, but does not replace their semantic structures. Testimonials, Team, Pricing and Events retain specialised renderers composed from shared design primitives. A new family declares its applicable capabilities and must not introduce private copies of shared controls.
+
+   This replaces the earlier wording, "cards (features, services, testimonials, team)", which implied one schema and one renderer for every card. The shared primitives and the capability declarations are build plan tasks 156 and 275.
 
 2. **Layout presets** (existing `PresetDefinition` macros) choose the arrangement, such as Media right, Media left, Stacked or Text over media. Each layout fixes its responsive behaviour. **Editors never set breakpoints.**
 3. **Typed slots** live in one shared slot registry, generalised from `hero/slots.tsx`:
@@ -303,6 +315,8 @@ This extends the worst-case method that `glass-contrast.ts` uses for Link list r
 
 - the manifest can't describe a field that doesn't exist;
 - a new option can't be added without appearing in it.
+
+**Amendment (task 275, approved by the owner on 5 and 6 November 2026).** The manifest stays generated. Task 275 adds one more hand-written input beside purpose and example: each component's capability _policy_ (`declareCapabilities`), which says what it should offer and switches nothing on. What a component really offers is never written down: it is worked out from the schema's markers and passing evidence.
 
 ### 6.2 Change proposals
 

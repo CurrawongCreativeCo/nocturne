@@ -5,16 +5,20 @@ import { accessField } from '@/lib/sanity/schema/access-field'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
 
+import { richTextCapabilities } from './rich-text-capabilities'
+
 export const richText = defineType({
   name: 'richText',
   title: 'Rich text',
   type: 'object',
   icon: TextIcon,
+  options: { designCapabilities: richTextCapabilities },
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
-      defineField({ name: 'body', type: 'blockContent', validation: (rule) => rule.required() }),
+      // Paragraphs, pictures and, for the agency, dividers (the shared `richTextBody`).
+      defineField({ name: 'body', type: 'richTextBody', validation: (rule) => rule.required() }),
       accessField,
     ],
     { spacing: 'compact', align: 'start' },

@@ -7,27 +7,33 @@ import {
   type InputProps,
 } from 'sanity'
 
+import type { DesignSummaryConfig } from '@/lib/sanity/design-summary'
 import { framingKeyOf } from '@/lib/sanity/schema/image-framing-option'
 
 import { PresetBarInput } from './preset-bar-input'
 import { PresetPickerInput } from './preset-picker-input'
 import { AnchorPickerInput } from '../anchor-picker/anchor-picker-input'
+import { DesignSummaryInput } from '../design-summary-input'
+import { EdgeLayerColoursInput } from '../edge-layer-colours-input'
 import { FrameReferenceInput } from '../frame-reference-input'
-import { GradientPickerInput } from '../gradient-picker/gradient-picker-input'
+import {
+  DocumentGradientPickerInput,
+  GradientPickerInput,
+} from '../gradient-picker/gradient-picker-input'
 import { HeadingGradientInput } from '../gradient-picker/heading-gradient-input'
 import { IconPickerInput } from '../icon-picker-input'
 import { InheritableChoiceInput } from '../inheritable-choice-input'
-import { LinkDesignSummaryInput } from '../link-design-summary-input'
 import { OverlayPreviewInput } from '../overlay-preview-input'
 import { PanelUsageInput } from '../panel-usage-input'
 import { PictureFramingInput } from '../picture-framing/picture-framing-input'
 import { SliderInput } from '../slider-input'
 import { SlotInput } from '../slot-input'
+import { SpacingUsageInput } from '../spacing-usage-note'
 
 /**
  * Wraps the Studio-wide input override (`form.components.input`): a string field with
  * `options.presetPicker` gets the picture picker, `options.iconPicker` the icon grid, `options.inheritable` the Inherit-first buttons, an object type with `options.presets` gets the
- * preset bar above its fields, an object with `options.linkDesignSummary` the link design summary and resets, an image with `options.framing` gets "Adjust picture" under it, a string field with `options.gradientPicker` gets the gradient list, `options.headingGradientPicker` the heading highlight's gradient picker, an array with `options.slot` gets the one-item slot input, and everything else goes to `Fallback` (the role-aware input).
+ * preset bar above its fields, an object with `options.designSummary` the design summary and resets (a Link list link's Appearance, or any section, card or item design), an object with `options.layerOverridesReset` the section edge's "Reset all layer overrides" button, an image with `options.framing` gets "Adjust picture" under it, a string field with `options.gradientPicker` gets the gradient list, `options.headingGradientPicker` the heading highlight's gradient picker, an array with `options.slot` gets the one-item slot input, and everything else goes to `Fallback` (the role-aware input).
  */
 export function withPresetPicker(Fallback: ComponentType<InputProps>) {
   return function PresetAwareInput(props: InputProps) {
@@ -37,12 +43,18 @@ export function withPresetPicker(Fallback: ComponentType<InputProps>) {
     ) {
       return <FrameReferenceInput {...props} />
     }
+    if (isObjectInputProps(props)) {
+      const summary = (
+        props.schemaType.options as { designSummary?: DesignSummaryConfig } | undefined
+      )?.designSummary
+      if (summary) return <DesignSummaryInput {...props} summary={summary} />
+    }
     if (
       isObjectInputProps(props) &&
-      (props.schemaType.options as { linkDesignSummary?: boolean } | undefined)
-        ?.linkDesignSummary === true
+      (props.schemaType.options as { layerOverridesReset?: boolean } | undefined)
+        ?.layerOverridesReset === true
     ) {
-      return <LinkDesignSummaryInput {...props} />
+      return <EdgeLayerColoursInput {...props} />
     }
     if (isObjectInputProps(props) && framingKeyOf(props.schemaType.options)) {
       return <PictureFramingInput {...props} />
@@ -71,6 +83,9 @@ export function withPresetPicker(Fallback: ComponentType<InputProps>) {
     if (isStringInputProps(props) && props.schemaType.options?.gradientPicker === true) {
       return <GradientPickerInput {...props} />
     }
+    if (isStringInputProps(props) && props.schemaType.options?.documentGradients === true) {
+      return <DocumentGradientPickerInput {...props} />
+    }
     if (isArrayOfObjectsInputProps(props) && props.schemaType.options?.slot === true) {
       return <SlotInput {...props} />
     }
@@ -80,6 +95,13 @@ export function withPresetPicker(Fallback: ComponentType<InputProps>) {
       (props.schemaType.options as { usedByButtons?: boolean } | undefined)?.usedByButtons === true
     ) {
       return <PanelUsageInput {...props} />
+    }
+    if (
+      isObjectInputProps(props) &&
+      props.path.length === 0 &&
+      (props.schemaType.options as { spacingUsage?: boolean } | undefined)?.spacingUsage === true
+    ) {
+      return <SpacingUsageInput {...props} />
     }
     if (
       isObjectInputProps(props) &&

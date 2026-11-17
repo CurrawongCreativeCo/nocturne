@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatPath, getAt, insertAt, parsePath, setAt, unsetAt } from './paths'
+import {
+  formatPath,
+  getAt,
+  insertAt,
+  missingObjectParents,
+  parsePath,
+  setAt,
+  setCreatingParents,
+  unsetAt,
+} from './paths'
 
 const doc = {
   title: 'Home',
@@ -56,6 +65,38 @@ describe('editing a copy', () => {
   it('appends to an empty array with [-1]', () => {
     const empty = { items: [] as { _key: string }[] }
     expect(insertAt(empty, seg('items[-1]'), 'after', [{ _key: 'a' }]).items).toHaveLength(1)
+  })
+})
+
+describe('setting through parents that are missing', () => {
+  const root = { a: { b: 1 }, text: 'x', list: [{ _key: 'k' }] }
+
+  it('lists the object fields a set creates, outermost first', () => {
+    expect(missingObjectParents(root, seg('style.panel')).map(formatPath)).toEqual(['style'])
+    expect(missingObjectParents(root, seg('x.y.z')).map(formatPath)).toEqual(['x', 'x.y'])
+    expect(missingObjectParents(root, seg('a.b'))).toEqual([])
+  })
+
+  it('does not list what cannot be created: a missing list member, or a field of a list member', () => {
+    expect(missingObjectParents(root, seg('list[_key=="nope"].design.border'))).toEqual([])
+    expect(missingObjectParents(root, seg('missing[_key=="k"].x'))).toEqual([])
+  })
+
+  it('creates them, leaving the original alone', () => {
+    const next = setCreatingParents(root, seg('style.panel'), 'glass')
+    expect(getAt(next, seg('style.panel'))).toBe('glass')
+    expect(getAt(root, seg('style'))).toBeUndefined()
+  })
+
+  it('still throws when the value has nowhere to land', () => {
+    expect(() => setCreatingParents(root, seg('text.panel'), 1)).toThrow()
+    expect(() => setCreatingParents(root, seg('list[_key=="nope"].design.border'), 1)).toThrow()
+    expect(() => setCreatingParents(root, seg('missing[_key=="k"].x'), 1)).toThrow()
+  })
+
+  it('treats unsetting a value that is not there as a no-op, whatever its parent is', () => {
+    expect(unsetAt(root, seg('style.panel'))).toEqual(root)
+    expect(unsetAt(root, seg('text.panel'))).toEqual(root)
   })
 })
 

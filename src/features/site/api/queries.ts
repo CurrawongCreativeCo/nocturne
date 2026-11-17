@@ -1,11 +1,35 @@
 import { defineQuery } from 'next-sanity'
 
-import { ctaFields, imageFields, linkFields } from '@/lib/sanity/fragments'
+import {
+  ctaFields,
+  decorativeDividerFields,
+  iconDesignFields,
+  imageFields,
+  linkFields,
+} from '@/lib/sanity/fragments'
+
+/** The footer's social icons: whether, in which style, and the Icons box that changes it. */
+export const footerSocialFields = /* groq */ `
+  footerShowSocial,
+  footerSocialStyle,
+  footerIconDesign { ${iconDesignFields} }
+`
+
+/** The footer's divider above its bottom row (task 151). */
+export const footerDividerFields = /* groq */ `
+  footerDividerDesign { ${decorativeDividerFields} }
+`
 
 const navItemFields = /* groq */ `
   _key,
   label,
   link { ${linkFields} }
+`
+
+// One level only: sub-links have no children of their own (schemas/nav-item.ts).
+const headerNavItemFields = /* groq */ `
+  ${navItemFields},
+  children[] { ${navItemFields} }
 `
 
 /**
@@ -36,12 +60,12 @@ export const SETTINGS_QUERY = defineQuery(/* groq */ `
       verificationMarker
     },
     "navigation": coalesce(*[_id == "siteNavigation"][0], *[_id == "settings"][0]) {
-      headerNav[] { ${navItemFields} },
+      headerNav[] { ${headerNavItemFields} },
       headerCta { ${ctaFields} },
       footerNav[] { ${navItemFields} },
       footerText,
-      footerShowSocial,
-      footerSocialStyle
+      ${footerSocialFields},
+      ${footerDividerFields}
     },
     "announcement": coalesce(*[_id == "announcement"][0], *[_id == "settings"][0].announcement) {
       message,
@@ -70,6 +94,15 @@ export const SETTINGS_QUERY = defineQuery(/* groq */ `
       ink,
       inkMuted,
       line,
+      density,
+      shape,
+      headingStyle,
+      cardDepth,
+      buttonFill,
+      buttonGradient,
+      buttonDepth,
+      buttonGlow,
+      secondaryButton,
       gradients[] { name, angle, stops }
     },
     // Footer details, hours and LocalBusiness structured data (no extra request: part of this query).
@@ -103,6 +136,8 @@ export const SETTINGS_QUERY = defineQuery(/* groq */ `
     "footerText": navigation.footerText,
     "footerShowSocial": navigation.footerShowSocial == true,
     "footerSocialStyle": navigation.footerSocialStyle,
+    "footerIconDesign": navigation.footerIconDesign,
+    "footerDividerDesign": navigation.footerDividerDesign,
     "consent": consent,
     "design": design,
     "business": business,

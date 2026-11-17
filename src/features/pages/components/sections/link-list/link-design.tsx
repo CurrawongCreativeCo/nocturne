@@ -2,11 +2,15 @@ import { stegaClean } from 'next-sanity'
 import type { CSSProperties, ReactNode } from 'react'
 
 import { BadgeIcon } from '@/components/ui/badge-icon'
+import { DecorativeMark } from '@/components/ui/decorative-mark'
+import { IconContainer } from '@/components/ui/icon-container'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { trackAttributes } from '@/lib/analytics/track-script'
+import type { MarkFill } from '@/lib/color/mark-contrast'
+import { resolveDecorativeMark } from '@/lib/sanity/decorative-mark-options'
 import { OWN_SHADOW } from '@/lib/sanity/depth-options'
 import type { ThumbnailServed } from '@/lib/sanity/link-thumbnail-framing'
-import { iconLook, type IconDesign, type OwnIcon } from '@/lib/sanity/surface-options'
+import type { IconDesign, OwnIcon } from '@/lib/sanity/surface-options'
 import { textLook, type OwnText } from '@/lib/sanity/text-style-options'
 import type { SanityImageData } from '@/types/sanity'
 
@@ -28,6 +32,26 @@ export function linkShadow(
 ): { className: string; style: CSSProperties | undefined } {
   const depth = context.linkDepth(OWN_SHADOW[own])
   return depth ?? { className: ownClass, style: undefined }
+}
+
+/** The link's element once it holds a mark, which is laid out behind its text. Unset adds nothing. */
+export const withMark = (className: string, mark: LinkContext['mark']) =>
+  resolveDecorativeMark(mark.input) ? `${className} relative isolate` : className
+
+/**
+ * A link's decorative mark, inside the link's own element so it follows its corners and hover. A `span`,
+ * since a link can be a `<button>`, which holds phrasing content only. Hidden from assistive technology
+ * and never hit by the pointer, so the card is still the one link it was, with the same accessible name.
+ */
+export function LinkMark({
+  mark,
+  fill,
+}: {
+  mark: LinkContext['mark']
+  /** The card's own colours, when it isn't the tone's surface (the featured link's filled button). */
+  fill?: MarkFill
+}) {
+  return <DecorativeMark {...mark} fill={fill} as="span" nested />
 }
 
 /**
@@ -78,7 +102,7 @@ export function LinkDescription({
 }) {
   if (!text) return null
   return (
-    <span className={className} style={style}>
+    <span className={className} style={style} data-text-role="description">
       <span className="sr-only">. </span>
       {text}
     </span>
@@ -131,12 +155,21 @@ export function LinkText({
   return (
     <span className={`flex min-w-0 flex-col ${className}`.trim()}>
       {eyebrowText && (
-        <span className={`mb-0.5 ${eyebrow.className}`} style={eyebrow.style} data-link-eyebrow="">
+        <span
+          className={`mb-0.5 ${eyebrow.className}`}
+          style={eyebrow.style}
+          data-link-eyebrow=""
+          data-text-role="eyebrow"
+        >
           {link.item.eyebrow}
           <span className="sr-only">. </span>
         </span>
       )}
-      <span className={`${label.className} ${own.labelClass ?? ''}`.trim()} style={label.style}>
+      <span
+        className={`${label.className} ${own.labelClass ?? ''}`.trim()}
+        style={label.style}
+        data-text-role="label"
+      >
         {link.label}
       </span>
       <LinkDescription
@@ -169,25 +202,10 @@ export function LinkIcon({
   keepBox?: boolean
 }) {
   if (!link.item.icon) return null
-  const look = iconLook(design, own)
-  const icon = <BadgeIcon name={clean(link.item.icon)} className={iconClass} />
-  if (look.shape === 'plain' && !keepBox) {
-    return look.className || look.style ? (
-      <span className={`contents ${look.className}`} style={look.style}>
-        {icon}
-      </span>
-    ) : (
-      icon
-    )
-  }
   return (
-    <span
-      className={`grid shrink-0 place-items-center ${box} ${look.className}`}
-      style={look.style}
-      data-icon-shape={look.shape}
-    >
-      {icon}
-    </span>
+    <IconContainer design={design} own={own} size={box} keepBox={keepBox}>
+      <BadgeIcon name={clean(link.item.icon)} className={iconClass} />
+    </IconContainer>
   )
 }
 

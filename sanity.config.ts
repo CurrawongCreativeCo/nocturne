@@ -10,7 +10,7 @@
 import { assist } from '@sanity/assist'
 import { visionTool } from '@sanity/vision'
 import { createElement } from 'react'
-import { defineConfig, isStringInputProps, type InputProps } from 'sanity'
+import { defineConfig, isObjectInputProps, isStringInputProps, type InputProps } from 'sanity'
 import { presentationTool } from 'sanity/presentation'
 import { structureTool } from 'sanity/structure'
 
@@ -24,6 +24,7 @@ import { experimentSchemaTypes } from './src/features/experiments/schemas'
 import { formSchemaTypes } from './src/features/forms/schemas'
 import { hideEnquiriesFromNewMenu, withoutEnquiryDuplicate } from './src/features/forms/studio'
 import { framesSchemaTypes } from './src/features/frames/schemas'
+import { locationsSchemaTypes } from './src/features/locations/schemas'
 import { pageSchemaTypes } from './src/features/pages/schemas'
 import { sectionTypes } from './src/features/pages/schemas/sections'
 import { AGENCY_ONLY_TEMPLATE_IDS, pageTemplates } from './src/features/pages/schemas/templates'
@@ -40,13 +41,16 @@ import { publishGateActions } from './src/features/studio/actions/publish-throug
 import { publishValidationActions } from './src/features/studio/actions/publish-validation'
 import { aiSettings } from './src/features/studio/ai-settings/plugin'
 import { assistPresets } from './src/features/studio/assist-presets'
+import { createDividerClientNote } from './src/features/studio/components/divider-client-note'
 import { FramelessAwareField } from './src/features/studio/components/frameless-field'
+import { PageBreadcrumbInput } from './src/features/studio/components/page-breadcrumb-input'
 import { withPresetPicker } from './src/features/studio/components/preset-picker/with-preset-picker'
 import { RoleNavbar } from './src/features/studio/components/role-navbar'
 import { createRoleAwareInput } from './src/features/studio/components/section-insert-filter'
 import { StudioIcon } from './src/features/studio/components/studio-icon'
 import { StudioInputBoundary } from './src/features/studio/components/studio-input-boundary'
 import { ThemeColourPickerInput } from './src/features/studio/components/theme-colour-picker/theme-colour-picker-input'
+import { withRichTextDividerGuard } from './src/features/studio/components/with-rich-text-divider-guard'
 import { contentHealth } from './src/features/studio/content-health/plugin'
 import { emptyListResources } from './src/features/studio/empty-list-wording'
 import { resolve } from './src/features/studio/presentation'
@@ -86,19 +90,26 @@ const PROTECTED_TYPES = new Set<string>(CLIENT_PROTECTED_TYPES)
 const PresetAwareInput = withPresetPicker(
   createRoleAwareInput(new Set(sectionTypes.map(({ name }) => name))),
 )
+// A divider's own fields are agency only: a client who opens one is told so, not shown a blank dialog.
+const DividerAwareInput = createDividerClientNote((props) => createElement(PresetAwareInput, props))
 // A heading highlight's custom gradient colours reuse the Brand colours input (features/site), which
 // a studio or shared module may not import: composed here.
 // An element's Custom colour (themeColourField) uses the same input; its colour choice gets swatches.
 // A plain colour (`options.colourPicker`, a gradient overlay's stop) uses it with no contrast check.
 const StudioInputs = (props: InputProps) =>
-  isStringInputProps(props) &&
-  (props.schemaType.options?.headingStop === true ||
-    props.schemaType.options?.themeColourHex ||
-    props.schemaType.options?.colourPicker === true)
-    ? createElement(ColourInput, props)
-    : isStringInputProps(props) && props.schemaType.options?.themeColourPicker
-      ? createElement(ThemeColourPickerInput, props)
-      : createElement(PresetAwareInput, props)
+  // A page's place in the site above its fields: the page document's root input only.
+  isObjectInputProps(props) && props.path.length === 0 && props.schemaType.name === 'page'
+    ? createElement(PageBreadcrumbInput, props)
+    : isObjectInputProps(props) && props.schemaType.name === 'decorativeDivider'
+      ? createElement(DividerAwareInput, props)
+      : isStringInputProps(props) &&
+          (props.schemaType.options?.headingStop === true ||
+            props.schemaType.options?.themeColourHex ||
+            props.schemaType.options?.colourPicker === true)
+        ? createElement(ColourInput, props)
+        : isStringInputProps(props) && props.schemaType.options?.themeColourPicker
+          ? createElement(ThemeColourPickerInput, props)
+          : createElement(PresetAwareInput, props)
 // A throwing input shows a client a safe message with Try again, never a raw React error.
 const StudioInput = (props: InputProps) =>
   createElement(StudioInputBoundary, null, createElement(StudioInputs, props))
@@ -138,22 +149,25 @@ export default defineConfig({
   // Content variants: lets editors create variants of a document, which A/B experiments serve.
   beta: { variants: { enabled: true } },
   schema: {
-    types: withClientEditableHiding(
-      withServiceSections([
-        ...pageSchemaTypes,
-        ...blogSchemaTypes,
-        ...formSchemaTypes,
-        ...pricingSchemaTypes,
-        ...experimentSchemaTypes,
-        ...siteSchemaTypes,
-        ...teamSchemaTypes,
-        ...eventsSchemaTypes,
-        ...framesSchemaTypes,
-        ...panelsSchemaTypes,
-        ...servicesSchemaTypes,
-        // new-registry:register
-        ...sharedSchemaTypes,
-      ]),
+    types: withRichTextDividerGuard(
+      withClientEditableHiding(
+        withServiceSections([
+          ...pageSchemaTypes,
+          ...blogSchemaTypes,
+          ...formSchemaTypes,
+          ...pricingSchemaTypes,
+          ...experimentSchemaTypes,
+          ...siteSchemaTypes,
+          ...teamSchemaTypes,
+          ...eventsSchemaTypes,
+          ...framesSchemaTypes,
+          ...panelsSchemaTypes,
+          ...servicesSchemaTypes,
+          ...locationsSchemaTypes,
+          // new-registry:register
+          ...sharedSchemaTypes,
+        ]),
+      ),
     ),
     templates: (defaults) => [...withoutSingletonTemplates(defaults), ...pageTemplates],
   },

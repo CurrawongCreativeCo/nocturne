@@ -1,6 +1,7 @@
 import { CaseIcon } from '@sanity/icons/Case'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
+import { hasLocations } from '@/config/profile'
 import { imageField } from '@/lib/sanity/schema/image-field'
 
 import { SERVICE_SLUG_PATTERN, slugifyService } from '../utils/slug'
@@ -125,6 +126,16 @@ export const service = defineType({
           preview: { select: { title: 'question', subtitle: 'answer' } },
         }),
       ],
+    }),
+    defineField({
+      name: 'locations',
+      title: 'Where it’s offered',
+      type: 'array',
+      description:
+        'Optional. The branches and service areas that offer this service. Leave it empty if it is offered everywhere: the page then names none. Listed places appear on the page and in its structured data.',
+      of: [defineArrayMember({ type: 'reference', to: [{ type: 'place' }] })],
+      hidden: () => !hasLocations(),
+      validation: (rule) => rule.unique(),
     }),
     defineField({
       name: 'evidence',

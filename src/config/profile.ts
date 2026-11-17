@@ -32,6 +32,7 @@ export const FEATURE_NAMES = [
   'teamProfiles',
   'events',
   'services',
+  'locations',
   'releases',
   'publishGate',
 ] as const
@@ -114,10 +115,15 @@ export interface SiteProfile {
  * Features that start off: ones that depend on the Sanity plan rather than on what the site offers
  * (a site on a plan without them never meets an upgrade screen), and ones that need set-up before
  * they are safe (`publishGate` needs an Editor token and Contributor clients), and ones a site opts
- * into because they add routes and structured data it may not want (`services`). Switch one on in
+ * into because they add routes and structured data it may not want (`services`, `locations`). Switch one on in
  * `site.profile.ts`.
  */
-export const PLAN_FEATURES: readonly FeatureName[] = ['releases', 'publishGate', 'services']
+export const PLAN_FEATURES: readonly FeatureName[] = [
+  'releases',
+  'publishGate',
+  'services',
+  'locations',
+]
 
 /** Everything on except the plan-dependent features: a site with no profile edits behaves as the template always has. */
 export const DEFAULT_FEATURES: Readonly<Features> = Object.fromEntries(
@@ -257,6 +263,11 @@ export function validateSiteProfile(input: unknown, options: ValidateOptions = {
           errors.push(`features.${name} must be true or false.`)
         }
       }
+      if (features.locations === true && features.businessInfo === false) {
+        errors.push(
+          'features.locations needs features.businessInfo: a location is an additional place, and Business info stays the primary one.',
+        )
+      }
     }
   }
 
@@ -356,6 +367,11 @@ export function isFeatureEnabled(name: FeatureName, profile: SiteProfile = siteP
  */
 export function hasTeamProfiles(profile: SiteProfile = siteProfile): boolean {
   return profile.features.team && profile.features.teamProfiles
+}
+
+/** Whether the site has locations: `/locations/<slug>` pages, their sitemap entries and branch JSON-LD. Off by default. */
+export function hasLocations(profile: SiteProfile = siteProfile): boolean {
+  return profile.features.locations
 }
 
 /** Whether the site has services: `/services/<slug>` pages, their sitemap entries and Service JSON-LD. Off by default. */

@@ -31,3 +31,24 @@ export function linkArrowOf(
   const clean = stegaClean(value)
   return LINK_ARROWS.find((option) => option === clean) ?? fallback
 }
+
+/**
+ * How the indicator moves when its card is hovered or focused (components/ui/action-indicator.tsx).
+ * Studio-free, like the glyphs above.
+ */
+export const ACTION_MOTIONS = ['none', 'nudge', 'lift', 'draw'] as const
+export type ActionMotion = (typeof ACTION_MOTIONS)[number]
+
+export const ACTION_MOTION_TITLES: Record<ActionMotion, string> = {
+  none: 'None',
+  nudge: 'Nudge',
+  lift: 'Lift',
+  draw: 'Draw',
+}
+
+export const ACTION_MOTION_DESCRIPTIONS: Record<ActionMotion, string> = {
+  none: 'Stays still.',
+  nudge: 'Moves a little in the direction it points.',
+  lift: 'Rises a little.',
+  draw: 'Draws itself once. Reduced motion keeps it still.',
+}

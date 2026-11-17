@@ -11,7 +11,7 @@ const DEFAULTS: SectionDefaults = {
 }
 
 export function RichText({ data, isFirst }: SectionProps<'richText'>) {
-  const { text } = sectionTraits(data.style, DEFAULTS)
+  const { text, block } = sectionTraits(data.style, DEFAULTS)
 
   return (
     <SectionFrame
@@ -20,7 +20,7 @@ export function RichText({ data, isFirst }: SectionProps<'richText'>) {
       isFirst={isFirst}
       containerClassName={`text-lead text-ink ${text}`}
     >
-      <RichTextBody value={data.body} />
+      <RichTextBody value={data.body} dividerBlock={block} />
     </SectionFrame>
   )
 }

@@ -1,12 +1,16 @@
 import { useId } from 'react'
 
-import { PlainText } from '@/components/ui/plain-text'
-import { RichHeading } from '@/components/ui/rich-heading'
 import { SectionFrame } from '@/components/ui/section-frame'
+import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
+import { resolveTextRoles } from '@/lib/sanity/text-role'
 
+import { FormCard } from './form-card'
 import type { SectionProps } from '../../types'
+
+const HEADER_ROLES = ['eyebrow', 'heading', 'intro'] as const
 
 const DEFAULTS: SectionDefaults = { container: 'max-w-measure-narrow', align: 'start' }
 
@@ -23,17 +27,19 @@ export function NewsletterSignup({
 
   return (
     <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst}>
-      <header className={`mb-10 ${textAlign}`}>
-        <RichHeading
-          as="h2"
-          id={headingId}
-          blocks={heading}
-          fallback={title}
-          className="text-h2 font-semibold text-balance"
-        />
-        <PlainText text={text} className="mt-4 text-lead text-pretty text-ink-muted" />
-      </header>
-      {renderNewsletter?.({ submitLabel, successMessage, headingId })}
+      <SectionHeader
+        eyebrow={data.eyebrow}
+        title={title}
+        heading={heading}
+        intro={text}
+        design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+        divider={resolveDivider(data.headerDesign?.divider)}
+        className={`mb-10 ${textAlign}`}
+        headingId={headingId}
+      />
+      <FormCard cardDesign={data.cardDesign}>
+        {renderNewsletter?.({ submitLabel, successMessage, headingId })}
+      </FormCard>
     </SectionFrame>
   )
 }

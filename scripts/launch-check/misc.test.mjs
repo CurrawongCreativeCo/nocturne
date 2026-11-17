@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { normaliseSiteUrl, parseArgs } from './args.mjs'
 import { onOrigin, sitemapLocations } from './discover.mjs'
-import { followRedirects, request } from './net.mjs'
+import { followRedirects, readCapped, request } from './net.mjs'
 import { mapLimit } from './pool.mjs'
 import { evaluatePsi, psiEndpoint } from './psi.mjs'
 import { fail, formatSummary, formatTable, listSome, pass, summarise, warn } from './result.mjs'
@@ -191,5 +191,54 @@ describe('net (with fetch replaced)', () => {
       .mockImplementation(() => Promise.resolve(reply(302, { location: '/again' })))
     const { chain } = await followRedirects('https://x.com/', { fetchImpl, max: 3 })
     expect(chain).toHaveLength(4)
+  })
+})
+
+describe('bounded reads', () => {
+  /** A body that never ends: reading it all would hang or exhaust memory. */
+  function endless(onCancel = () => undefined) {
+    const chunk = new Uint8Array(64 * 1024).fill(97)
+    return new ReadableStream({
+      pull(controller) {
+        controller.enqueue(chunk)
+      },
+      cancel: onCancel,
+    })
+  }
+
+  it('stops reading and cancels an endless body at the limit', async () => {
+    const cancelled = vi.fn()
+    const response = new Response(endless(cancelled))
+    const body = await readCapped(response, 100_000)
+    expect(body).toHaveLength(100_000)
+    expect(cancelled).toHaveBeenCalled()
+  })
+
+  it('returns a short body whole', async () => {
+    expect((await readCapped(new Response('hello'))).toString()).toBe('hello')
+  })
+
+  it('caps the text request() returns, so a huge page cannot fill memory', async () => {
+    const response = new Response(endless(), { headers: { 'content-type': 'text/html' } })
+    const result = await request('https://x.com/', { fetchImpl: async () => response })
+    expect(result.status).toBe(200)
+    expect(result.text.length).toBeGreaterThan(1_000_000)
+    expect(result.text.length).toBeLessThanOrEqual(2_000_000)
+  })
+
+  it('caps the bytes of an image read with `bytes`', async () => {
+    const response = new Response(endless(), { headers: { 'content-type': 'image/png' } })
+    const result = await request('https://x.com/a.png', {
+      bytes: true,
+      fetchImpl: async () => response,
+    })
+    expect(result.bytes.length).toBe(2_000_000)
+  })
+
+  it('strips a byte-order mark from text, as response.text() did', async () => {
+    const response = new Response('\uFEFF<h1>x</h1>', { headers: { 'content-type': 'text/html' } })
+    expect((await request('https://x.com/', { fetchImpl: async () => response })).text).toBe(
+      '<h1>x</h1>',
+    )
   })
 })

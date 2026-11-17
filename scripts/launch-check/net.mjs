@@ -5,6 +5,35 @@ const MAX_BODY = 2_000_000
 const TEXT_TYPE = /^(text\/|application\/(json|xml|xhtml|[a-z.+-]*\+xml)|image\/svg)/i
 
 /**
+ * Reads at most `limit` bytes of a response body, then cancels the rest, so a huge or endless body
+ * costs at most the cap in memory and time. (`response.text()` reads it all before any slice.)
+ * Falls back to `arrayBuffer()` or `text()` for a response with no readable stream.
+ */
+export async function readCapped(response, limit = MAX_BODY) {
+  if (typeof response.body?.getReader !== 'function') {
+    const whole =
+      typeof response.arrayBuffer === 'function'
+        ? Buffer.from(await response.arrayBuffer())
+        : Buffer.from(await response.text())
+    return whole.subarray(0, limit)
+  }
+  const reader = response.body.getReader()
+  const chunks = []
+  let size = 0
+  try {
+    while (size < limit) {
+      const { done, value } = await reader.read()
+      if (done) break
+      chunks.push(value)
+      size += value.length
+    }
+  } finally {
+    await reader.cancel().catch(() => undefined)
+  }
+  return Buffer.concat(chunks).subarray(0, limit)
+}
+
+/**
  * One request, never throwing. Redirects are not followed unless asked, so a 301 is visible.
  * Text-like bodies are read (capped); images and anything else are discarded unread, unless
  * `bytes` is set, which returns the (capped) body as a Buffer in `bytes`.
@@ -37,10 +66,10 @@ export async function request(
     let text = ''
     let data
     if (bytes) {
-      data = Buffer.from(await response.arrayBuffer()).subarray(0, MAX_BODY)
+      data = await readCapped(response)
       if (TEXT_TYPE.test(contentType)) text = data.toString('utf8')
     } else if (TEXT_TYPE.test(contentType) || (!contentType && response.status < 300)) {
-      text = (await response.text()).slice(0, MAX_BODY)
+      text = (await readCapped(response)).toString('utf8').replace(/^\uFEFF/, '')
     } else {
       await response.body?.cancel()
     }

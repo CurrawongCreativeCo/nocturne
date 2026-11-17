@@ -1,3 +1,4 @@
+import { stegaClean } from 'next-sanity'
 import type { ConditionalPropertyCallback } from 'sanity'
 
 import {
@@ -8,9 +9,30 @@ import {
   type MotionCustomField,
   type MotionOption,
 } from '@/components/motion/presets'
+import { LAYERED_PRESETS, allowsLayerBelow, drawnLayerSlots } from '@/components/ui/edge-presets'
+import { resolveEdge, type SectionStyleInput } from '@/components/ui/section-style'
+import { resolveEmbed } from '@/config/embed-providers'
+import type { FollowerInput, FollowerPresence } from '@/lib/color/edge-visibility'
+import { isMembersOnly } from '@/lib/sanity/access'
 
 import {
+  GENERATED_EDGE_HEIGHT_BOUNDS,
+  GENERATED_EDGE_HEIGHTS,
+  SECTION_EDGE_DEPTHS,
+  SECTION_EDGE_HEIGHTS,
+  SECTION_EDGE_LAYER_COLOUR_INHERIT,
+  SECTION_EDGE_LAYER_RESET,
+  SECTION_EDGE_LAYER_ROLES,
+  SECTION_EDGE_LAYER_SLOTS,
+  SECTION_EDGE_LAYER_SLOT_TITLES,
+  SECTION_EDGE_LAYER_STRENGTH_INHERIT,
+  SECTION_EDGE_STRENGTHS,
+  SECTION_EDGE_TITLES,
   SECTION_MOTIONS,
+  type EdgeLayerSlot,
+  type GeneratedEdgeScreen,
+  isGeneratedEdge,
+  edgeAllowsAccent,
   edgeAllowsFlip,
   edgeAllowsInvert,
   imageSizeUsesFixed,
@@ -52,7 +74,8 @@ export interface SectionFormRules {
   drawsBackground?: (section: SectionValue) => boolean
   /**
    * Whether this layout draws its own surfaces (the Link list's cards), so the shared Panel doesn't
-   * apply and isn't offered. SectionFrame's `ownsSurfaces` is the same rule on the page.
+   * apply and isn't offered. Register `ownsSurfaces` from lib/design/section-surfaces.ts: SectionRenderer
+   * applies the same rule on the page.
    */
   ownsSurfaces?: (section: SectionValue) => boolean
 }
@@ -91,6 +114,85 @@ export function sectionAtStylePath(
     }
   }
   return current !== null && typeof current === 'object' ? (current as SectionValue) : undefined
+}
+
+/**
+ * Whether the following section draws its background, from its own data and what is verified of its component
+ * (follower-presence.test.tsx). Only a type whose component always draws its frame in the stored tone is
+ * `established`; a form, a pricing table or an embed is judged by the data its component depends on, and an
+ * embed through the same guard the page uses (`resolveEmbed`). References alone prove nothing: a form or a plan
+ * may point at something deleted. Every other type is `type-unverified`; this is not a model of the renderer.
+ */
+function presenceOf(section: SectionValue): { presence: FollowerPresence } {
+  switch (section._type) {
+    case 'richText':
+    case 'featuresGrid':
+    case 'ctaBanner':
+    case 'newsletterSignup':
+      return { presence: 'established' }
+    case 'embed':
+      return {
+        presence: resolveEmbed(
+          stegaClean(section.provider as string),
+          stegaClean(section.url as string),
+        )
+          ? 'established'
+          : 'embed-invalid',
+      }
+    case 'formSection': {
+      const form = section.form as { _ref?: unknown } | null | undefined
+      return { presence: form?._ref ? 'form-unresolved' : 'form-empty' }
+    }
+    case 'pricingTable': {
+      const plans = section.plans
+      return {
+        presence: Array.isArray(plans) && plans.length > 0 ? 'plans-unverified' : 'plans-empty',
+      }
+    }
+    default:
+      return { presence: 'type-unverified' }
+  }
+}
+
+/** The lists the page renderer draws sections from: a page's `pageBuilder` and a service's `sections`. */
+const SECTION_LISTS = ['pageBuilder', 'sections']
+
+/**
+ * What follows the section a `style` field belongs to, as the page draws it, read from the document the form
+ * already holds (no request). The next entry of the same list is the follower; after the last the footer's band
+ * (a Minimal page has none). A section anywhere else (a shared section's own document) has no known place, and a
+ * shared or members-only follower is marked as such: its style is elsewhere, or the page draws a stub.
+ */
+export function followerAtStylePath(
+  document: unknown,
+  path: readonly PathSegment[] | undefined,
+): FollowerInput {
+  const unknown: FollowerInput = { position: 'unknown' }
+  const [name, at, style] = path ?? []
+  if (typeof name !== 'string' || !SECTION_LISTS.includes(name) || style !== 'style') return unknown
+  const doc = document as Record<string, unknown> | null | undefined
+  const list = doc?.[name]
+  if (!Array.isArray(list)) return unknown
+  const entries = list as (SectionValue | undefined)[]
+  const index =
+    typeof at === 'number'
+      ? at
+      : typeof at === 'object' && !Array.isArray(at) && '_key' in at
+        ? entries.findIndex((entry) => entry?._key === at._key)
+        : -1
+  if (index < 0 || index >= entries.length) return unknown
+  if (index === entries.length - 1)
+    return { position: 'last', minimal: doc?.minimalLayout === true }
+  const next = entries[index + 1]
+  if (!next || typeof next !== 'object') return unknown
+  return {
+    position: 'next',
+    style: (next.style as SectionStyleInput | undefined) ?? null,
+    hasOwnBackground: sectionHasOwnBackground(next),
+    shared: next._type === 'reference',
+    locked: isMembersOnly(next.access as string | undefined),
+    ...presenceOf(next),
+  }
 }
 
 /** Whether Parallax has something to move in this section's chosen layout. */
@@ -252,9 +354,17 @@ interface EdgeParent {
 const edgeOf = (parent: unknown) => (parent as EdgeParent | undefined)?.edge
 const hasEdge = (edge: string | undefined) => !!edge && edge !== 'none'
 
-/** The edge's options mean nothing until a shape is chosen. */
+/**
+ * The edge's options mean nothing until a shape is chosen, and Elevated has none of the cut's: it is a straight
+ * boundary with a shadow, so a height, custom heights, Flip and the rest stored from another shape are not shown
+ * and not drawn (and not deleted: choosing another shape brings them back).
+ */
 export const edgeOptionsHidden: ConditionalPropertyCallback = ({ parent }) =>
-  !hasEdge(edgeOf(parent))
+  !hasEdge(edgeOf(parent)) || edgeOf(parent) === 'elevated'
+
+/** Only Elevated has a shadow to choose. */
+export const edgeShadowHidden: ConditionalPropertyCallback = ({ parent }) =>
+  edgeOf(parent) !== 'elevated'
 
 /** Curve and Arch are symmetrical, so mirroring them would change nothing. */
 export const edgeFlipHidden: ConditionalPropertyCallback = ({ parent }) =>
@@ -267,3 +377,226 @@ export const edgeInvertHidden: ConditionalPropertyCallback = ({ parent }) =>
 /** Only the layered wave has a back wave to colour. */
 export const edgeLayerHidden: ConditionalPropertyCallback = ({ parent }) =>
   edgeOf(parent) !== 'layered'
+
+/** The accent line is for today's shapes: Tide and Contour bring their own ornament. */
+export const edgeAccentHidden: ConditionalPropertyCallback = ({ parent }) =>
+  !edgeAllowsAccent(edgeOf(parent))
+
+/** Only Tide has a back crest to colour. */
+export const edgeTideLayerHidden: ConditionalPropertyCallback = ({ parent }) =>
+  edgeOf(parent) !== 'tide'
+
+/** Only Contour has lines to colour. */
+export const edgeLineColourHidden: ConditionalPropertyCallback = ({ parent }) =>
+  edgeOf(parent) !== 'contour'
+
+interface GeneratedEdgeParent extends EdgeParent {
+  edgeDepth?: string
+  edgeHeight?: string
+}
+
+/** The generated shapes' controls mean nothing for any other shape. */
+export const edgeGeneratedHidden: ConditionalPropertyCallback = ({ parent }) =>
+  !isGeneratedEdge(edgeOf(parent))
+
+/**
+ * A generated shape's control left over on another shape stays visible, so the editor can see the warning
+ * below and clear it; it is hidden once there is nothing to say.
+ */
+export const edgeGeneratedOptionHidden: ConditionalPropertyCallback = ({ parent, value }) =>
+  !isGeneratedEdge(edgeOf(parent)) && !value
+
+/** The warning for a generated shape's control left on another shape; true when there is nothing to say. */
+export function staleGeneratedOptionMessage(
+  value: unknown,
+  context: { parent?: unknown },
+): string | true {
+  if (!value || isGeneratedEdge(edgeOf(context.parent))) return true
+  return 'This choice belongs to Still water, Lagoon and Reef and is ignored by the shape chosen above. Clear it from the field menu.'
+}
+
+type EdgeStep = 'crest' | 'depth'
+
+/** The steps a generated shape offers for crest position or depth; the first is its default. */
+const stepsOffered = (edge: string, step: EdgeStep): readonly string[] =>
+  isGeneratedEdge(edge)
+    ? LAYERED_PRESETS[edge][step === 'crest' ? 'crestOptions' : 'depthOptions']
+    : []
+
+/**
+ * Crest position and depth are offered only where the shape has a choice (Still water: three of each; Lagoon and
+ * Reef: one, curated). A value stored under a shape that does not offer it stays visible, so the editor can
+ * read the warning below and clear it; it is never deleted.
+ */
+export const edgeStepHidden =
+  (step: EdgeStep): ConditionalPropertyCallback =>
+  ({ parent, value }) => {
+    const edge = edgeOf(parent)
+    if (!isGeneratedEdge(edge)) return !value
+    const offered = stepsOffered(edge, step)
+    return offered.length < 2 && (!value || (typeof value === 'string' && offered.includes(value)))
+  }
+
+/** The warning for a crest position or depth that the shape chosen does not offer; true when there is nothing to say. */
+export const staleStepMessage =
+  (step: EdgeStep) =>
+  (value: unknown, context: { parent?: unknown }): string | true => {
+    if (!value) return true
+    const edge = edgeOf(context.parent)
+    if (!isGeneratedEdge(edge)) return staleGeneratedOptionMessage(value, context)
+    if (typeof value === 'string' && stepsOffered(edge, step).includes(value)) return true
+    const title = SECTION_EDGE_TITLES[edge]
+    return `${title} draws one ${step === 'crest' ? 'crest position' : 'depth'} only, so this is ignored. Clear it from the field menu.`
+  }
+
+const depthOf = (parent: unknown) => {
+  const depth = (parent as GeneratedEdgeParent | undefined)?.edgeDepth
+  return SECTION_EDGE_DEPTHS.find((option) => option === depth) ?? 'standard'
+}
+
+/** Whether the depth chosen offers a layer below; any other shape has no layer below to offer. */
+const offersLayerBelow = (parent: unknown) => {
+  const edge = edgeOf(parent)
+  return isGeneratedEdge(edge) && allowsLayerBelow(LAYERED_PRESETS[edge], depthOf(parent))
+}
+
+/**
+ * Layer below is not offered at Shallow, where the layer is too thin to read. A value already stored there
+ * keeps the field visible, so the editor can see the warning below; the edge draws without it.
+ */
+export const edgeLayerBelowHidden: ConditionalPropertyCallback = ({ parent, value }) =>
+  !isGeneratedEdge(edgeOf(parent)) || (!offersLayerBelow(parent) && value !== true)
+
+/** The warning for a layer below saved under a depth that does not offer one; the saved value is kept. */
+export function staleLayerBelowMessage(
+  value: unknown,
+  context: { parent?: unknown },
+): string | true {
+  const edge = edgeOf(context.parent)
+  if (value !== true || !isGeneratedEdge(edge)) return true
+  if (offersLayerBelow(context.parent)) return true
+  const { layerBelow } = LAYERED_PRESETS[edge]
+  if (layerBelow === 'always')
+    return `${SECTION_EDGE_TITLES[edge]} always draws its layer below, so this switch is ignored. Clear it from the field menu.`
+  if (layerBelow === 'never')
+    return `${SECTION_EDGE_TITLES[edge]} has no layer below, so this is ignored. Clear it from the field menu.`
+  return 'A layer below is not drawn at Shallow depth, so this is ignored. Choose Standard or Deep to show it, or turn it off.'
+}
+
+type LayerColoursValue = Record<string, unknown> | null | undefined
+type PathLike = Parameters<typeof sectionAtStylePath>[1]
+
+const layerColourFields = (slot: EdgeLayerSlot) => [slot, `${slot}Strength`] as const
+const layerColourSet = (value: LayerColoursValue, slot: EdgeLayerSlot) =>
+  layerColourFields(slot).some((field) => !!value?.[field])
+
+/** Whether anything is stored in the per-layer colours: the object is shown while it holds a value. */
+const anyLayerColourSet = (value: LayerColoursValue) =>
+  SECTION_EDGE_LAYER_SLOTS.some((slot) => layerColourSet(value, slot))
+
+/** Why a layer's colour or strength is not drawn, or undefined when its layer is drawn (or cannot be known). */
+function inactiveLayerReason(
+  style: SectionStyleInput | undefined,
+  slot: EdgeLayerSlot,
+): string | undefined {
+  if (!style) return undefined
+  const edge = resolveEdge(style)
+  if (!edge?.layered || !isGeneratedEdge(edge.shape))
+    return 'These colours belong to Still water, Lagoon and Reef and are ignored by the shape chosen above.'
+  const preset = LAYERED_PRESETS[edge.shape]
+  if (drawnLayerSlots(preset, edge.layered.depth, edge.layered.below).includes(slot))
+    return undefined
+  const title = SECTION_EDGE_TITLES[edge.shape]
+  if (slot === 'above2') return `${title} has one layer above the edge, so this is ignored.`
+  if (preset.layerBelow === 'never') return `${title} has no layer below, so this is ignored.`
+  return `${title} draws its layer below only when Layer below is on and the depth offers it, so this is ignored.`
+}
+
+/** The style a per-layer field belongs to: the object's parent, or two levels up from a field inside it. */
+const styleOfLayerField = (document: unknown, path: PathLike): SectionStyleInput | undefined =>
+  (sectionAtStylePath(document, path?.slice(0, -1))?.style as SectionStyleInput | undefined) ??
+  undefined
+
+interface LayerColoursContext {
+  document?: unknown
+  path?: PathLike
+  parent?: unknown
+}
+
+/**
+ * The per-layer colours (task 151, Slice 8) are shown for every generated shape. For any other shape they are
+ * shown only while something is stored, so the editor can read the warning and clear it; nothing is deleted.
+ */
+export const edgeLayerColoursHidden: ConditionalPropertyCallback = ({ parent, value }) =>
+  !isGeneratedEdge(edgeOf(parent)) && !anyLayerColourSet(value as LayerColoursValue)
+
+/**
+ * One colour or strength field of a layer: shown while its layer is drawn, and while it holds a value for a
+ * layer that is not (so its warning can be read); hidden once that value is cleared. When the shape cannot be
+ * read it is shown, because hiding a control wrongly is worse than showing one that does nothing.
+ */
+export const edgeLayerColourFieldHidden =
+  (slot: EdgeLayerSlot): ConditionalPropertyCallback =>
+  ({ document, path, value }) => {
+    const style = styleOfLayerField(document, path)
+    return !value && !!style && inactiveLayerReason(style, slot) !== undefined
+  }
+
+/**
+ * The warning on a layer's colour or strength: a value for a layer the shape does not draw (kept, not drawn), or
+ * one that is not a choice (it is ignored, and the recipe or the shared strength is used).
+ */
+export const staleLayerColourFieldMessage =
+  (slot: EdgeLayerSlot, kind: 'colour' | 'strength') =>
+  (value: unknown, context: LayerColoursContext): string | true => {
+    if (!value) return true
+    // The control that clears it: the field's own first choice, which unsets the field.
+    const clear = `Choose “${kind === 'colour' ? SECTION_EDGE_LAYER_COLOUR_INHERIT : SECTION_EDGE_LAYER_STRENGTH_INHERIT}” to clear it.`
+    const reason = inactiveLayerReason(styleOfLayerField(context.document, context.path), slot)
+    if (reason) return `${reason} ${clear}`
+    const choices: readonly unknown[] =
+      kind === 'colour' ? SECTION_EDGE_LAYER_ROLES : SECTION_EDGE_STRENGTHS
+    return choices.includes(value)
+      ? true
+      : `This is not one of the choices, so it is ignored and ${kind === 'colour' ? 'the recipe’s colour' : 'the shared Layer strength'} is used. ${clear}`
+  }
+
+/** The warning on the group: layers it holds values for that the shape does not draw here. Kept, not drawn. */
+export function staleLayerColoursMessage(
+  value: unknown,
+  context: { parent?: unknown },
+): string | true {
+  const stored = value as LayerColoursValue
+  const style = context.parent as SectionStyleInput | undefined
+  const inactive = SECTION_EDGE_LAYER_SLOTS.filter(
+    (slot) => layerColourSet(stored, slot) && inactiveLayerReason(style, slot) !== undefined,
+  )
+  if (inactive.length === 0) return true
+  const names = inactive.map((slot) => SECTION_EDGE_LAYER_SLOT_TITLES[slot].toLowerCase())
+  return `Colours set for the ${names.join(' and the ')} are ignored here, because this edge does not draw ${inactive.length > 1 ? 'those layers' : 'that layer'}. They stay saved and show again if it does. Clear them with “${SECTION_EDGE_LAYER_COLOUR_INHERIT}” or “${SECTION_EDGE_LAYER_STRENGTH_INHERIT}” on each field, or “${SECTION_EDGE_LAYER_RESET}” for every layer.`
+}
+
+/** Small is not drawn for a generated shape: Studio refuses it, and the page draws Medium. */
+export function generatedHeightMessage(
+  value: unknown,
+  context: { parent?: unknown },
+): string | true {
+  const edge = edgeOf(context.parent)
+  if (!isGeneratedEdge(edge)) return true
+  const allowed = GENERATED_EDGE_HEIGHTS as readonly unknown[]
+  if (!SECTION_EDGE_HEIGHTS.some((size) => size === value) || allowed.includes(value)) return true
+  return `${SECTION_EDGE_TITLES[edge]} is not drawn at Small: its layers need a taller band to read. Choose Medium or Large. Until then it is drawn at Medium.`
+}
+
+/** A custom height of a generated shape must sit within what that screen size is proven for. */
+export function generatedCustomHeightMessage(
+  screen: GeneratedEdgeScreen,
+  value: unknown,
+  context: { parent?: unknown },
+): string | true {
+  const edge = edgeOf(context.parent)
+  if (typeof value !== 'number' || !isGeneratedEdge(edge)) return true
+  const { min, max } = GENERATED_EDGE_HEIGHT_BOUNDS[screen]
+  if (value >= min && value <= max) return true
+  return `${SECTION_EDGE_TITLES[edge]} is drawn between ${String(min)} and ${String(max)} px on this screen size. Until this is changed it is drawn at the nearest one.`
+}

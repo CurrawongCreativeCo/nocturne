@@ -5,8 +5,13 @@ import { useFormValue, type ObjectInputProps } from 'sanity'
 
 import { resolveDesignTokens, type DesignOverrides } from '@/lib/color/resolve-design-tokens'
 
+import { buttonPreview } from './button-preview'
+import { SiteDecisionPreview } from './site-decision-preview'
+
 /**
- * A small mock-up of the site in the colours being edited, above the form. It reads the same
+ * A small mock-up of the site in the colours being edited, above the form, then one of the chosen
+ * density, shape and heading style. The count of sections that set their own spacing sits above it
+ * (`options.spacingUsage`, shown by the Studio-wide input). It reads the same
  * resolveDesignTokens the site does, so it is a faithful (if simplified) preview; the Presentation
  * tool shows the real pages. The colours are the editor's, so they are inline on purpose.
  */
@@ -14,6 +19,7 @@ export function DesignSettingsInput(props: ObjectInputProps) {
   const document = useFormValue([]) as DesignOverrides | undefined
   const { colours, vars } = resolveDesignTokens(document)
   const gradients = Object.entries(vars).filter(([name]) => name.startsWith('--gradient-'))
+  const buttons = buttonPreview(vars, colours)
 
   const band = (background: string, color: string, label: string, muted?: string) => (
     <div style={{ background, color, padding: '12px 16px' }}>
@@ -76,28 +82,11 @@ export function DesignSettingsInput(props: ObjectInputProps) {
                 </span>{' '}
                 tag.
               </div>
-              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                <span
-                  style={{
-                    background: colours.cta,
-                    color: colours.ctaInk,
-                    borderRadius: 999,
-                    padding: '6px 16px',
-                    fontSize: 13,
-                    fontWeight: 600,
-                  }}
-                >
+              <div style={{ display: 'flex', gap: 12, marginTop: 12, ...buttons.scope }}>
+                <span data-part="primary-button" style={buttons.primary}>
                   Primary button
                 </span>
-                <span
-                  style={{
-                    border: `1px solid ${colours.line}`,
-                    color: colours.ink,
-                    borderRadius: 999,
-                    padding: '6px 16px',
-                    fontSize: 13,
-                  }}
-                >
+                <span data-part="secondary-button" style={buttons.secondary}>
                   Secondary button
                 </span>
               </div>
@@ -116,6 +105,7 @@ export function DesignSettingsInput(props: ObjectInputProps) {
           </div>
         </Stack>
       </Card>
+      <SiteDecisionPreview vars={vars} headingStyle={document?.headingStyle} colours={colours} />
       {props.renderDefault(props)}
     </Stack>
   )

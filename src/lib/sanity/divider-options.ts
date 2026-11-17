@@ -15,8 +15,20 @@ import { themeColourCss, type ThemeColour, type ThemeColourInput } from './theme
  * code so the site can import it.
  */
 
-/** How the rule is drawn. Three dots stand alone; the others can hold a centre. */
-export const DIVIDER_STYLES = ['none', 'line', 'fade', 'dots'] as const
+/**
+ * How the rule is drawn. Three dots (`dots`) stand alone; the others can hold a centre. Double, Dotted line and
+ * Gradient (task 151, Slice 7) are new values appended after the stored ones, so no stored key changes: a
+ * stored `dots` is still Three dots, and `dotted` is a different, newer thing (a line made of dots).
+ */
+export const DIVIDER_STYLES = [
+  'none',
+  'line',
+  'fade',
+  'dots',
+  'double',
+  'dotted',
+  'gradient',
+] as const
 export type DividerStyle = (typeof DIVIDER_STYLES)[number]
 
 export const DIVIDER_STYLE_TITLES: Record<DividerStyle, string> = {
@@ -24,6 +36,9 @@ export const DIVIDER_STYLE_TITLES: Record<DividerStyle, string> = {
   line: 'Line',
   fade: 'Fading line',
   dots: 'Three dots',
+  double: 'Double',
+  dotted: 'Dotted line',
+  gradient: 'Gradient',
 }
 
 export const DIVIDER_STYLE_DESCRIPTIONS: Record<DividerStyle, string> = {
@@ -31,9 +46,13 @@ export const DIVIDER_STYLE_DESCRIPTIONS: Record<DividerStyle, string> = {
   line: 'An even rule, with anything in the middle.',
   fade: 'Fades out towards its ends.',
   dots: 'Three small dots, centred.',
+  double: 'Two fine lines, side by side, with anything in the middle.',
+  dotted: 'A line of small dots, with anything in the middle.',
+  gradient: 'A line from the Primary to the Secondary colour, fading at its ends.',
 }
 
-export const DIVIDER_CENTRES = ['none', 'diamond', 'icon', 'text', 'image'] as const
+/** `ornament` (task 151, Slice 7) is appended after the stored values, so no stored key changes. */
+export const DIVIDER_CENTRES = ['none', 'diamond', 'icon', 'text', 'image', 'ornament'] as const
 export type DividerCentre = (typeof DIVIDER_CENTRES)[number]
 
 export const DIVIDER_CENTRE_TITLES: Record<DividerCentre, string> = {
@@ -42,7 +61,29 @@ export const DIVIDER_CENTRE_TITLES: Record<DividerCentre, string> = {
   icon: 'Icon',
   text: 'Words',
   image: 'Picture',
+  ornament: 'Ornament',
 }
+
+/**
+ * The finish of the line (task 151, Slice 7): Flat is what every divider was before, and Glow is a soft halo
+ * of the line's own colour. It is a finish, never a style, and is offered only for the styles in
+ * `GLOW_STYLES`. Unset, Flat and any unknown value draw Flat.
+ */
+export const DIVIDER_FINISHES = ['flat', 'glow'] as const
+export type DividerFinish = (typeof DIVIDER_FINISHES)[number]
+
+export const DIVIDER_FINISH_TITLES: Record<DividerFinish, string> = {
+  flat: 'Flat',
+  glow: 'Glow',
+}
+
+export const DIVIDER_FINISH_DESCRIPTIONS: Record<DividerFinish, string> = {
+  flat: 'The line as it is.',
+  glow: 'A soft halo around the line, in the line’s own colour.',
+}
+
+/** The styles that can glow. A finish stored for any other style is kept and not drawn. */
+export const GLOW_STYLES: readonly DividerStyle[] = ['line', 'double', 'gradient']
 
 /** The whole divider's length, centre included. */
 export const DIVIDER_WIDTHS = ['short', 'medium', 'long', 'full'] as const
@@ -94,6 +135,7 @@ export interface DividerInput {
   style?: string | null
   width?: string | null
   thickness?: string | null
+  finish?: string | null
   centre?: string | null
   text?: string | null
   letterSpacing?: string | null
@@ -110,6 +152,7 @@ export type ResolvedCentre =
   | { kind: 'icon'; icon: BadgeIconName }
   | { kind: 'text'; text: string; textCase: DividerTextCase; letterSpacing?: LetterSpacing }
   | { kind: 'image'; image: SanityImageData }
+  | { kind: 'ornament' }
 
 export interface ResolvedDivider {
   style: Exclude<DividerStyle, 'none'>
@@ -117,6 +160,8 @@ export interface ResolvedDivider {
   thickness: DividerThickness
   centre: ResolvedCentre | null
   centreSize: DividerCentreSize
+  /** Present only for Glow on a style that can glow; Flat (and anything else) leaves it out, so the output is what it was. */
+  finish?: 'glow'
   /** CSS colours; undefined is the line colour, and the centre follows the lines. */
   lineColour: string | undefined
   centreColour: string | undefined
@@ -152,6 +197,8 @@ function resolveCentre(input: DividerInput): ResolvedCentre | null {
     }
     case 'image':
       return input.image?.asset ? { kind: 'image', image: input.image } : null
+    case 'ornament':
+      return { kind: 'ornament' }
     default:
       return null
   }
@@ -159,7 +206,9 @@ function resolveCentre(input: DividerInput): ResolvedCentre | null {
 
 /**
  * One divider, or null for none (unset, None, or a style the schema never offered). Three dots
- * never take a centre. A Custom colour is drawn only when its hex is valid.
+ * never take a centre. A Custom colour is drawn only when its hex is valid. Gradient is always Primary to
+ * Secondary, so a line colour stored for it is not drawn; it is not removed either, and comes back if the style
+ * is changed (the input is only read).
  */
 export function resolveDivider(input: DividerInput | null | undefined): ResolvedDivider | null {
   const style = pick(DIVIDER_STYLES, input?.style)
@@ -170,7 +219,11 @@ export function resolveDivider(input: DividerInput | null | undefined): Resolved
     thickness: pick(DIVIDER_THICKNESSES, input.thickness) ?? 'thin',
     centre: style === 'dots' ? null : resolveCentre(input),
     centreSize: pick(DIVIDER_CENTRE_SIZES, input.centreSize) ?? 'medium',
-    lineColour: themeColourCss(input.lineColour, OFFERED),
+    // Only a stored Glow on a style that can glow; the stored value is never changed, only read.
+    ...(pick(DIVIDER_FINISHES, input.finish) === 'glow' && GLOW_STYLES.includes(style)
+      ? { finish: 'glow' as const }
+      : {}),
+    lineColour: style === 'gradient' ? undefined : themeColourCss(input.lineColour, OFFERED),
     centreColour: themeColourCss(input.centreColour, OFFERED),
   }
 }

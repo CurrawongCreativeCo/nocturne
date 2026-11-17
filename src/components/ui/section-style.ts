@@ -7,6 +7,7 @@ import {
   type MotionContext,
 } from '@/components/motion/presets'
 import { GRADIENT_SLUG_PATTERN } from '@/lib/color/gradients'
+import type { MarkInput } from '@/lib/sanity/decorative-mark-options'
 import type { OverlayGradientInput } from '@/lib/sanity/overlay-gradient'
 import {
   SECTION_ALIGNS,
@@ -21,19 +22,39 @@ import {
   imageSizeUsesRepeat,
   SECTION_EDGES,
   SECTION_EDGE_ACCENTS,
+  SECTION_EDGE_CRESTS,
+  SECTION_EDGE_DEPTHS,
   SECTION_EDGE_HEIGHTS,
   SECTION_EDGE_LAYERS,
+  SECTION_EDGE_LAYER_ROLES,
+  SECTION_EDGE_LAYER_SLOTS,
+  SECTION_EDGE_LINE_COLOURS,
+  SECTION_EDGE_PALETTES,
+  SECTION_EDGE_SHADOWS,
+  SECTION_EDGE_STRENGTHS,
+  SECTION_EDGE_TIDE_LAYERS,
+  GENERATED_EDGE_HEIGHTS,
+  GENERATED_EDGE_HEIGHT_BOUNDS,
   SECTION_MOTIONS,
   SECTION_OVERLAYS,
   SECTION_SPACINGS,
   SECTION_TONES,
   SECTION_WIDTHS,
   defaultOverlayFor,
+  edgeAllowsAccent,
   edgeAllowsFlip,
   edgeAllowsInvert,
+  isGeneratedEdge,
+  type EdgeLayerColoursInput,
 } from '@/lib/sanity/section-style-options'
 import type { SanityImageData } from '@/types/sanity'
 
+import {
+  LAYERED_PRESETS,
+  drawsLayerBelow,
+  type LayeredSettings,
+  type LayerOverrides,
+} from './edge-presets'
 import { customEdgeHeight, type ResolvedEdge } from './section-edges'
 
 /**
@@ -100,10 +121,26 @@ export interface SectionStyleInput {
   edgeFlip?: boolean | null
   edgeAccent?: string | null
   edgeLayer?: string | null
+  /** Tide's back crest colour (task 151); unset is Primary. */
+  edgeTideLayer?: string | null
+  /** Contour's line colour (task 151); unset is Primary. */
+  edgeLineColour?: string | null
+  /** Elevated's shadow (task 151, Slice 6); unset is Soft. */
+  edgeShadow?: string | null
+  /** The generated shapes' stepped controls (task 151, Slice 3); unset is each preset's default. */
+  edgeCrest?: string | null
+  edgeDepth?: string | null
+  edgeStrength?: string | null
+  edgePalette?: string | null
+  edgeLayerBelow?: boolean | null
+  /** A generated shape's own colour and strength for each layer (task 151, Slice 8); unset is the recipe. */
+  edgeLayerColours?: EdgeLayerColoursInput | null
   edgeInvert?: boolean | null
   edgeHeightMobile?: number | null
   edgeHeightTablet?: number | null
   edgeHeightDesktop?: number | null
+  /** A faint word, picture or icon behind the section (README, "Decorative marks"). */
+  mark?: MarkInput | null
   /** A panel behind the content: 'none', 'glass' or 'solid' (README, "Section panels"); unset is none. */
   panel?: string | null
   /** Advanced: how see-through the glass starts; unset follows the glass tokens. */
@@ -275,27 +312,125 @@ function pick<T extends string>(
 
 /**
  * A section's bottom edge. Options that don't apply to the chosen shape (Flip on a symmetrical curve,
- * Invert on a diagonal, a back-wave colour on anything but the layered wave) are ignored, so a value
- * left behind after the editor changed shape can't produce a nonsensical edge.
+ * Invert on a diagonal, a back-wave colour on anything but the layered wave, an accent line on Tide or
+ * Contour) are ignored, so a value left behind after the editor changed shape can't produce a nonsensical
+ * edge. Tide's Echo is the section's own colour, which a picture or a gradient doesn't have: over one,
+ * Tide draws its default, Primary, instead.
  */
 export function resolveEdge(style: SectionStyleInput | null | undefined): ResolvedEdge | undefined {
   const edge = pick(SECTION_EDGES, style?.edge)
   if (!edge || edge === 'none') return undefined
-  const size = pick(SECTION_EDGE_HEIGHTS, style?.edgeHeight) ?? 'medium'
-  const custom = customEdgeHeight({
-    mobile: style?.edgeHeightMobile,
-    tablet: style?.edgeHeightTablet,
-    desktop: style?.edgeHeightDesktop,
-  })
+  const generated = isGeneratedEdge(edge)
+  const picked = pick(SECTION_EDGE_HEIGHTS, style?.edgeHeight) ?? 'medium'
+  // A generated shape is not drawn at Small, so a stored Small is drawn as Medium.
+  const size =
+    generated && !GENERATED_EDGE_HEIGHTS.some((allowed) => allowed === picked) ? 'medium' : picked
+  const custom = customEdgeHeight(
+    generated
+      ? {
+          mobile: clampedHeight(style?.edgeHeightMobile, 'mobile'),
+          tablet: clampedHeight(style?.edgeHeightTablet, 'tablet'),
+          desktop: clampedHeight(style?.edgeHeightDesktop, 'desktop'),
+        }
+      : {
+          mobile: style?.edgeHeightMobile,
+          tablet: style?.edgeHeightTablet,
+          desktop: style?.edgeHeightDesktop,
+        },
+  )
+  const tideLayer = pick(SECTION_EDGE_TIDE_LAYERS, style?.edgeTideLayer)
 
   return {
     shape: edge,
     flip: edgeAllowsFlip(edge) && style?.edgeFlip === true,
     invert: edgeAllowsInvert(edge) && style?.edgeInvert === true,
     height: custom ?? { kind: 'token', size },
-    accent: pick(SECTION_EDGE_ACCENTS, style?.edgeAccent) ?? 'none',
+    accent: edgeAllowsAccent(edge)
+      ? (pick(SECTION_EDGE_ACCENTS, style?.edgeAccent) ?? 'none')
+      : 'none',
     layer: pick(SECTION_EDGE_LAYERS, style?.edgeLayer) ?? 'accent-2',
+    tideLayer: tideLayer === 'echo' && hasBackdrop(style) ? 'accent' : (tideLayer ?? 'accent'),
+    lineColour: pick(SECTION_EDGE_LINE_COLOURS, style?.edgeLineColour) ?? 'accent',
+    // Only Elevated has a shadow; the others' resolved edge is exactly what it was.
+    ...(edge === 'elevated'
+      ? { shadow: pick(SECTION_EDGE_SHADOWS, style?.edgeShadow) ?? 'soft' }
+      : {}),
+    ...(generated ? { layered: resolveLayered(edge, style) } : {}),
   }
+}
+
+/**
+ * A stored custom height for a generated shape, held to what Studio permits at that screen size. The clamp
+ * lives here and nowhere else: today's shapes keep the whole 16 to 320 px range (customEdgeHeight).
+ */
+function clampedHeight(
+  value: number | null | undefined,
+  screen: keyof typeof GENERATED_EDGE_HEIGHT_BOUNDS,
+): number | undefined {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return undefined
+  const { min, max } = GENERATED_EDGE_HEIGHT_BOUNDS[screen]
+  return Math.min(max, Math.max(min, value))
+}
+
+/**
+ * A generated shape's stepped controls: each unset, unknown or not-offered value is the preset's default. A shape
+ * offers only some steps (Lagoon and Reef offer one crest and one depth), so a step stored under another shape
+ * is not drawn and not deleted: Studio says it is ignored. A layer below follows the preset: Reef always has
+ * one, Lagoon never, Still water when the switch is on and the depth offers it.
+ */
+function resolveLayered(
+  edge: keyof typeof LAYERED_PRESETS,
+  style: SectionStyleInput | null | undefined,
+): LayeredSettings {
+  const preset = LAYERED_PRESETS[edge]
+  const offered = <T extends string>(
+    options: readonly T[],
+    value: T | undefined,
+    fallback: T,
+  ): T => (value !== undefined && options.includes(value) ? value : fallback)
+  const depth = offered(
+    preset.depthOptions,
+    pick(SECTION_EDGE_DEPTHS, style?.edgeDepth),
+    preset.depthOptions[0] ?? 'standard',
+  )
+  return {
+    crest: offered(
+      preset.crestOptions,
+      pick(SECTION_EDGE_CRESTS, style?.edgeCrest),
+      preset.crestOptions[0] ?? 'standard',
+    ),
+    depth,
+    strength: pick(SECTION_EDGE_STRENGTHS, style?.edgeStrength) ?? 'standard',
+    palette: pick(SECTION_EDGE_PALETTES, style?.edgePalette) ?? preset.defaultPalette,
+    below: drawsLayerBelow(preset, depth, style?.edgeLayerBelow === true),
+    ...overridesOf(style?.edgeLayerColours),
+  }
+}
+
+/**
+ * The per-layer colours and strengths as stored, each field read on its own: a missing, null, empty or unknown
+ * value is unset (the recipe's role, or the shared strength), so a colour with no strength and a strength with
+ * no colour are both valid. Every slot is read, drawn or not: the composition draws only the layers a shape has,
+ * and a value for another slot is kept in the data. Nothing is added when nothing valid is stored.
+ */
+function overridesOf(
+  stored: EdgeLayerColoursInput | null | undefined,
+): { overrides: LayerOverrides } | undefined {
+  if (!stored || typeof stored !== 'object') return undefined
+  const overrides: LayerOverrides = {}
+  for (const slot of SECTION_EDGE_LAYER_SLOTS) {
+    const paint = pick(SECTION_EDGE_LAYER_ROLES, stored[slot])
+    const strength = pick(SECTION_EDGE_STRENGTHS, stored[`${slot}Strength`])
+    if (paint || strength)
+      overrides[slot] = { ...(paint ? { paint } : {}), ...(strength ? { strength } : {}) }
+  }
+  return Object.keys(overrides).length > 0 ? { overrides } : undefined
+}
+
+/** Whether a section is drawn over a picture or a brand gradient, as resolveSectionStyle reads them. */
+function hasBackdrop(style: SectionStyleInput | null | undefined): boolean {
+  const gradient = stegaClean(style?.gradient)
+  return Boolean(style?.image?.asset) || Boolean(gradient && GRADIENT_SLUG_PATTERN.test(gradient))
 }
 
 /** The stored Advanced animation options, cleaned of edit markers. */

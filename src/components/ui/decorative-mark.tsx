@@ -1,0 +1,169 @@
+import type { CSSProperties } from 'react'
+
+import { BADGE_ICON_PATHS } from '@/components/ui/badge-icon'
+import type { StoredCardLevel } from '@/lib/color/card-contrast'
+import type { GlassStrength } from '@/lib/color/glass-contrast'
+import { markOpacityAt, type MarkFill } from '@/lib/color/mark-contrast'
+import type { BadgeIconName } from '@/lib/sanity/badge-icons'
+import {
+  MARK_SIZE_CQI,
+  resolveDecorativeMark,
+  type MarkInput,
+  type ResolvedMark,
+} from '@/lib/sanity/decorative-mark-options'
+import type { SiteDesign } from '@/lib/sanity/site-design'
+
+export type MarkScope = 'section' | 'card' | 'item'
+
+export interface DecorativeMarkProps {
+  input: MarkInput | null | undefined
+  scope: MarkScope
+  tone: string | null | undefined
+  /** A card's or item's stored levels, least specific first. Unset is the section itself. */
+  levels?: readonly (StoredCardLevel | null | undefined)[]
+  /** A picture, gradient or panel sits behind the text. */
+  backdrop?: boolean
+  glass?: GlassStrength | null
+  /**
+   * Drawn inside the element whose background it sits on (a card, a panel), which must be `relative
+   * isolate`: below that element's content and above its own background. Otherwise a direct child of the
+   * section, drawn before a content container that is `relative`.
+   */
+  nested?: boolean
+  /** The box's element: a `span` where only phrasing content is allowed (inside a link or a button). */
+  as?: 'div' | 'span'
+  /** A card's own fill and text colours, when it isn't the tone's surface. */
+  fill?: MarkFill
+}
+
+const ALIGN_CLASS = { left: 'text-left', centre: 'text-center', right: 'text-right' } as const
+const FONT_CLASS = { display: 'font-display', body: 'font-body' } as const
+
+/** Where the mark sits, in the container's own measure, so it never takes part in layout. */
+function placement(mark: ResolvedMark, opacity: number): CSSProperties {
+  return {
+    left: `calc(${String(mark.x)}% + ${String(mark.offsetX)}%)`,
+    top: `calc(${String(mark.y)}% + ${String(mark.offsetY)}%)`,
+    transform: `translate(${String(-mark.x)}%, ${String(-mark.y)}%) rotate(${String(mark.rotation)}deg) scale(var(--mark-scale, 1))`,
+    opacity,
+    ...(mark.colour ? { color: mark.colour } : {}),
+  }
+}
+
+function MarkContent({ mark, opacity }: { mark: ResolvedMark; opacity: number }) {
+  const position = placement(mark, opacity)
+  const sizes = MARK_SIZE_CQI[mark.size]
+  // No taller than what it sits in, so a short, wide card (a closed FAQ question) shows a whole mark.
+  const box = { ...position, width: `min(${String(sizes.box)}cqi, 100cqb)` }
+  switch (mark.kind) {
+    case 'text':
+      return (
+        // Drawn from an attribute, so the words are never read, selected, copied or indexed as content.
+        <span
+          data-mark-text={mark.text}
+          className={`absolute w-max max-w-[100cqi] leading-none font-semibold before:content-[attr(data-mark-text)] ${FONT_CLASS[mark.font]} ${ALIGN_CLASS[mark.align]}`}
+          style={{ ...position, fontSize: `${String(sizes.text)}cqi` }}
+        />
+      )
+    case 'icon':
+      return (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          focusable="false"
+          className="absolute"
+          style={box}
+        >
+          {BADGE_ICON_PATHS[mark.icon as BadgeIconName]}
+        </svg>
+      )
+    case 'picture':
+      return (
+        <span
+          className="absolute aspect-square bg-center bg-no-repeat"
+          style={
+            mark.keepColours
+              ? { ...box, backgroundImage: `url(${mark.url})`, backgroundSize: 'contain' }
+              : {
+                  ...box,
+                  backgroundColor: 'currentColor',
+                  maskImage: `url(${mark.url})`,
+                  WebkitMaskImage: `url(${mark.url})`,
+                  maskSize: 'contain',
+                  WebkitMaskSize: 'contain',
+                  maskRepeat: 'no-repeat',
+                  WebkitMaskRepeat: 'no-repeat',
+                  maskPosition: 'center',
+                  WebkitMaskPosition: 'center',
+                }
+          }
+        />
+      )
+  }
+}
+
+/**
+ * The one decorative mark, at every scope (task 156; README, "Decorative marks"): a server component with
+ * no JavaScript. Decorative only (hidden from assistive technology, never hit by the pointer, never
+ * focusable) and clipped to its own box, so it can't cause a horizontal scroll or reach a neighbour. It is
+ * absolutely placed in a box the size of its container, so it can't shift layout. Only a page with a mark
+ * waits for the site's colours, which the contrast check needs.
+ */
+export function DecorativeMark(props: DecorativeMarkProps) {
+  const mark = resolveDecorativeMark(props.input)
+  return mark ? <LoadedMark {...props} mark={mark} /> : null
+}
+
+/**
+ * The site's colours, loaded here and not at the top so a page without a mark never loads the Sanity
+ * client for this. One import is shared by every mark on the page: several cards each draw a mark at
+ * once, and two first-time imports of one module racing is how a test's mock of it was bypassed.
+ */
+let loadedSiteDesign: Promise<{ getSiteDesign: () => Promise<SiteDesign | undefined> }> | undefined
+const siteDesign = () => (loadedSiteDesign ??= import('@/lib/sanity/site-design'))
+
+async function LoadedMark({
+  mark,
+  scope,
+  tone,
+  levels,
+  backdrop,
+  glass,
+  nested = false,
+  as: Box = 'div',
+  fill,
+}: DecorativeMarkProps & { mark: ResolvedMark }) {
+  const design = await (await siteDesign()).getSiteDesign()
+  const opacity = markOpacityAt({
+    opacity: mark.opacity,
+    colour: mark.storedColour,
+    ownColours: mark.kind === 'picture' && mark.keepColours,
+    tone,
+    levels,
+    backdrop,
+    glass,
+    fill,
+    site: design?.colours,
+  })
+  if (opacity === 0) return null
+  const phone =
+    mark.phoneScale === 'hidden'
+      ? 'max-md:hidden'
+      : mark.phoneScale === 'smaller'
+        ? 'max-md:[--mark-scale:0.6]'
+        : ''
+  return (
+    <Box
+      aria-hidden="true"
+      data-decorative-mark={scope}
+      data-mark-kind={mark.kind}
+      className={`[container-type:size] pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit] select-none ${nested ? '-z-10' : ''} ${phone}`.trim()}
+    >
+      <MarkContent mark={mark} opacity={opacity} />
+    </Box>
+  )
+}

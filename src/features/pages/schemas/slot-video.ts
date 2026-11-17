@@ -5,6 +5,7 @@ import { hiddenFromClients } from '@/lib/sanity/roles'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 
+import { slotVideoCapabilities } from './slot-video-capabilities'
 import { ASPECT_RATIOS, PROVIDER_NAMES, VIDEO_SOURCES, parseVideoUrl } from '../utils/video-source'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
@@ -28,6 +29,7 @@ export const slotVideo = defineType({
   title: 'Video',
   type: 'object',
   icon: PlayIcon,
+  options: { designCapabilities: slotVideoCapabilities },
   fields: [
     defineField({
       name: 'title',

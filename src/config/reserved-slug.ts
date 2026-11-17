@@ -3,6 +3,7 @@ import {
   BLOG_SEGMENT,
   EXPERIMENT_SEGMENT,
   GALLERY_SEGMENT,
+  LOCATIONS_SEGMENT,
   PRELAUNCH_VIEW_SEGMENT,
   SEARCH_SEGMENT,
   SERVICES_SEGMENT,
@@ -36,16 +37,19 @@ const RESERVED_SEGMENTS = new Set([
  * first. A page called plain `team` or `events` has no route in its way, and is where a Team or
  * Events section usually lives. `services` is reserved the same way, but only while the `services`
  * flag is on (callers pass it: this module can't read the profile, which imports it): a site without
- * the flag has no route in the way, and a page at `services/web-design` is fine.
+ * the flag has no route in the way, and a page at `services/web-design` is fine. `locations` follows
+ * the same rule with its own flag.
  */
 export function reservedSegment(
   slug: string,
-  { services = false }: { services?: boolean } = {},
+  { services = false, locations = false }: { services?: boolean; locations?: boolean } = {},
 ): string | null {
   const [first = '', ...rest] = slug.split('/')
   if (RESERVED_SEGMENTS.has(first)) return first
   if (rest.length === 0) return null
   if (first === TEAM_SEGMENT || first === EVENTS_SEGMENT) return first
-  // `/services/[slug]` answers exactly two segments; `services/web/design` still reaches the page route.
-  return first === SERVICES_SEGMENT && services && rest.length === 1 ? first : null
+  // `/services/[slug]` and `/locations/[slug]` answer exactly two segments; `services/web/design` still reaches the page route.
+  if (rest.length !== 1) return null
+  if (first === SERVICES_SEGMENT && services) return first
+  return first === LOCATIONS_SEGMENT && locations ? first : null
 }

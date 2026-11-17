@@ -22,28 +22,46 @@ export interface BrandColours {
 /** What a site with nothing set in Design settings draws (and what a failed request counts as). */
 export const DEFAULT_BRAND_COLOURS: BrandColours = { colours: colorHex, custom: false }
 
+/** The site's colours, and whether they were read: a failed request is unknown, not "the defaults". */
+export interface BrandColourState extends BrandColours {
+  known: boolean
+}
+
 // A form asks several times as it renders; share the answer for a moment, but never for long, so a
 // colour just published in Design settings turns up on the next look.
 const SHARE_MS = 3000
-let shared: { at: number; pending: Promise<BrandColours> } | undefined
+let shared: { at: number; pending: Promise<BrandColourState> } | undefined
 
 /**
  * The site's colours for the contrast checks: Design settings' Brand colours resolved the way the
  * page resolves them (`resolveDesignTokens`). A failed request counts as the defaults, so a flaky
- * connection leaves the checks on tokens.json's colours rather than breaking the form.
+ * connection leaves the checks on tokens.json's colours rather than breaking the form. A check that
+ * should not give a verdict on colours it could not read asks `fetchBrandColourState` instead, which
+ * says whether the read worked.
  */
-export function fetchBrandColours(client: ColourClient): Promise<BrandColours> {
+export function fetchBrandColourState(client: ColourClient): Promise<BrandColourState> {
   if (shared && Date.now() - shared.at < SHARE_MS) return shared.pending
-  const pending = client
-    .fetch<DesignOverrides | null>(QUERY)
-    .then((overrides) => {
-      const { colours } = resolveDesignTokens(overrides)
-      const custom = (Object.keys(colorHex) as (keyof typeof colorHex)[]).some(
-        (key) => colours[key] !== colorHex[key],
-      )
-      return { colours, custom }
-    })
-    .catch(() => DEFAULT_BRAND_COLOURS)
-  shared = { at: Date.now(), pending }
-  return pending
+  const entry = {
+    at: Date.now(),
+    pending: client
+      .fetch<DesignOverrides | null>(QUERY)
+      .then((overrides): BrandColourState => {
+        const { colours } = resolveDesignTokens(overrides)
+        const custom = (Object.keys(colorHex) as (keyof typeof colorHex)[]).some(
+          (key) => colours[key] !== colorHex[key],
+        )
+        return { colours, custom, known: true }
+      })
+      .catch((): BrandColourState => ({ ...DEFAULT_BRAND_COLOURS, known: false })),
+  }
+  shared = entry
+  // A failed read is not kept for the moment: the next look asks again.
+  void entry.pending.then((state) => {
+    if (!state.known && shared === entry) shared = undefined
+  })
+  return entry.pending
+}
+
+export function fetchBrandColours(client: ColourClient): Promise<BrandColours> {
+  return fetchBrandColourState(client).then(({ colours, custom }) => ({ colours, custom }))
 }

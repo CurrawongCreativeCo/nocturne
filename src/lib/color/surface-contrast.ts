@@ -83,6 +83,28 @@ export function surfaceTextContrast({
   glass: GlassStrength | null
   site?: ColourSet
 }): SurfaceContrast | null {
+  const backgrounds = surfaceBackgrounds({ surface, tone, glass, site })
+  if (!backgrounds) return null
+  return backgrounds
+    .map((background) => ({ background, ratio: contrastRatio(foreground, background) }))
+    .reduce((a, b) => (b.ratio < a.ratio ? b : a))
+}
+
+/**
+ * The colours a chosen card background can draw as, given the section's tone and, for glass, its strength.
+ * Null when nothing about the background is chosen: the family's own surface.
+ */
+export function surfaceBackgrounds({
+  surface,
+  tone,
+  glass,
+  site = colorHex,
+}: {
+  surface: StoredSurface
+  tone: string | null | undefined
+  glass: GlassStrength | null
+  site?: ColourSet
+}): string[] | null {
   if (!surface.background && !surface.backgroundStrength) return null
   const tint = backgroundHex(surface.background ?? undefined, tone, site)
   const strength = surface.backgroundStrength as SurfaceStrength | undefined
@@ -92,12 +114,9 @@ export function surfaceTextContrast({
       ? glassFractions[glass]
       : 1
   const under = glass ? ['#000000', '#ffffff'] : [tonePalette(tone, site).background]
-  return under
-    .map((behind) => {
-      const background = tint === 'transparent' ? behind : composite(tint, behind, fraction)
-      return { background, ratio: contrastRatio(foreground, background) }
-    })
-    .reduce((a, b) => (b.ratio < a.ratio ? b : a))
+  return under.map((behind) =>
+    tint === 'transparent' ? behind : composite(tint, behind, fraction),
+  )
 }
 
 /** The chosen foreground, else the surrounding tone’s ink. */
@@ -120,6 +139,7 @@ export function surfaceColourCheck({
   hex,
   inherited,
   own,
+  foregrounds = [],
   tone,
   glass,
   site = colorHex,
@@ -129,6 +149,8 @@ export function surfaceColourCheck({
   hex?: string
   inherited?: StoredSurface
   own?: StoredSurface
+  /** Every other chosen text colour on the card: a background is judged by the worst of them. */
+  foregrounds?: readonly StoredColour[]
   tone?: string
   glass: GlassStrength | null
   site?: ColourSet
@@ -139,13 +161,24 @@ export function surfaceColourCheck({
   const surface = own
     ? layeredSurface(inherited, put(own))
     : layeredSurface(put(inherited), undefined)
-  const foreground =
+  const candidates =
     role === 'background'
-      ? surfaceForegroundHex(surface, tone, site)
-      : themeColourHex(current, hex, tone, site)
-  if (!foreground) return null
-  const result = surfaceTextContrast({ foreground, surface, tone, glass, site })
-  if (!result) return null
+      ? [
+          surfaceForegroundHex(surface, tone, site),
+          ...foregrounds.map((colour) => themeColourHex(colour.colour, colour.hex, tone, site)),
+        ]
+      : [themeColourHex(current, hex, tone, site)]
+  const measured = candidates
+    .filter((foreground): foreground is string => Boolean(foreground))
+    .map((foreground) => ({
+      foreground,
+      result: surfaceTextContrast({ foreground, surface, tone, glass, site }),
+    }))
+    .filter((entry): entry is typeof entry & { result: SurfaceContrast } => entry.result !== null)
+  if (measured.length === 0) return null
+  const { foreground, result } = measured.reduce((a, b) =>
+    b.result.ratio < a.result.ratio ? b : a,
+  )
   const required = 4.5
   return {
     foreground,

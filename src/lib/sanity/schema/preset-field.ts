@@ -68,6 +68,11 @@ declare module 'sanity' {
      * in features/studio/components/panel-usage.
      */
     usedByButtons?: boolean
+    /**
+     * Shows how many sections set their own spacing, with links, above the document's form (Brand
+     * colours, under Density). The Studio input is features/studio/components/spacing-usage-note.
+     */
+    spacingUsage?: boolean
   }
   interface ObjectOptions {
     /** Presets shown in a bar above the object's fields (features/studio/components/preset-picker). */

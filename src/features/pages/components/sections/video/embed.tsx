@@ -1,11 +1,14 @@
-import { PlainText } from '@/components/ui/plain-text'
-import { RichHeading } from '@/components/ui/rich-heading'
 import { SectionFrame } from '@/components/ui/section-frame'
+import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
+import { resolveTextRoles } from '@/lib/sanity/text-role'
 
 import { VideoFrame } from './video-frame'
 import type { SectionProps } from '../../../types'
+
+const HEADER_ROLES = ['eyebrow', 'heading', 'intro'] as const
 
 // How this section looks without a style. Keep it equal to the initial style in its schema.
 const DEFAULTS: SectionDefaults = { container: 'max-w-content', align: 'start' }
@@ -17,7 +20,7 @@ const DEFAULTS: SectionDefaults = { container: 'max-w-content', align: 'start' }
 export function VideoEmbed({ data, isFirst }: SectionProps<'video'>) {
   const { heading, text } = data
   const title = sectionTitle(data)
-  const { text: textAlign } = sectionTraits(data.style, DEFAULTS)
+  const { block, text: textAlign } = sectionTraits(data.style, DEFAULTS)
 
   return (
     <SectionFrame
@@ -26,18 +29,17 @@ export function VideoEmbed({ data, isFirst }: SectionProps<'video'>) {
       isFirst={isFirst}
       containerClassName={textAlign}
     >
-      <RichHeading
-        as="h2"
-        blocks={heading}
-        fallback={title}
-        className="text-h2 font-semibold text-balance"
+      <SectionHeader
+        as={null}
+        eyebrow={data.eyebrow}
+        title={title}
+        heading={heading}
+        intro={text}
+        design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+        divider={resolveDivider(data.headerDesign?.divider)}
+        dividerBlock={block}
+        introClass="mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted"
       />
-      {text && (
-        <PlainText
-          text={text}
-          className="mt-4 max-w-measure-narrow text-lead text-pretty text-ink-muted"
-        />
-      )}
       <div className="mt-8 text-left">
         <VideoFrame
           source={data.source}

@@ -1,0 +1,791 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SectionRenderer output parity > ctaBanner keeps its output for every layout and stored panel choice 1`] = `
+{
+  "single layout · panel glass": {
+    "hash": "e604d37c9fd36eff",
+    "panel": null,
+  },
+  "single layout · panel none": {
+    "hash": "e604d37c9fd36eff",
+    "panel": null,
+  },
+  "single layout · panel solid": {
+    "hash": "e604d37c9fd36eff",
+    "panel": null,
+  },
+  "single layout · panel unset": {
+    "hash": "e604d37c9fd36eff",
+    "panel": null,
+  },
+}
+`;
+
+exports[`SectionRenderer output parity > embed keeps its output for every layout and stored panel choice 1`] = `
+{
+  "single layout · panel glass": {
+    "hash": "bc633ab9ae32a1ac",
+    "panel": "tinted",
+  },
+  "single layout · panel none": {
+    "hash": "f03e0629b1c857f2",
+    "panel": null,
+  },
+  "single layout · panel solid": {
+    "hash": "e3852c544d2a8be5",
+    "panel": "solid",
+  },
+  "single layout · panel unset": {
+    "hash": "f03e0629b1c857f2",
+    "panel": null,
+  },
+}
+`;
+
+exports[`SectionRenderer output parity > events keeps its output for every layout and stored panel choice 1`] = `
+{
+  "agenda · panel glass": {
+    "hash": "c6bf5a4daf622858",
+    "panel": "tinted",
+  },
+  "agenda · panel none": {
+    "hash": "28dfc8f6e76033ac",
+    "panel": null,
+  },
+  "agenda · panel solid": {
+    "hash": "718708e11b01039a",
+    "panel": "solid",
+  },
+  "agenda · panel unset": {
+    "hash": "28dfc8f6e76033ac",
+    "panel": null,
+  },
+  "featured · panel glass": {
+    "hash": "bf7d7daaee85ee60",
+    "panel": "tinted",
+  },
+  "featured · panel none": {
+    "hash": "d8377a95057584be",
+    "panel": null,
+  },
+  "featured · panel solid": {
+    "hash": "601c0a514ada2163",
+    "panel": "solid",
+  },
+  "featured · panel unset": {
+    "hash": "d8377a95057584be",
+    "panel": null,
+  },
+  "list · panel glass": {
+    "hash": "4d0172db42504dd2",
+    "panel": "tinted",
+  },
+  "list · panel none": {
+    "hash": "1eabfb7a873a46ad",
+    "panel": null,
+  },
+  "list · panel solid": {
+    "hash": "96a818e6b98b4b54",
+    "panel": "solid",
+  },
+  "list · panel unset": {
+    "hash": "1eabfb7a873a46ad",
+    "panel": null,
+  },
+}
+`;
+
+exports[`SectionRenderer output parity > faq keeps its output for every layout and stored panel choice 1`] = `
+{
+  "single layout · panel glass": {
+    "hash": "8c45bc4c7a169fb6",
+    "panel": "tinted",
+  },
+  "single layout · panel none": {
+    "hash": "9bfaac1ef4b9e7dd",
+    "panel": null,
+  },
+  "single layout · panel solid": {
+    "hash": "9a52422284b21c09",
+    "panel": "solid",
+  },
+  "single layout · panel unset": {
+    "hash": "9bfaac1ef4b9e7dd",
+    "panel": null,
+  },
+}
+`;
+
+exports[`SectionRenderer output parity > featuresGrid keeps its output for every layout and stored panel choice 1`] = `
+{
+  "single layout · panel glass": {
+    "hash": "3272ac36240752a3",
+    "panel": "tinted",
+  },
+  "single layout · panel none": {
+    "hash": "4b06b3e796afda84",
+    "panel": null,
+  },
+  "single layout · panel solid": {
+    "hash": "b59e76437ae43171",
+    "panel": "solid",
+  },
+  "single layout · panel unset": {
+    "hash": "4b06b3e796afda84",
+    "panel": null,
+  },
+}
+`;
+
+exports[`SectionRenderer output parity > formSection keeps its output for every layout and stored panel choice 1`] = `
+{
+  "single layout · panel glass": {
+    "hash": "9d11722db1bb237c",
+    "panel": "tinted",
+  },
+  "single layout · panel none": {
+    "hash": "14fc3e6647873d4d",
+    "panel": null,
+  },
+  "single layout · panel solid": {
+    "hash": "8c32e5e79790d4c7",
+    "panel": "solid",
+  },
+  "single layout · panel unset": {
+    "hash": "14fc3e6647873d4d",
+    "panel": null,
+  },
+}
+`;
+
+exports[`SectionRenderer output parity > gallery keeps its output for every layout and stored panel choice 1`] = `
+{
+  "grid · panel glass": {
+    "hash": "e1f19bb65bec5c6e",
+    "panel": "tinted",
+  },
+  "grid · panel none": {
+    "hash": "3132e958f37129cd",
+    "panel": null,
+  },
+  "grid · panel solid": {
+    "hash": "d700c5d58b1fc35d",
+    "panel": "solid",
+  },
+  "grid · panel unset": {
+    "hash": "3132e958f37129cd",
+    "panel": null,
+  },
+  "masonry · panel glass": {
+    "hash": "fdc79f405581dd36",
+    "panel": "tinted",
+  },
+  "masonry · panel none": {
+    "hash": "74aa67c63c3d58d6",
+    "panel": null,
+  },
+  "masonry · panel solid": {
+    "hash": "555164fea8c1f849",
+    "panel": "solid",
+  },
+  "masonry · panel unset": {
+    "hash": "74aa67c63c3d58d6",
+    "panel": null,
+  },
+  "slider · panel glass": {
+    "hash": "67fa167e8f617469",
+    "panel": "tinted",
+  },
+  "slider · panel none": {
+    "hash": "c7bc55f544bb819e",
+    "panel": null,
+  },
+  "slider · panel solid": {
+    "hash": "1d3bfc5058277d82",
+    "panel": "solid",
+  },
+  "slider · panel unset": {
+    "hash": "c7bc55f544bb819e",
+    "panel": null,
+  },
+}
+`;
+
+exports[`SectionRenderer output parity > hero keeps its output for every layout and stored panel choice 1`] = `
+{
+  "editorial · panel glass": {
+    "hash": "a4ff279e8403ae5a",
+    "panel": "tinted",
+  },
+  "editorial · panel none": {
+    "hash": "b51d5440ef5494a7",
+    "panel": null,
+  },
+  "editorial · panel solid": {
+    "hash": "3e4b11a7ba19ae2a",
+    "panel": "solid",
+  },
+  "editorial · panel unset": {
+    "hash": "b51d5440ef5494a7",
+    "panel": null,
+  },
+  "full-bleed · panel glass": {
+    "hash": "b779d193914b8319",
+    "panel": null,
+  },
+  "full-bleed · panel none": {
+    "hash": "b779d193914b8319",
+    "panel": null,
+  },
+  "full-bleed · panel solid": {
+    "hash": "b779d193914b8319",
+    "panel": null,
+  },
+  "full-bleed · panel unset": {
+    "hash": "b779d193914b8319",
+    "panel": null,
+  },
+  "overlay · panel glass": {
+    "hash": "78b3103124040e17",
+    "panel": "frosted",
+  },
+  "overlay · panel none": {
+    "hash": "5876b71f70693585",
+    "panel": null,
+  },
+  "overlay · panel solid": {
+    "hash": "fa431f64fdb7d9c0",
+    "panel": "solid",
+  },
+  "overlay · panel unset": {
+    "hash": "5876b71f70693585",
+    "panel": null,
+  },
+  "split · panel glass": {
+    "hash": "f6c7294b6dee07d4",
+    "panel": "tinted",
+  },
+  "split · panel none": {
+    "hash": "c0a4e4614bdb36d5",
+    "panel": null,
+  },
+  "split · panel solid": {
+    "hash": "db240896b5be7e1f",
+    "panel": "solid",
+  },
+  "split · panel unset": {
+    "hash": "c0a4e4614bdb36d5",
+    "panel": null,
+  },
+}
+`;
+
+exports[`SectionRenderer output parity > keeps draft-mode output, with edit markers in the layout and panel values 1`] = `
+{
+  "ctaBanner · single layout": {
+    "hash": "d49b6dd6874626e7",
+    "panel": null,
+  },
+  "hero · full-bleed": {
+    "hash": "430b8589d76bde6a",
+    "panel": null,
+  },
+  "hero · split": {
+    "hash": "794d2bf7dc06fa57",
+    "panel": "tinted",
+  },
+  "linkList · compact": {
+    "hash": "2d6793fe862f0e74",
+    "panel": null,
+  },
+  "linkList · stacked": {
+    "hash": "92785789999c5b82",
+    "panel": null,
+  },
+  "mediaText · side": {
+    "hash": "10fc0278178efebc",
+    "panel": "tinted",
+  },
+  "richText · single layout": {
+    "hash": "2dbcc787fdf2a894",
+    "panel": "tinted",
+  },
+}
+`;
+
+exports[`SectionRenderer output parity > keeps output behind the members gate 1`] = `
+{
+  "ctaBanner · single layout": {
+    "hash": "51524442dc551c49",
+    "panel": null,
+  },
+  "hero · full-bleed": {
+    "hash": "e5ac5867e20ebae8",
+    "panel": null,
+  },
+  "hero · split": {
+    "hash": "cad1a795d72e7176",
+    "panel": "tinted",
+  },
+  "linkList · compact": {
+    "hash": "17b7380f987d6600",
+    "panel": null,
+  },
+  "linkList · stacked": {
+    "hash": "14e5e29fe0f5f944",
+    "panel": null,
+  },
+  "mediaText · side": {
+    "hash": "cca743e6bcb8a168",
+    "panel": "tinted",
+  },
+  "richText · single layout": {
+    "hash": "5f9892626cdabd21",
+    "panel": "tinted",
+  },
+}
+`;
+
+exports[`SectionRenderer output parity > linkList keeps its output for every layout and stored panel choice 1`] = `
+{
+  "cards · panel glass": {
+    "hash": "ea9a7276d4343f63",
+    "panel": null,
+  },
+  "cards · panel none": {
+    "hash": "ea9a7276d4343f63",
+    "panel": null,
+  },
+  "cards · panel solid": {
+    "hash": "ea9a7276d4343f63",
+    "panel": null,
+  },
+  "cards · panel unset": {
+    "hash": "ea9a7276d4343f63",
+    "panel": null,
+  },
+  "compact · panel glass": {
+    "hash": "7c16514bbd906bb8",
+    "panel": null,
+  },
+  "compact · panel none": {
+    "hash": "7c16514bbd906bb8",
+    "panel": null,
+  },
+  "compact · panel solid": {
+    "hash": "7c16514bbd906bb8",
+    "panel": null,
+  },
+  "compact · panel unset": {
+    "hash": "7c16514bbd906bb8",
+    "panel": null,
+  },
+  "editorial · panel glass": {
+    "hash": "b32410d707bc5957",
+    "panel": null,
+  },
+  "editorial · panel none": {
+    "hash": "b32410d707bc5957",
+    "panel": null,
+  },
+  "editorial · panel solid": {
+    "hash": "b32410d707bc5957",
+    "panel": null,
+  },
+  "editorial · panel unset": {
+    "hash": "b32410d707bc5957",
+    "panel": null,
+  },
+  "stacked · panel glass": {
+    "hash": "7c0d9533a83feb30",
+    "panel": null,
+  },
+  "stacked · panel none": {
+    "hash": "7c0d9533a83feb30",
+    "panel": null,
+  },
+  "stacked · panel solid": {
+    "hash": "7c0d9533a83feb30",
+    "panel": null,
+  },
+  "stacked · panel unset": {
+    "hash": "7c0d9533a83feb30",
+    "panel": null,
+  },
+}
+`;
+
+exports[`SectionRenderer output parity > location keeps its output for every layout and stored panel choice 1`] = `
+{
+  "single layout · panel glass": {
+    "hash": "1312fa34ce6a4c16",
+    "panel": "tinted",
+  },
+  "single layout · panel none": {
+    "hash": "64040420b3ecf765",
+    "panel": null,
+  },
+  "single layout · panel solid": {
+    "hash": "4023c96119c38eda",
+    "panel": "solid",
+  },
+  "single layout · panel unset": {
+    "hash": "64040420b3ecf765",
+    "panel": null,
+  },
+}
+`;
+
+exports[`SectionRenderer output parity > logoCloud keeps its output for every layout and stored panel choice 1`] = `
+{
+  "grid · panel glass": {
+    "hash": "1e3d8aa87caa18cf",
+    "panel": "tinted",
+  },
+  "grid · panel none": {
+    "hash": "a031657579b3067b",
+    "panel": null,
+  },
+  "grid · panel solid": {
+    "hash": "151c704492d5e53f",
+    "panel": "solid",
+  },
+  "grid · panel unset": {
+    "hash": "a031657579b3067b",
+    "panel": null,
+  },
+  "marquee · panel glass": {
+    "hash": "18c3523924441aab",
+    "panel": "tinted",
+  },
+  "marquee · panel none": {
+    "hash": "7b19be2a8978f9a6",
+    "panel": null,
+  },
+  "marquee · panel solid": {
+    "hash": "42b64a45653447ee",
+    "panel": "solid",
+  },
+  "marquee · panel unset": {
+    "hash": "7b19be2a8978f9a6",
+    "panel": null,
+  },
+}
+`;
+
+exports[`SectionRenderer output parity > mediaText keeps its output for every layout and stored panel choice 1`] = `
+{
+  "overlay · panel glass": {
+    "hash": "1e5f95e77f844c29",
+    "panel": "frosted",
+  },
+  "overlay · panel none": {
+    "hash": "ddfcf5aec43d7be7",
+    "panel": null,
+  },
+  "overlay · panel solid": {
+    "hash": "bd3ee01f03626b16",
+    "panel": "solid",
+  },
+  "overlay · panel unset": {
+    "hash": "ddfcf5aec43d7be7",
+    "panel": null,
+  },
+  "side · panel glass": {
+    "hash": "9e2c192523771000",
+    "panel": "tinted",
+  },
+  "side · panel none": {
+    "hash": "18577803af2bf544",
+    "panel": null,
+  },
+  "side · panel solid": {
+    "hash": "4d645c2467e70a77",
+    "panel": "solid",
+  },
+  "side · panel unset": {
+    "hash": "18577803af2bf544",
+    "panel": null,
+  },
+  "stacked · panel glass": {
+    "hash": "b08fe1eb2fb5c82f",
+    "panel": "tinted",
+  },
+  "stacked · panel none": {
+    "hash": "49c262fde3294c15",
+    "panel": null,
+  },
+  "stacked · panel solid": {
+    "hash": "b8801ae2e6341c81",
+    "panel": "solid",
+  },
+  "stacked · panel unset": {
+    "hash": "49c262fde3294c15",
+    "panel": null,
+  },
+}
+`;
+
+exports[`SectionRenderer output parity > newsletterSignup keeps its output for every layout and stored panel choice 1`] = `
+{
+  "single layout · panel glass": {
+    "hash": "3856acc795fc9263",
+    "panel": "tinted",
+  },
+  "single layout · panel none": {
+    "hash": "86ecbd01c32c82ca",
+    "panel": null,
+  },
+  "single layout · panel solid": {
+    "hash": "94fb4545c5d992fc",
+    "panel": "solid",
+  },
+  "single layout · panel unset": {
+    "hash": "86ecbd01c32c82ca",
+    "panel": null,
+  },
+}
+`;
+
+exports[`SectionRenderer output parity > pricingTable keeps its output for every layout and stored panel choice 1`] = `
+{
+  "single layout · panel glass": {
+    "hash": "3495ca8b9b3464c0",
+    "panel": "tinted",
+  },
+  "single layout · panel none": {
+    "hash": "0f89f55aba0733fe",
+    "panel": null,
+  },
+  "single layout · panel solid": {
+    "hash": "0f384a1548f9a93a",
+    "panel": "solid",
+  },
+  "single layout · panel unset": {
+    "hash": "0f89f55aba0733fe",
+    "panel": null,
+  },
+}
+`;
+
+exports[`SectionRenderer output parity > process keeps its output for every layout and stored panel choice 1`] = `
+{
+  "alternating · panel glass": {
+    "hash": "78fac4f2347a7b28",
+    "panel": "tinted",
+  },
+  "alternating · panel none": {
+    "hash": "6ba1df6f8612239e",
+    "panel": null,
+  },
+  "alternating · panel solid": {
+    "hash": "4882bc7fbfdc804c",
+    "panel": "solid",
+  },
+  "alternating · panel unset": {
+    "hash": "6ba1df6f8612239e",
+    "panel": null,
+  },
+  "vertical · panel glass": {
+    "hash": "715bfde48c1e7a93",
+    "panel": "tinted",
+  },
+  "vertical · panel none": {
+    "hash": "fba802c94cca0b39",
+    "panel": null,
+  },
+  "vertical · panel solid": {
+    "hash": "e7448627e46c4ea6",
+    "panel": "solid",
+  },
+  "vertical · panel unset": {
+    "hash": "fba802c94cca0b39",
+    "panel": null,
+  },
+}
+`;
+
+exports[`SectionRenderer output parity > richText keeps its output for every layout and stored panel choice 1`] = `
+{
+  "single layout · panel glass": {
+    "hash": "cbf4bf90ef16321e",
+    "panel": "tinted",
+  },
+  "single layout · panel none": {
+    "hash": "7ff7e0ba9f5c1d46",
+    "panel": null,
+  },
+  "single layout · panel solid": {
+    "hash": "e351ed9129c38da7",
+    "panel": "solid",
+  },
+  "single layout · panel unset": {
+    "hash": "7ff7e0ba9f5c1d46",
+    "panel": null,
+  },
+}
+`;
+
+exports[`SectionRenderer output parity > stats keeps its output for every layout and stored panel choice 1`] = `
+{
+  "cards · panel glass": {
+    "hash": "2b8a549ba5a6afb4",
+    "panel": "tinted",
+  },
+  "cards · panel none": {
+    "hash": "549f9625171359df",
+    "panel": null,
+  },
+  "cards · panel solid": {
+    "hash": "351bfcbb5c9c4a0f",
+    "panel": "solid",
+  },
+  "cards · panel unset": {
+    "hash": "549f9625171359df",
+    "panel": null,
+  },
+  "inline · panel glass": {
+    "hash": "46e263a3cf997fdc",
+    "panel": "tinted",
+  },
+  "inline · panel none": {
+    "hash": "f63de1b93468d320",
+    "panel": null,
+  },
+  "inline · panel solid": {
+    "hash": "d0ebe6d3d0eda96c",
+    "panel": "solid",
+  },
+  "inline · panel unset": {
+    "hash": "f63de1b93468d320",
+    "panel": null,
+  },
+}
+`;
+
+exports[`SectionRenderer output parity > team keeps its output for every layout and stored panel choice 1`] = `
+{
+  "grid · panel glass": {
+    "hash": "3d077aa1f2508423",
+    "panel": "tinted",
+  },
+  "grid · panel none": {
+    "hash": "123f1ee32748df3a",
+    "panel": null,
+  },
+  "grid · panel solid": {
+    "hash": "54ebd8d729778075",
+    "panel": "solid",
+  },
+  "grid · panel unset": {
+    "hash": "123f1ee32748df3a",
+    "panel": null,
+  },
+  "list · panel glass": {
+    "hash": "bb36278be41659a2",
+    "panel": "tinted",
+  },
+  "list · panel none": {
+    "hash": "c82fd51fc24374a8",
+    "panel": null,
+  },
+  "list · panel solid": {
+    "hash": "4bbd190ccadb68b1",
+    "panel": "solid",
+  },
+  "list · panel unset": {
+    "hash": "c82fd51fc24374a8",
+    "panel": null,
+  },
+  "slider · panel glass": {
+    "hash": "c7f45cc5bd9544e3",
+    "panel": "tinted",
+  },
+  "slider · panel none": {
+    "hash": "c9bdaad9b219905a",
+    "panel": null,
+  },
+  "slider · panel solid": {
+    "hash": "51f1efc7c549e4fb",
+    "panel": "solid",
+  },
+  "slider · panel unset": {
+    "hash": "c9bdaad9b219905a",
+    "panel": null,
+  },
+}
+`;
+
+exports[`SectionRenderer output parity > testimonials keeps its output for every layout and stored panel choice 1`] = `
+{
+  "grid · panel glass": {
+    "hash": "d5c8f9f4c9c84734",
+    "panel": "tinted",
+  },
+  "grid · panel none": {
+    "hash": "f686216e5ac1a1b0",
+    "panel": null,
+  },
+  "grid · panel solid": {
+    "hash": "68985f5370056e3a",
+    "panel": "solid",
+  },
+  "grid · panel unset": {
+    "hash": "f686216e5ac1a1b0",
+    "panel": null,
+  },
+  "slider · panel glass": {
+    "hash": "7f384b7db84ac445",
+    "panel": "tinted",
+  },
+  "slider · panel none": {
+    "hash": "9d8487d15736c016",
+    "panel": null,
+  },
+  "slider · panel solid": {
+    "hash": "be39a38c3c57b096",
+    "panel": "solid",
+  },
+  "slider · panel unset": {
+    "hash": "9d8487d15736c016",
+    "panel": null,
+  },
+}
+`;
+
+exports[`SectionRenderer output parity > video keeps its output for every layout and stored panel choice 1`] = `
+{
+  "ambient · panel glass": {
+    "hash": "ae28eac90d40af98",
+    "panel": "frosted",
+  },
+  "ambient · panel none": {
+    "hash": "e8480672c68e20e8",
+    "panel": null,
+  },
+  "ambient · panel solid": {
+    "hash": "8cec6192e48dd564",
+    "panel": "solid",
+  },
+  "ambient · panel unset": {
+    "hash": "e8480672c68e20e8",
+    "panel": null,
+  },
+  "embed · panel glass": {
+    "hash": "507dba3c7824061b",
+    "panel": "tinted",
+  },
+  "embed · panel none": {
+    "hash": "ddf0f8e1738f75fc",
+    "panel": null,
+  },
+  "embed · panel solid": {
+    "hash": "0dd561ffbc340c92",
+    "panel": "solid",
+  },
+  "embed · panel unset": {
+    "hash": "ddf0f8e1738f75fc",
+    "panel": null,
+  },
+}
+`;

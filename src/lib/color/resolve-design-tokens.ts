@@ -1,10 +1,11 @@
 import { stegaClean } from 'next-sanity'
 
 import { colorHex } from '@/config/tokens.generated'
+import { siteDecisionVars, type SiteDecisionInput } from '@/lib/design/site-decisions'
 
 import { adjustLightnessForContrast, contrastRatio } from './contrast'
-import { brandGradients, type GradientInput } from './gradients'
-import { HEX_PATTERN, hexToOklch, oklchToHex } from './oklch'
+import { brandGradients, gradientInk, gradientSamples, type GradientInput } from './gradients'
+import { HEX_PATTERN, hexToOklch, hexToRgb, oklchToHex, rgbToHex } from './oklch'
 
 /** The generated token colours, camelCase hex (what `colorHex` in tokens.generated.ts holds). */
 export type BaseColours = Readonly<Record<keyof typeof colorHex, string>>
@@ -12,7 +13,7 @@ export type BaseColours = Readonly<Record<keyof typeof colorHex, string>>
 export const DEFAULT_BASE: BaseColours = colorHex
 
 /** Studio "Design settings" values as stored (and as the settings query returns them). */
-export interface DesignOverrides {
+export interface DesignOverrides extends SiteDecisionInput {
   appearance?: string | null
   primary?: string | null
   secondary?: string | null
@@ -24,6 +25,10 @@ export interface DesignOverrides {
   inkMuted?: string | null
   line?: string | null
   gradients?: readonly (GradientInput | null)[] | null
+  /** Brand colours → Buttons: `gradient` fills the main button from the gradient named by `buttonGradient`. */
+  buttonFill?: string | null
+  /** The slug of one of `gradients` (as a section's Gradient stores it). */
+  buttonGradient?: string | null
 }
 
 /** Text needs 4.5:1 (WCAG 2.2 AA); borders, icons and large text need 3:1. */
@@ -42,6 +47,12 @@ export interface ContrastCheck {
   pass: boolean
   /** True when the foreground is the colour the editor chose, so a lighter or darker shade can fix it. */
   adjustable: boolean
+  /**
+   * True when both colours of the pair are ones the editor chose under Advanced. Only such a pair that
+   * fails is an error on Brand colours (`ResolvedDesign.errors`); anything inherited or derived is a
+   * warning, and the site adjusts derived text itself.
+   */
+  explicit?: boolean
 }
 
 export interface DesignWarning {
@@ -56,6 +67,12 @@ export interface ResolvedDesign {
   css: string
   checks: ContrastCheck[]
   warnings: DesignWarning[]
+  /**
+   * Text pairs the editor chose in full (Advanced: Text or Muted text on a Background they also chose)
+   * that fail AA. They block publishing Brand colours, and nothing else: page and section documents
+   * only ever get warnings, because an error there would stop content being published.
+   */
+  errors: DesignWarning[]
   /** Every colour after the overrides (tokens.json values where nothing is set), for Studio previews. */
   colours: BaseColours
   /** The accent pair, for code that cannot read CSS variables (the OG image). */
@@ -230,13 +247,20 @@ export function resolveDesignTokens(
     colours.accentText = text
     colours.cta = primary.hex
     colours.ctaInk = primary.ink
+    // Links and eyebrows sit on the Background and the Alternate background, so the harder of the two
+    // is measured: a shade that passes it (what "Use suggested colour" saves) passes both.
+    const harder = [colours.surface, colours.surfaceAlt].reduce((worst, background) =>
+      contrastRatio(primary.hex, background) < contrastRatio(primary.hex, worst)
+        ? background
+        : worst,
+    )
     checks.push({
       id: 'primary-text',
       fields: ['primary'],
       label: 'Primary as text on the background',
       foreground: primary.hex,
-      background: colours.surface,
-      ratio: contrastRatio(primary.hex, colours.surface),
+      background: harder,
+      ratio: contrastRatio(primary.hex, harder),
       required: TEXT_RATIO,
       pass: text === primary.hex,
       adjustable: true,
@@ -277,6 +301,7 @@ export function resolveDesignTokens(
     foreground: string,
     background: string,
     adjustable: boolean,
+    explicit = false,
   ) =>
     checks.push({
       id,
@@ -288,6 +313,7 @@ export function resolveDesignTokens(
       required: TEXT_RATIO,
       pass: contrastRatio(foreground, background) >= TEXT_RATIO,
       adjustable,
+      explicit,
     })
   if (chosen.ink || chosen.surface || dark) {
     pair(
@@ -297,6 +323,19 @@ export function resolveDesignTokens(
       colours.ink,
       colours.surface,
       Boolean(chosen.ink),
+      Boolean(chosen.ink && chosen.surface),
+    )
+  }
+  // Tinted sections (`data-tone='alt'`) and cards draw the same Text on the Alternate background.
+  if (chosen.ink || chosen.surface || chosen.surfaceAlt || dark) {
+    pair(
+      'ink-alt',
+      ['ink', 'surfaceAlt'],
+      'Text on the alternate background',
+      colours.ink,
+      colours.surfaceAlt,
+      Boolean(chosen.ink),
+      Boolean(chosen.ink && chosen.surfaceAlt),
     )
   }
   if (chosen.inkMuted || chosen.surface || chosen.surfaceAlt) {
@@ -307,6 +346,7 @@ export function resolveDesignTokens(
       colours.inkMuted,
       colours.surface,
       Boolean(chosen.inkMuted),
+      Boolean(chosen.inkMuted && chosen.surface),
     )
     pair(
       'ink-muted-alt',
@@ -315,6 +355,7 @@ export function resolveDesignTokens(
       colours.inkMuted,
       colours.surfaceAlt,
       Boolean(chosen.inkMuted),
+      Boolean(chosen.inkMuted && chosen.surfaceAlt),
     )
   }
 
@@ -333,15 +374,94 @@ export function resolveDesignTokens(
     })
   }
 
+  // 6b. The main button's Brand gradient (task 148). Anything that cannot be drawn with readable text
+  // leaves the Solid button and says why in a warning (never an error, as for every derived pair).
+  if (input.buttonFill === 'gradient') {
+    const slug = input.buttonGradient
+    const gradient = brandGradients(input.gradients).find((item) => item.slug === slug)
+    if (!gradient) {
+      warnings.push({
+        field: 'buttonGradient',
+        message: slug
+          ? 'This gradient is no longer in Advanced, so the main button stays Solid. Choose another gradient.'
+          : 'Choose a gradient for the main button. Until then it stays Solid.',
+      })
+    } else {
+      const ink = gradientInk(gradient.stops, TEXT_RATIO)
+      if (ink) {
+        vars['--button-fill'] = gradient.css
+        vars['--button-fill-ink'] = ink.ink
+        // Hover and press lay a veil of the colour opposite the text over the gradient. That moves the
+        // fill away from the text colour, so the contrast only improves and the text is never touched.
+        vars['--button-fill-veil'] = ink.ink === '#ffffff' ? '#000000' : '#ffffff'
+        // The button still draws, but where most of the gradient is close to the section behind it the
+        // edge disappears (the label alone marks the button). Warn per background, as 216 does for the rest.
+        const samples = gradientSamples(gradient.stops)
+        for (const [label, background] of [
+          ['the page background', colours.surface],
+          ['the inverse background', colours.surfaceInverse],
+        ] as const) {
+          const faint = samples.filter((sample) => contrastRatio(sample, background) < UI_RATIO)
+          if (faint.length > samples.length / 2) {
+            warnings.push({
+              field: 'buttonGradient',
+              message: `Most of "${gradient.name}" is under ${UI_RATIO}:1 against ${label}, so a main button on it loses its edge. Choose a gradient that stands out from both backgrounds, or add Depth or Glow.`,
+            })
+          }
+        }
+      } else {
+        warnings.push({
+          field: 'buttonGradient',
+          message: `No single text colour reaches ${TEXT_RATIO}:1 along "${gradient.name}" (checked at every stop, each midpoint and between), so the main button stays Solid. Choose a gradient whose colours are all light or all dark.`,
+        })
+      }
+    }
+  }
+
   // 7. Only what differs from tokens.json is emitted.
   for (const key of Object.keys(colours) as (keyof typeof colorHex)[]) {
     if (colours[key] !== base[key]) vars[CSS_VARIABLES[key]] = colours[key]
   }
   if (dark) vars['color-scheme'] = 'dark'
+  // Site-wide decisions (density, shape): token variables beyond colour, after the colours so the
+  // output of a site that sets none is byte-for-byte what it was.
+  Object.assign(vars, siteDecisionVars(input))
+  // The main button's depth and glow are one box-shadow list, so the button reads a single variable
+  // (and, while neither is chosen, none: the rule then hands back to the button's own classes).
+  // Soft fill tints the secondary towards its own text, which can only lower the text's contrast. Where that
+  // would take a tone's text under 4.5:1 (checked at the strongest tint, the pressed state), the secondary
+  // stays Outline everywhere rather than carry a fill that fails somewhere: the variables are not emitted.
+  if (input.secondaryButton === 'soft' && vars['--button-secondary-fill'] !== undefined) {
+    const failing = softFillFailures(colours)
+    if (failing.length > 0) {
+      for (const name of Object.keys(vars)) {
+        if (name.startsWith('--button-secondary-')) Reflect.deleteProperty(vars, name)
+      }
+      warnings.push({
+        field: 'secondaryButton',
+        message: `Soft fill would take ${failing.join('; ')}, so secondary buttons stay Outline. Choose a darker Text or a lighter Background (or the reverse on the inverse sections), or keep Outline.`,
+      })
+    }
+  }
+  const buttonShadows = [vars['--button-depth'], vars['--button-glow']].filter(Boolean)
+  if (buttonShadows.length > 0) vars['--button-shadow'] = buttonShadows.join(', ')
 
+  const errors: DesignWarning[] = []
   for (const check of checks) {
     const [field] = check.fields
-    if (!check.pass && field) {
+    if (!check.pass && field && check.explicit) {
+      // The editor chose both colours, so this is theirs to fix (Studio offers "Use suggested colour").
+      errors.push({
+        field,
+        message: `${check.label}: ${check.ratio.toFixed(1)}:1 on the colours you chose, below the ${check.required}:1 AA minimum for text. Change this colour or the background, or use the suggested colour.`,
+      })
+    }
+  }
+  // A field that already has an error is not warned about as well: one suggestion covers every pair.
+  const blocked = new Set(errors.map((error) => error.field))
+  for (const check of checks) {
+    const [field] = check.fields
+    if (!check.pass && field && !check.explicit && !blocked.has(field)) {
       warnings.push({
         field,
         message:
@@ -360,9 +480,40 @@ export function resolveDesignTokens(
       : '',
     checks,
     warnings,
+    errors,
     colours,
     accent: { background: colours.accent, foreground: colours.accentInk },
   }
+}
+
+/** The strongest tint of Soft fill: the pressed state (`--button-secondary-fill-active`, `currentColor` 26%). */
+const SOFT_FILL_STRONGEST = 0.26
+
+/** `ink` laid over `background` at `alpha`: what `color-mix(in srgb, currentColor <alpha>, transparent)` paints. */
+function tinted(background: string, ink: string, alpha: number): string {
+  const [bg, fg] = [hexToRgb(background), hexToRgb(ink)]
+  return rgbToHex(bg.map((channel, index) => channel + ((fg[index] ?? channel) - channel) * alpha))
+}
+
+/**
+ * The tones whose secondary text Soft fill would take under 4.5:1 at its strongest tint, as words. The
+ * secondary's text is Text on the page and Alternate backgrounds and Inverse text on the Inverse background;
+ * a section in the Primary colour keeps its outline (globals.css), so it is not measured here.
+ */
+function softFillFailures(colours: BaseColours): string[] {
+  const pairs = [
+    ['Text on the background', colours.ink, colours.surface],
+    ['Text on the alternate background', colours.ink, colours.surfaceAlt],
+    ['Inverse text on the inverse background', colours.inkInverse, colours.surfaceInverse],
+  ] as const
+  return pairs.flatMap(([label, ink, background]) => {
+    const after = contrastRatio(ink, tinted(background, ink, SOFT_FILL_STRONGEST))
+    return after < TEXT_RATIO
+      ? [
+          `${label} from ${contrastRatio(ink, background).toFixed(1)}:1 to ${after.toFixed(1)}:1 when pressed`,
+        ]
+      : []
+  })
 }
 
 /** Whether a surface reads as dark (decides which way its tints and borders step). */

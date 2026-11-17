@@ -1,11 +1,16 @@
+import { ItemIcon } from '@/components/ui/item-icon'
 import { PlainText } from '@/components/ui/plain-text'
-import { RichHeading } from '@/components/ui/rich-heading'
-import { SanityImage } from '@/components/ui/sanity-image'
 import { SectionFrame } from '@/components/ui/section-frame'
+import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
+import { resolveIconDesign } from '@/lib/sanity/surface-options'
+import { resolveTextRoles } from '@/lib/sanity/text-role'
 
 import type { SectionProps } from '../../types'
+
+const HEADER_ROLES = ['eyebrow', 'heading', 'intro'] as const
 
 // Full class names so Tailwind's scanner sees them.
 const columnClasses = {
@@ -20,32 +25,24 @@ export function FeaturesGrid({ data, isFirst }: SectionProps<'featuresGrid'>) {
   const { heading, intro, columns, items } = data
   const title = sectionTitle(data)
   const { block, text } = sectionTraits(data.style, DEFAULTS)
+  const iconDesign = resolveIconDesign(data.iconDesign)
 
   return (
     <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst}>
-      {(title || intro) && (
-        <header className={`mb-16 max-w-measure-narrow ${block} ${text}`}>
-          {title && (
-            <RichHeading
-              as="h2"
-              blocks={heading}
-              fallback={title}
-              className="text-h2 font-semibold text-balance"
-            />
-          )}
-          <PlainText text={intro} className="mt-4 text-lead text-pretty text-ink-muted" />
-        </header>
-      )}
+      <SectionHeader
+        eyebrow={data.eyebrow}
+        title={title}
+        heading={heading}
+        intro={intro}
+        design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+        divider={resolveDivider(data.headerDesign?.divider)}
+        block={block}
+        text={text}
+      />
       <ul className={`grid grid-cols-1 gap-x-8 gap-y-12 ${columnClasses[columns]}`}>
         {items.map((item) => (
           <li key={item._key}>
-            <SanityImage
-              image={item.icon}
-              alt=""
-              width={48}
-              height={48}
-              className="mb-4 size-12 object-contain"
-            />
+            <ItemIcon name={item.iconName} image={item.icon} design={iconDesign} />
             <h3 className="text-lead font-semibold">{item.title}</h3>
             <PlainText text={item.text} className="mt-2 text-ink-muted" />
           </li>

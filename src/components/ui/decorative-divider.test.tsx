@@ -104,3 +104,282 @@ it.each([
   expect(html).toContain(className)
   expect(html).not.toContain('tracking-[0.08em]')
 })
+
+/**
+ * Double, Dotted line and Gradient (task 151, Slice 7), drawn from the Divider Design Lab's measurements for a line
+ * of thickness t px (thin 1, bold 2): Double is two lines of t with a 3px gap (2t + 3 tall); Dotted line is dots
+ * of radius 1.1t every 5t + 3 px (3t + 2 tall); Gradient is Primary to Secondary, t + 1 tall, faded at its ends.
+ */
+describe('Double, Dotted line and Gradient', () => {
+  const lines = (html: string) => html.match(/<span aria-hidden="true"[^>]*>/g) ?? []
+
+  it('draws Double as two borders with a 3px gap: 5px tall thin, 7px bold, so forced colours keep it', () => {
+    const thin = render({ style: 'double', thickness: 'thin' })
+    expect(thin).toContain('data-decorative-divider="double"')
+    expect(lines(thin)).toHaveLength(1)
+    expect(thin).toContain('h-[5px] border-y border-current')
+    // Borders, not a background: a background is removed in forced colours, a border is painted in system colours.
+    expect(thin).not.toContain('style="background')
+    expect(thin).not.toContain('linear-gradient')
+    const bold = render({ style: 'double', thickness: 'bold' })
+    expect(bold).toContain('h-[7px] border-y-2 border-current')
+    expect(bold).not.toContain('linear-gradient')
+  })
+
+  it('draws Dotted line as dots of radius 1.1t every 5t + 3 px: 5px tall thin, 8px bold', () => {
+    const thin = render({ style: 'dotted', thickness: 'thin' })
+    expect(thin).toContain('data-decorative-divider="dotted"')
+    expect(thin).toContain('h-[5px]')
+    expect(thin).toContain(
+      'radial-gradient(circle, currentColor 1.1px, transparent 1.7px) 0 50% / 8px 100% repeat-x',
+    )
+    const bold = render({ style: 'dotted', thickness: 'bold' })
+    expect(bold).toContain('h-2')
+    expect(bold).toContain(
+      'radial-gradient(circle, currentColor 2.2px, transparent 2.8px) 0 50% / 13px 100% repeat-x',
+    )
+  })
+
+  it('gives Dotted line a dotted system-colour border for forced colours, as thick as a dot is wide', () => {
+    const thin = render({ style: 'dotted', thickness: 'thin' })
+    expect(thin).toContain('forced-colors:border-t-2')
+    expect(thin).toContain('forced-colors:border-dotted')
+    expect(thin).toContain('forced-colors:border-[CanvasText]')
+    expect(render({ style: 'dotted', thickness: 'bold' })).toContain('forced-colors:border-t-4')
+    // Nothing of it applies outside forced colours: every border class is behind the variant.
+    const tag = /<span aria-hidden="true" class="([^"]*)"/.exec(thin)?.[1] ?? ''
+    for (const name of tag.split(' ').filter((n) => n.includes('border')))
+      expect(name.startsWith('forced-colors:'), name).toBe(true)
+  })
+
+  it('draws Gradient from Primary to Secondary, 2px thin and 3px bold, with a Canvas text fallback', () => {
+    const thin = render({ style: 'gradient' })
+    expect(thin).toContain('data-decorative-divider="gradient"')
+    expect(thin).toContain('h-0.5')
+    expect(thin).toContain('from-accent')
+    expect(thin).toContain('to-accent-2')
+    expect(thin).toContain('forced-colors:bg-none')
+    expect(thin).toContain('forced-colors:bg-[CanvasText]')
+    expect(render({ style: 'gradient', thickness: 'bold' })).toContain('h-[3px]')
+  })
+
+  it('fades Gradient at both ends when alone, and at the outer end of each line beside a centre', () => {
+    const alone = render({ style: 'gradient' })
+    expect(alone).toContain('#000_15%,#000_85%')
+    const withCentre = render({ style: 'gradient', centre: 'diamond' })
+    expect(
+      lines(withCentre).filter((tag) => tag.includes('to_right,transparent,#000_40%')),
+    ).toHaveLength(1)
+    expect(
+      lines(withCentre).filter((tag) => tag.includes('to_left,transparent,#000_40%')),
+    ).toHaveLength(1)
+  })
+
+  it('draws a line colour on Double and Dotted line, and none on Gradient, whatever is stored', () => {
+    const colour = { colour: 'custom', hex: '#aa5500' }
+    expect(render({ style: 'double', lineColour: colour })).toContain('color:#aa5500')
+    expect(render({ style: 'dotted', lineColour: colour })).toContain('color:#aa5500')
+    const gradient = render({ style: 'gradient', lineColour: colour })
+    expect(gradient).not.toContain('#aa5500')
+    expect(gradient).toContain('text-line-strong')
+  })
+
+  it('holds a centre between two lines on each, as a Line does, and keeps the middle’s own colour', () => {
+    for (const style of ['double', 'dotted', 'gradient'] as const) {
+      const html = render({
+        style,
+        centre: 'diamond',
+        centreColour: { colour: 'custom', hex: '#00aa55' },
+      })
+      expect(
+        lines(html).filter((tag) => /h-(\[5px\]|2|0\.5)/.test(tag)),
+        style,
+      ).toHaveLength(2)
+      expect(html, style).toContain('data-divider-centre="diamond"')
+      expect(html, style).toContain('color:#00aa55')
+    }
+    // Words in the middle are read out, and only the lines are hidden.
+    const words = render({ style: 'dotted', centre: 'text', text: 'Stay connected' })
+    expect(words).not.toMatch(/^<div aria-hidden/)
+    expect(words).toContain('>Stay connected</span>')
+  })
+
+  it('gives a Gradient’s middle the default line colour when it has none of its own, whatever line colour is stored', () => {
+    const stored = { colour: 'custom', hex: '#aa5500' }
+    const html = render({ style: 'gradient', centre: 'diamond', lineColour: stored })
+    // The stored line colour is not drawn on the divider, so the middle (which follows the lines) is the default.
+    expect(html).not.toContain('#aa5500')
+    expect(html).toContain('text-line-strong')
+    // The middle's wrapper takes no colour of its own.
+    const wrapper =
+      /<span class="flex max-w-\[calc\(100%-3\.5rem\)\][^"]*"([^>]*)>/.exec(html)?.[1] ?? ''
+    expect(wrapper).not.toContain('color:')
+    // The same middle on a Line with that colour follows the stored colour: only Gradient ignores it.
+    expect(render({ style: 'line', centre: 'diamond', lineColour: stored })).toContain(
+      'color:#aa5500',
+    )
+  })
+
+  it('still honours an explicit colour for a Gradient’s middle', () => {
+    const html = render({
+      style: 'gradient',
+      centre: 'text',
+      text: 'Stay connected',
+      lineColour: { colour: 'custom', hex: '#aa5500' },
+      centreColour: { colour: 'custom', hex: '#00aa55' },
+    })
+    expect(html).toContain('color:#00aa55')
+    expect(html).not.toContain('#aa5500')
+  })
+
+  it('keeps Three dots centre-free, however it is stored', () => {
+    const html = render({ style: 'dots', centre: 'diamond' })
+    expect(html).not.toContain('data-divider-centre')
+    expect(html).toContain('data-decorative-divider="dots"')
+  })
+
+  it('keeps the divider’s own space and width: the same row classes as a Line', () => {
+    const row = (html: string) => /class="([^"]*)"/.exec(html)?.[1]
+    for (const width of ['short', 'long', 'full'] as const)
+      for (const style of ['double', 'dotted', 'gradient'] as const)
+        expect(row(render({ style, width })), `${style} ${width}`).toBe(
+          row(render({ style: 'line', width })),
+        )
+  })
+
+  it('is decoration only, hidden from assistive technology', () => {
+    for (const style of ['double', 'dotted', 'gradient'] as const)
+      expect(render({ style })).toMatch(/^<div aria-hidden="true" data-decorative-divider=/)
+  })
+})
+
+describe('Glow and the Ornament centre (task 151, Slice 7)', () => {
+  const flat = (style: string, extra: DividerInput = {}) => render({ style, ...extra })
+  const glow = (style: string, extra: DividerInput = {}) =>
+    render({ style, finish: 'glow', ...extra })
+  const GLOW_THIN = '[box-shadow:0_0_8px_1px_color-mix(in_oklab,currentColor_55%,transparent)]'
+  const GLOW_BOLD = '[box-shadow:0_0_10px_2px_color-mix(in_oklab,currentColor_55%,transparent)]'
+
+  it('draws Flat, unset, unknown and unsupported finishes exactly as before', () => {
+    for (const style of ['line', 'double', 'gradient', 'fade', 'dots', 'dotted']) {
+      for (const finish of [undefined, null, 'flat', 'sparkly'])
+        expect(flat(style, { finish }), `${style} ${String(finish)}`).toBe(flat(style))
+      expect(flat(style, { finish: 'glow' }) === flat(style), style).toBe(
+        !['line', 'double', 'gradient'].includes(style),
+      )
+    }
+  })
+
+  it('gives Line and Double a halo of their own colour, outside their box, by the Lab’s sizes', () => {
+    for (const style of ['line', 'double']) {
+      expect(glow(style)).toContain(GLOW_THIN)
+      expect(glow(style, { thickness: 'bold' })).toContain(GLOW_BOLD)
+      expect(glow(style)).toContain('forced-colors:[box-shadow:none]')
+      expect(glow(style)).toContain('color-mix(in_oklab,currentColor_55%')
+    }
+  })
+
+  it('keeps the line’s own size and fill when it glows, so nothing moves', () => {
+    expect(glow('line')).toContain('h-px bg-current')
+    expect(glow('double')).toContain('h-[5px] border-y border-current')
+  })
+
+  it('gives Gradient a separate, masked glow layer that the line’s mask cannot clip', () => {
+    const html = glow('gradient')
+    // The line is still the Primary to Secondary gradient with its own fade; the glow is a blurred copy.
+    expect(html).toContain('bg-linear-to-r from-accent to-accent-2')
+    expect(html).toMatch(/relative block min-w-4 shrink-\[4\] h-0\.5/)
+    // Alone, both ends fade out, so the layer is as wide as the line (and taller by the blur's reach).
+    expect(html).toContain('-inset-y-3 inset-x-0')
+    expect(html).toContain('blur-[4px]')
+    expect(html).toContain('opacity-55')
+    expect(html).toContain('forced-colors:hidden')
+    expect(glow('gradient', { thickness: 'bold' })).toContain('blur-[5px]')
+    // The line keeps its own end fade; the layer is wider than the line, so its fade starts at the line's ends.
+    expect(html.match(/mask-image:linear-gradient\(to_right,transparent,#000_15%/g)).toHaveLength(2)
+  })
+
+  it('fades the glow with the line at the outer ends beside a centre', () => {
+    const html = glow('gradient', { centre: 'diamond' })
+    // The line's own fades, and the glow layer's, written from the line's ends.
+    expect(html).toContain('to_right,transparent,#000_40%')
+    expect(html).toContain('to_left,transparent,#000_40%')
+    expect(html).toContain('to_right,transparent,#000_calc((100%_-_12px)_*_0.4)')
+    expect(html).toContain('to_left,transparent,#000_calc((100%_-_12px)_*_0.4)')
+    // Only the inner end, beside the centre, is given room: the start line reaches right, the end line left.
+    expect(html).toContain('-inset-y-3 left-0 -right-3')
+    expect(html).toContain('-inset-y-3 -left-3 right-0')
+    expect(html).not.toContain('-inset-3 ')
+    expect(html).toContain('data-divider-centre="diamond"')
+  })
+
+  it('leaves the centre as it is whatever the finish', () => {
+    const centre = {
+      centre: 'text',
+      text: 'Stay connected',
+      centreColour: { colour: 'accent' },
+    } as const
+    const middle = (html: string) =>
+      /<span class="flex max-w[\s\S]*?<\/span><\/span>/.exec(html)?.[0]
+    expect(middle(glow('line', centre))).toBe(middle(flat('line', centre)))
+    expect(middle(glow('line', centre))).toBeTruthy()
+  })
+
+  describe('the Ornament centre', () => {
+    const ornament = (extra: DividerInput = {}) =>
+      render({ style: 'line', centre: 'ornament', ...extra })
+
+    it('draws the Lab’s flourish: two stroked halves and a diamond, in the current colour', () => {
+      const html = ornament()
+      expect(html).toContain('viewBox="0 0 120 24"')
+      expect(html.match(/<path /g)).toHaveLength(2)
+      expect(html).toContain('stroke="currentColor"')
+      expect(html).toContain('stroke-width="1.3"')
+      expect(html).toContain('stroke-linecap="round"')
+      expect(html).toContain('x="56.5" y="8.5" width="7" height="7" transform="rotate(45 60 12)"')
+    })
+
+    it('is hidden from assistive technology and cannot take focus', () => {
+      const html = ornament()
+      expect(html).toMatch(/^<div aria-hidden="true"/)
+      expect(html).toMatch(/<svg aria-hidden="true" focusable="false"/)
+      expect(html).not.toContain('tabindex')
+      expect(html).not.toContain('<title')
+    })
+
+    it('uses the existing size control: 90 by 18 at medium, smaller and larger either side', () => {
+      expect(ornament()).toContain('h-[18px] w-[90px]')
+      expect(ornament({ centreSize: 'small' })).toContain('h-3.5 w-[70px]')
+      expect(ornament({ centreSize: 'large' })).toContain('h-[22px] w-[110px]')
+    })
+
+    it('uses the existing colour control: its own colour on the middle, the lines’ otherwise', () => {
+      expect(ornament({ centreColour: { colour: 'highlight' } })).toContain(
+        'style="color:var(--color-highlight)"',
+      )
+      expect(ornament()).not.toContain('style="color:')
+      expect(ornament({ lineColour: { colour: 'highlight' } })).toMatch(
+        /^<div[^>]*style="color:var\(--color-highlight\)"/,
+      )
+    })
+
+    it('takes the same row as any other centre, between two lines', () => {
+      const html = ornament({ width: 'full' })
+      expect(html).toContain('data-divider-centre="ornament"')
+      expect(html.match(/<span aria-hidden="true" class="block min-w-4/g)).toHaveLength(2)
+      expect(html).toContain('w-full')
+    })
+
+    it('leaves Three dots centre-free', () => {
+      const html = render({ style: 'dots', centre: 'ornament' })
+      expect(html).not.toContain('<svg')
+      expect(html).not.toContain('data-divider-centre')
+    })
+
+    it('sits between Glow lines too, with its own colours untouched', () => {
+      const html = glow('line', { centre: 'ornament' })
+      expect(html).toContain('<svg')
+      expect(html.match(/box-shadow:0_0_8px/g)).toHaveLength(2)
+    })
+  })
+})

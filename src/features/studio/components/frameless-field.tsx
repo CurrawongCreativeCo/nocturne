@@ -15,7 +15,11 @@ export function FramelessAwareField(props: FieldProps) {
   ) {
     return <>{props.children}</>
   }
-  if (props.schemaType.jsonType === 'string' && props.schemaType.options?.gradientPicker === true) {
+  if (
+    props.schemaType.jsonType === 'string' &&
+    (props.schemaType.options?.gradientPicker === true ||
+      props.schemaType.options?.documentGradients === true)
+  ) {
     return <GradientField {...props} />
   }
   return props.renderDefault(props)

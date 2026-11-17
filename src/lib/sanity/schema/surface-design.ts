@@ -1,10 +1,30 @@
 import { defineField, type ConditionalProperty, type ConditionalPropertyCallback } from 'sanity'
 
+import type { TextRole } from '@/lib/design/capabilities'
+
+import {
+  GLOW_COLOUR_CHOICES,
+  GLOW_LEVELS,
+  GLOW_TITLES,
+  LIFT_LEVELS,
+  LIFT_TITLES,
+  SHADOW_DESCRIPTIONS,
+  SHADOW_LEVELS,
+  SHADOW_TITLES,
+} from '../depth-options'
+import type { DesignSummaryConfig } from '../design-summary'
 import {
   INLINE_CASE_TITLES,
   INLINE_SIZE_TITLES,
   INLINE_WEIGHT_TITLES,
 } from '../inline-list-options'
+import {
+  ACTION_MOTION_TITLES,
+  ACTION_MOTIONS,
+  LINK_ARROW_TITLES,
+  LINK_ARROWS,
+} from '../link-arrow-options'
+import { hiddenFromClients } from '../roles'
 import {
   BORDER_COLOUR_CHOICES,
   ICON_COLOUR_CHOICES,
@@ -19,6 +39,8 @@ import {
 import {
   TEXT_CASES,
   TEXT_COLOUR_CHOICES,
+  TEXT_FONT_STYLES,
+  TEXT_FONT_STYLE_TITLES,
   TEXT_LEADINGS,
   TEXT_LEADING_TITLES,
   TEXT_SIZES,
@@ -26,6 +48,7 @@ import {
   TEXT_TRACKING_TITLES,
   TEXT_WEIGHTS,
 } from '../text-style-options'
+import { builtBy } from './capability-marker'
 import { themeColourField } from './theme-colour'
 
 declare module 'sanity' {
@@ -39,10 +62,11 @@ declare module 'sanity' {
   }
   interface ObjectOptions {
     /**
-     * A link's Appearance: the Studio shows what the link changes and the resets above its fields
-     * (features/studio/components/link-design-summary-input).
+     * A section, card or item design object: the Studio shows what it changes, at which level, and
+     * the resets above its fields (features/studio/components/design-summary-input). A Link list
+     * link's Appearance sets LINK_DESIGN_SUMMARY (lib/sanity/link-design-summary.ts).
      */
-    linkDesignSummary?: boolean
+    designSummary?: DesignSummaryConfig
   }
 }
 
@@ -127,7 +151,7 @@ export function surfaceFields({
       name: 'backgroundStrength',
       title: 'Background strength',
       description:
-        'How much of the colour shows. Light, Medium and Strong keep glass see-through; Solid hides the photo.',
+        'How much of the colour shows. Wash is a faint tint. Light, Medium and Strong keep glass see-through; Solid hides the photo.',
       values: SURFACE_STRENGTHS,
       titles: SURFACE_STRENGTH_TITLES,
       inherits: `${inherits} (the glass strength on Glass rows, else Solid)`,
@@ -158,31 +182,72 @@ export function surfaceFields({
       fieldset,
       hidden: hiddenOr(({ parent }) => valueOf(parent, 'border') === 'none'),
     }),
-  ]
+  ].map((field) => builtBy('surfaceFields', field, 'surface'))
 }
 
-type TextElement = 'eyebrow' | 'label' | 'description'
+const MEDIUM_IS_OWN = 'Medium is the layout’s own size.'
 
-const TEXT_ELEMENT = {
+/** Every registered role's wording and the extra controls it adds beyond size, weight and colour. */
+const TEXT_ROLE_FIELDS: Record<
+  TextRole,
+  { title: string; description: string; letters?: boolean; leading?: boolean; italic?: boolean }
+> = {
   eyebrow: {
     title: 'Eyebrow',
     description: 'The small line above the label. Empty is small spaced capitals.',
+    letters: true,
   },
-  label: { title: 'Label', description: 'Medium is the layout’s own size.' },
-  description: { title: 'Description', description: 'Medium is the layout’s own size.' },
-} as const
+  heading: { title: 'Heading', description: MEDIUM_IS_OWN },
+  intro: { title: 'Intro', description: MEDIUM_IS_OWN, leading: true },
+  title: { title: 'Title', description: MEDIUM_IS_OWN },
+  body: { title: 'Body', description: MEDIUM_IS_OWN, leading: true },
+  meta: { title: 'Meta', description: MEDIUM_IS_OWN },
+  quote: { title: 'Quote', description: MEDIUM_IS_OWN, leading: true, italic: true },
+  attribution: { title: 'Attribution', description: MEDIUM_IS_OWN },
+  price: { title: 'Price', description: MEDIUM_IS_OWN },
+  number: { title: 'Number', description: MEDIUM_IS_OWN },
+  label: { title: 'Label', description: MEDIUM_IS_OWN, letters: true },
+  description: { title: 'Description', description: MEDIUM_IS_OWN, leading: true },
+}
 
-/** One text element's look: size, weight and colour, plus capitals and spacing (eyebrow) or line height (description). */
-export function textStyleField({
-  element,
+/** The stored parts of a role's object, in form order: what the field offers and the summary names. */
+export function textRoleParts(role: TextRole): string[] {
+  const { letters, leading, italic } = TEXT_ROLE_FIELDS[role]
+  return [
+    'size',
+    'weight',
+    'colour',
+    ...(letters ? ['textCase', 'tracking'] : []),
+    ...(leading ? ['leading'] : []),
+    ...(italic ? ['fontStyle'] : []),
+  ]
+}
+
+/**
+ * One text role's look: size, weight and colour for every role, plus capitals and spacing (eyebrow,
+ * label), line height (intro, body, quote, description) and italic (quote). `highlight` adds how the
+ * role draws its safe highlights (lib/text-highlights.ts). The field is named after the role, so
+ * stored values and their layers keep one shape at every level. `capability` says which capability
+ * the field adopts: a section header's roles are `header`, everything else `text`.
+ */
+export function textRoleField({
+  role,
   inherits,
   inItem,
   fieldset,
   hidden,
-}: Level & { element: TextElement; fieldset?: string; hidden?: ConditionalProperty }) {
-  const { title, description } = TEXT_ELEMENT[element]
-  return defineField({
-    name: element,
+  capability = 'text',
+  highlight = false,
+}: Level & {
+  role: TextRole
+  fieldset?: string
+  hidden?: ConditionalProperty
+  capability?: 'text' | 'header'
+  highlight?: boolean
+}) {
+  const { title, description, letters, leading, italic } = TEXT_ROLE_FIELDS[role]
+  const field = defineField({
+    name: role,
     title,
     type: 'object',
     description,
@@ -213,7 +278,7 @@ export function textStyleField({
         inItem,
         inherits,
       }),
-      ...(element === 'eyebrow'
+      ...(letters
         ? [
             choiceField({
               name: 'textCase',
@@ -232,7 +297,7 @@ export function textStyleField({
             }),
           ]
         : []),
-      ...(element === 'description'
+      ...(leading
         ? [
             choiceField({
               name: 'leading',
@@ -243,8 +308,57 @@ export function textStyleField({
             }),
           ]
         : []),
+      ...(italic
+        ? [
+            choiceField({
+              name: 'fontStyle',
+              title: 'Style',
+              values: TEXT_FONT_STYLES,
+              titles: TEXT_FONT_STYLE_TITLES,
+              inherits,
+            }),
+          ]
+        : []),
+      ...(highlight
+        ? [
+            defineField({
+              name: 'highlight',
+              title: 'Highlighted words',
+              type: 'object',
+              description:
+                'How the words chosen for highlighting look. Semibold unless you choose.',
+              options: { collapsible: true, collapsed: true },
+              fields: [
+                themeColourField({
+                  name: 'colour',
+                  title: 'Colour',
+                  usage: 'text',
+                  choices: TEXT_COLOUR_CHOICES,
+                  onCard: 'text',
+                  inItem,
+                  inherits: 'the text around them',
+                }),
+                choiceField({
+                  name: 'weight',
+                  title: 'Weight',
+                  values: TEXT_WEIGHTS,
+                  titles: INLINE_WEIGHT_TITLES,
+                  inherits: 'Semibold',
+                }),
+                choiceField({
+                  name: 'fontStyle',
+                  title: 'Style',
+                  values: TEXT_FONT_STYLES,
+                  titles: TEXT_FONT_STYLE_TITLES,
+                  inherits: 'the text around them',
+                }),
+              ],
+            }),
+          ]
+        : []),
     ],
   })
+  return builtBy('textRoleField', field, capability, role)
 }
 
 /**
@@ -302,7 +416,7 @@ export function iconDesignFields({
     choiceField({
       name: 'iconBackgroundStrength',
       title: 'Container strength',
-      description: 'Light, Medium and Strong let the card show through.',
+      description: 'Wash, Light, Medium and Strong let the card show through.',
       values: SURFACE_STRENGTHS,
       titles: SURFACE_STRENGTH_TITLES,
       inherits: `${inherits} (Solid)`,
@@ -336,5 +450,193 @@ export function iconDesignFields({
         (context) => plain(context) || valueOf(context.parent, 'iconBorder') === 'none',
       ),
     }),
-  ]
+  ].map((field) => builtBy('iconDesignFields', field, 'icon'))
+}
+
+/** The glyph, motion and colour of a linked card's indicator (stored beside the card's other design). */
+export function actionFields({
+  hidden,
+  inherits = 'the layout’s own',
+}: {
+  hidden?: ConditionalPropertyCallback
+  inherits?: string
+}) {
+  const none: ConditionalPropertyCallback = (context) =>
+    (context.parent as { actionStyle?: string } | undefined)?.actionStyle === 'none'
+  const hiddenOr =
+    (own?: ConditionalPropertyCallback): ConditionalPropertyCallback =>
+    (context) =>
+      (hidden?.(context) ?? false) || (own?.(context) ?? false)
+  return [
+    choiceField({
+      name: 'actionStyle',
+      title: 'Indicator',
+      description: 'The mark at the end of a linked card. It is decoration: the card is one link.',
+      values: LINK_ARROWS,
+      titles: LINK_ARROW_TITLES,
+      inherits,
+      fieldset: 'action',
+      hidden: hiddenOr(),
+    }),
+    choiceField({
+      name: 'actionMotion',
+      title: 'Indicator motion',
+      description: 'On hover and keyboard focus. Visitors who ask for less motion see none.',
+      values: ACTION_MOTIONS,
+      titles: ACTION_MOTION_TITLES,
+      inherits,
+      fieldset: 'action',
+      hidden: hiddenOr(none),
+    }),
+    themeColourField({
+      name: 'actionColour',
+      title: 'Indicator colour',
+      usage: 'graphic',
+      onRows: true,
+      inherits: 'the card’s own colour',
+      choices: ['ink', 'muted', 'accent', 'accent-2', 'highlight'],
+      fieldset: 'action',
+      hidden: hiddenOr(none),
+    }),
+  ].map((field) => builtBy('actionFields', field, 'action'))
+}
+
+/**
+ * A card's shadow level and glow (task 146), stored beside the card's other design as `shadow`, `glow`
+ * and `glowColour`: the names a Link list link already stores, so one resolver reads both. Empty
+ * inherits the section's, then the site's Card depth, then what the family draws; a glow is off until
+ * chosen. `fieldset` is where the Cards box groups them (Pictures belong to task 147, buttons to 148).
+ */
+export function depthFields({
+  hidden,
+  inherits = 'the site’s Card depth, or the layout’s own shadow',
+  fieldset,
+  lift,
+}: {
+  hidden?: ConditionalPropertyCallback
+  inherits?: string
+  fieldset?: string
+  /** Offered where the whole card is one link: it rises under the pointer and keyboard focus. */
+  lift?: { hidden?: ConditionalPropertyCallback } | false
+}) {
+  const glowOff: ConditionalPropertyCallback = (context) => {
+    const glow = (context.parent as { glow?: string } | undefined)?.glow
+    return (hidden?.(context) ?? false) || (glow !== 'soft' && glow !== 'strong')
+  }
+  return [
+    choiceField({
+      name: 'shadow',
+      title: 'Shadow',
+      description: SHADOW_LEVELS.map(
+        (level) => `${SHADOW_TITLES[level]}: ${SHADOW_DESCRIPTIONS[level]}`,
+      ).join(' '),
+      values: SHADOW_LEVELS,
+      titles: SHADOW_TITLES,
+      inherits,
+      fieldset,
+      hidden,
+    }),
+    choiceField({
+      name: 'glow',
+      title: 'Glow',
+      description: 'A soft halo around the card. Decorative, and strongest on a dark background.',
+      values: GLOW_LEVELS,
+      titles: GLOW_TITLES,
+      inherits: 'no glow',
+      fieldset,
+      hidden,
+    }),
+    themeColourField({
+      name: 'glowColour',
+      title: 'Glow colour',
+      usage: 'graphic',
+      decorative: true,
+      inherits: 'Primary',
+      choices: GLOW_COLOUR_CHOICES,
+      fieldset,
+      hidden: glowOff,
+    }),
+    ...(lift
+      ? [
+          choiceField({
+            name: 'lift',
+            title: 'Hover lift',
+            description:
+              'The card rises a little under the pointer and keyboard focus, and only cards that link to a page lift. Visitors who ask for less motion see none.',
+            values: LIFT_LEVELS,
+            titles: LIFT_TITLES,
+            inherits: 'the layout’s own movement',
+            fieldset,
+            hidden: (context) => (hidden?.(context) ?? false) || (lift.hidden?.(context) ?? false),
+          }),
+        ]
+      : []),
+  ].map((field) => builtBy('depthFields', field, 'depth'))
+}
+
+/**
+ * A framed picture's shadow and glow (task 147), as one `pictureDepthDesign` object beside the picture's
+ * other design: `shadow`, `glow` and `glowColour`, the names `depthFields` uses, read by
+ * `resolvePictureDepth`. It is an object of its own, not part of Image design, so a layout whose Image
+ * design is hidden (Gallery Masonry) or replaced (a Team list's Portrait) can still offer it. Agency
+ * only. Empty everywhere means no shadow and no glow: the picture is drawn as it always was.
+ */
+export function pictureDepthFields({
+  name = 'pictureDepthDesign',
+  title = 'Picture depth and glow',
+  description = 'A shadow and glow that follow the picture’s outline, frame included. Empty is none.',
+  group = 'design',
+  hidden,
+}: {
+  name?: string
+  title?: string
+  description?: string
+  group?: string
+  hidden?: ConditionalPropertyCallback
+}) {
+  const glowOff: ConditionalPropertyCallback = (context) => {
+    const glow = (context.parent as { glow?: string } | undefined)?.glow
+    return glow !== 'soft' && glow !== 'strong'
+  }
+  const leaves = [
+    choiceField({
+      name: 'shadow',
+      title: 'Shadow',
+      description: SHADOW_LEVELS.map(
+        (level) => `${SHADOW_TITLES[level]}: ${SHADOW_DESCRIPTIONS[level]}`,
+      ).join(' '),
+      values: SHADOW_LEVELS,
+      titles: SHADOW_TITLES,
+      inherits: 'no shadow',
+    }),
+    choiceField({
+      name: 'glow',
+      title: 'Glow',
+      description:
+        'A soft halo around the picture. Decorative, and strongest on a dark background.',
+      values: GLOW_LEVELS,
+      titles: GLOW_TITLES,
+      inherits: 'no glow',
+    }),
+    themeColourField({
+      name: 'glowColour',
+      title: 'Glow colour',
+      usage: 'graphic',
+      decorative: true,
+      inherits: 'Primary',
+      choices: GLOW_COLOUR_CHOICES,
+      hidden: glowOff,
+    }),
+  ].map((field) => builtBy('pictureDepthFields', field, 'pictureDepth'))
+  const box = defineField({
+    name,
+    title,
+    description,
+    type: 'object',
+    group,
+    options: { collapsible: true, collapsed: true },
+    hidden: (context) => hiddenFromClients(context) || (hidden?.(context) ?? false),
+    fields: leaves,
+  })
+  return builtBy('pictureDepthFields', box)
 }

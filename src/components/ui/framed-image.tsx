@@ -2,6 +2,7 @@ import { stegaClean } from 'next-sanity'
 import type { CSSProperties } from 'react'
 
 import { LazyParallax } from '@/components/motion/parallax-lazy'
+import type { ElementDepth } from '@/lib/sanity/depth-options'
 import {
   forcedAspect,
   resolveImageDesign,
@@ -61,6 +62,13 @@ interface Props {
   imageClassName?: string
   /** Always draw the box and its clip, even for a plain picture (a hover zoom must not spill out of its shape). */
   clip?: boolean
+  /**
+   * Picture depth (task 147, `resolvePictureDepth`): a drop-shadow filter and glow. It goes on the
+   * still outer box, never the picture that moves inside it, so the shadow follows the whole visible
+   * picture (its shape and frame) and stays put under Parallax. A plain picture, which has no box,
+   * takes it on the <img>. Undefined adds nothing: the markup is exactly what it was.
+   */
+  depth?: ElementDepth | undefined
 }
 
 /**
@@ -90,11 +98,12 @@ export function FramedImage({
   className = '',
   imageClassName = '',
   clip = false,
+  depth,
 }: Props) {
   const { shape, motion, frame } = resolveImageDesign(stegaClean(design), context)
   const ratio = forcedAspect(shape) ?? aspect
   const shapeClass = SHAPE_CLASS[shape]
-  const style = { objectPosition: hotspotObjectPosition(image) }
+  const style = { objectPosition: hotspotObjectPosition(image), ...depth?.style }
 
   if (!motion && !frame && !clip) {
     return (
@@ -106,7 +115,7 @@ export function FramedImage({
         sizes={sizes}
         preload={preload}
         loading={loading}
-        className={`w-full object-cover ${ratio ? ASPECT_CLASS[ratio] : ''} ${shapeClass} ${className} ${imageClassName}`
+        className={`w-full object-cover ${ratio ? ASPECT_CLASS[ratio] : ''} ${shapeClass} ${className} ${imageClassName} ${depth?.className ?? ''}`
           .replace(/\s+/g, ' ')
           .trim()}
         style={style}
@@ -123,14 +132,15 @@ export function FramedImage({
       preload={preload}
       loading={loading}
       className={`object-cover ${imageClassName}`.trim()}
-      style={style}
+      style={{ objectPosition: style.objectPosition }}
     />
   )
 
   return (
     <div
       data-framed-image={shape}
-      className={`relative ${ASPECT_CLASS[ratio ?? '4/3']} ${className}`.trim()}
+      className={`relative ${ASPECT_CLASS[ratio ?? '4/3']} ${className} ${depth?.className ?? ''}`.trim()}
+      style={depth?.style}
     >
       {/* `isolate` keeps a rounded clip honest in Safari while the picture inside is transformed. */}
       <div className={`absolute inset-0 isolate overflow-hidden bg-surface-alt ${shapeClass}`}>

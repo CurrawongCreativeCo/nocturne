@@ -58,7 +58,9 @@ const OFFERED: readonly ThemeColour[] = ['inherit', ...GLOW_COLOUR_CHOICES, 'cus
 const NO_SHADOW = '0 0 #0000'
 const BOX_SHADOW: Record<ShadowLevel, string> = {
   flat: NO_SHADOW,
-  soft: 'var(--shadow-card)',
+  // Its own token, so an explicit Soft stays Soft when a site's card shadow is something else. The
+  // fallback is for a tokens.json that predates `shadow.soft`.
+  soft: 'var(--shadow-soft, var(--shadow-card))',
   raised: 'var(--shadow-raised)',
   floating: 'var(--shadow-floating)',
 }
@@ -102,6 +104,21 @@ export const OWN_SHADOW = {
   none: NO_SHADOW,
   card: 'var(--shadow-card)',
   glass: 'var(--glass-shadow)',
+  /** A card family that draws `shadow-card`: the site's Card depth when one is chosen, else the same. */
+  siteCard: 'var(--card-depth, var(--shadow-card))',
+  /** A card family that draws no shadow: the site's Card depth when one is chosen, else none. */
+  siteCardFree: `var(--card-depth, ${NO_SHADOW})`,
+} as const
+
+/**
+ * The classes a card family draws in place of `shadow-card` (or, for a family with no shadow, in
+ * addition to its classes), so the site's Card depth reaches it. `--card-depth` is defined only when a
+ * site chooses one (lib/design/site-decisions.ts), so unset these compute exactly what the family drew.
+ * Nothing but cards reads the variable: `shadow-card` itself is untouched.
+ */
+export const CARD_SHADOW_CLASS = {
+  shadowed: 'shadow-(--card-depth,var(--shadow-card))',
+  free: 'shadow-(--card-depth,0_0_#0000)',
 } as const
 
 const pick = <T extends string>(allowed: readonly T[], value: string | null | undefined) => {
@@ -115,6 +132,10 @@ export const shadowLevelOf = (value: string | null | undefined): ShadowLevel | u
 
 export const glowLevelOf = (value: string | null | undefined): GlowLevel =>
   pick(GLOW_LEVELS, value) ?? 'off'
+
+/** A glow level that was chosen (Off included), or undefined while it is inherited. */
+export const glowChoiceOf = (value: string | null | undefined): GlowLevel | undefined =>
+  pick(GLOW_LEVELS, value)
 
 /** The ticked targets that exist; Links when none are. */
 export function glowTargetsOf(values: DepthInput['glowTargets']): GlowTarget[] {
@@ -138,22 +159,147 @@ function glowFilter(level: Exclude<GlowLevel, 'off'>, colour: string): string {
   return `drop-shadow(0 0 ${blur} color-mix(in oklch, ${colour} var(--depth-glow-${level}-strength), transparent))`
 }
 
+/** What a box or picture is given: a shadow level, a glow and the glow's colour. All optional. */
+export interface DepthLookInput {
+  level?: ShadowLevel | undefined
+  glow?: GlowLevel | undefined
+  glowColour?: ThemeColourInput | null | undefined
+}
+
+const glowColourOf = (input: ThemeColourInput | null | undefined) =>
+  themeColourCss(input, OFFERED) ?? themeColourCss({ colour: 'accent' }) ?? 'currentColor'
+
 /**
- * A box element (a link row, a pill, a social button). The class replaces the element's own shadow
- * class (Tailwind's `shadow-(--…)` keeps rings, which the layouts use as borders); with only a glow
- * chosen, the element keeps its own shadow and the glow is added to it.
+ * A box element's depth (a card, a link row, a pill, a social button). The class replaces the element's
+ * own shadow class (Tailwind's `shadow-(--…)` keeps rings, which the layouts use as borders); with only
+ * a glow chosen, the element keeps `own`, the shadow it draws on its own (`OWN_SHADOW`), and the glow is
+ * added to it. Undefined keeps the element exactly as the layout draws it.
  */
-function boxDepth(
-  level: ShadowLevel | undefined,
-  glow: string | undefined,
-  own: string,
-): ElementDepth | undefined {
-  if (!level && !glow) return undefined
-  const shadow = level ? BOX_SHADOW[level] : own
+export function depthLook(input: DepthLookInput, own: string): ElementDepth | undefined {
+  const glow = input.glow && input.glow !== 'off' ? input.glow : undefined
+  if (!input.level && !glow) return undefined
+  const shadow = input.level ? BOX_SHADOW[input.level] : own
+  const halo = glow ? glowShadow(glow, glowColourOf(input.glowColour)) : undefined
   return {
     className: 'shadow-(--depth-shadow)',
-    style: { '--depth-shadow': glow ? `${shadow}, ${glow}` : shadow } as CSSProperties,
+    style: { '--depth-shadow': halo ? `${shadow}, ${halo}` : shadow } as CSSProperties,
   }
+}
+
+/**
+ * A picture's depth: the same level and glow as a filter, which follows the picture's outline (a round
+ * crop, a transparent logo) rather than its box. Undefined while neither is chosen.
+ */
+export function depthFilter(input: DepthLookInput): ElementDepth | undefined {
+  const glow = input.glow && input.glow !== 'off' ? input.glow : undefined
+  const filter = [
+    input.level ? PICTURE_SHADOW[input.level] : '',
+    glow ? glowFilter(glow, glowColourOf(input.glowColour)) : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+  return filter
+    ? {
+        className: '[filter:var(--depth-filter)]',
+        style: { '--depth-filter': filter } as CSSProperties,
+      }
+    : undefined
+}
+
+/** A picture's stored `pictureDepthDesign` object as a query returns it (task 147): untrusted, so every value is checked. */
+export interface PictureDepthInput {
+  shadow?: string | null
+  glow?: string | null
+  glowColour?: ThemeColourInput | null
+}
+
+/** The room a picture's shadow and glow need, in px, on each side and above it (a shadow falls downwards). */
+export interface PictureClearance {
+  side: number
+  top: number
+}
+
+/**
+ * How much room a picture's shadow and glow need before a card that clips (Team, Events Featured) cuts them off,
+ * by shadow level and glow. Measured in Chromium on the real cards (task 147): the distance from the picture's
+ * edge at which the fade is down to a tint of 8/255 against the card (about 3%, the same as the card's own ring),
+ * plus 2px, rounded up to an even number; the approved first values (Soft 8, Raised 16, Floating 28) are the
+ * least any level gets. A glow's fade is much longer than its blur radius, and a glow added to a shadow lengthens
+ * the shadow's own tail, so a combination is its own measurement, not the larger of the two. One table, so no
+ * family makes up its own.
+ *
+ * These values depend on the filter tokens (`depth.picture-*` and `depth.glow-*`, scripts/build-tokens.mjs) and on
+ * `glowFilter`'s blur. If either changes, the clearances must be measured again before anything else: a test in
+ * scripts/build-tokens.test.mjs pins the tokens and fails with this instruction when they move.
+ */
+export const PICTURE_CLEARANCE: Record<
+  ShadowLevel,
+  Record<GlowLevel, PictureClearance | undefined>
+> = {
+  flat: { off: undefined, soft: { side: 12, top: 12 }, strong: { side: 22, top: 22 } },
+  soft: { off: { side: 8, top: 4 }, soft: { side: 14, top: 12 }, strong: { side: 22, top: 22 } },
+  raised: { off: { side: 16, top: 6 }, soft: { side: 18, top: 14 }, strong: { side: 26, top: 22 } },
+  floating: {
+    off: { side: 28, top: 12 },
+    soft: { side: 30, top: 18 },
+    strong: { side: 34, top: 24 },
+  },
+}
+
+/**
+ * The room the picture's chosen depth needs, or undefined while there is none (nothing chosen, Flat with Glow
+ * Off, or values the schema does not offer).
+ */
+export function pictureClearance(
+  input: PictureDepthInput | null | undefined,
+): PictureClearance | undefined {
+  return PICTURE_CLEARANCE[shadowLevelOf(input?.shadow) ?? 'flat'][glowLevelOf(input?.glow)]
+}
+
+/**
+ * Where that room goes in a slot that must keep its size: `side` on each side, `top` above, and the rest of the
+ * slot's vertical padding below, so the picture keeps its ratio and the slot its height. `ratio` is the picture's
+ * height over its width (1 for a square, 9/16 for a 16:9 picture): the padding a ratio-keeping inset adds is
+ * twice the side's room times that ratio, exactly: a rounded figure would leave the slot half a pixel too tall
+ * or short and move the text below it. A top that would not fit is cut back to what does.
+ */
+export function pictureInset({ side, top }: PictureClearance, ratio = 1) {
+  const vertical = Number((2 * side * ratio).toFixed(2))
+  const above = Math.min(top, vertical)
+  return { side, top: above, bottom: Number((vertical - above).toFixed(2)) }
+}
+
+/**
+ * A picture that already sits inside its card with a fixed margin (Team's shaped portraits: 24px at the sides and
+ * above, none below) and needs more room at the sides than that: the sides grow to the clearance, the picture
+ * narrows with them, and the bottom takes up exactly what its height lost, so the slot keeps its height. `ratio` is
+ * the picture's height over its width (1 for a circle, 5/4 for an arch). Undefined while the margin is enough.
+ */
+export function pictureInsetBeyond(
+  { side }: PictureClearance,
+  existing: { side: number; top: number },
+  ratio = 1,
+) {
+  if (side <= existing.side) return undefined
+  // Slot height before: top + ratio x (width - 2 x existing side). After: top + ratio x (width - 2 x side) + bottom.
+  const bottom = Number((ratio * 2 * (side - existing.side)).toFixed(2))
+  return { side, top: existing.top, bottom }
+}
+
+/**
+ * A framed picture's depth (Image + text, Hero, Team, Gallery, Testimonials, Location, Events, post
+ * cards): the shared filter, from the picture's own `pictureDepthDesign`. There is no level above it, so the
+ * site's Card depth never reaches a picture. Undefined while neither a shadow nor a glow is chosen, so
+ * the picture is drawn exactly as it was; an unknown or legacy value is the same as unset.
+ */
+export function resolvePictureDepth(
+  input: PictureDepthInput | null | undefined,
+): ElementDepth | undefined {
+  return depthFilter({
+    level: shadowLevelOf(input?.shadow),
+    glow: glowChoiceOf(input?.glow),
+    glowColour: input?.glowColour,
+  })
 }
 
 /**
@@ -163,27 +309,75 @@ function boxDepth(
 export function resolveDepth(input: DepthInput | null | undefined): ResolvedDepth {
   const glow = glowLevelOf(input?.glow)
   const targets = glowTargetsOf(input?.glowTargets)
-  const colour =
-    themeColourCss(input?.glowColour, OFFERED) ??
-    themeColourCss({ colour: 'accent' }) ??
-    'currentColor'
-  const boxGlow = (target: GlowTarget) =>
-    glow !== 'off' && targets.includes(target) ? glowShadow(glow, colour) : undefined
+  const glowColour = input?.glowColour
+  const glowFor = (target: GlowTarget): GlowLevel => (targets.includes(target) ? glow : 'off')
 
   const links = shadowLevelOf(input?.linkShadow)
   const social = shadowLevelOf(input?.socialShadow)
   const picture = shadowLevelOf(input?.pictureShadow)
-  const pictureGlow = glow !== 'off' && targets.includes('picture') ? glowFilter(glow, colour) : ''
-  const filter = [picture ? PICTURE_SHADOW[picture] : '', pictureGlow].filter(Boolean).join(' ')
 
   return {
-    links: (own) => boxDepth(links, boxGlow('links'), own),
-    social: (own) => boxDepth(social, boxGlow('social'), own),
-    picture: filter
-      ? {
-          className: '[filter:var(--depth-filter)]',
-          style: { '--depth-filter': filter } as CSSProperties,
-        }
-      : undefined,
+    links: (own) => depthLook({ level: links, glow: glowFor('links'), glowColour }, own),
+    social: (own) => depthLook({ level: social, glow: glowFor('social'), glowColour }, own),
+    picture: depthFilter({ level: picture, glow: glowFor('picture'), glowColour }),
   }
+}
+
+export const LIFT_LEVELS = ['none', 'lift'] as const
+export type LiftLevel = (typeof LIFT_LEVELS)[number]
+
+export const LIFT_TITLES: Record<LiftLevel, string> = { none: 'None', lift: 'Lift' }
+
+/** One level of a card's stored depth: an item's, then the section's Cards box. */
+export interface CardDepthLevel {
+  shadow?: string | null
+  glow?: string | null
+  glowColour?: ThemeColourInput | null
+  lift?: string | null
+}
+
+/**
+ * A card's depth. Each property comes from the first level that chose it (an item over its section's
+ * Cards box); an empty property inherits, ending at the site's Card depth (`--card-depth`, through
+ * `own`) and then the family's own shadow. `own` is one of `OWN_SHADOW.siteCard` or `siteCardFree`.
+ * Undefined while nothing is chosen, so the family draws exactly what it did.
+ */
+export function resolveCardDepth(
+  levels: readonly (CardDepthLevel | null | undefined)[],
+  own: string,
+): ElementDepth | undefined {
+  const first = <T>(read: (level: CardDepthLevel) => T | undefined) => {
+    for (const level of levels) {
+      const value = level ? read(level) : undefined
+      if (value !== undefined) return value
+    }
+    return undefined
+  }
+  const glow = first((level) => glowChoiceOf(level.glow))
+  return depthLook(
+    {
+      level: first((level) => shadowLevelOf(level.shadow)),
+      glow,
+      glowColour: first((level) => {
+        const colour = stegaClean(level.glowColour?.colour)
+        return colour && colour !== 'inherit' ? level.glowColour : undefined
+      }),
+    },
+    own,
+  )
+}
+
+/**
+ * Whether a card lifts under the pointer: the first level that chose None or Lift. Undefined while
+ * nothing is chosen, which is "as the family draws it". The card must also be one link: a lift on a card
+ * that goes nowhere promises something it can't do, so callers ask only of linked cards.
+ */
+export function resolveCardLift(
+  levels: readonly (CardDepthLevel | null | undefined)[],
+): LiftLevel | undefined {
+  for (const level of levels) {
+    const chosen = level ? pick(LIFT_LEVELS, level.lift) : undefined
+    if (chosen) return chosen
+  }
+  return undefined
 }

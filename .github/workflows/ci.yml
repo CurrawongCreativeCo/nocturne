@@ -74,6 +74,38 @@ jobs:
             exit 1
           }
 
+      # `npm run typegen` also rewrites the README's Design capability contract tables from the
+      # declarations and the evidence. (`npm run check` also fails when a declaration, evidence entry or
+      # exception breaks the contract, or the baseline in capability-baseline.json grows.)
+      - name: README design capability tables are committed and current
+        run: |
+          git diff --exit-code README.md || {
+            echo "::error::The README's Design capability contract tables are stale. Run 'npm run design-capability-docs' (or 'npm run typegen') and commit README.md."
+            exit 1
+          }
+
+      # The baseline may only change by evidence or by a reviewed row (capability-baseline-changes.ts), and
+      # that is only visible against the commit the change is made on: the pull request's base, or the
+      # commit before this push. A missing base baseline fails here: the template always has one. (Not part
+      # of `npm run check`: the generator jobs have no base to compare with.) A new branch has no previous
+      # commit (an all-zero sha), so there is nothing to compare with then.
+      - name: Capability baseline only changes by evidence or a reviewed row
+        id: base-baseline
+        if: ${{ (github.event.pull_request.base.sha || github.event.before) != '0000000000000000000000000000000000000000' }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.event.before }}
+          path: .ci-base
+          persist-credentials: false
+          sparse-checkout: capability-baseline.json
+          sparse-checkout-cone-mode: false
+
+      - name: Compare the capability baseline with the base commit's
+        if: ${{ steps.base-baseline.outcome == 'success' }}
+        run: |
+          npm run design-capabilities -- --against-file .ci-base/capability-baseline.json
+          rm -rf .ci-base
+
       # `.env.example` and the README's settings table are written from the feature registries.
       - name: .env.example and the README settings table are committed and current
         run: |
@@ -130,9 +162,35 @@ jobs:
 
       - run: npm ci
 
-      - name: Generate, then run every check
+      - name: Generate
+        run: ${{ matrix.command }}
+
+      # A generated section declares every design capability as Not applicable with the reason "Not
+      # reviewed yet", which the checks reject: a new section can't merge until a person has reviewed it.
+      # Prove that, then give the throwaway section a reason so the rest of the checks can run on it.
+      - name: A new section can't merge before its capabilities are reviewed
+        if: startsWith(matrix.name, 'section')
         run: |
-          ${{ matrix.command }}
+          if npm run design-capabilities > review.log 2>&1; then
+            echo "::error::A generated section passed the design capability check without being reviewed."
+            exit 1
+          fi
+          grep -q 'still says "Not reviewed yet"' review.log || {
+            cat review.log
+            echo "::error::The design capability check failed, but not for the generated section's unreviewed capabilities."
+            exit 1
+          }
+          sed -i "s/Not reviewed yet/Smoke test section: nothing to review/" src/features/pages/schemas/sections/ci-smoke-*-capabilities.ts
+          # The committed design manifest and README tables were written with the old reason.
+          npm run design-manifest
+          npm run design-capability-docs
+
+      # VITEST_NEW_SNAPSHOTS lets the new section write its first output-parity and capability snapshots
+      # (a missing snapshot fails in CI); anything that changed still fails.
+      - name: Run every check
+        env:
+          VITEST_NEW_SNAPSHOTS: '1'
+        run: |
           npx next typegen
           npm run check
 
@@ -214,13 +272,13 @@ jobs:
             .lighthouseci
           retention-days: 7
 
-  # The projects that change the whole site's state (an A/B test, the Studio's brand colours). Each
+  # The projects that change the whole site's state (an A/B test, the Studio's brand colours, the header menu). Each
   # runs alone and in order against its own fake Content Lake; locally playwright.config.ts chains
   # them with `dependencies`, which CI cannot shard.
   e2e-isolated:
     name: e2e (isolated)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -256,11 +314,36 @@ jobs:
         env:
           E2E_TIMINGS_FILE: e2e-timings/isolated-panel-palettes.json
 
+      - name: Header dropdowns
+        run: npx playwright test --project=nav-submenus --no-deps
+        env:
+          E2E_TIMINGS_FILE: e2e-timings/isolated-nav-submenus.json
+
+      - name: Blog post cards
+        run: npx playwright test --project=blog-card-design --no-deps
+        env:
+          E2E_TIMINGS_FILE: e2e-timings/isolated-blog-card-design.json
+
+      - name: Button styles
+        run: npx playwright test --project=button-style --no-deps
+        env:
+          E2E_TIMINGS_FILE: e2e-timings/isolated-button-style.json
+
+      - name: Footer divider
+        run: npx playwright test --project=footer-divider --no-deps
+        env:
+          E2E_TIMINGS_FILE: e2e-timings/isolated-footer-divider.json
+
+      - name: Team member divider
+        run: npx playwright test --project=team-divider --no-deps
+        env:
+          E2E_TIMINGS_FILE: e2e-timings/isolated-team-divider.json
+
       - name: Slim timings
         if: always()
         run: |
           mkdir -p e2e-timings/slim
-          for name in experiments design design-visual panel-palettes; do
+          for name in experiments design design-visual panel-palettes nav-submenus blog-card-design button-style footer-divider team-divider; do
             node scripts/e2e-timings.mjs --slim "e2e-timings/isolated-$name.json" "e2e-timings/slim/isolated-$name.json" || true
           done
 
@@ -310,7 +393,7 @@ jobs:
         run: |
           gh run download "${{ github.run_id }}" --repo "${{ github.repository }}" --pattern 'e2e-timings-shard-*' --pattern 'e2e-timings-isolated' --dir reports || true
           gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" --paginate > jobs.json || echo '{}' > jobs.json
-          node scripts/e2e-timings.mjs --out e2e-timings.json --jobs jobs.json --expect shard-1,shard-2,shard-3,shard-4,shard-5,shard-6,shard-7,shard-8,shard-9,shard-10,isolated-experiments,isolated-design,isolated-design-visual,isolated-panel-palettes $(find reports -name '*.json' | sort) >> "$GITHUB_STEP_SUMMARY"
+          node scripts/e2e-timings.mjs --out e2e-timings.json --jobs jobs.json --expect shard-1,shard-2,shard-3,shard-4,shard-5,shard-6,shard-7,shard-8,shard-9,shard-10,isolated-experiments,isolated-design,isolated-design-visual,isolated-panel-palettes,isolated-nav-submenus,isolated-blog-card-design,isolated-button-style,isolated-footer-divider,isolated-team-divider $(find reports -name '*.json' | sort) >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload summary
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

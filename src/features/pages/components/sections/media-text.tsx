@@ -3,17 +3,34 @@ import { stegaClean } from 'next-sanity'
 import { travelForSpeed } from '@/components/motion/image-travel'
 import type { ParallaxPlan } from '@/components/motion/presets'
 import { CtaGroup } from '@/components/ui/cta-link'
+import { DecorativeDivider } from '@/components/ui/decorative-divider'
 import { FramedImage } from '@/components/ui/framed-image'
 import { RichHeading } from '@/components/ui/rich-heading'
 import { RichText } from '@/components/ui/rich-text'
 import { SectionFrame } from '@/components/ui/section-frame'
 import { ctaSurfaceFor, sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { chooseMedia, drawnSplitLayout, videoHasSource } from '@/features/pages/utils/split-layout'
+import { resolvePictureDepth } from '@/lib/sanity/depth-options'
+import { resolveDivider } from '@/lib/sanity/divider-options'
+import { hasHeadingText } from '@/lib/sanity/heading-text'
 import { sectionTitle } from '@/lib/sanity/section-title'
+import { resolveTextRoles, textRoleProps } from '@/lib/sanity/text-role'
 
 import { renderSlot } from '../../slots/render-slot'
 import type { SectionProps } from '../../types'
 import { HeroBackground } from './hero/hero-background'
+
+const HEADER_ROLES = ['eyebrow', 'heading', 'intro'] as const
+
+/** What the eyebrow, heading and intro (the body) draw with nothing chosen, so the steps move from them. */
+const OWN_EYEBROW = {
+  size: 'text-small',
+  weight: 'semibold',
+  textCase: 'uppercase',
+  colour: 'text-accent-text',
+} as const
+const OWN_HEADING = { size: 'text-h2', weight: 'semibold' } as const
+const OWN_INTRO = { size: 'text-lead', weight: 'regular', colour: 'text-ink-muted' } as const
 
 export function MediaText({ data, isFirst = false }: SectionProps<'mediaText'>) {
   const { eyebrow, heading, body, ctas, imagePosition } = data
@@ -67,12 +84,42 @@ export function MediaText({ data, isFirst = false }: SectionProps<'mediaText'>) 
         container: hasMedia && !stacked ? 'max-w-content' : 'max-w-measure',
         align: stacked ? 'center' : 'start',
       }
-  const { tone, text, justify } = sectionTraits(data.style, defaults)
+  const { tone, text, justify, block: dividerBlock } = sectionTraits(data.style, defaults)
+
+  const header = resolveTextRoles(data.headerDesign, HEADER_ROLES)
+  const heading$ = textRoleProps(
+    'heading',
+    'mt-2 text-h2 font-semibold text-balance',
+    OWN_HEADING,
+    header.heading,
+  )
+  // The divider (task 151) sits between the heading and the body: drawn only with a title and a body that
+  // says something (words, or a picture). It owns 24px above and below, so the body drops its top margin
+  // and so does its first block (a paragraph's `my-4`, a heading's `mt-10`), and the gap is 24px whether
+  // or not margins collapse. Unset, the body keeps `mt-4` and nothing else changes.
+  const divider = resolveDivider(data.headerDesign?.divider)
+  const hasBody =
+    hasHeadingText(body) || (body ?? []).some((item) => stegaClean(item._type) === 'image')
+  const showDivider = Boolean(divider && title?.trim() && hasBody)
+  const intro$ = textRoleProps(
+    'intro',
+    `${showDivider ? 'mt-0 [&>:first-child]:mt-0!' : 'mt-4'} text-lead text-ink-muted`,
+    OWN_INTRO,
+    header.intro,
+  )
 
   const copy = (
     <div className={text}>
       {eyebrow && (
-        <p className="text-small font-semibold tracking-wide text-accent-text uppercase">
+        <p
+          {...textRoleProps(
+            'eyebrow',
+            'text-small font-semibold tracking-wide text-accent-text uppercase',
+            OWN_EYEBROW,
+            header.eyebrow,
+            'tracking-wide',
+          )}
+        >
           {eyebrow}
         </p>
       )}
@@ -80,9 +127,12 @@ export function MediaText({ data, isFirst = false }: SectionProps<'mediaText'>) 
         as="h2"
         blocks={heading}
         fallback={title}
-        className="mt-2 text-h2 font-semibold text-balance"
+        className={heading$.className}
+        style={heading$.style}
+        textRole="heading"
       />
-      <RichText value={body} className="mt-4 text-lead text-ink-muted" />
+      {showDivider && divider ? <DecorativeDivider divider={divider} block={dividerBlock} /> : null}
+      <RichText value={body} className={intro$.className} style={intro$.style} textRole="intro" />
       <CtaGroup ctas={ctas} surface={ctaSurfaceFor(tone)} className={`mt-8 ${justify}`} />
       {overlay && supporting && <div className="mt-8">{supporting}</div>}
     </div>
@@ -119,6 +169,7 @@ export function MediaText({ data, isFirst = false }: SectionProps<'mediaText'>) 
       <FramedImage
         image={image}
         design={data.imageDesign}
+        depth={resolvePictureDepth(data.pictureDepthDesign)}
         context={{
           isFirst,
           sectionTravel: parallax ? travelForSpeed(parallax.speed) : undefined,

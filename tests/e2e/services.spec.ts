@@ -64,6 +64,16 @@ test.describe('a service page with everything', () => {
     await expect(people.getByRole('link', { name: 'Cara Doyle' })).toHaveCount(0)
   })
 
+  test('lists where it is offered, linking each location', async ({ page }) => {
+    await page.goto(FULL)
+    const where = region(page, 'Where it’s offered')
+    await expect(where.getByRole('link')).toHaveText(['Parramatta', 'Western Sydney'])
+    await expect(where.getByRole('link', { name: 'Parramatta' })).toHaveAttribute(
+      'href',
+      '/locations/parramatta',
+    )
+  })
+
   test('links proof of work, and leaves out a members-only page', async ({ page }) => {
     await page.goto(FULL)
     const evidence = region(page, 'See it in action')
@@ -165,9 +175,30 @@ test.describe('the JSON-LD', () => {
       about: { '@id': `${SITE_URL}/#service-service-emergency-plumbing` },
     })
     expect(service?.image as string).toContain('cdn.sanity.io/images')
-    for (const key of ['areaServed', 'aggregateRating', 'review']) {
+    for (const key of ['aggregateRating', 'review']) {
       expect(service).not.toHaveProperty(key)
     }
+  })
+
+  test('names the locations it lists as areaServed, by @id, and defines each shortly on the page', async ({
+    page,
+  }) => {
+    await page.goto(FULL)
+    const nodes = await jsonLd(page)
+    const service = nodes.find((node) => node['@type'] === 'Service')
+    expect(service?.areaServed).toEqual([
+      { '@id': `${SITE_URL}/#location-place-parramatta` },
+      { '@id': `${SITE_URL}/#location-place-western-sydney` },
+    ])
+    expect(nodes.find((node) => node['@id'] === `${SITE_URL}/#location-place-parramatta`)).toEqual({
+      '@type': 'ProfessionalService',
+      '@id': `${SITE_URL}/#location-place-parramatta`,
+      name: 'Parramatta',
+      url: `${SITE_URL}/locations/parramatta`,
+    })
+    expect(
+      nodes.find((node) => node['@id'] === `${SITE_URL}/#location-place-western-sydney`),
+    ).toMatchObject({ '@type': 'Place', name: 'Western Sydney' })
   })
 
   test('has one FAQPage for the questions the page shows', async ({ page }) => {
@@ -233,6 +264,7 @@ test.describe('a service page with only the required fields', () => {
     await expect(main).toContainText('We clear blocked drains and tell you what caused them.')
     for (const heading of [
       'Who it’s for',
+      'Where it’s offered',
       'Who provides it',
       'See it in action',
       'Questions and answers',
@@ -249,6 +281,8 @@ test.describe('a service page with only the required fields', () => {
     expect(nodes.map((node) => node['@type'])).toContain('Service')
     expect(nodes.map((node) => node['@type'])).not.toContain('FAQPage')
     expect(nodes.find((node) => node['@type'] === 'Service')).not.toHaveProperty('offers')
+    // It names no location, so it is offered everywhere and says nothing about where.
+    expect(nodes.find((node) => node['@type'] === 'Service')).not.toHaveProperty('areaServed')
   })
 })
 

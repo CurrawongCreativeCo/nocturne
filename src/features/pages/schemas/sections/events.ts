@@ -1,18 +1,26 @@
 import { CalendarIcon } from '@sanity/icons/Calendar'
-import { defineField, defineType } from 'sanity'
+import { defineField, defineType, type ConditionalPropertyCallback } from 'sanity'
 
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import {
+  cardDesignField,
+  eyebrowField,
+  headerDesignField,
+} from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
+import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
+import { pictureDepthFields } from '@/lib/sanity/schema/surface-design'
 import {
   EventsAgendaThumbnail,
   EventsFeaturedThumbnail,
   EventsListThumbnail,
 } from '@/lib/sanity/schema/thumbnails/events-thumbnails'
 
+import { eventsCapabilities } from './events-capabilities'
 import { EVENTS_MAX_COUNT } from '../../utils/events'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
@@ -47,16 +55,30 @@ export const EVENTS_VARIANTS = [
   },
 ] as const
 
+/** The text roles every layout draws (events-capabilities.ts), and what each is drawn in. */
+export const EVENTS_ROLES = [{ role: 'title' }, { role: 'meta' }, { role: 'body' }] as const
+export const EVENTS_ROLE_COLOURS = { title: 'ink', meta: 'muted', body: 'muted' } as const
+
+/** Only the Featured layout draws a card, so only it has a fill, a border and a mark to set. */
+const notFeatured: ConditionalPropertyCallback = ({ document, path }) =>
+  (sectionAtStylePath(document, path)?.variant ?? 'list') !== 'featured'
+
+/** The Agenda is not linked card by card (137 item 4), so it has no indicator to choose. */
+const isAgenda: ConditionalPropertyCallback = ({ document, path }) =>
+  (sectionAtStylePath(document, path)?.variant ?? 'list') === 'agenda'
+
 export const events = defineType({
   name: 'events',
   title: 'Events',
   type: 'object',
   icon: CalendarIcon,
+  options: { designCapabilities: eventsCapabilities },
   // Content, plus the agency-only Design tab (the shared `style` field that sectionFields adds).
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
+      eyebrowField(),
       headingField({
         name: 'heading',
         title: 'Section title',
@@ -82,6 +104,25 @@ export const events = defineType({
         initialValue: 'See all events',
         hidden: ({ parent }) => !(parent as { seeAllLink?: unknown } | undefined)?.seeAllLink,
         validation: (rule) => lengthWarning(rule, LIMITS.label, 'Link text'),
+      }),
+      headerDesignField({}, { divider: true }),
+      cardDesignField({
+        description:
+          'Text for every layout. Only Featured draws a card, so its fill, border and mark are shown there.',
+        roles: EVENTS_ROLES,
+        defaults: EVENTS_ROLE_COLOURS,
+        inherits: 'the layout’s own',
+        surface: { hidden: notFeatured },
+        markHidden: notFeatured,
+        // The List draws a chevron today, the Featured layout nothing: that is what unset means.
+        action: { hidden: isAgenda },
+        depth: { hidden: notFeatured, lift: {} },
+      }),
+      // A shadow and glow on the Featured card's picture (task 147); the other layouts draw no picture.
+      pictureDepthFields({
+        // The object sits on the section itself, so its parent is the section (the Cards box is one deeper).
+        hidden: ({ parent }) =>
+          ((parent as { variant?: string } | undefined)?.variant ?? 'list') !== 'featured',
       }),
       accessField,
       // Shown first in the Content tab.

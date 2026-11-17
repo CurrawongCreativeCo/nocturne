@@ -3,17 +3,21 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { eyebrowField, headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageDesignField } from '@/lib/sanity/schema/image-design'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
+import { pictureDepthFields } from '@/lib/sanity/schema/surface-design'
 import {
   GalleryGridThumbnail,
   GalleryMasonryThumbnail,
   GallerySliderThumbnail,
 } from '@/lib/sanity/schema/thumbnails/gallery-thumbnails'
+
+import { galleryCapabilities } from './gallery-capabilities'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -76,11 +80,13 @@ export const gallery = defineType({
   title: 'Gallery',
   type: 'object',
   icon: ImagesIcon,
+  options: { designCapabilities: galleryCapabilities },
   // Content, plus the agency-only Design tab (the shared `style` field that sectionFields adds).
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
+      eyebrowField(),
       headingField({
         name: 'heading',
         title: 'Section title',
@@ -107,6 +113,10 @@ export const gallery = defineType({
       imageDesignField({
         hidden: ({ parent }) => (parent as { variant?: string } | undefined)?.variant === 'masonry',
       }),
+      // A shadow and glow on every tile (task 147), beside Image design so it never moves with it: on every layout,
+      // Masonry too (which has no Image design to hold it).
+      pictureDepthFields({}),
+      headerDesignField({}, { divider: true }),
       accessField,
       // Shown first in the Content tab.
       variantField(GALLERY_VARIANTS),

@@ -1,5 +1,5 @@
+import { ActionIndicator } from '@/components/ui/action-indicator'
 import { buttonFeedback, ctaColours } from '@/components/ui/cta-link'
-import { LinkArrow } from '@/components/ui/link-arrow'
 import { SanityLink } from '@/components/ui/sanity-link'
 import { servedThumbnail } from '@/lib/sanity/link-thumbnail-framing'
 import { glassSurfaceLook, ringSurfaceLook } from '@/lib/sanity/surface-options'
@@ -14,6 +14,8 @@ import {
   linkShadow,
   ownEyebrow,
   type OwnLinkText,
+  LinkMark,
+  withMark,
 } from './link-design'
 import { LinkListView } from './link-list-parts'
 import { type LinkListLayout } from './link-list-types'
@@ -53,7 +55,7 @@ const layout: LinkListLayout = {
   profile: { picture: PICTURE, name: 'text-h3' },
   listClassName: 'grid gap-3',
   renderLink: (link, context) => {
-    const { surface, rowStyle, glassStrength, arrow, arrowStyle, design } = context
+    const { surface, rowStyle, glassStrength, arrow, arrowStyle, design, mark } = context
     if (rowStyle === 'glass') {
       // The glass draws its own shadow (`.glass-row`); a chosen one replaces it.
       const depth = linkShadow(context, 'glass')
@@ -68,6 +70,7 @@ const layout: LinkListLayout = {
             arrowStyle={arrowStyle}
             design={design}
             className={depth.className}
+            mark={mark}
           />
         </LinkItem>
       )
@@ -87,8 +90,21 @@ const layout: LinkListLayout = {
       <LinkItem link={link} style={[depth.style, look.style]}>
         <SanityLink
           link={link.link}
-          className={`${BUTTON} ${link.large ? `min-h-20 py-4${tinted ? 'text-ink' : ''}` : NORMAL} ${look.className} ${depth.className}`}
+          className={withMark(
+            `${BUTTON} ${link.large ? `min-h-20 py-4${tinted ? 'text-ink' : ''}` : NORMAL} ${look.className} ${depth.className}`,
+            mark,
+          )}
         >
+          <LinkMark
+            mark={mark}
+            fill={
+              link.large && !tinted
+                ? surface === 'dark'
+                  ? { background: 'inkInverse', foreground: 'surfaceInverse' }
+                  : { background: 'cta', foreground: 'ctaInk' }
+                : undefined
+            }
+          />
           <span className="absolute left-4 flex items-center">
             <LinkVisual
               link={link}
@@ -112,10 +128,12 @@ const layout: LinkListLayout = {
               className="absolute right-4 flex items-center opacity-70 group-hover:opacity-100"
               style={arrowStyle}
             >
-              <LinkArrow
-                arrow={arrow}
+              <ActionIndicator
+                glyph={arrow}
                 external={link.kind === 'external'}
-                className="size-5 motion-safe:transition-transform motion-safe:group-hover:translate-x-0.5"
+                motion="nudge"
+                distance="legacy-small"
+                className="size-5"
               />
             </span>
           )}

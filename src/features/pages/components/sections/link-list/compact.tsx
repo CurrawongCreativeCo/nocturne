@@ -3,7 +3,7 @@ import { SanityLink } from '@/components/ui/sanity-link'
 import { ringSurfaceLook } from '@/lib/sanity/surface-options'
 import { textLook } from '@/lib/sanity/text-style-options'
 
-import { LinkIcon, LinkItem, linkShadow } from './link-design'
+import { LinkIcon, LinkItem, LinkMark, linkShadow, withMark } from './link-design'
 import { LinkListView } from './link-list-parts'
 import { type LinkListLayout } from './link-list-types'
 import type { SectionProps } from '../../../types'
@@ -32,7 +32,7 @@ const layout: LinkListLayout = {
   // Wraps; the section's alignment decides whether the pills sit left or centred.
   listClassName: 'flex flex-wrap gap-2 [text-align:inherit]',
   renderLink: (link, context) => {
-    const { design } = context
+    const { design, mark } = context
     const depth = linkShadow(context, 'none')
     const look = ringSurfaceLook(design.surface, SURFACE)
     const label = textLook(design.label, LABEL)
@@ -40,8 +40,13 @@ const layout: LinkListLayout = {
       <LinkItem link={link} style={[depth.style, look.style, label.style]}>
         <SanityLink
           link={link.link}
-          className={`${PILL} ${label.className} ${look.className} ${depth.className}`}
+          className={withMark(
+            `${PILL} ${label.className} ${look.className} ${depth.className}`,
+            mark,
+          )}
+          textRole="label"
         >
+          <LinkMark mark={mark} />
           <LinkIcon
             link={link}
             design={design.icon}

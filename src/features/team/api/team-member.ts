@@ -4,9 +4,10 @@ import { defineQuery } from 'next-sanity'
 import { teamPath } from '@/config/paths'
 import { hasTeamProfiles } from '@/config/profile'
 import { siteUrl } from '@/config/site-url'
-import { imageFields, portableTextFields } from '@/lib/sanity/fragments'
 import { urlFor } from '@/lib/sanity/image'
 import { cachedSanityFetch, PUBLISHED, TAGS, type FetchMode } from '@/lib/sanity/live'
+
+import { teamMemberFields, teamPageSettingsFields } from './team-member-fields'
 
 /**
  * A member with everything their page and metadata need. Only published members with a slug have
@@ -14,20 +15,8 @@ import { cachedSanityFetch, PUBLISHED, TAGS, type FetchMode } from '@/lib/sanity
  */
 export const TEAM_MEMBER_QUERY = defineQuery(/* groq */ `
   *[_type == "teamMember" && slug.current == $slug][0] {
-    _id,
-    _type,
-    _updatedAt,
-    name,
-    role,
-    "slug": slug.current,
-    portrait { ${imageFields} },
-    shortBio,
-    bio[] { ${portableTextFields} },
-    qualifications,
-    publicEmail,
-    phone,
-    socialLinks[] { _key, platform, url },
-    socialDisplay
+    ${teamMemberFields},
+    "pageSettings": *[_id == "teamPageSettings"][0] { ${teamPageSettingsFields} }
   }
 `)
 
@@ -44,7 +33,7 @@ export const TEAM_INDEX_QUERY = defineQuery(/* groq */ `
 `)
 
 /** Profile pages link to pages from their bio, which resolve to slugs. */
-const MEMBER_TAGS = [TAGS.teamMember, TAGS.page]
+const MEMBER_TAGS = [TAGS.teamMember, TAGS.teamPageSettings, TAGS.page]
 
 /** `generateStaticParams` can't be empty under Cache Components; this slug is never a member (404). */
 const PLACEHOLDER_SLUG = '_'

@@ -3,6 +3,7 @@ import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 
+import { getBusinessType } from '@/app/business-type'
 import { hasServices } from '@/config/profile'
 import { getServiceMetadata, getServiceStaticParams } from '@/features/services/api/service'
 import {
@@ -44,18 +45,36 @@ export async function generateMetadata(
 export default async function ServicePage({ params }: Props) {
   if (!hasServices()) notFound()
   const { isEnabled: isDraftMode } = await draftMode()
+  // The type of the short node each listed location gets (a service can't read Business info).
+  const businessType = await getBusinessType()
 
   if (isDraftMode) {
     return (
       <Suspense fallback={null}>
-        <DraftService params={params} />
+        <DraftService params={params} businessType={businessType} />
       </Suspense>
     )
   }
 
-  return <ServiceView slug={(await params).slug} renderSections={renderSections} {...PUBLISHED} />
+  return (
+    <ServiceView
+      slug={(await params).slug}
+      businessType={businessType}
+      renderSections={renderSections}
+      {...PUBLISHED}
+    />
+  )
 }
 
-async function DraftService({ params }: Pick<Props, 'params'>) {
-  return <DraftServiceView slug={(await params).slug} renderSections={renderSections} />
+async function DraftService({
+  params,
+  businessType,
+}: Pick<Props, 'params'> & { businessType: string }) {
+  return (
+    <DraftServiceView
+      slug={(await params).slug}
+      businessType={businessType}
+      renderSections={renderSections}
+    />
+  )
 }
