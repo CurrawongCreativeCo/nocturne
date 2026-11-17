@@ -90,8 +90,20 @@ export interface FramingResolver {
    * cropped. `path` is the image field's own path, for placements that depend on which item it sits in.
    */
   resolve: (design: unknown, frameUrl?: string | null, path?: FormPath) => FrameShape[]
-  /** What the field says when `resolve` returns no shape, if not the profile picture's uncropped wording. */
-  wholeNote?: WholeNote
+  /**
+   * What the field says when `resolve` returns no shape, if not the profile picture's uncropped wording:
+   * one note, or one per design (a placement whose reason depends on the section's settings).
+   */
+  wholeNote?: WholeNote | ((design: unknown) => WholeNote)
+}
+
+/** The note a resolver gives for this design, if any. */
+export function wholeNoteFor(
+  resolver: FramingResolver | undefined,
+  design: unknown,
+): WholeNote | undefined {
+  const note = resolver?.wholeNote
+  return typeof note === 'function' ? note(design) : note
 }
 
 /** The field's line when a picture has no shape to adjust: with a positioning saved, and without. */
@@ -329,6 +341,54 @@ const mediaTextLegacyImage: FramingResolver = {
   resolve: mediaTextShapes,
 }
 
+interface StoredVideoSection {
+  variant?: string | null
+  source?: string | null
+  aspectRatio?: string | null
+}
+
+/** The video frame's Shape (features/pages/utils/video-source.ts ASPECT_RATIOS; a test keeps them in step). */
+const VIDEO_RATIOS: Record<string, number> = {
+  '16:9': 16 / 9,
+  '4:3': 4 / 3,
+  '1:1': 1,
+  '21:9': 21 / 9,
+}
+
+/**
+ * The video section's poster (task 177, QA-052). Embed with YouTube or Vimeo shows it before play, cut to
+ * the frame's Shape (unset 16:9) with the frame's card corners (video-frame.tsx); the player then fills the
+ * same box, so framing never resizes it. An uploaded video's own player draws the poster whole, and Ambient
+ * draws it behind the words: no fixed shape in either. The field is on the section.
+ */
+const videoPoster: FramingResolver = {
+  designPath: { drop: 1 },
+  wholeNote: (design) => {
+    const section = design as StoredVideoSection | null | undefined
+    return section?.variant === 'ambient'
+      ? BACKGROUND_NOTE
+      : {
+          saved:
+            'An uploaded video’s player shows its poster whole, so there’s nothing to adjust here. The saved positioning still applies if you switch to YouTube or Vimeo.',
+          unsaved:
+            'An uploaded video’s player shows its poster whole, so there’s nothing to adjust here.',
+        }
+  },
+  resolve: (design) => {
+    const section = design as StoredVideoSection | null | undefined
+    if (section?.variant === 'ambient' || section?.source === 'upload') return []
+    return [
+      {
+        label: 'Poster before play',
+        aspect: VIDEO_RATIOS[section?.aspectRatio ?? ''] ?? 16 / 9,
+        corner: 'card',
+        insetPct: 0,
+        drawnPx: 1100,
+      },
+    ]
+  },
+}
+
 /** Registry keys, set on an image field with `framing('…')` (lib/sanity/schema/image-framing-option.ts). */
 export const FRAMING_RESOLVERS = {
   linkListProfile,
@@ -338,6 +398,7 @@ export const FRAMING_RESOLVERS = {
   heroImage,
   mediaTextImage,
   mediaTextLegacyImage,
+  videoPoster,
   // new-framing: resolver
 } satisfies Record<string, FramingResolver>
 

@@ -10,6 +10,7 @@ import {
   CORNER_PX,
   appearanceCorner,
   isFramingKey,
+  wholeNoteFor,
 } from './image-frame-geometry'
 import {
   PROFILE_BORDERS,
@@ -176,14 +177,16 @@ describe('appearanceCorner', () => {
 })
 
 describe('heroImage (task 177)', () => {
-  const { designPath, resolve, wholeNote } = FRAMING_RESOLVERS.heroImage
+  const { designPath, resolve } = FRAMING_RESOLVERS.heroImage
   it('finds the section one segment up, and has a shape only in Split', () => {
     expect(designPath).toEqual({ drop: 1 })
     expect(resolve({ variant: 'split' })[0]).toMatchObject({ aspect: 4 / 3, corner: 'card' })
     for (const variant of ['overlay', 'full-bleed', 'editorial', undefined]) {
       expect(resolve({ variant })).toEqual([])
     }
-    expect(wholeNote?.saved).toMatch(/covers the section/)
+    expect(wholeNoteFor(FRAMING_RESOLVERS.heroImage, { variant: 'overlay' })?.saved).toMatch(
+      /covers the section/,
+    )
   })
 
   it('takes the older Image shape, and the Image design over it', () => {
@@ -213,5 +216,29 @@ describe('Image + text pictures (task 177)', () => {
       aspect: 1,
       corner: 'circle',
     })
+  })
+})
+
+describe('videoPoster (task 177, QA-052)', () => {
+  const { designPath, resolve } = FRAMING_RESOLVERS.videoPoster
+  it('is the frame’s Shape before play for YouTube and Vimeo, 16:9 when unset', () => {
+    expect(designPath).toEqual({ drop: 1 })
+    expect(resolve({ variant: 'embed' })[0]).toMatchObject({ aspect: 16 / 9, corner: 'card' })
+    expect(resolve({ variant: 'embed', source: 'vimeo', aspectRatio: '4:3' })[0]).toMatchObject({
+      aspect: 4 / 3,
+    })
+    expect(resolve({ aspectRatio: '1:1' })[0]?.aspect).toBe(1)
+    expect(resolve({ aspectRatio: '21:9' })[0]?.aspect).toBe(21 / 9)
+  })
+
+  it('has no fixed shape for an uploaded video or Ambient, and says why', () => {
+    expect(resolve({ variant: 'embed', source: 'upload' })).toEqual([])
+    expect(resolve({ variant: 'ambient' })).toEqual([])
+    expect(wholeNoteFor(FRAMING_RESOLVERS.videoPoster, { source: 'upload' })?.unsaved).toMatch(
+      /player shows its poster whole/,
+    )
+    expect(wholeNoteFor(FRAMING_RESOLVERS.videoPoster, { variant: 'ambient' })?.unsaved).toMatch(
+      /covers the section/,
+    )
   })
 })

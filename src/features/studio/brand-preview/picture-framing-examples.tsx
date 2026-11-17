@@ -7,6 +7,7 @@ import {
   type FrameShape,
   type FrameShapes,
   type WholeNote,
+  wholeNoteFor,
 } from '@/lib/sanity/image-frame-geometry'
 import type { Crop, Hotspot } from '@/lib/sanity/image-framing'
 
@@ -199,7 +200,7 @@ export function PlacementFramingExamples() {
         title="Gallery photo: Masonry"
         shapes={GALLERY_MASONRY}
         initial={SAVED}
-        wholeNote={GALLERY.wholeNote}
+        wholeNote={wholeNoteFor(GALLERY, { variant: 'masonry' })}
       />
       <Example
         id="event-image"

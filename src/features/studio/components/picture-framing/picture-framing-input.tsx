@@ -3,7 +3,7 @@ import { Stack } from '@sanity/ui'
 import { useEffect, useMemo, useState } from 'react'
 import { useClient, useFormValue, type ObjectInputProps, type Path } from 'sanity'
 
-import { FRAMING_RESOLVERS } from '@/lib/sanity/image-frame-geometry'
+import { FRAMING_RESOLVERS, wholeNoteFor } from '@/lib/sanity/image-frame-geometry'
 import { assetSizeFromId } from '@/lib/sanity/image-framing'
 import { framingKeyOf } from '@/lib/sanity/schema/image-framing-option'
 
@@ -105,7 +105,7 @@ export function PictureFramingInput(props: ObjectInputProps) {
         source={source}
         readOnly={Boolean(readOnly)}
         onChange={onChange}
-        wholeNote={resolver?.wholeNote}
+        wholeNote={wholeNoteFor(resolver, design)}
       />
     </Stack>
   )
