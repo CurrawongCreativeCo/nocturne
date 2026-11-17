@@ -1,6 +1,6 @@
 # Task 151: working status (decorative dividers and section transitions)
 
-**Reconciled on 17 November 2026** against `main` at `6989101` and the owner decisions recorded during the task.
+**Reconciled on 17 November 2026** against `main` at `c127ab7` (post-merge CI: 18 of 18 jobs successful, run 44006781268) and the owner decisions recorded during the task.
 **Task 151 is not Done.** Every planned code slice has merged, but Done acceptance needs the manual checks and owner
 sign-offs listed under _Pending acceptance_. This file records status only. It changes no plan, task status or
 capability baseline (see `t275-canonical-patch/t151-plan-amendments.md` for the unapplied Task 280 amendment).
@@ -22,8 +22,9 @@ capability baseline (see `t275-canonical-patch/t151-plan-amendments.md` for the 
 | Slice 8: per-layer colours and the layer-below advisory                                     | #215 | `55d59c3`    | 15 Nov |
 | Slice 8 fix: clearing the per-layer colours in Studio                                       | #225 | `4dd5dcb`    | 16 Nov |
 | Clearing Alignment and the generated edge's controls in Studio                              | #227 | `6989101`    | 17 Nov |
+| Crest colour, Line colour, Shadow and the divider radios: clear with a labelled default     | #228 | `c127ab7`    | 17 Nov |
 
-**This PR** fixes the controls the 17 November real-Studio check found still clearing only through Studio's unnamed
+**#228** fixed the controls the 17 November real-Studio check found still clearing only through Studio's unnamed
 icon:
 
 - Tide's **Crest colour**, Contour's **Line colour** and Elevated's **Shadow** now start with **Use shape default**. A
@@ -65,32 +66,85 @@ Stored values, defaults and rendering are unchanged.
 
 ## Manual checks completed
 
-| Check                                                                                                                                    | When      | Result                                                                                                                                                                                                                                                                                                                                                                               |
-| ---------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Playwright WebKit (local `playwright.webkit.config.ts`; this is not Safari and not an iPhone)                                            | 13–16 Nov | Slice 2: 140/140. Slice 4: 231/231 (Chromium 333/333). B1: all 14 selectors accepted by WebKit 27.2. Slice 8 `section-edge-layer-colours.spec.ts`: 8/8 (16 Nov), plus a read-only visual inspection of `/edge-layer-colours` in WebKit (desktop and phone captures)                                                                                                                  |
-| Real Studio, Slice 8 (local `next dev`, project r4kwvgkz, a temporary draft, writes guarded, draft deleted afterwards)                   | 16 Nov    | Passed: applicability, saves, retention, advisory, Preview note. Found two problems: the field menu has no Clear, and the inline clear icon has no accessible name. Both are fixed by #225                                                                                                                                                                                           |
-| Real Studio, #225 recheck                                                                                                                | 16 Nov    | 31/31                                                                                                                                                                                                                                                                                                                                                                                |
-| Real Studio, #221 (Sanity 6.22) clearing recheck                                                                                         | 17 Nov    | 31/31                                                                                                                                                                                                                                                                                                                                                                                |
-| Real Studio, #227 (the same target, guards and cleanup)                                                                                  | 17 Nov    | 50/50: warning text, group names, mouse and keyboard clearing, one field changed per action, persistence after reopening, read-only on an earlier revision                                                                                                                                                                                                                           |
-| Real Studio, remaining controls on merged `main` (draft `task151-remaining-qa`, deleted)                                                 | 17 Nov    | Tide Crest colour, Contour Line colour, Elevated Shadow: 58/62; the four failures are the unnamed clear icon (3) and its enabled state on an earlier revision, fixed by this PR. Hero divider (Slice 7: labels, Finish, Dotted line centres, Gradient keeps line colour, Ornament size) all passed; Part A in a page draft (Link list, FAQ header, Rich text blocks as agency) 24/24 |
-| Real Studio, this PR (draft `task151-option-clear-qa`, deleted; before the fix the six divider radios' clear icon was confirmed unnamed) | 17 Nov    | 56/56: named groups with the default choice first, mouse and keyboard clearing of one field each, leftover warnings naming Tide, Contour and Elevated and hidden once cleared, Three dots and Gradient retention, reopen, read-only on an earlier revision                                                                                                                           |
+| Check                                                                                                                                            | When      | Result                                                                                                                                                                                                                                                                                                                                                                            |
+| ------------------------------------------------------------------------------------------------------------------------------------------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Playwright WebKit (local `playwright.webkit.config.ts`; this is not Safari and not an iPhone)                                                    | 13–16 Nov | Slice 2: 140/140. Slice 4: 231/231 (Chromium 333/333). B1: all 14 selectors accepted by WebKit 27.2. Slice 8 `section-edge-layer-colours.spec.ts`: 8/8 (16 Nov), plus a read-only visual inspection of `/edge-layer-colours` in WebKit (desktop and phone captures)                                                                                                               |
+| Real Studio, Slice 8 (local `next dev`, project r4kwvgkz, a temporary draft, writes guarded, draft deleted afterwards)                           | 16 Nov    | Passed: applicability, saves, retention, advisory, Preview note. Found two problems: the field menu has no Clear, and the inline clear icon has no accessible name. Both are fixed by #225                                                                                                                                                                                        |
+| Real Studio, #225 recheck                                                                                                                        | 16 Nov    | 31/31                                                                                                                                                                                                                                                                                                                                                                             |
+| Real Studio, #221 (Sanity 6.22) clearing recheck                                                                                                 | 17 Nov    | 31/31                                                                                                                                                                                                                                                                                                                                                                             |
+| Real Studio, #227 (the same target, guards and cleanup)                                                                                          | 17 Nov    | 50/50: warning text, group names, mouse and keyboard clearing, one field changed per action, persistence after reopening, read-only on an earlier revision                                                                                                                                                                                                                        |
+| Real Studio, remaining controls on merged `main` (draft `task151-remaining-qa`, deleted)                                                         | 17 Nov    | Tide Crest colour, Contour Line colour, Elevated Shadow: 58/62; the four failures are the unnamed clear icon (3) and its enabled state on an earlier revision, fixed by #228. Hero divider (Slice 7: labels, Finish, Dotted line centres, Gradient keeps line colour, Ornament size) all passed; Part A in a page draft (Link list, FAQ header, Rich text blocks as agency) 24/24 |
+| Real Studio, #228 fix branch (draft `task151-option-clear-qa`, deleted; before the fix the six divider radios' clear icon was confirmed unnamed) | 17 Nov    | 56/56: named groups with the default choice first, mouse and keyboard clearing of one field each, leftover warnings naming Tide, Contour and Elevated and hidden once cleared, Three dots and Gradient retention, reopen, read-only on an earlier revision                                                                                                                        |
+
+| Real Studio, **Navigation settings** (the Footer divider; the Navigation divider belongs under Footer) (**agent-run**) | 17 Nov | **22/22 passed** |
+| Real Studio, **Team page settings** divider (**agent-run**) | 17 Nov | **16/16 genuine checks passed.** A further Diamond-visibility assertion also failed. It was a mistaken test expectation, not a product defect, and is not counted as a check |
+| **Blog settings** divider | 17 Nov | **Not applicable.** Blog settings has no divider field |
+| **Device pass, Mac Safari and real iPhone Safari** (**owner-run**), against `c127ab7`, default palette, with the preview image adaptation below | 17 Nov | Confirmed by the owner, with **clean top and bottom overscroll** on both. Orientations, zoom levels and the pages reviewed were **not recorded** |
+| **Light fixture palette on Mac Safari** (**owner-run**) | 17 Nov | Approved by the owner |
+| **Light fixture palette on real iPhone Safari** (**owner-run**) | 17 Nov | Approved by the owner |
+| **Dark fixture palette on Mac Safari** (**owner-run**) | 17 Nov | Approved by the owner |
+| **Dark fixture palette on real iPhone Safari** (**owner-run**) | 17 Nov | Approved by the owner |
+
+The palette approvals are each recorded per device and per palette. Pages, orientations and zoom levels were **not
+recorded** for any of them. Before the owner's review, an agent-side Playwright scan of the light palette (WebKit,
+iPhone-13 emulation, Chromium: 93 section boundaries, no seam rows, no horizontal overflow) and a colour-and-pictures
+check of the dark palette (57 of 57 pictures loaded) were run. Neither replaced the owner's review.
+
+**Preview adaptation (disposable, nothing in the repo changed).** The device and palette reviews ran on a local
+production build of `c127ab7` with the fake e2e data. A small front proxy served the e2e fixture picture from the
+preview's own origin, because ordinary browsers have no Playwright request routing. Rendering, geometry and styling were
+untouched. Brand colours were switched between the fixture's `light` and `dark` samples with the fake lake's own control
+endpoint and the signed revalidate webhook.
+
+**Two-palette evidence (Slice 8).** The Reef in `/edge-layer-colours`, light and dark, on file in
+`docs/nocturne/t151-evidence/`:
+
+- `reef-light-desktop-playwright-webkit.png` (light sample: Primary #0b6e4f, Secondary #e4572e, Highlight #ffd166)
+- `reef-dark-desktop-playwright-webkit.png` (dark sample: Primary #7ad9b4, Secondary #f2a07b, Highlight #ffd166)
+
+Both are **Playwright WebKit captures at 1440 px with the privacy banner dismissed, not device photos**, and both are
+**fixture-palette** evidence. No requirement that the palettes be real client palettes was found. The owner named the
+dark Reef capture as the last image needed for the two-palette record. The owner's own screenshot was not received for
+this record.
 
 ## Pending acceptance (needed before Done)
 
-- **S6 and S7: Safari on macOS and a real iPhone.** These were never run. Playwright WebKit does not count.
-- **S3 top-overscroll follow-up** (B1). Deferred, still open.
-- **Owner visual QA** of the full edge set in light and dark. That includes Elevated and the Slice 7 rules on real
-  content. It also includes owner screenshots of two palettes for Slice 8.
-- **Real-Studio checks still pending** (each needs another role or document type; not simulated):
-  - The Rich text role guard as a client (the agency-only note, not a blank dialog).
-  - Dividers on other document types: Navigation (header and footer), Team page settings, Blog settings.
-  - Presentation preview of the edges (needs a Viewer token).
-- **Deployed Sanity schema.** The post-merge `deploy-schema` job skips because no `SANITY_DEPLOY_TOKEN` is configured.
-  The deployed schema lacks the fields added since Slice 2 until someone deploys it by hand.
-- **Windows High Contrast** (forced colours is covered only by Playwright emulation).
-- **Dark-mode visibility advisory** (Studio judges the light scene only).
-- **Task 280 handoff and the servicePage baseline transfer.** These wait for the owner to publish the amendment and
+Done is the owner's call. The items below are what is still open. They are listed in three groups so that what needs
+access or an operations action is not mixed with the rest.
+
+### Access blockers (cannot be run without the access named)
+
+- **Rich text role guard as a client** (the agency-only note, not a blank dialog). Needs a client-role sign-in. The QA
+  project's trial notice is relevant (see Operations).
+- **Presentation preview of the edges.** Needs a Viewer or preview token. No new token is to be created without approval.
+- **Windows High Contrast** (forced colours is covered only by Playwright emulation). Needs Edge on Windows.
+
+### Pending manual checks (no access blocker; not yet run)
+
+- **Tide's Echo control in a real Studio.** It is not named in any recorded pass.
+- **VoiceOver in Studio** (Safari): the new "Use shape default" and "Use layout default" controls announced inside their
+  named groups, and "Layer below: Use shape default" dimmed while nothing is saved.
+
+### Operations (owner action)
+
+- **Deploy the Sanity schema by hand.** CI's `deploy-schema` job reports success, but its Deploy schema step is skipped
+  (no `SANITY_DEPLOY_TOKEN`). The deployed schema lacks the fields added since Slice 2 until someone deploys it. Then
+  confirm `edgeTideLayer`, `edgeLineColour`, the five generated-edge fields, `edgeShadow`, `edgeLayerColours` and the
+  divider `finish` are present.
+- **Task 280 handoff and the servicePage baseline transfer.** These wait for the owner to publish the plan amendment and
   name the reviewer.
+- **The QA project's trial notice** (see below): decide whether the plan change affects QA before the trial ends.
+
+### Remaining product and owner decisions
+
+- **S6 and S7 (Safari on macOS and a real iPhone):** the owner confirmed a pass on both devices on 17 Nov with clean
+  overscroll. Pages, orientations and zoom levels were not recorded. Whether that closes S6, S7 and the **S3
+  top-overscroll follow-up** is the owner's call.
+- **Other Part A dividers on real content** (`/hero-dividers`, `/link-dividers`, `/media-text-dividers`,
+  `/rich-text-dividers`) are covered by the agent Studio passes above, not by an owner visual review.
+- **Dark-mode visibility advisory** (Studio judges the light scene only): decide whether it is needed before Done.
+- **Issue #205** (see below).
+- **Deferred, not reopened:** the Reef hairline and White veil, and the smoother-wave design reference (see below).
 
 ## Deferred or follow-up (outside Task 151's remaining code)
 
@@ -102,6 +156,11 @@ Stored values, defaults and rendering are unchanged.
 - **Issue #205:** a plain Surface section is see-through under its bottom edge. The proposed fix gives framed Surface
   sections an opaque background. It needs owner approval because it changes Classic's visuals.
 - **Reef hairline and the White veil** (see above).
+- **Design reference (deferred, 17 Nov):** broader, smoother waves with soft overlapping layers. Nothing changes now: no
+  geometry, preset, stored value or baseline. If it is taken up, it is a new preset or family through the layered
+  generator's closed preset table (not an edit to a frozen shape), needs the owner's visual approval before code, and
+  keeps Classic and the parity snapshot unchanged and production edges static. The reference image was not received for
+  this record.
 - **Ribbon.** Deferred. **Drift and the other motion** wait for Task 217. Production edges stay static.
 - **Known Studio gaps that keep values on purpose:**
   - A Layer below saved as false under Lagoon or Reef is hidden with no warning. False draws the same as unset.
