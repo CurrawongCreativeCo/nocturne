@@ -413,6 +413,15 @@ export const SECTION_EDGE_LAYER_SLOT_TITLES: Record<EdgeLayerSlot, string> = {
 export const SECTION_EDGE_LAYER_COLOUR_INHERIT = 'Use recipe colour'
 export const SECTION_EDGE_LAYER_STRENGTH_INHERIT = 'Use Layer strength'
 export const SECTION_EDGE_LAYER_RESET = 'Reset all layer overrides'
+/**
+ * The first choice of the generated shapes' Crest position, Depth, Layer strength and Colours, and the clear button
+ * beside Layer below: each unsets its field, so the page draws the shape's own default (the preset's first crest
+ * and depth, Standard strength, the preset's palette, its own rule for the layer below). Named once so the inputs,
+ * the warnings and the docs agree.
+ */
+export const SECTION_EDGE_SHAPE_DEFAULT = 'Use shape default'
+/** The first choice of a section's Alignment: unsets it, so the layout's own alignment is used. */
+export const SECTION_ALIGN_LAYOUT_DEFAULT = 'Use layout default'
 /** The stored fields of `style.edgeLayerColours`: a slot's colour is named for it, its strength `<slot>Strength`. */
 export type EdgeLayerColoursInput = Partial<
   Record<EdgeLayerSlot | `${EdgeLayerSlot}Strength`, string | null>
