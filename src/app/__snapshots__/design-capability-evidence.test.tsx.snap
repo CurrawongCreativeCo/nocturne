@@ -835,6 +835,12 @@ exports[`design capability evidence > hero.edge.section@split: the probe changes
 ]
 `;
 
+exports[`design capability evidence > hero.framing.picture@split: the probe changes the registered target 1`] = `
+[
+  "58c272795a44476b (731 characters)",
+]
+`;
+
 exports[`design capability evidence > hero.glass.section@editorial: the probe changes the registered target 1`] = `
 [
   "<div class="mx-auto w-full max-w-content grid items-end gap-12 lg:gap-20">",
@@ -2744,6 +2750,18 @@ exports[`design capability evidence > testimonials.edge.section@slider: the prob
 [
   "<body>",
   "<div class="mx-auto w-full max-w-content" data-reveal="" style="opacity:0;transform:translateY(24px)">",
+]
+`;
+
+exports[`design capability evidence > testimonials.framing.avatar@grid: the probe changes the registered target 1`] = `
+[
+  "78a7acba0a617a37 (305 characters)",
+]
+`;
+
+exports[`design capability evidence > testimonials.framing.avatar@slider: the probe changes the registered target 1`] = `
+[
+  "78a7acba0a617a37 (305 characters)",
 ]
 `;
 

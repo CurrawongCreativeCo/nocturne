@@ -1083,6 +1083,27 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { backgroundImage: PICTURE, imageDesign: { appearance: 'framed' } },
     probe: { 'pictureDepthDesign.shadow': 'floating' },
   },
+  // "Adjust picture" on Split's picture (task 177): served as the editor's area (`visibleArea`) at its ratio,
+  // through the URL builder (`urlFor`).
+  {
+    id: 'hero.framing.picture',
+    component: 'hero',
+    capability: 'framing',
+    scope: 'section',
+    part: 'picture',
+    layouts: ['split'],
+    field: 'backgroundImage',
+    resolvers: [
+      { module: '@/lib/sanity/image-framing', export: 'isFramed' },
+      { module: '@/lib/sanity/image-framing', export: 'visibleArea' },
+      { module: '@/lib/sanity/image', export: 'urlFor' },
+    ],
+    render: 'src/features/pages/components/sections/hero/hero-picture.tsx',
+    target: '[data-framed-image]',
+    change: 'content',
+    base: { backgroundImage: PICTURE, imageDesign: { appearance: 'framed' } },
+    probe: { 'backgroundImage.crop': CROPPED },
+  },
   // The hero's divider (task 151): `divider` is drawn under the title by HeroText, in every layout, once
   // the hero has a title and a description or buttons. The gallery's first Split hero has only a title, so
   // the base gives every layout the same description.
@@ -1282,6 +1303,29 @@ export const EVIDENCE: readonly Evidence[] = [
       })),
     },
     probe: { 'pictureDepthDesign.shadow': 'floating' },
+  },
+  // "Adjust picture" on the avatar (task 177): ProfileImage asks the CDN for the avatar's square with its
+  // stored crop and hotspot (`urlFor`), as the editor shows it.
+  {
+    id: 'testimonials.framing.avatar',
+    component: 'testimonials',
+    capability: 'framing',
+    scope: 'card',
+    part: 'avatar',
+    layouts: TESTIMONIAL_LAYOUTS,
+    field: 'items[].avatar',
+    resolvers: [{ module: '@/lib/sanity/image', export: 'urlFor' }],
+    render: 'src/features/pages/components/sections/testimonials/quote-card.tsx',
+    target: '[data-profile-image]',
+    change: 'content',
+    base: {
+      ...TESTIMONIAL_CONTENT,
+      items: (TESTIMONIAL_CONTENT.items as Record<string, unknown>[]).map((item) => ({
+        ...item,
+        avatar: PICTURE,
+      })),
+    },
+    probe: { 'items.0.avatar.crop': CROPPED },
   },
   {
     id: 'testimonials.depth.card',
