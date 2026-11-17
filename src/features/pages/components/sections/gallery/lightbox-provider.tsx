@@ -8,6 +8,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type ReactNode,
 } from 'react'
 
@@ -63,11 +64,14 @@ export function OpenImageButton({
   index,
   label,
   className,
+  style,
   children,
 }: {
   index: number
   label: string
   className: string
+  /** Custom properties for the picture-depth filter class (task 147); undefined adds no attribute. */
+  style?: CSSProperties | undefined
   children: ReactNode
 }) {
   const open = useContext(OpenContext)
@@ -84,6 +88,7 @@ export function OpenImageButton({
       aria-label={label}
       aria-haspopup="dialog"
       className={className}
+      style={style}
       onClick={onClick}
     >
       {children}

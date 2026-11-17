@@ -1,0 +1,786 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`the design capability contract > badgeRow: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "icon required item: verified",
+    "icon required section: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > blogPostCards: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "surface required card: verified",
+    "text required card: verified",
+    "mark required card: verified",
+    "depth required card: verified",
+    "action required card: verified",
+    "framing required card: pending (177)",
+    "pictureDepth conditional card: verified",
+    "glass conditional card: pending (159)",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > ctaBanner: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "surface required card: pending (159)",
+    "header required section: verified",
+    "mark required section: verified",
+    "depth required card: verified",
+    "action conditional item: verified",
+    "framing conditional section/background: pending (177)",
+    "overlay required section: verified",
+    "glass required section: pending (159)",
+    "divider required section: verified",
+    "edge required section: verified",
+    "motion required section: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > embed: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "surface required card: verified",
+    "header required section: verified",
+    "depth required card: verified",
+    "framing conditional section/background: pending (177)",
+    "overlay required section: verified",
+    "glass required section: verified",
+    "divider required section: verified",
+    "edge required section: verified",
+    "motion required section: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > eventDetailsCard: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "surface required card: pending (280)",
+    "text required card: pending (280)",
+    "mark required card: pending (280)",
+    "depth required card: pending (280)",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > events: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "surface required card @featured: verified",
+    "text required card @list: verified",
+    "text required card @agenda: verified",
+    "text required card @featured: verified",
+    "header required section @list: verified",
+    "header required section @agenda: verified",
+    "header required section @featured: verified",
+    "mark required section @list: verified",
+    "mark required section @agenda: verified",
+    "mark required section @featured: verified",
+    "mark required card @featured: verified",
+    "depth required card @featured: verified",
+    "action required card @list: verified",
+    "action required card @featured: verified",
+    "framing required card/picture @featured: pending (177)",
+    "framing conditional section/background @list: pending (177)",
+    "framing conditional section/background @agenda: pending (177)",
+    "framing conditional section/background @featured: pending (177)",
+    "pictureDepth conditional card @featured: verified",
+    "overlay required section @list: verified",
+    "overlay required section @agenda: verified",
+    "overlay required section @featured: verified",
+    "glass required section @list: verified",
+    "glass required section @agenda: verified",
+    "glass required section @featured: verified",
+    "glass conditional card @featured: pending (159)",
+    "divider required section @list: verified",
+    "divider required section @agenda: verified",
+    "divider required section @featured: verified",
+    "edge required section @list: verified",
+    "edge required section @agenda: verified",
+    "edge required section @featured: verified",
+    "motion required section @list: verified",
+    "motion required section @agenda: verified",
+    "motion required section @featured: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > faq: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "surface required card: verified",
+    "text required card: verified",
+    "header required section: verified",
+    "mark required section: verified",
+    "mark required card: verified",
+    "depth conditional card: verified",
+    "framing conditional section/background: pending (177)",
+    "overlay required section: verified",
+    "glass required section: verified",
+    "divider required section: verified",
+    "edge required section: verified",
+    "motion required section: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > featuresGrid: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "surface conditional card: pending (276)",
+    "text required card: pending (276)",
+    "header required section: verified",
+    "mark required section: verified",
+    "depth conditional card: pending (276)",
+    "icon required card: verified",
+    "action conditional card: pending (276)",
+    "framing conditional section/background: pending (177)",
+    "overlay required section: verified",
+    "glass required section: verified",
+    "glass conditional card: pending (159)",
+    "divider required section: verified",
+    "edge required section: verified",
+    "motion required section: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > formSection: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "surface required card: verified",
+    "header required section: verified",
+    "mark required section: verified",
+    "depth required card: verified",
+    "framing conditional section/background: pending (177)",
+    "overlay required section: verified",
+    "glass required section: verified",
+    "divider required section: verified",
+    "edge required section: verified",
+    "motion required section: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > gallery: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "header required section @grid: verified",
+    "header required section @masonry: verified",
+    "header required section @slider: verified",
+    "mark required section @grid: verified",
+    "mark required section @masonry: verified",
+    "mark required section @slider: verified",
+    "framing required card/tile @grid: pending (177)",
+    "framing required card/tile @masonry: pending (177)",
+    "framing required card/tile @slider: pending (177)",
+    "framing conditional section/background @grid: pending (177)",
+    "framing conditional section/background @masonry: pending (177)",
+    "framing conditional section/background @slider: pending (177)",
+    "pictureDepth required card @grid: verified",
+    "pictureDepth required card @masonry: verified",
+    "pictureDepth required card @slider: verified",
+    "overlay required section @grid: verified",
+    "overlay required section @masonry: verified",
+    "overlay required section @slider: verified",
+    "glass required section @grid: verified",
+    "glass required section @masonry: verified",
+    "glass required section @slider: verified",
+    "divider required section @grid: verified",
+    "divider required section @masonry: verified",
+    "divider required section @slider: verified",
+    "edge required section @grid: verified",
+    "edge required section @masonry: verified",
+    "edge required section @slider: verified",
+    "motion required section @grid: verified",
+    "motion required section @masonry: verified",
+    "motion required section @slider: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > hero: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "text required section @overlay: pending (213)",
+    "text required section @split: pending (213)",
+    "text required section @editorial: pending (213)",
+    "text required section @full-bleed: pending (213)",
+    "header required section @overlay: pending (213)",
+    "header required section @split: pending (213)",
+    "header required section @editorial: pending (213)",
+    "header required section @full-bleed: pending (213)",
+    "mark required section @overlay: verified",
+    "mark required section @split: verified",
+    "mark required section @editorial: verified",
+    "mark required section @full-bleed: verified",
+    "action conditional item @overlay: verified",
+    "action conditional item @split: verified",
+    "action conditional item @editorial: verified",
+    "action conditional item @full-bleed: verified",
+    "framing required section/picture @split: pending (177)",
+    "framing conditional section/background @overlay: pending (177)",
+    "framing conditional section/background @full-bleed: pending (177)",
+    "pictureDepth required section @split: verified",
+    "overlay required section @overlay: pending (157)",
+    "overlay required section @full-bleed: pending (157)",
+    "glass required section @overlay: verified",
+    "glass required section @split: verified",
+    "glass required section @editorial: verified",
+    "divider required section @overlay: verified",
+    "divider required section @split: verified",
+    "divider required section @editorial: verified",
+    "divider required section @full-bleed: verified",
+    "edge required section @overlay: verified",
+    "edge required section @split: verified",
+    "edge required section @editorial: verified",
+    "edge required section @full-bleed: verified",
+    "motion required section @overlay: verified",
+    "motion required section @split: verified",
+    "motion required section @editorial: verified",
+    "motion required section @full-bleed: verified",
+    "slots required section/block @overlay: verified",
+    "slots required section/block @split: verified",
+    "slots required section/block @editorial: verified",
+    "slots required section/block @full-bleed: verified",
+    "slots required section/placement @overlay: pending (213)",
+    "slots required section/placement @split: pending (213)",
+    "slots required section/placement @editorial: pending (213)",
+    "slots required section/placement @full-bleed: pending (213)",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > launchDate: reports what it offers today 1`] = `
+{
+  "capabilities": [],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > linkList: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "surface required card @stacked: verified",
+    "surface required card @cards: verified",
+    "surface required card @compact: verified",
+    "surface required item @stacked: verified",
+    "surface required item @cards: verified",
+    "surface required item @compact: verified",
+    "text required card @stacked: verified",
+    "text required card @cards: verified",
+    "text required card @editorial: verified",
+    "text required card @compact: verified",
+    "text required item @stacked: verified",
+    "text required item @cards: verified",
+    "text required item @editorial: verified",
+    "text required item @compact: verified",
+    "header required section @stacked: verified",
+    "header required section @cards: verified",
+    "header required section @editorial: verified",
+    "header required section @compact: verified",
+    "mark required section @stacked: verified",
+    "mark required section @cards: verified",
+    "mark required section @editorial: verified",
+    "mark required section @compact: verified",
+    "mark required card @stacked: verified",
+    "mark required card @cards: verified",
+    "mark required card @editorial: verified",
+    "mark required card @compact: verified",
+    "mark required item @stacked: verified",
+    "mark required item @cards: verified",
+    "mark required item @editorial: verified",
+    "mark required item @compact: verified",
+    "depth required card @stacked: verified",
+    "depth required card @cards: verified",
+    "depth required card @compact: verified",
+    "depth required item @stacked: verified",
+    "depth required item @cards: verified",
+    "depth required item @compact: verified",
+    "icon required card/container @stacked: verified",
+    "icon required card/container @cards: verified",
+    "icon required card/container @compact: verified",
+    "icon required item/container @stacked: verified",
+    "icon required item/container @cards: verified",
+    "icon required item/container @compact: verified",
+    "icon required item/identity @stacked: verified",
+    "icon required item/identity @cards: verified",
+    "icon required item/identity @compact: verified",
+    "icon conditional section/divider.afterCategories @stacked: verified",
+    "icon conditional section/divider.afterCategories @cards: verified",
+    "icon conditional section/divider.afterCategories @editorial: verified",
+    "icon conditional section/divider.afterCategories @compact: verified",
+    "icon conditional section/divider.afterProfile @stacked: verified",
+    "icon conditional section/divider.afterProfile @cards: verified",
+    "icon conditional section/divider.afterProfile @editorial: verified",
+    "icon conditional section/divider.afterProfile @compact: verified",
+    "icon conditional section/divider.aboveSocial @stacked: verified",
+    "icon conditional section/divider.aboveSocial @cards: verified",
+    "icon conditional section/divider.aboveSocial @editorial: verified",
+    "icon conditional section/divider.aboveSocial @compact: verified",
+    "icon conditional section/divider.belowSocial @stacked: verified",
+    "icon conditional section/divider.belowSocial @cards: verified",
+    "icon conditional section/divider.belowSocial @editorial: verified",
+    "icon conditional section/divider.belowSocial @compact: verified",
+    "action required card @stacked: verified",
+    "action required card @cards: verified",
+    "action required card @editorial: verified",
+    "action required item @stacked: verified",
+    "action required item @cards: verified",
+    "action required item @editorial: verified",
+    "framing required section/profile @stacked: verified",
+    "framing required section/profile @cards: verified",
+    "framing required section/profile @editorial: verified",
+    "framing required section/profile @compact: verified",
+    "framing required item/thumbnail @stacked: verified",
+    "framing required item/thumbnail @cards: verified",
+    "framing conditional section/background @stacked: pending (177)",
+    "framing conditional section/background @cards: pending (177)",
+    "framing conditional section/background @editorial: pending (177)",
+    "framing conditional section/background @compact: pending (177)",
+    "pictureDepth required section @stacked: verified",
+    "pictureDepth required section @cards: verified",
+    "pictureDepth required section @editorial: verified",
+    "pictureDepth required section @compact: verified",
+    "overlay required section @stacked: verified",
+    "overlay required section @cards: verified",
+    "overlay required section @editorial: verified",
+    "overlay required section @compact: verified",
+    "glass required card @stacked: pending (159)",
+    "divider required section @stacked: verified",
+    "divider required section @cards: verified",
+    "divider required section @editorial: verified",
+    "divider required section @compact: verified",
+    "edge required section @stacked: verified",
+    "edge required section @cards: verified",
+    "edge required section @editorial: verified",
+    "edge required section @compact: verified",
+    "motion required section @stacked: verified",
+    "motion required section @cards: verified",
+    "motion required section @editorial: verified",
+    "motion required section @compact: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > location: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "surface required card: verified",
+    "text required card: verified",
+    "header required section: verified",
+    "mark required section: verified",
+    "mark required card: verified",
+    "depth required card: verified",
+    "icon required section: verified",
+    "framing conditional section/background: pending (177)",
+    "pictureDepth conditional section: verified",
+    "overlay required section: verified",
+    "glass required section: verified",
+    "glass conditional card: pending (159)",
+    "divider required section: verified",
+    "edge required section: verified",
+    "motion required section: verified",
+  ],
+  "sources": [
+    "location.addressCard: verified",
+    "location.directionsLink: verified",
+    "location.clickToLoadEmbed: verified",
+    "location.placeIdEmbed: pending",
+  ],
+}
+`;
+
+exports[`the design capability contract > logoCloud: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "header required section @grid: verified",
+    "header required section @marquee: verified",
+    "mark required section @grid: verified",
+    "mark required section @marquee: verified",
+    "framing conditional section/background @grid: pending (177)",
+    "framing conditional section/background @marquee: pending (177)",
+    "overlay required section @grid: verified",
+    "overlay required section @marquee: verified",
+    "glass required section @grid: verified",
+    "glass required section @marquee: verified",
+    "divider required section @grid: verified",
+    "divider required section @marquee: verified",
+    "edge required section @grid: verified",
+    "edge required section @marquee: verified",
+    "motion required section @grid: verified",
+    "motion required section @marquee: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > logoRow: reports what it offers today 1`] = `
+{
+  "capabilities": [],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > mediaText: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "header required section @side: verified",
+    "header required section @stacked: verified",
+    "header required section @overlay: verified",
+    "mark required section @side: verified",
+    "mark required section @stacked: verified",
+    "mark required section @overlay: verified",
+    "action conditional item @side: verified",
+    "action conditional item @stacked: verified",
+    "action conditional item @overlay: verified",
+    "framing conditional section/background @side: pending (177)",
+    "framing conditional section/background @stacked: pending (177)",
+    "pictureDepth required section @side: verified",
+    "pictureDepth required section @stacked: verified",
+    "overlay required section @side: verified",
+    "overlay required section @stacked: verified",
+    "glass required section @side: verified",
+    "glass required section @stacked: verified",
+    "glass required section @overlay: verified",
+    "divider required section @side: verified",
+    "divider required section @stacked: verified",
+    "divider required section @overlay: verified",
+    "edge required section @side: verified",
+    "edge required section @stacked: verified",
+    "edge required section @overlay: verified",
+    "motion required section @side: verified",
+    "motion required section @stacked: verified",
+    "motion required section @overlay: verified",
+    "slots required section/block.media @side: verified",
+    "slots required section/block.media @stacked: verified",
+    "slots required section/block.media @overlay: verified",
+    "slots required section/block.supporting @side: verified",
+    "slots required section/block.supporting @stacked: verified",
+    "slots required section/block.supporting @overlay: verified",
+    "slots required section/placement @side: verified",
+    "slots required section/placement @stacked: verified",
+    "slots required section/placement @overlay: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > newsletterSignup: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "surface required card: verified",
+    "header required section: verified",
+    "mark required section: verified",
+    "depth required card: verified",
+    "framing conditional section/background: pending (177)",
+    "overlay required section: verified",
+    "glass required section: verified",
+    "divider required section: verified",
+    "edge required section: verified",
+    "motion required section: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > pricingTable: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "surface required card: verified",
+    "surface required item: verified",
+    "text required card: verified",
+    "text required item: verified",
+    "header required section: verified",
+    "mark required section: verified",
+    "mark required card: verified",
+    "mark required item: verified",
+    "depth required card: verified",
+    "depth required item: verified",
+    "icon conditional card: verified",
+    "framing conditional section/background: pending (177)",
+    "overlay required section: verified",
+    "glass required section: verified",
+    "glass conditional card: pending (159)",
+    "divider required section: verified",
+    "edge required section: verified",
+    "motion required section: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > process: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "text required card @vertical: verified",
+    "text required card @alternating: verified",
+    "header required section @vertical: verified",
+    "header required section @alternating: verified",
+    "mark required section @vertical: verified",
+    "mark required section @alternating: verified",
+    "icon required card @vertical: verified",
+    "icon required card @alternating: verified",
+    "framing conditional section/background @vertical: pending (177)",
+    "framing conditional section/background @alternating: pending (177)",
+    "overlay required section @vertical: verified",
+    "overlay required section @alternating: verified",
+    "glass required section @vertical: verified",
+    "glass required section @alternating: verified",
+    "divider required section @vertical: verified",
+    "divider required section @alternating: verified",
+    "edge required section @vertical: verified",
+    "edge required section @alternating: verified",
+    "motion required section @vertical: verified",
+    "motion required section @alternating: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > richText: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "mark required section: verified",
+    "framing conditional section/background: pending (177)",
+    "overlay required section: verified",
+    "glass required section: verified",
+    "divider required section: verified",
+    "edge required section: verified",
+    "motion required section: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > searchResults: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "text required section: pending (280)",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > servicePage: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "text required section: pending (280)",
+    "framing required section: pending (177)",
+    "divider required section: pending (151)",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > siteFooter: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "icon required section: verified",
+    "divider required section: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > slotImage: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "framing required item: pending (177)",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > slotVideo: reports what it offers today 1`] = `
+{
+  "capabilities": [],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > stats: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "surface required card @cards: verified",
+    "text required card @cards: verified",
+    "header required section @inline: verified",
+    "header required section @cards: verified",
+    "mark required section @inline: verified",
+    "mark required section @cards: verified",
+    "mark required card @cards: verified",
+    "depth conditional card @cards: verified",
+    "framing conditional section/background @inline: pending (177)",
+    "framing conditional section/background @cards: pending (177)",
+    "overlay required section @inline: verified",
+    "overlay required section @cards: verified",
+    "glass required section @inline: verified",
+    "glass required section @cards: verified",
+    "glass conditional card @cards: pending (159)",
+    "divider required section @inline: verified",
+    "divider required section @cards: verified",
+    "edge required section @inline: verified",
+    "edge required section @cards: verified",
+    "motion required section @inline: verified",
+    "motion required section @cards: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > statsBar: reports what it offers today 1`] = `
+{
+  "capabilities": [],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > team: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "surface required card @grid: verified",
+    "surface required card @slider: verified",
+    "surface required card @list: verified",
+    "text required card @grid: verified",
+    "text required card @slider: verified",
+    "text required card @list: verified",
+    "header required section @grid: verified",
+    "header required section @slider: verified",
+    "header required section @list: verified",
+    "mark required section @grid: verified",
+    "mark required section @slider: verified",
+    "mark required section @list: verified",
+    "mark required card @grid: verified",
+    "mark required card @slider: verified",
+    "mark required card @list: verified",
+    "depth required card @grid: verified",
+    "depth required card @slider: verified",
+    "depth required card @list: verified",
+    "action required card @grid: verified",
+    "action required card @slider: verified",
+    "action required card @list: verified",
+    "framing required card/portrait @grid: pending (177)",
+    "framing required card/portrait @slider: pending (177)",
+    "framing required card/portrait @list: pending (177)",
+    "framing conditional section/background @grid: pending (177)",
+    "framing conditional section/background @slider: pending (177)",
+    "framing conditional section/background @list: pending (177)",
+    "pictureDepth required card @grid: verified",
+    "pictureDepth required card @slider: verified",
+    "pictureDepth required card @list: verified",
+    "overlay required section @grid: verified",
+    "overlay required section @slider: verified",
+    "overlay required section @list: verified",
+    "glass required section @grid: verified",
+    "glass required section @slider: verified",
+    "glass required section @list: verified",
+    "glass conditional card @grid: pending (159)",
+    "glass conditional card @slider: pending (159)",
+    "glass conditional card @list: pending (159)",
+    "divider required section @grid: verified",
+    "divider required section @slider: verified",
+    "divider required section @list: verified",
+    "edge required section @grid: verified",
+    "edge required section @slider: verified",
+    "edge required section @list: verified",
+    "motion required section @grid: verified",
+    "motion required section @slider: verified",
+    "motion required section @list: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > teamMemberPage: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "icon required section: verified",
+    "framing required section: pending (177)",
+    "divider required section: verified",
+  ],
+  "sources": [],
+}
+`;
+
+exports[`the design capability contract > testimonials: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "surface required card @grid: verified",
+    "surface required card @slider: verified",
+    "text required card @grid: verified",
+    "text required card @slider: verified",
+    "header required section @grid: verified",
+    "header required section @slider: verified",
+    "mark required section @grid: verified",
+    "mark required section @slider: verified",
+    "mark required card @grid: verified",
+    "mark required card @slider: verified",
+    "depth required card @grid: verified",
+    "depth required card @slider: verified",
+    "framing required card/avatar @grid: pending (177)",
+    "framing required card/avatar @slider: pending (177)",
+    "framing conditional section/background @grid: pending (177)",
+    "framing conditional section/background @slider: pending (177)",
+    "pictureDepth required card @grid: verified",
+    "pictureDepth required card @slider: verified",
+    "overlay required section @grid: verified",
+    "overlay required section @slider: verified",
+    "glass required section @grid: verified",
+    "glass required section @slider: verified",
+    "glass conditional card @grid: pending (159)",
+    "glass conditional card @slider: pending (159)",
+    "divider required section @grid: verified",
+    "divider required section @slider: verified",
+    "edge required section @grid: verified",
+    "edge required section @slider: verified",
+    "motion required section @grid: verified",
+    "motion required section @slider: verified",
+  ],
+  "sources": [
+    "testimonials.manual @grid: verified",
+    "testimonials.manual @slider: verified",
+    "testimonials.google @grid: pending",
+    "testimonials.google @slider: pending",
+  ],
+}
+`;
+
+exports[`the design capability contract > video: reports what it offers today 1`] = `
+{
+  "capabilities": [
+    "header required section @embed: verified",
+    "header required section @ambient: verified",
+    "framing conditional section/background @embed: pending (177)",
+    "framing conditional section/background @ambient: pending (177)",
+    "overlay required section @embed: verified",
+    "overlay required section @ambient: verified",
+    "glass required section @embed: verified",
+    "glass required section @ambient: verified",
+    "divider required section @embed: verified",
+    "divider required section @ambient: verified",
+    "edge required section @embed: verified",
+    "edge required section @ambient: verified",
+    "motion required section @embed: verified",
+    "motion required section @ambient: verified",
+  ],
+  "sources": [],
+}
+`;

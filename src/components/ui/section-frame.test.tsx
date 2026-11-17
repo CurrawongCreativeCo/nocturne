@@ -18,12 +18,9 @@ vi.mock('server-only', () => ({}))
 
 import { SectionFrame } from './section-frame'
 
-const html = (props: { ownsSurfaces?: boolean; panel?: string }) =>
+const html = (props: { panel?: string }) =>
   renderToStaticMarkup(
-    <SectionFrame
-      style={{ tone: 'inverse', panel: props.panel, panelStrength: 'strong' }}
-      ownsSurfaces={props.ownsSurfaces}
-    >
+    <SectionFrame style={{ tone: 'inverse', panel: props.panel, panelStrength: 'strong' }}>
       <p>Content</p>
     </SectionFrame>,
   )
@@ -36,19 +33,6 @@ describe('SectionFrame panels', () => {
     expect(markup).not.toContain('rounded-card')
   })
 
-  it.each(['glass', 'solid'])(
-    'ignores a stored %s panel on a section that draws its own surfaces',
-    (panel) => {
-      const markup = html({ panel, ownsSurfaces: true })
-      expect(markup).not.toContain('data-panel')
-      expect(markup).not.toContain('--panel-opacity')
-      expect(markup).toContain('Content')
-    },
-  )
-
-  it('renders the same markup for an opted-out section whether or not a panel is stored', () => {
-    expect(html({ panel: 'glass', ownsSurfaces: true })).toBe(
-      html({ panel: 'none', ownsSurfaces: true }),
-    )
-  })
+  // A layout that draws its own surfaces never reaches SectionFrame with a panel: SectionRenderer
+  // leaves the stored choice out (features/pages/utils/owned-surfaces.test.ts).
 })

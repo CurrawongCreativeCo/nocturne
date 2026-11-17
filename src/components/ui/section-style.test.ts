@@ -8,6 +8,7 @@ import {
   resolveSectionStyle,
   sectionMotion,
   sectionTraits,
+  type SectionStyleInput,
 } from './section-style'
 
 describe('resolveSectionStyle', () => {
@@ -189,6 +190,8 @@ describe('resolveEdge', () => {
       height: { kind: 'token', size: 'medium' },
       accent: 'none',
       layer: 'accent-2',
+      tideLayer: 'accent',
+      lineColour: 'accent',
     })
   })
 
@@ -209,6 +212,8 @@ describe('resolveEdge', () => {
       height: { kind: 'token', size: 'large' },
       accent: 'highlight',
       layer: 'highlight',
+      tideLayer: 'accent',
+      lineColour: 'accent',
     })
   })
 
@@ -229,6 +234,208 @@ describe('resolveEdge', () => {
       mobile: 'var(--edge-height-medium)',
       tablet: 'var(--edge-height-medium)',
       desktop: '120px',
+    })
+  })
+
+  describe('Tide and Contour (task 151)', () => {
+    it('start at Primary, with Flip offered and no accent line or Invert, whatever is stored', () => {
+      for (const edge of ['tide', 'contour']) {
+        const resolved = resolveEdge({
+          edge,
+          edgeFlip: true,
+          edgeInvert: true,
+          edgeAccent: 'highlight',
+        })
+        expect(resolved).toMatchObject({
+          shape: edge,
+          flip: true,
+          invert: false,
+          accent: 'none',
+          tideLayer: 'accent',
+          lineColour: 'accent',
+        })
+      }
+    })
+
+    it('read Tide’s crest colour and Contour’s line colour', () => {
+      expect(resolveEdge({ edge: 'tide', edgeTideLayer: 'accent-2' })?.tideLayer).toBe('accent-2')
+      expect(resolveEdge({ edge: 'tide', edgeTideLayer: 'echo' })?.tideLayer).toBe('echo')
+      expect(resolveEdge({ edge: 'contour', edgeLineColour: 'muted' })?.lineColour).toBe('muted')
+      // A value from a newer dataset falls back to the default.
+      expect(resolveEdge({ edge: 'tide', edgeTideLayer: 'gold' })?.tideLayer).toBe('accent')
+    })
+
+    it('draw Echo’s crest as Primary over a picture or a gradient, which have no single colour to echo', () => {
+      const echo = { edge: 'tide', edgeTideLayer: 'echo' }
+      expect(resolveEdge({ ...echo, gradient: 'forest-dusk' })?.tideLayer).toBe('accent')
+      expect(
+        resolveEdge({ ...echo, image: { asset: { _id: 'image-a-1x1-png' } } })?.tideLayer,
+      ).toBe('accent')
+      // A picture with no asset, or a gradient that isn't a slug, draws nothing: Echo stays.
+      expect(resolveEdge({ ...echo, gradient: 'not a slug!' })?.tideLayer).toBe('echo')
+      const noAsset = { ...echo, image: {} } as unknown as SectionStyleInput
+      expect(resolveEdge(noAsset)?.tideLayer).toBe('echo')
+    })
+
+    it('keep today’s shapes exactly as they were: the accent line still follows them', () => {
+      for (const edge of ['diagonal', 'wave', 'curve', 'arch', 'layered'])
+        expect(resolveEdge({ edge, edgeAccent: 'accent-2' })?.accent).toBe('accent-2')
+    })
+  })
+
+  describe('Still water (task 151, Slice 3)', () => {
+    const still = (style: Record<string, unknown> = {}) =>
+      resolveEdge({ edge: 'still-water', ...style })
+
+    it('starts at Standard crest, depth and strength, the Tint recipe and no layer below', () => {
+      expect(still()?.layered).toEqual({
+        crest: 'standard',
+        depth: 'standard',
+        strength: 'standard',
+        palette: 'tint',
+        below: false,
+      })
+      expect(still()).toMatchObject({
+        shape: 'still-water',
+        height: { kind: 'token', size: 'medium' },
+      })
+    })
+
+    it('reads each stepped control, and falls back to the default for a value it does not know', () => {
+      expect(
+        still({
+          edgeCrest: 'shifted',
+          edgeDepth: 'deep',
+          edgeStrength: 'strong',
+          edgePalette: 'highlight',
+          edgeLayerBelow: true,
+        })?.layered,
+      ).toEqual({
+        crest: 'shifted',
+        depth: 'deep',
+        strength: 'strong',
+        palette: 'highlight',
+        below: true,
+      })
+      expect(
+        still({
+          edgeCrest: 'gold',
+          edgeDepth: 'abyss',
+          edgeStrength: 'loud',
+          edgePalette: 'lagoon',
+        })?.layered,
+      ).toEqual({
+        crest: 'standard',
+        depth: 'standard',
+        strength: 'standard',
+        palette: 'tint',
+        below: false,
+      })
+    })
+
+    it('offers Flip, and no Invert, accent line or back-wave colour, whatever is stored', () => {
+      expect(
+        still({
+          edgeFlip: true,
+          edgeInvert: true,
+          edgeAccent: 'highlight',
+          edgeLayer: 'highlight',
+        }),
+      ).toMatchObject({
+        flip: true,
+        invert: false,
+        accent: 'none',
+      })
+    })
+
+    it('draws a stored Small as Medium, and keeps Medium and Large', () => {
+      expect(still({ edgeHeight: 'small' })?.height).toEqual({ kind: 'token', size: 'medium' })
+      expect(still({ edgeHeight: 'medium' })?.height).toEqual({ kind: 'token', size: 'medium' })
+      expect(still({ edgeHeight: 'large' })?.height).toEqual({ kind: 'token', size: 'large' })
+      // Today's shapes still have Small.
+      expect(resolveEdge({ edge: 'wave', edgeHeight: 'small' })?.height).toEqual({
+        kind: 'token',
+        size: 'small',
+      })
+    })
+
+    it('holds a stored custom height to 40-64 px on phones, 40-120 on tablets and 40-160 on desktops, and no further', () => {
+      const heights = (mobile: number, tablet: number, desktop: number) =>
+        still({ edgeHeightMobile: mobile, edgeHeightTablet: tablet, edgeHeightDesktop: desktop })
+          ?.height
+      expect(heights(16, 16, 16)).toEqual({
+        kind: 'custom',
+        mobile: '40px',
+        tablet: '40px',
+        desktop: '40px',
+      })
+      expect(heights(40, 40, 40)).toEqual({
+        kind: 'custom',
+        mobile: '40px',
+        tablet: '40px',
+        desktop: '40px',
+      })
+      expect(heights(64, 120, 160)).toEqual({
+        kind: 'custom',
+        mobile: '64px',
+        tablet: '120px',
+        desktop: '160px',
+      })
+      expect(heights(320, 320, 320)).toEqual({
+        kind: 'custom',
+        mobile: '64px',
+        tablet: '120px',
+        desktop: '160px',
+      })
+      expect(heights(65, 121, 161)).toEqual({
+        kind: 'custom',
+        mobile: '64px',
+        tablet: '120px',
+        desktop: '160px',
+      })
+      expect(heights(39.6, 39.6, 39.6)).toEqual({
+        kind: 'custom',
+        mobile: '40px',
+        tablet: '40px',
+        desktop: '40px',
+      })
+      // A screen size left blank keeps the one below it, which is already within its own bound.
+      expect(still({ edgeHeightMobile: 64 })?.height).toEqual({
+        kind: 'custom',
+        mobile: '64px',
+        tablet: '64px',
+        desktop: '64px',
+      })
+      expect(still({ edgeHeightDesktop: 999 })?.height).toEqual({
+        kind: 'custom',
+        mobile: 'var(--edge-height-medium)',
+        tablet: 'var(--edge-height-medium)',
+        desktop: '160px',
+      })
+      // Nothing set is the token.
+      expect(still({ edgeHeightMobile: null, edgeHeightTablet: Number.NaN })?.height).toEqual({
+        kind: 'token',
+        size: 'medium',
+      })
+    })
+
+    it('keeps the 16-320 px range for every other shape: the clamp is Still water’s alone', () => {
+      for (const edge of ['diagonal', 'wave', 'curve', 'arch', 'layered', 'tide', 'contour']) {
+        expect(
+          resolveEdge({ edge, edgeHeightMobile: 16, edgeHeightTablet: 200, edgeHeightDesktop: 320 })
+            ?.height,
+        ).toEqual({ kind: 'custom', mobile: '16px', tablet: '200px', desktop: '320px' })
+        expect(resolveEdge({ edge })).not.toHaveProperty('layered')
+      }
+    })
+
+    it('does not draw a layer below at Shallow, however it is stored, and keeps the depth', () => {
+      expect(still({ edgeDepth: 'shallow', edgeLayerBelow: true })?.layered).toMatchObject({
+        depth: 'shallow',
+        below: false,
+      })
+      for (const edgeDepth of ['standard', 'deep'])
+        expect(still({ edgeDepth, edgeLayerBelow: true })?.layered?.below).toBe(true)
     })
   })
 

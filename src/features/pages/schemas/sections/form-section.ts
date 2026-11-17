@@ -3,10 +3,14 @@ import { defineField, defineType } from 'sanity'
 
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { eyebrowField, headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
+
+import { formCardField } from './form-card-field'
+import { formSectionCapabilities } from './form-section-capabilities'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -21,10 +25,12 @@ export const formSection = defineType({
   title: 'Form',
   type: 'object',
   icon: EnvelopeIcon,
+  options: { designCapabilities: formSectionCapabilities },
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
+      eyebrowField(),
       headingField({
         name: 'heading',
         title: 'Section title',
@@ -47,6 +53,13 @@ export const formSection = defineType({
         to: [{ type: 'form' }],
         description: 'Create forms under Forms in the sidebar. One form can be used on many pages.',
         validation: (rule) => rule.required(),
+      }),
+      headerDesignField({}, { divider: true }),
+      formCardField({
+        subject: 'the form',
+        unset:
+          'Empty draws no card: the form sits on the section. Choosing a fill, border or shadow draws one.',
+        colour: 'ink',
       }),
       accessField,
     ],

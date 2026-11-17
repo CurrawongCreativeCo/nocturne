@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest'
 import {
   build,
   buildCss,
+  depthOf,
   hexToRgb,
   oklchToRgb,
   paths,
@@ -108,4 +109,35 @@ describe('depth tokens', () => {
     const { depth: _depth, ...tokens } = readTokens()
     expect(buildCss(tokens)).toContain('--depth-picture-soft: drop-shadow(')
   })
+})
+
+describe('picture depth tokens', () => {
+  // `PICTURE_CLEARANCE` (src/lib/sanity/depth-options.ts) is how much room a picture's shadow and glow need before
+  // a card that clips cuts them off, measured in a browser against exactly these values. If they change, the
+  // clearances are wrong until they are measured again: Team and Events Featured would cut the new shadow off.
+  it('are the ones the picture clearance was measured against', () => {
+    const depth = depthOf(readTokens())
+    expect(
+      {
+        soft: depth['picture-soft'],
+        raised: depth['picture-raised'],
+        floating: depth['picture-floating'],
+        glowSoft: depth['glow-soft'],
+        glowSoftStrength: depth['glow-soft-strength'],
+        glowStrong: depth['glow-strong'],
+        glowStrongStrength: depth['glow-strong-strength'],
+      },
+      'The depth tokens changed. Re-measure PICTURE_CLEARANCE (how far each shadow and glow fades before a clipping card cuts it off; see its comment) and update this test with the new values.',
+    ).toEqual({
+      soft: 'drop-shadow(0 1px 2px rgb(0 0 0 / 0.14)) drop-shadow(0 2px 6px rgb(0 0 0 / 0.08))',
+      raised: 'drop-shadow(0 4px 6px rgb(0 0 0 / 0.12)) drop-shadow(0 10px 15px rgb(0 0 0 / 0.1))',
+      floating:
+        'drop-shadow(0 8px 12px rgb(0 0 0 / 0.14)) drop-shadow(0 20px 28px rgb(0 0 0 / 0.16))',
+      glowSoft: '0 0 18px 0',
+      glowSoftStrength: '35%',
+      glowStrong: '0 0 28px 4px',
+      glowStrongStrength: '55%',
+    })
+  })
+  // The glow's own blur (9px soft, 14px strong, in `glowFilter`) is pinned by depth-options.test.ts.
 })

@@ -1,6 +1,8 @@
 import { stegaClean } from 'next-sanity'
+import type { CSSProperties } from 'react'
 
 import { LazyCountUp } from '@/components/motion/count-up-lazy'
+import type { TextRole } from '@/lib/design/capabilities'
 import { formatStat, statWidthCh, type StatFigure as Figure } from '@/lib/stats/format-stat'
 
 /** A `statItem` as a query returns it (fragment: `statItemFields`). */
@@ -29,6 +31,9 @@ interface Props {
   animate?: boolean
   /** Type size and weight, e.g. `text-h1 font-semibold`. */
   className?: string
+  style?: CSSProperties
+  /** The text role this figure draws (lib/design/capabilities.ts). */
+  textRole?: TextRole
 }
 
 /**
@@ -41,15 +46,25 @@ interface Props {
  * causes no layout shift. The counting code is a separate chunk (see LazyCountUp), downloaded only
  * by pages that render an animated figure.
  */
-export function StatFigure({ item, animate = false, className = '' }: Props) {
+export function StatFigure({ item, animate = false, className = '', style, textRole }: Props) {
   const figure = cleanFigure(item)
   const final = formatStat(figure)
   const base = `inline-block tabular-nums ${className}`.trim()
 
-  if (!animate) return <span className={base}>{final}</span>
+  if (!animate) {
+    return (
+      <span className={base} style={style} data-text-role={textRole}>
+        {final}
+      </span>
+    )
+  }
 
   return (
-    <span className={`${base} relative`} style={{ minWidth: `${statWidthCh(figure)}ch` }}>
+    <span
+      className={`${base} relative`}
+      style={{ ...style, minWidth: `${statWidthCh(figure)}ch` }}
+      data-text-role={textRole}
+    >
       <span className="sr-only">{final}</span>
       <span aria-hidden="true">
         <LazyCountUp stat={figure} final={final} />

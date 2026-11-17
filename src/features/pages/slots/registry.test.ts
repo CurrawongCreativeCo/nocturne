@@ -138,3 +138,19 @@ describe('slotField', () => {
     expect(hidden({ currentUser: agency, value: [] })).toBe(false)
   })
 })
+
+describe('slot families', () => {
+  it('maps every slot’s family to a section that has the slot’s field', async () => {
+    const { SLOT_FAMILIES } = await import('./registry')
+    const { sectionTypes } = await import('../schemas/sections')
+    for (const slot of Object.keys(SLOTS)) {
+      const [family, field] = slot.split('.') as [keyof typeof SLOT_FAMILIES, string]
+      const section = sectionTypes.find((type) => type.name === SLOT_FAMILIES[family])
+      expect(section, slot).toBeDefined()
+      expect(
+        (section?.fields as { name: string }[] | undefined)?.map(({ name }) => name),
+        slot,
+      ).toContain(field)
+    }
+  })
+})

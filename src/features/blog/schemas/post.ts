@@ -3,9 +3,8 @@ import { defineArrayMember, defineField, defineType, type PreviewValue } from 's
 
 import { siteLanguage } from '@/config/env'
 import { hasServices } from '@/config/profile'
+import { formatDate } from '@/lib/format-date'
 import { imageField } from '@/lib/sanity/schema/image-field'
-
-import { formatDate } from '../utils/format-date'
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 

@@ -1,22 +1,33 @@
 import type { ReactNode } from 'react'
 
+import { CardSurface } from '@/components/ui/card-surface'
 import { ctaClassName } from '@/components/ui/cta-link'
+import { IconContainer } from '@/components/ui/icon-container'
 import { OpenNowBadge } from '@/components/ui/open-now-badge'
 import { OpeningHours } from '@/components/ui/opening-hours'
-import { PlainText } from '@/components/ui/plain-text'
-import { RichHeading } from '@/components/ui/rich-heading'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SanityLink } from '@/components/ui/sanity-link'
 import { SectionFrame } from '@/components/ui/section-frame'
+import { SectionHeader } from '@/components/ui/section-header'
 import { ctaSurfaceFor, sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
 import { SocialLinks } from '@/components/ui/social-links'
+import { addressLines, directionsUrl, embedUrl } from '@/lib/location-links'
 import { groupOpeningHours } from '@/lib/opening-hours'
+import { resolveCardDesign, type CardDesign } from '@/lib/sanity/card-design'
+import {
+  CARD_SHADOW_CLASS,
+  OWN_SHADOW,
+  resolveCardDepth,
+  resolvePictureDepth,
+} from '@/lib/sanity/depth-options'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
+import { resolveIconDesign, type IconDesign, type OwnIcon } from '@/lib/sanity/surface-options'
+import { resolveTextRoles, textRoleProps } from '@/lib/sanity/text-role'
 import type { LocationBusiness } from '@/types/business'
 
 import { MapEmbed } from './map-embed'
 import type { SectionProps } from '../../../types'
-import { addressLines, directionsUrl, embedUrl } from '../../../utils/location-links'
 
 // How this section looks without a style. Keep it equal to the initial style in its schema.
 const DEFAULTS: SectionDefaults = { container: 'max-w-content', align: 'start' }
@@ -28,9 +39,30 @@ const CARD_COLUMNS: Record<number, string> = {
   3: 'md:grid-cols-2 lg:grid-cols-3',
 }
 
-const PANEL = 'rounded-card bg-surface-alt p-8 ring-1 ring-line'
-const LINK =
-  'font-medium text-ink underline decoration-line underline-offset-4 hover:decoration-current'
+const PANEL = `rounded-card bg-surface-alt p-8 ${CARD_SHADOW_CLASS.free} ring-1 ring-line`
+const OWN_SURFACE = {
+  background: 'bg-surface-alt',
+  border: 'ring-1 ring-line',
+  fill: 'var(--color-surface-alt)',
+  still: true,
+}
+
+/** The text roles the details draw (location-capabilities.ts), and what each draws with nothing chosen. */
+const ROLES = ['title', 'body', 'meta'] as const
+const HEADER_ROLES = ['eyebrow', 'heading', 'intro'] as const
+const OWN_TITLE = { size: 'text-h4', weight: 'semibold' } as const
+const OWN_BODY = { size: 'text-lead', weight: 'regular' } as const
+type Look = CardDesign<(typeof ROLES)[number]>
+
+/** A contact link: a chosen weight or colour takes the place of the link's own, which would win over it. */
+const linkClass = (look: Look) =>
+  [
+    look.text.body.weight ? '' : 'font-medium',
+    look.text.body.colour ? '' : 'text-ink',
+    'underline decoration-line underline-offset-4 hover:decoration-current',
+  ]
+    .filter(Boolean)
+    .join(' ')
 
 /**
  * The address, opening hours and contact details from Business info, beside a map image or on
@@ -40,6 +72,8 @@ const LINK =
  */
 export function Location({ data, isFirst, business }: SectionProps<'location'>) {
   const { heading, intro, mapImage, directionsLabel } = data
+  const look = resolveCardDesign(data.cardDesign, ROLES)
+  const icon = resolveIconDesign(data.iconDesign)
   const title = sectionTitle(data)
   const { block, text } = sectionTraits(data.style, DEFAULTS)
   const { tone } = sectionTraits(data.style, DEFAULTS)
@@ -68,13 +102,21 @@ export function Location({ data, isFirst, business }: SectionProps<'location'>) 
       directions={directions}
       label={directionsLabel}
       surface={ctaSurfaceFor(tone)}
+      look={look}
+      icon={icon}
     />
   )
   const contact = hasContact && (
-    <ContactBlock business={business} showDetails={hasPhoneOrEmail} showSocial={hasSocial} />
+    <ContactBlock
+      business={business}
+      showDetails={hasPhoneOrEmail}
+      showSocial={hasSocial}
+      look={look}
+      icon={icon}
+    />
   )
   const hours = hasHours && (
-    <HoursBlock business={business} showOpenNow={data.showOpenNow ?? true} />
+    <HoursBlock business={business} showOpenNow={data.showOpenNow ?? true} look={look} />
   )
   const blocks: [string, ReactNode][] = [
     ['address', address],
@@ -84,25 +126,31 @@ export function Location({ data, isFirst, business }: SectionProps<'location'>) 
   const present = blocks.filter(([, node]) => Boolean(node))
 
   const header = (
-    <header className={`max-w-measure-narrow lg:col-span-2 ${block} ${text}`}>
-      <RichHeading
-        as="h2"
-        blocks={heading}
-        fallback={title}
-        className="text-h2 font-semibold text-balance"
-      />
-      <PlainText text={intro} className="mt-4 text-lead text-pretty text-ink-muted" />
-    </header>
+    <SectionHeader
+      eyebrow={data.eyebrow}
+      title={title}
+      heading={heading}
+      intro={intro}
+      design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+      divider={resolveDivider(data.headerDesign?.divider)}
+      spacing="max-w-measure-narrow lg:col-span-2"
+      block={block}
+      text={text}
+    />
   )
 
   if (hasImage) {
     // The picture beside the details, which stack in a column; narrower screens put it below them.
+    // A shadow and glow on the picture itself (task 147): the filter follows its ring and corners, and a picture
+    // with none chosen is exactly the plain <img> it was.
+    const depth = resolvePictureDepth(data.pictureDepthDesign)
     const picture = (
       <SanityImage
         image={mapImage}
         width={1200}
         sizes="(min-width: 1024px) 50vw, 100vw"
-        className="h-auto w-full rounded-card object-cover ring-1 ring-line"
+        className={`h-auto w-full rounded-card object-cover ring-1 ring-line${depth ? ` ${depth.className}` : ''}`}
+        style={depth?.style}
       />
     )
     return (
@@ -142,9 +190,18 @@ export function Location({ data, isFirst, business }: SectionProps<'location'>) 
       {header}
       <div className={`grid gap-6 ${CARD_COLUMNS[Math.min(present.length, 3)] ?? CARD_COLUMNS[3]}`}>
         {present.map(([key, node], index) => (
-          <div key={key} className={`${PANEL} ${index === 0 ? 'border-t-4 border-accent' : ''}`}>
+          <CardSurface
+            key={key}
+            as="div"
+            className={`${PANEL} ${index === 0 ? 'border-t-4 border-accent' : ''}`}
+            own={OWN_SURFACE}
+            shadow={CARD_SHADOW_CLASS.free}
+            depth={resolveCardDepth([data.cardDesign], OWN_SHADOW.siteCardFree)}
+            design={look.surface}
+            mark={{ input: data.cardDesign?.mark, scope: 'card', tone, levels: [data.cardDesign] }}
+          >
             {node}
-          </div>
+          </CardSurface>
         ))}
       </div>
       {embed && <MapEmbed src={embed} title={embedTitle} />}
@@ -158,24 +215,37 @@ function AddressBlock({
   directions,
   label,
   surface,
+  look,
+  icon,
 }: {
   business: LocationBusiness
   lines: string[]
   directions: string | null
   label: string
   surface: 'dark' | 'light'
+  look: Look
+  icon: IconDesign
 }) {
   return (
     <div className="flex flex-col items-start gap-4 text-start">
       <div>
-        <h3 className="flex items-center gap-2 text-h4 font-semibold">
-          <PinIcon />
+        <h3
+          {...textRoleProps(
+            'title',
+            'flex items-center gap-2 text-h4 font-semibold',
+            OWN_TITLE,
+            look.text.title,
+          )}
+        >
+          <IconContainer design={icon} own={PIN_OWN} size="size-9">
+            <PinIcon className={icon.colour ? '' : 'text-accent-text'} />
+          </IconContainer>
           Address
         </h3>
-        <address className="mt-3 text-lead not-italic">
+        <address {...textRoleProps('body', 'mt-3 text-lead not-italic', OWN_BODY, look.text.body)}>
           <span className="block font-semibold">{business.tradingName}</span>
           {lines.map((line) => (
-            <span key={line} className="block text-ink-muted">
+            <span key={line} className={look.text.body.colour ? 'block' : 'block text-ink-muted'}>
               {line}
             </span>
           ))}
@@ -197,20 +267,29 @@ function ContactBlock({
   business,
   showDetails,
   showSocial,
+  look,
+  icon,
 }: {
   business: LocationBusiness
   showDetails: boolean
   showSocial: boolean
+  look: Look
+  icon: IconDesign
 }) {
+  const link = linkClass(look)
   const { phone, phoneHref, publicEmail } = business
   return (
     <div className="flex flex-col gap-1 text-start">
-      <h3 className="text-h4 font-semibold">Contact</h3>
+      <h3 {...textRoleProps('title', 'text-h4 font-semibold', OWN_TITLE, look.text.title)}>
+        Contact
+      </h3>
       {showDetails && (
-        <div className="mt-2 flex flex-col gap-1 text-lead">
+        <div
+          {...textRoleProps('body', 'mt-2 flex flex-col gap-1 text-lead', OWN_BODY, look.text.body)}
+        >
           {phone &&
             (phoneHref ? (
-              <a href={`tel:${phoneHref}`} className={LINK}>
+              <a href={`tel:${phoneHref}`} className={link}>
                 <span className="sr-only">Phone </span>
                 {phone}
               </a>
@@ -221,7 +300,7 @@ function ContactBlock({
               </p>
             ))}
           {publicEmail && (
-            <a href={`mailto:${publicEmail}`} className={LINK}>
+            <a href={`mailto:${publicEmail}`} className={link}>
               <span className="sr-only">Email </span>
               {publicEmail}
             </a>
@@ -231,7 +310,9 @@ function ContactBlock({
       {showSocial && (
         <SocialLinks
           profiles={business.socialLinks ?? []}
-          shape="circle"
+          shape={icon.shape ?? 'circle'}
+          colour={icon.colour}
+          design={icon}
           className="mt-2"
           label="Social profiles"
         />
@@ -243,13 +324,17 @@ function ContactBlock({
 function HoursBlock({
   business,
   showOpenNow,
+  look,
 }: {
   business: LocationBusiness
   showOpenNow: boolean
+  look: Look
 }) {
   return (
     <div className="flex flex-col gap-3 text-start">
-      <h3 className="text-h4 font-semibold">Opening hours</h3>
+      <h3 {...textRoleProps('title', 'text-h4 font-semibold', OWN_TITLE, look.text.title)}>
+        Opening hours
+      </h3>
       {showOpenNow && (
         <OpenNowBadge
           hours={business.openingHours}
@@ -258,18 +343,29 @@ function HoursBlock({
           className="self-start"
         />
       )}
-      <OpeningHours hours={business.openingHours} specialDays={business.specialDays} />
+      <OpeningHours
+        hours={business.openingHours}
+        specialDays={business.specialDays}
+        meta={look.text.meta}
+      />
     </div>
   )
 }
 
-function PinIcon() {
+/** The address pin with nothing chosen: no container, in the accent (set on the pin itself). */
+const PIN_OWN: OwnIcon = {
+  shape: 'plain',
+  background: 'bg-surface-alt',
+  border: 'ring-1 ring-inset ring-line',
+}
+
+function PinIcon({ className }: { className: string }) {
   return (
     <svg
       aria-hidden="true"
       focusable="false"
       viewBox="0 0 24 24"
-      className="size-5 shrink-0 text-accent-text"
+      className={`size-5 shrink-0 ${className}`.trim()}
       fill="none"
       stroke="currentColor"
       strokeWidth="2"

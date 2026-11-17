@@ -16,6 +16,18 @@ describe('textLook', () => {
     expect(stepType('text-display', 1)).toBe('text-display')
   })
 
+  it('keeps a size off the scale as Medium, and steps from the nearest scale step for the others', () => {
+    const price = { size: 'text-4xl', scale: 'text-h2', weight: 'semibold' } as const
+    expect(textLook({}, price).className).toBe('text-4xl font-semibold')
+    expect(textLook({ size: 'medium' }, price).className).toBe('text-4xl font-semibold')
+    expect(textLook({ size: 'large' }, price).className).toBe('text-h1 font-semibold')
+    expect(textLook({ size: 'small' }, price).className).toBe('text-h3 font-semibold')
+    // Never the smallest step by accident: an off-scale size with no scale to step from stays itself.
+    expect(textLook({ size: 'large' }, { size: 'text-4xl', weight: 'regular' }).className).toBe(
+      'text-4xl font-normal',
+    )
+  })
+
   it('draws the eyebrow as small spaced capitals until told otherwise', () => {
     const own = {
       size: 'text-small',

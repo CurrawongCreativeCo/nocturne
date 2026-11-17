@@ -6,6 +6,7 @@ import { CogIcon } from '@sanity/icons/Cog'
 import { ColorWheelIcon } from '@sanity/icons/ColorWheel'
 import { ComposeIcon } from '@sanity/icons/Compose'
 import { ControlsIcon } from '@sanity/icons/Controls'
+import { DocumentIcon } from '@sanity/icons/Document'
 import { DocumentsIcon } from '@sanity/icons/Documents'
 import { DownloadIcon } from '@sanity/icons/Download'
 import { EnvelopeIcon } from '@sanity/icons/Envelope'
@@ -15,6 +16,7 @@ import { FolderIcon } from '@sanity/icons/Folder'
 import { InboxIcon } from '@sanity/icons/Inbox'
 import { LockIcon } from '@sanity/icons/Lock'
 import { MenuIcon } from '@sanity/icons/Menu'
+import { PinIcon } from '@sanity/icons/Pin'
 import { RocketIcon } from '@sanity/icons/Rocket'
 import { SearchIcon } from '@sanity/icons/Search'
 import { SplitHorizontalIcon } from '@sanity/icons/SplitHorizontal'
@@ -186,6 +188,7 @@ const LISTED_TYPES = new Set([
   'enquiry',
   'panel',
   'service',
+  'place',
   // new-document:listed
 ])
 
@@ -263,6 +266,8 @@ const buildStructure = (
   ]
 
   const items: Item[] = [
+    singletonItem(S, 'blogSettings', DocumentIcon),
+    singletonItem(S, 'teamPageSettings', DocumentIcon),
     // new-singleton:list
     ...(audience === 'agency' ? [waitingForReview(S, context), S.divider()] : []),
     pagesTree(S, context),
@@ -321,6 +326,9 @@ const buildStructure = (
       : []),
     ...(hasType('service') && isTypeVisible('service')
       ? [S.documentTypeListItem('service').title('Services').icon(CaseIcon)]
+      : []),
+    ...(hasType('place') && isTypeVisible('place')
+      ? [S.documentTypeListItem('place').title('Locations').icon(PinIcon)]
       : []),
     ...(hasType('enquiry') && isTypeVisible('enquiry') ? [enquiriesList(S, context)] : []),
     // new-document:list

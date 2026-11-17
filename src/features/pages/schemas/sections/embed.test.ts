@@ -72,12 +72,16 @@ describe('embed section', () => {
 
   it('has no field for markup, scripts or embed code', () => {
     expect(fields.map((f) => f.name)).toEqual([
+      'eyebrow',
       'heading',
       'title',
       'text',
       'provider',
       'url',
       'height',
+      'headerDesign',
+      // Styling only (task 148): a fill, border and shadow for the facade card.
+      'cardDesign',
       'access',
       'style',
       'customHeight',

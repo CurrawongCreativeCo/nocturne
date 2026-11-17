@@ -3,6 +3,8 @@ import { defineField, defineType, type PreviewValue } from 'sanity'
 
 import { imageField } from '@/lib/sanity/schema/image-field'
 
+import { slotImageCapabilities } from './slot-image-capabilities'
+
 /**
  * A picture for a slot (README, "Adding a slot block"): the Image + text section's media, now that the
  * media slot also takes a video. Its shape, frame and movement stay the section's Image design
@@ -13,6 +15,7 @@ export const slotImage = defineType({
   title: 'Image',
   type: 'object',
   icon: ImageIcon,
+  options: { designCapabilities: slotImageCapabilities },
   fields: [
     defineField({
       ...imageField({ name: 'image', aspect: '4:3', minWidth: 1600 }),

@@ -11,12 +11,14 @@ import {
   GLASS_STRENGTH_TITLES,
   glassContrastProblem,
 } from '@/lib/color/glass-contrast'
+import { ownsSurfaces } from '@/lib/design/section-surfaces'
 import { listsCategories, looksLikeTypedCategories, plainTextParagraphs } from '@/lib/plain-text'
 import { SHADOW_LEVELS, SHADOW_TITLES } from '@/lib/sanity/depth-options'
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { LINK_ARROWS, LINK_ARROW_TITLES } from '@/lib/sanity/link-arrow-options'
 import {
   LINK_DESIGN_GROUP_TITLES,
+  LINK_DESIGN_SUMMARY,
   countCustomisedLinks,
   customisedLinksText,
   scopedTitle,
@@ -26,19 +28,27 @@ import { hiddenFromClients } from '@/lib/sanity/roles'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { badgeIconField } from '@/lib/sanity/schema/badge-icon-field'
 import { fetchBrandColours } from '@/lib/sanity/schema/brand-colours'
+import { markFields } from '@/lib/sanity/schema/capability-marker'
+import { eyebrowField, headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField, imageOptions } from '@/lib/sanity/schema/image-field'
 import { framing } from '@/lib/sanity/schema/image-framing-option'
+import {
+  itemAppearanceField,
+  notCustomised as notCustomisedItem,
+} from '@/lib/sanity/schema/item-appearance'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { presetField, presetsOption } from '@/lib/sanity/schema/preset-field'
 import { matchPreset } from '@/lib/sanity/schema/preset-match'
+import { enclosingOfArray, memberOfArray } from '@/lib/sanity/schema/schema-path'
+import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle, variantField } from '@/lib/sanity/schema/section-variant'
 import {
   choiceField,
   iconDesignFields,
   surfaceFields,
-  textStyleField,
+  textRoleField,
 } from '@/lib/sanity/schema/surface-design'
 import { themeColourField } from '@/lib/sanity/schema/theme-colour'
 import {
@@ -50,8 +60,10 @@ import {
   LinkListMinimalThumbnail,
 } from '@/lib/sanity/schema/thumbnails/link-list-thumbnails'
 import { textOrImageFields } from '@/lib/sanity/schema/wordmark'
+import { showsWordmark } from '@/lib/sanity/wordmark-options'
 import { SOCIAL_PLATFORMS, socialPlatformTitle } from '@/lib/social-platforms'
 
+import { linkListCapabilities } from './link-list-capabilities'
 import { linkListDesignFields, withCardContrast } from './link-list-design'
 import {
   LINK_LIST_RECOMMENDED_MAX,
@@ -60,7 +72,6 @@ import {
   ownIconShape,
   usesArrow,
 } from '../../utils/link-list'
-import { enclosingOfArray, memberOfArray } from '../../utils/schema-path'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -327,8 +338,7 @@ const linkContext = ({ document, path }: Parameters<ConditionalPropertyCallback>
 
 /** The Appearance options only show once "Customise this card" is chosen, and only to the agency. */
 const notCustomised: ConditionalPropertyCallback = (context) =>
-  hiddenFromClients(context) ||
-  (context.parent as StoredLinkDesign | undefined)?.appearance !== 'custom'
+  hiddenFromClients(context) || notCustomisedItem(context)
 
 const notCustomisedOr =
   (
@@ -353,7 +363,7 @@ const linkAppearanceField = defineField({
     'This link follows the Link list’s design (Design tab). Customise it to change only what you pick here.',
   hidden: hiddenFromClients,
   // The summary and the resets above the fields (features/studio/components/link-design-summary-input).
-  options: { collapsible: true, collapsed: true, linkDesignSummary: true },
+  options: { collapsible: true, collapsed: true, designSummary: LINK_DESIGN_SUMMARY },
   fieldsets: [
     {
       name: 'card',
@@ -376,19 +386,14 @@ const linkAppearanceField = defineField({
       title: scopedTitle(LINK_DESIGN_GROUP_TITLES.arrow, 'link'),
       options: { collapsible: true, collapsed: true },
     },
+    {
+      name: 'decoration',
+      title: scopedTitle(LINK_DESIGN_GROUP_TITLES.decoration, 'link'),
+      options: { collapsible: true, collapsed: true },
+    },
   ],
-  fields: [
-    defineField({
-      name: 'appearance',
-      title: 'Design',
-      type: 'string',
-      options: {
-        list: [{ value: 'custom', title: 'Customise this card' }],
-        layout: 'radio',
-        direction: 'horizontal',
-        inheritable: 'Use the Link list design',
-      },
-    }),
+  fields: markFields({ shadow: 'depth', arrowStyle: 'action', arrowColour: 'action' }, [
+    itemAppearanceField({ inheritLabel: 'Use the Link list design' }),
     ...surfaceFields({
       inherits: CARD_INHERITS,
       inItem: true,
@@ -408,8 +413,8 @@ const linkAppearanceField = defineField({
       fieldset: 'card',
       hidden: notCustomisedOr((context) => looksOfLink(context).layout === 'editorial'),
     }),
-    textStyleField({
-      element: 'eyebrow',
+    textRoleField({
+      role: 'eyebrow',
       inherits: CARD_INHERITS,
       inItem: true,
       fieldset: 'text',
@@ -417,15 +422,15 @@ const linkAppearanceField = defineField({
         (context) => !usesEyebrow(looksOfLink(context).layout) || !linkContext(context).link,
       ),
     }),
-    textStyleField({
-      element: 'label',
+    textRoleField({
+      role: 'label',
       inherits: CARD_INHERITS,
       inItem: true,
       fieldset: 'text',
       hidden: notCustomised,
     }),
-    textStyleField({
-      element: 'description',
+    textRoleField({
+      role: 'description',
       inherits: CARD_INHERITS,
       inItem: true,
       fieldset: 'text',
@@ -484,7 +489,15 @@ const linkAppearanceField = defineField({
         return arrow === 'none'
       }),
     }),
-  ],
+    defineField({
+      name: 'mark',
+      title: 'Decorative mark',
+      type: 'decorativeMark',
+      description: 'One faint mark behind this link’s text, instead of the list’s card mark.',
+      fieldset: 'decoration',
+      hidden: notCustomised,
+    }),
+  ]),
 })
 
 const linkItem = defineArrayMember({
@@ -670,18 +683,26 @@ const linkItem = defineArrayMember({
   },
 })
 
+/** The heading role styles text. Drawn as a wordmark picture the heading has no text to style. */
+const wordmarkHeading: ConditionalPropertyCallback = ({ document, path }) => {
+  const section = sectionAtStylePath(document, path) as
+    { headingDisplay?: string; headingImage?: { asset?: unknown } } | undefined
+  return showsWordmark(section?.headingDisplay, section?.headingImage)
+}
+
 export const linkList = defineType({
   name: 'linkList',
   title: 'Link list',
   type: 'object',
   icon: BlockElementIcon,
   // The preset bar above the form: the one place to choose a layout (README, "Link list").
-  options: presetsOption(LINK_LIST_PRESETS),
+  options: { ...presetsOption(LINK_LIST_PRESETS), designCapabilities: linkListCapabilities },
   // Content, plus the agency-only Design tab (the shared `style` field that sectionFields adds).
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
+      eyebrowField(),
       headingField({
         name: 'heading',
         title: 'Heading',
@@ -691,6 +712,12 @@ export const linkList = defineType({
         requiredUnless: 'title',
       }),
       legacyTitleField(LIMITS.title),
+      defineField({
+        name: 'intro',
+        type: 'text',
+        rows: 2,
+        description: 'A sentence under the heading. Optional, and empty draws nothing.',
+      }),
       ...textOrImageFields({
         prefix: 'heading',
         what: 'the heading',
@@ -898,6 +925,7 @@ export const linkList = defineType({
         hidden: true,
       }),
       ...linkListDesignFields,
+      headerDesignField({ heading: wordmarkHeading }),
       accessField,
       // Set by the presets above the form; the stored value is the layout the section renders. Hidden
       // so there is one picker, not two. A hidden field keeps its value, and the list subtitle shows it.
@@ -915,7 +943,12 @@ export const linkList = defineType({
     { align: 'center' },
     // No design option depends on the layout: no picture, and each layout accepts any alignment. Its
     // cards are its own surfaces (glass rows, tinted cards), so the shared Panel isn't offered.
-    { rules: { type: 'linkList', ownsSurfaces: () => true } },
+    {
+      rules: {
+        type: 'linkList',
+        ownsSurfaces: (section) => ownsSurfaces('linkList', section.variant),
+      },
+    },
   ),
   preview: {
     select: {

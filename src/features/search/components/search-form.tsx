@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useTransition, type SubmitEvent } from 'react'
 
+import { ctaClassName } from '@/components/ui/button-style'
 import { SEARCH_PATH } from '@/config/paths'
 
 import { MAX_QUERY_LENGTH, MIN_QUERY_LENGTH } from '../utils/query'
@@ -49,10 +50,7 @@ export function SearchForm({ defaultValue = '' }: { defaultValue?: string }) {
         placeholder="Search this site"
         className="min-w-0 flex-1 rounded-pill border border-line-strong px-5 py-3 text-body placeholder:text-ink-muted"
       />
-      <button
-        type="submit"
-        className="rounded-button bg-cta px-6 py-3 text-small font-semibold text-cta-ink hover:bg-cta/85"
-      >
+      <button type="submit" className={ctaClassName('light')}>
         Search
       </button>
     </form>

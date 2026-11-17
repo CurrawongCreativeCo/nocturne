@@ -162,4 +162,38 @@ describe('SETTINGS_QUERY', () => {
       priceRange: null,
     })
   })
+
+  it('returns header sub-links one level deep, null on flat links, and none in the footer', async () => {
+    const services = {
+      ...navItem('Services', 'about'),
+      children: [
+        { _key: 's1', _type: 'navSubItem', label: 'Design', link: link('home') },
+        // Malformed: a grandchild pasted in through the API is not fetched.
+        { ...navItem('Build', 'about'), _type: 'navSubItem', children: [navItem('Deep', 'home')] },
+      ],
+    }
+    const result = (await run([
+      {
+        _id: 'siteNavigation',
+        _type: 'siteNavigation',
+        headerNav: [navItem('Home', 'home'), services, { _key: 'r', label: 'Resources' }],
+        footerNav: [{ ...services }],
+      },
+    ])) as { headerNav: object[]; footerNav: object[] }
+
+    expect(result.headerNav).toMatchObject([
+      { label: 'Home', children: null },
+      {
+        label: 'Services',
+        link: { slug: 'about' },
+        children: [
+          { _key: 's1', label: 'Design', link: { slug: 'home' } },
+          { _key: 'Build', label: 'Build', link: { slug: 'about' } },
+        ],
+      },
+      { _key: 'r', label: 'Resources', link: null, children: null },
+    ])
+    expect(result.headerNav[1]).not.toHaveProperty('children.1.children')
+    expect(result.footerNav[0]).not.toHaveProperty('children')
+  })
 })

@@ -3,20 +3,45 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { avatarDesignField } from '@/lib/sanity/schema/avatar-design'
+import {
+  cardDesignField,
+  eyebrowField,
+  headerDesignField,
+} from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
+import { pictureDepthFields } from '@/lib/sanity/schema/surface-design'
+import {
+  TESTIMONIAL_CARD_PRESETS,
+  TESTIMONIAL_ROLE_COLOURS,
+} from '@/lib/sanity/schema/testimonial-card-presets'
 import {
   TestimonialsGridThumbnail,
   TestimonialsSliderThumbnail,
 } from '@/lib/sanity/schema/thumbnails/testimonials-thumbnails'
+import { permissionWarning, sourceDateWarning, TESTIMONIAL_SOURCES } from '@/lib/testimonial-source'
+import { missingHighlights } from '@/lib/text-highlights'
+
+import { testimonialsCapabilities } from './testimonials-capabilities'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
   // text-h2, balanced over max-w-measure-narrow.
   title: 60,
+  eyebrow: 40,
 } as const
+
+/** A quote's fields read from its neighbours, for the warnings below. */
+interface StoredTestimonial {
+  quote?: string
+  source?: string
+  date?: string
+  rating?: number
+}
+const testimonialOf = (context: { parent?: unknown }) => (context.parent ?? {}) as StoredTestimonial
 
 /**
  * One component per variant in components/sections/testimonials/. The first is the default: what
@@ -42,10 +67,12 @@ export const testimonials = defineType({
   title: 'Testimonials',
   type: 'object',
   icon: CommentIcon,
+  options: { designCapabilities: testimonialsCapabilities },
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
+      eyebrowField(LIMITS.eyebrow),
       headingField({
         name: 'heading',
         title: 'Section title',
@@ -55,6 +82,13 @@ export const testimonials = defineType({
         requiredUnless: 'title',
       }),
       legacyTitleField(LIMITS.title),
+      defineField({
+        name: 'intro',
+        title: 'Intro',
+        type: 'text',
+        rows: 2,
+        description: 'A sentence or two under the title. Optional.',
+      }),
       defineField({
         name: 'items',
         title: 'Testimonials',
@@ -71,14 +105,98 @@ export const testimonials = defineType({
                 rows: 4,
                 validation: (rule) => rule.required(),
               }),
+              defineField({
+                name: 'highlights',
+                title: 'Highlighted words',
+                type: 'array',
+                of: [defineArrayMember({ type: 'string' })],
+                options: { layout: 'tags' },
+                description:
+                  'Words to stand out, copied exactly from the quote. The quote itself stays as written.',
+                validation: (rule) =>
+                  rule
+                    .custom((phrases: string[] | undefined, context) => {
+                      const missing = missingHighlights(testimonialOf(context).quote, phrases)
+                      return missing.length === 0
+                        ? true
+                        : `Not found in the quote, so not highlighted: ${missing.join(', ')}. Copy the words exactly, on one line.`
+                    })
+                    .warning(),
+              }),
               defineField({ name: 'name', type: 'string', validation: (rule) => rule.required() }),
               defineField({ name: 'role', type: 'string', description: 'e.g. "CEO, Acme"' }),
+              defineField({
+                name: 'attribution',
+                title: 'Attribution line',
+                type: 'string',
+                description: 'An extra line under the name, e.g. "Client since 2019". Optional.',
+              }),
               imageField({ name: 'avatar', requireAlt: false, aspect: '1:1', minWidth: 800 }),
+              defineField({
+                name: 'source',
+                title: 'Where it came from',
+                type: 'string',
+                description: 'Shown as plain words on the card. Other is kept here but not shown.',
+                options: {
+                  list: [...TESTIMONIAL_SOURCES],
+                  layout: 'radio',
+                  direction: 'horizontal',
+                },
+              }),
+              defineField({
+                name: 'date',
+                title: 'Date',
+                type: 'date',
+                description: 'When the client wrote it. Shown on the card.',
+                validation: (rule) =>
+                  rule
+                    .custom((date: string | undefined, context) =>
+                      sourceDateWarning(testimonialOf(context).source, date),
+                    )
+                    .warning(),
+              }),
+              defineField({
+                name: 'rating',
+                title: 'Rating',
+                type: 'number',
+                description:
+                  'Only if the place it came from had a rating. Shown as stars, for this quote alone.',
+                options: { list: [1, 2, 3, 4, 5], layout: 'radio', direction: 'horizontal' },
+                validation: (rule) => rule.integer().min(1).max(5),
+              }),
+              defineField({
+                name: 'permissionToPublish',
+                title: 'Permission to publish',
+                type: 'boolean',
+                description:
+                  'The person agreed to their words and name being shown here. Never shown on the site.',
+                validation: (rule) =>
+                  rule
+                    .custom((confirmed: boolean | undefined) => permissionWarning(confirmed))
+                    .warning(),
+              }),
             ],
             preview: { select: { title: 'name', subtitle: 'quote', media: 'avatar' } },
           }),
         ],
       }),
+      headerDesignField({}, { divider: true }),
+      cardDesignField({
+        description:
+          'Shared background, border, text and mark for every quote. Inherit uses the default card.',
+        presets: TESTIMONIAL_CARD_PRESETS,
+        roles: [{ role: 'quote', highlight: true }, { role: 'attribution' }, { role: 'label' }],
+        inherits: 'the default card',
+        defaults: TESTIMONIAL_ROLE_COLOURS,
+        depth: {},
+      }),
+      avatarDesignField({
+        name: 'avatarDesign',
+        title: 'Avatar',
+        description: 'Size and ring for the author’s picture. Medium with no ring is the default.',
+      }),
+      // A shadow and glow on the author's picture (task 147), beside Avatar so it never changes its size or ring.
+      pictureDepthFields({}),
       accessField,
       // Shown first in the Content tab.
       variantField(TESTIMONIALS_VARIANTS),

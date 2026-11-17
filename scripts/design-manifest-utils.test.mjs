@@ -255,6 +255,20 @@ describe('slots', () => {
     expect(section.fields.find((row) => row.path === 'extra')).toMatchObject({ max: 1 })
   })
 
+  it('finds a family’s slots on the section the registry maps the family to', () => {
+    const mapped = buildDesignManifest(
+      deps({
+        slots: {
+          ...slotDeps,
+          SLOTS: { 'wide.extra': { title: 'Extra', max: 1 } },
+          SLOT_FAMILIES: { wide: 'banner' },
+        },
+      }),
+    )
+    expect(mapped.sections[0].slots).toEqual([{ slot: 'wide.extra', path: 'extra' }])
+    expect(mapped.sections[0].fields.find((row) => row.path === 'extra')).toMatchObject({ max: 1 })
+  })
+
   it('refuses a registry block with no schema type', () => {
     const missing = {
       ...slotDeps,
@@ -272,10 +286,29 @@ describe('evaluateRules', () => {
       hasPicture: (section) => section.variant === 'wide',
       fixesAlignment: (section) => section.variant === 'narrow',
     }))
+    const none = { hasOwnBackgroundImage: false, drawsBackground: false, ownsSurfaces: false }
     expect(rules).toEqual([
-      { variant: null, hasPicture: false, fixesAlignment: false, hasOwnBackgroundImage: false },
-      { variant: 'wide', hasPicture: true, fixesAlignment: false, hasOwnBackgroundImage: false },
-      { variant: 'narrow', hasPicture: false, fixesAlignment: true, hasOwnBackgroundImage: false },
+      { variant: null, hasPicture: false, fixesAlignment: false, ...none },
+      { variant: 'wide', hasPicture: true, fixesAlignment: false, ...none },
+      { variant: 'narrow', hasPicture: false, fixesAlignment: true, ...none },
+    ])
+  })
+
+  it('records which layouts draw their own surfaces or background', () => {
+    const rules = evaluateRules('banner', [{ value: 'wide' }, { value: 'boxed' }], () => ({
+      ownsSurfaces: (section) => section.variant === 'boxed',
+      drawsBackground: (section) => section.variant === 'wide',
+    }))
+    expect(
+      rules.map(({ variant, ownsSurfaces, drawsBackground }) => [
+        variant,
+        ownsSurfaces,
+        drawsBackground,
+      ]),
+    ).toEqual([
+      [null, false, false],
+      ['wide', false, true],
+      ['boxed', true, false],
     ])
   })
 
@@ -293,5 +326,109 @@ describe('listOf and missingPurposes', () => {
     const types = [{ name: 'hero', options: { manifest: { purpose: 'x' } } }, { name: 'mediaText' }]
     expect(FAMILY_TYPES).toEqual(['hero', 'mediaText'])
     expect(missingPurposes(types)).toEqual(['mediaText'])
+  })
+})
+
+describe('nested inline objects and inherited marks (AT3)', () => {
+  const deepSection = {
+    name: 'deep',
+    type: 'object',
+    options: { manifest: { purpose: 'Nested objects.' } },
+    fields: [
+      {
+        name: 'items',
+        type: 'array',
+        of: [
+          {
+            type: 'object',
+            fields: [
+              { name: 'label', type: 'string' },
+              {
+                // An inline object inside an inline array member, as a link's own Appearance is.
+                name: 'design',
+                type: 'object',
+                options: { designSummary: { groups: [] } },
+                hidden: ({ currentUser }) =>
+                  currentUser.roles.some((role) => role.name === 'editor'),
+                fields: [
+                  { name: 'tone', type: 'string' },
+                  {
+                    name: 'inner',
+                    type: 'object',
+                    fields: [{ name: 'size', type: 'string' }],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: 'box',
+        type: 'object',
+        fields: [{ name: 'inside', type: 'object', fields: [{ name: 'depth', type: 'number' }] }],
+      },
+      { name: 'loop', type: 'looping' },
+      { name: 'plain', type: 'string' },
+    ],
+  }
+  const looping = {
+    name: 'looping',
+    type: 'object',
+    fields: [
+      { name: 'again', type: 'looping' },
+      { name: 'leaf', type: 'string' },
+    ],
+  }
+  const agencyOnlyField = (field) => typeof field.hidden === 'function'
+  const build = (extra = {}) =>
+    buildDesignManifest(
+      deps({
+        sectionTypes: [deepSection],
+        sharedTypes: [cta, looping],
+        isClientEditable: () => true,
+        schemaJson: [],
+        ...extra,
+      }),
+    )
+  const rowsOf = (manifest) => new Map(manifest.sections[0].fields.map((row) => [row.path, row]))
+
+  it('gives rows to an inline object inside an inline object, at any depth', () => {
+    const rows = rowsOf(build())
+    for (const path of [
+      'items[].design',
+      'items[].design.tone',
+      'items[].design.inner.size',
+      'box.inside.depth',
+    ]) {
+      expect(rows.has(path), path).toBe(true)
+    }
+  })
+
+  it('still stops a named type that holds itself', () => {
+    const rows = rowsOf(build())
+    expect(rows.has('loop.leaf')).toBe(true)
+    expect(rows.has('loop.again')).toBe(true)
+    expect(rows.has('loop.again.leaf')).toBe(false)
+  })
+
+  it('marks every row under an agency-only field as not client-editable', () => {
+    const rows = rowsOf(build({ agencyOnlyField }))
+    expect(rows.get('items[].label').clientEditable).toBe(true)
+    for (const path of ['items[].design', 'items[].design.tone', 'items[].design.inner.size']) {
+      expect(rows.get(path).clientEditable, path).toBe(false)
+    }
+    // Without the check the registry alone decides.
+    expect(rowsOf(build()).get('items[].design.tone').clientEditable).toBe(true)
+  })
+
+  it('marks a design object and everything under it, and nothing else, as design', () => {
+    const rows = rowsOf(build())
+    for (const path of ['items[].design', 'items[].design.tone', 'items[].design.inner.size']) {
+      expect(rows.get(path).design, path).toBe(true)
+    }
+    for (const path of ['items[].label', 'box.inside.depth', 'plain']) {
+      expect(rows.get(path)).not.toHaveProperty('design')
+    }
   })
 })

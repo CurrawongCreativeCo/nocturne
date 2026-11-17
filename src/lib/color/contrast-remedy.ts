@@ -1,4 +1,4 @@
-import { adjustLightnessForContrast } from './contrast'
+import { adjustLightnessForContrast, contrastRatio } from './contrast'
 
 /**
  * What a contrast warning says and what it can offer, with no Studio code in it. The ratios come
@@ -56,6 +56,33 @@ export function suggestColour(
   return result.adjusted && result.ratio >= required
     ? { hex: result.hex, ratio: result.ratio }
     : null
+}
+
+/**
+ * The nearest shade of `foreground` that reaches `required` on **every** one of `backgrounds`, or null
+ * when no such shade is found (including when the colour already passes them all). A colour that sits
+ * on several backgrounds (Text on the Background and on the Alternate background) is only fixed when
+ * the one suggestion clears them all, so the button never claims a fix that leaves a pair failing. The
+ * ratio is the lowest across the backgrounds.
+ */
+export function suggestColourForAll(
+  foreground: string,
+  backgrounds: readonly string[],
+  required: number,
+): ColourSuggestion | null {
+  if (backgrounds.length === 0) return null
+  let hex = foreground
+  // Moving for one background can undo another, so settle: a few passes are plenty for lightness.
+  for (let pass = 0; pass < 4; pass += 1) {
+    const next = backgrounds.reduce(
+      (current, background) => adjustLightnessForContrast(current, background, required).hex,
+      hex,
+    )
+    if (next === hex) break
+    hex = next
+  }
+  const ratio = Math.min(...backgrounds.map((background) => contrastRatio(hex, background)))
+  return hex !== foreground && ratio >= required ? { hex, ratio } : null
 }
 
 /**

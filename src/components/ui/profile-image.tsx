@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 
+import type { ElementDepth } from '@/lib/sanity/depth-options'
 import { profileFrameShape, type FrameCorner } from '@/lib/sanity/image-frame-geometry'
 import type { ProfileImageSize, ResolvedProfileImage } from '@/lib/sanity/profile-image-options'
 import type { SanityImageData } from '@/types/sanity'
@@ -13,6 +14,11 @@ export interface ProfileImageScale {
   box: Record<ProfileImageSize, string>
   /** `h-*` for a logo drawn at its own proportions. */
   height: Record<ProfileImageSize, string>
+  /**
+   * The largest drawn width in CSS pixels, per size, for a layout that draws far below the Link
+   * list's (an avatar). Without it the `sizes` hint and CDN width are the Link list's.
+   */
+  px?: Record<ProfileImageSize, number>
 }
 
 /** The `sizes` hint and the width asked of the image CDN, per size (2x the largest drawn width). */
@@ -50,7 +56,8 @@ export function ProfileImage({
   colour,
   preload,
   className = '',
-  style,
+  style: ownStyle,
+  depth,
 }: {
   image: SanityImageData | null | undefined
   design: ResolvedProfileImage
@@ -62,15 +69,24 @@ export function ProfileImage({
   className?: string
   /** Custom properties for those classes, on the outer element. */
   style?: CSSProperties
+  /**
+   * Picture depth (task 147, `resolvePictureDepth`): the shared drop-shadow filter and glow, on the
+   * outer element of whichever border is drawn, so the shadow follows the picture with its ring or
+   * frame. Undefined adds nothing.
+   */
+  depth?: ElementDepth | undefined
 }) {
   if (!image?.asset) return null
+  const style = depth ? { ...ownStyle, ...depth.style } : ownStyle
+  const withDepth = (classes: string) => (depth ? `${classes} ${depth.className}` : classes)
   const { size, shape, border } = design
   const frameShape = profileFrameShape(design)
   const natural = !frameShape
   const radius = frameShape ? (CORNER_RADIUS[frameShape.corner] ?? '') : 'rounded-control'
   // A logo is shown whole: a saved adjustment stays stored for when a cropping shape is chosen again.
   const shown = natural ? { ...image, crop: null, hotspot: null } : image
-  const { sizes, request } = SIZES[size]
+  const drawn = scale.px?.[size]
+  const { sizes, request } = drawn ? { sizes: `${drawn}px`, request: drawn * 2 } : SIZES[size]
   const imageClass = natural
     ? `w-auto max-w-full object-contain ${scale.height[size]}`
     : `object-cover ${scale.box[size]}`
@@ -91,7 +107,7 @@ export function ProfileImage({
       <span
         data-profile-image={shape}
         data-profile-border="frame"
-        className={`relative block ${scale.box[size]} ${className}`.trim()}
+        className={withDepth(`relative block ${scale.box[size]} ${className}`.trim())}
         style={style}
       >
         {/* The frame's middle holds the picture: it sits 14% in from each edge. */}
@@ -123,7 +139,7 @@ export function ProfileImage({
       <span
         data-profile-image={shape}
         data-profile-border={border.gradient ? 'gradient' : 'line'}
-        className={`relative block w-fit p-(--ring-offset) ${className}`.trim()}
+        className={withDepth(`relative block w-fit p-(--ring-offset) ${className}`.trim())}
         style={ringStyle}
       >
         {picture()}
@@ -133,7 +149,11 @@ export function ProfileImage({
   }
 
   return (
-    <span data-profile-image={shape} className={`block w-fit ${className}`.trim()} style={style}>
+    <span
+      data-profile-image={shape}
+      className={withDepth(`block w-fit ${className}`.trim())}
+      style={style}
+    >
       {picture()}
     </span>
   )

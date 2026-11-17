@@ -7,8 +7,11 @@ import {
 } from 'sanity'
 
 import { customRange, isMotionPreset } from '@/components/motion/presets'
+import type { SectionStyleInput } from '@/components/ui/section-style'
 import { backgroundContrastProblem } from '@/lib/color/background-contrast'
 import { overlayGradientContrastProblem } from '@/lib/color/overlay-gradient-contrast'
+import type { CapabilityId } from '@/lib/design/capabilities'
+import { takesSectionMark } from '@/lib/design/section-surfaces'
 
 import {
   GRADIENT_OPACITY_RANGE,
@@ -55,7 +58,28 @@ import {
   SECTION_EDGE_HEIGHTS,
   SECTION_EDGE_HEIGHT_TITLES,
   SECTION_EDGE_LAYERS,
+  SECTION_EDGE_LAYER_COLOUR_INHERIT,
+  SECTION_EDGE_LAYER_RESET,
+  SECTION_EDGE_LAYER_ROLE_TITLES,
+  SECTION_EDGE_LAYER_ROLES,
+  SECTION_EDGE_LAYER_SLOT_TITLES,
+  SECTION_EDGE_LAYER_STRENGTH_INHERIT,
+  SECTION_EDGE_LAYER_SLOTS,
   SECTION_EDGE_LAYER_TITLES,
+  SECTION_EDGE_LINE_COLOURS,
+  SECTION_EDGE_CREST_TITLES,
+  SECTION_EDGE_CRESTS,
+  SECTION_EDGE_DEPTH_TITLES,
+  SECTION_EDGE_DEPTHS,
+  SECTION_EDGE_LINE_COLOUR_TITLES,
+  SECTION_EDGE_SHADOW_TITLES,
+  SECTION_EDGE_SHADOWS,
+  SECTION_EDGE_PALETTE_TITLES,
+  SECTION_EDGE_PALETTES,
+  SECTION_EDGE_STRENGTH_TITLES,
+  SECTION_EDGE_STRENGTHS,
+  SECTION_EDGE_TIDE_LAYERS,
+  SECTION_EDGE_TIDE_LAYER_TITLES,
   SECTION_EDGE_TITLES,
   imageStrengthOpacity,
   SECTION_IMAGE_HORIZONTAL_TITLES,
@@ -77,6 +101,8 @@ import {
 } from '../section-style-options'
 import { fetchBrandColours } from './brand-colours'
 import { fetchBrandGradientState, gradientFieldWarning } from './brand-gradients'
+import { builtBy, builtOptions } from './capability-marker'
+import { faintLayerWarning, uncheckedSceneNote } from './edge-visibility-validation'
 import { imageField } from './image-field'
 import { presetField } from './preset-field'
 import {
@@ -84,10 +110,27 @@ import {
   backgroundImageHidden,
   imageOptionHidden,
   staleImageOptionMessage,
+  edgeAccentHidden,
   edgeFlipHidden,
+  edgeGeneratedOptionHidden,
+  edgeStepHidden,
+  edgeLayerBelowHidden,
+  edgeLayerColoursHidden,
+  followerAtStylePath,
+  edgeLayerColourFieldHidden,
+  staleLayerColourFieldMessage,
+  staleLayerColoursMessage,
+  generatedCustomHeightMessage,
+  generatedHeightMessage,
+  staleGeneratedOptionMessage,
+  staleStepMessage,
+  staleLayerBelowMessage,
   edgeInvertHidden,
   edgeLayerHidden,
+  edgeLineColourHidden,
+  edgeShadowHidden,
   edgeOptionsHidden,
+  edgeTideLayerHidden,
   motionCustomHidden,
   motionOptionHidden,
   overlayHidden,
@@ -117,10 +160,16 @@ import {
 } from './thumbnails/background-image-thumbnails'
 import {
   EdgeArchThumbnail,
+  EdgeContourThumbnail,
   EdgeCurveThumbnail,
   EdgeDiagonalThumbnail,
+  EdgeElevatedThumbnail,
   EdgeLayeredThumbnail,
   EdgeNoneThumbnail,
+  EdgeLagoonThumbnail,
+  EdgeReefThumbnail,
+  EdgeStillWaterThumbnail,
+  EdgeTideThumbnail,
   EdgeWaveThumbnail,
 } from './thumbnails/edge-thumbnails'
 import {
@@ -282,10 +331,17 @@ declare module 'sanity' {
   interface ObjectOptions {
     /** Show the object's fields without its own title and frame (the Studio field is in features/studio/components/frameless-field). */
     frameless?: boolean
+    /**
+     * The section edge's per-layer colours: the Studio adds a "Reset all layer overrides" button under the fields
+     * that unsets the whole object (features/studio/components/edge-layer-colours-input).
+     */
+    layerOverridesReset?: boolean
   }
   interface StringOptions {
     /** The field holds the slug of a brand gradient: the Studio draws the picker (features/studio/components/gradient-picker). */
     gradientPicker?: boolean
+    /** Like `gradientPicker`, but lists the gradients of the Brand colours document being edited, drafts included (Brand colours → Buttons). */
+    documentGradients?: boolean
     /** A six-digit hex with the Brand colours input's picker and no contrast check (features/site/components/colour-input). */
     colourPicker?: boolean
     /** The gradient overlay's shape: the Studio adds a preview over the section's own picture (features/studio/components/overlay-preview). */
@@ -293,12 +349,54 @@ declare module 'sanity' {
   }
 }
 
+/**
+ * The section style's fields that are shared design capabilities (lib/design/capabilities.ts), so the
+ * checks and the manifest can find them. Every other field here is the section style's own (tone,
+ * background, spacing, width): shared by every section, but not one of the capabilities.
+ */
+const CAPABILITY_FIELDS: Readonly<Record<string, CapabilityId>> = {
+  overlay: 'overlay',
+  overlayColor: 'overlay',
+  overlayGradient: 'overlay',
+  overlayGradientTop: 'overlay',
+  overlayGradientMiddle: 'overlay',
+  overlayGradientBottom: 'overlay',
+  panel: 'glass',
+  panelStrength: 'glass',
+  motion: 'motion',
+  motionIntensity: 'motion',
+  motionDuration: 'motion',
+  motionDelay: 'motion',
+  motionDirection: 'motion',
+  motionTrigger: 'motion',
+  motionCustom: 'motion',
+  motionDurationMs: 'motion',
+  motionDistancePx: 'motion',
+  motionEasing: 'motion',
+  motionThreshold: 'motion',
+  edge: 'edge',
+  edgeHeight: 'edge',
+  edgeFlip: 'edge',
+  edgeAccent: 'edge',
+  edgeLayer: 'edge',
+  edgeTideLayer: 'edge',
+  edgeLineColour: 'edge',
+  edgeShadow: 'edge',
+  edgeCrest: 'edge',
+  edgeDepth: 'edge',
+  edgeStrength: 'edge',
+  edgePalette: 'edge',
+  edgeLayerBelow: 'edge',
+  edgeLayerColours: 'edge',
+  edgeInvert: 'edge',
+}
+
 export const sectionStyle = defineType({
   name: 'sectionStyle',
   title: 'Section design',
   type: 'object',
   // The fields are rendered straight into the Design tab, not in a box of their own.
-  options: { frameless: true },
+  options: builtOptions('sectionStyle', { frameless: true }),
   fieldsets: [
     {
       name: 'motionAdvanced',
@@ -336,7 +434,8 @@ export const sectionStyle = defineType({
     {
       name: 'edgeAdvanced',
       title: 'Advanced: edge',
-      description: 'Turn the shape inside out, or set the height for each screen size.',
+      description:
+        'Turn the shape inside out, give each layer its own colour or strength, or set the height for each screen size.',
       options: { collapsible: true, collapsed: true },
     },
   ],
@@ -659,6 +758,14 @@ export const sectionStyle = defineType({
       // Cover the screen already holds the picture still.
       hidden: imageOptionHidden('fixed'),
     }),
+    defineField({
+      name: 'mark',
+      title: 'Decorative mark',
+      type: 'decorativeMark',
+      description: 'One faint mark behind the whole section.',
+      hidden: ({ document, path }) =>
+        !takesSectionMark(sectionAtStylePath(document, path as never)?._type),
+    }),
     presetField({
       name: 'panel',
       title: 'Panel',
@@ -727,7 +834,7 @@ export const sectionStyle = defineType({
                 site: colours,
                 hasOwnBackground: sectionHasOwnBackground(section),
                 overlaps:
-                  Boolean(style?.edge && style.edge !== 'none') ||
+                  Boolean(style?.edge && style.edge !== 'none' && style.edge !== 'elevated') ||
                   style?.motion === 'parallax' ||
                   style?.motion === 'float',
               }) ?? true
@@ -984,10 +1091,50 @@ export const sectionStyle = defineType({
           thumbnail: EdgeArchThumbnail,
         },
         {
+          value: 'elevated',
+          title: SECTION_EDGE_TITLES.elevated,
+          description:
+            'A straight edge that casts a soft shadow onto the section below. Nothing is cut away, and it takes no room.',
+          thumbnail: EdgeElevatedThumbnail,
+        },
+        {
           value: 'layered',
           title: SECTION_EDGE_TITLES.layered,
           description: 'Two waves, one behind the other.',
           thumbnail: EdgeLayeredThumbnail,
+        },
+        {
+          value: 'tide',
+          title: SECTION_EDGE_TITLES.tide,
+          description: 'One rising crest, with a softer crest behind it.',
+          thumbnail: EdgeTideThumbnail,
+        },
+        {
+          value: 'contour',
+          title: SECTION_EDGE_TITLES.contour,
+          description: 'A sweeping cut, followed by three fine lines.',
+          thumbnail: EdgeContourThumbnail,
+        },
+        {
+          value: 'still-water',
+          title: SECTION_EDGE_TITLES['still-water'],
+          description:
+            'One calm crest with a soft layer above it, and an optional layer below. Medium or Large; Large is the one to start from.',
+          thumbnail: EdgeStillWaterThumbnail,
+        },
+        {
+          value: 'lagoon',
+          title: SECTION_EDGE_TITLES.lagoon,
+          description:
+            'Two soft layers above the edge that trade places across the width. Medium or Large; Large is the one to start from.',
+          thumbnail: EdgeLagoonThumbnail,
+        },
+        {
+          value: 'reef',
+          title: SECTION_EDGE_TITLES.reef,
+          description:
+            'Two layers above the edge and one below it: the boldest of the layered shapes. Medium or Large; Large is the one to start from.',
+          thumbnail: EdgeReefThumbnail,
         },
       ],
       initialValue: 'none',
@@ -1000,6 +1147,7 @@ export const sectionStyle = defineType({
       initialValue: 'medium',
       options: radio(SECTION_EDGE_HEIGHTS, SECTION_EDGE_HEIGHT_TITLES),
       hidden: edgeOptionsHidden,
+      validation: (rule) => rule.custom((value, context) => generatedHeightMessage(value, context)),
     }),
     defineField({
       name: 'edgeFlip',
@@ -1016,7 +1164,7 @@ export const sectionStyle = defineType({
       type: 'string',
       initialValue: 'none',
       options: radio(SECTION_EDGE_ACCENTS, SECTION_EDGE_ACCENT_TITLES),
-      hidden: edgeOptionsHidden,
+      hidden: edgeAccentHidden,
     }),
     defineField({
       name: 'edgeLayer',
@@ -1028,6 +1176,140 @@ export const sectionStyle = defineType({
       hidden: edgeLayerHidden,
     }),
     defineField({
+      name: 'edgeTideLayer',
+      title: 'Crest colour',
+      description:
+        'The softer crest behind the edge: Primary (the default) or Secondary, lightly, or Echo, this section’s own colour. A picture or a gradient has no single colour to echo, so over one the crest is Primary.',
+      type: 'string',
+      options: radio(SECTION_EDGE_TIDE_LAYERS, SECTION_EDGE_TIDE_LAYER_TITLES),
+      hidden: edgeTideLayerHidden,
+    }),
+    defineField({
+      name: 'edgeLineColour',
+      title: 'Line colour',
+      description:
+        'The three lines below the cut, in the colours of the section below: Primary (the default) or its muted text colour.',
+      type: 'string',
+      options: radio(SECTION_EDGE_LINE_COLOURS, SECTION_EDGE_LINE_COLOUR_TITLES),
+      hidden: edgeLineColourHidden,
+    }),
+    defineField({
+      name: 'edgeShadow',
+      title: 'Shadow',
+      description:
+        'How far the shadow reaches onto the section below, and how dark it is. Soft is the default; Deep is stronger and reaches further. It is a decoration over the next section, so it takes no room and never covers its content.',
+      type: 'string',
+      options: radio(SECTION_EDGE_SHADOWS, SECTION_EDGE_SHADOW_TITLES),
+      hidden: edgeShadowHidden,
+    }),
+    ...(
+      [
+        [
+          'edgeCrest',
+          'Crest position',
+          'Where the crest sits across the width.',
+          SECTION_EDGE_CRESTS,
+          SECTION_EDGE_CREST_TITLES,
+        ],
+        [
+          'edgeDepth',
+          'Depth',
+          'How far the layers reach from the edge. Shallow draws no layer below.',
+          SECTION_EDGE_DEPTHS,
+          SECTION_EDGE_DEPTH_TITLES,
+        ],
+        [
+          'edgeStrength',
+          'Layer strength',
+          'How strongly the layers show.',
+          SECTION_EDGE_STRENGTHS,
+          SECTION_EDGE_STRENGTH_TITLES,
+        ],
+        [
+          'edgePalette',
+          'Colours',
+          'Which brand colours the layers are drawn in: Tint (Primary and Secondary), Ink (text colour over Primary) or Highlight (Highlight over Secondary). Each shape draws its own take on them.',
+          SECTION_EDGE_PALETTES,
+          SECTION_EDGE_PALETTE_TITLES,
+        ],
+      ] as const
+    ).map(([name, title, description, values, titles]) =>
+      defineField({
+        name,
+        title,
+        description,
+        type: 'string',
+        options: radio(values, titles as Record<(typeof values)[number], string>),
+        // Crest position and depth are offered only where a shape has a choice; strength and colours always.
+        hidden:
+          name === 'edgeCrest'
+            ? edgeStepHidden('crest')
+            : name === 'edgeDepth'
+              ? edgeStepHidden('depth')
+              : edgeGeneratedOptionHidden,
+        validation: (rule) =>
+          name === 'edgePalette'
+            ? [
+                rule
+                  .custom((value, context) => staleGeneratedOptionMessage(value, context))
+                  .warning(),
+                // Task 151, Slice 5: is each layer above the edge visible on this section? One advisory, beside
+                // the edge controls: a warning for a faint layer, a note where the scene can't be judged.
+                rule
+                  .custom((_value, { getClient, parent, document, path }) =>
+                    faintLayerWarning(
+                      parent as SectionStyleInput | undefined,
+                      getClient({ apiVersion: '2025-01-01' }),
+                      // The section's own layout: a hero's picture is what the layers sit on, not the style's.
+                      {
+                        hasOwnBackground: sectionHasOwnBackground(
+                          sectionAtStylePath(document, path),
+                        ),
+                        // What the layer below is drawn over: the next section, or the footer's band.
+                        follower: followerAtStylePath(document, path),
+                      },
+                    ),
+                  )
+                  .warning(),
+                rule
+                  .custom((_value, { getClient, parent, document, path }) =>
+                    uncheckedSceneNote(
+                      parent as SectionStyleInput | undefined,
+                      getClient({ apiVersion: '2025-01-01' }),
+                      // The section's own layout: a hero's picture is what the layers sit on, not the style's.
+                      {
+                        hasOwnBackground: sectionHasOwnBackground(
+                          sectionAtStylePath(document, path),
+                        ),
+                        // What the layer below is drawn over: the next section, or the footer's band.
+                        follower: followerAtStylePath(document, path),
+                      },
+                    ),
+                  )
+                  .info(),
+              ]
+            : rule
+                .custom((value, context) =>
+                  name === 'edgeCrest'
+                    ? staleStepMessage('crest')(value, context)
+                    : name === 'edgeDepth'
+                      ? staleStepMessage('depth')(value, context)
+                      : staleGeneratedOptionMessage(value, context),
+                )
+                .warning(),
+      }),
+    ),
+    defineField({
+      name: 'edgeLayerBelow',
+      title: 'Layer below',
+      description:
+        'A second soft layer below the edge, over the section that follows. Still water only; not offered at Shallow depth.',
+      type: 'boolean',
+      hidden: edgeLayerBelowHidden,
+      validation: (rule) =>
+        rule.custom((value, context) => staleLayerBelowMessage(value, context)).warning(),
+    }),
+    defineField({
       name: 'edgeInvert',
       title: 'Invert',
       description: 'The shape bulges into the next section instead.',
@@ -1036,26 +1318,75 @@ export const sectionStyle = defineType({
       initialValue: false,
       hidden: edgeInvertHidden,
     }),
+    defineField({
+      name: 'edgeLayerColours',
+      title: 'Layer colours',
+      description: `Give a layer above or below the edge its own brand colour or strength. A colour on “${SECTION_EDGE_LAYER_COLOUR_INHERIT}” follows Colours above, and a strength on “${SECTION_EDGE_LAYER_STRENGTH_INHERIT}” follows Layer strength. Choose those to clear one field, or “${SECTION_EDGE_LAYER_RESET}” to return every layer to the recipe.`,
+      type: 'object',
+      fieldset: 'edgeAdvanced',
+      hidden: edgeLayerColoursHidden,
+      // Studio adds the reset button under the fields (features/studio/components/edge-layer-colours-input).
+      options: { layerOverridesReset: true },
+      // No initial value: nothing is stored until a layer is given its own, and an empty group is the recipe.
+      // Each field's first choice ("Use recipe colour", "Use Layer strength") unsets it: no sentinel is ever stored.
+      fields: SECTION_EDGE_LAYER_SLOTS.flatMap((slot) => {
+        const layer = SECTION_EDGE_LAYER_SLOT_TITLES[slot]
+        return [
+          defineField({
+            name: slot,
+            title: `${layer}: colour`,
+            type: 'string',
+            options: {
+              ...radio(SECTION_EDGE_LAYER_ROLES, SECTION_EDGE_LAYER_ROLE_TITLES),
+              inheritable: SECTION_EDGE_LAYER_COLOUR_INHERIT,
+            },
+            hidden: edgeLayerColourFieldHidden(slot),
+            validation: (rule) =>
+              rule.custom(staleLayerColourFieldMessage(slot, 'colour')).warning(),
+          }),
+          defineField({
+            name: `${slot}Strength`,
+            title: `${layer}: strength`,
+            type: 'string',
+            options: {
+              ...radio(SECTION_EDGE_STRENGTHS, SECTION_EDGE_STRENGTH_TITLES),
+              inheritable: SECTION_EDGE_LAYER_STRENGTH_INHERIT,
+            },
+            hidden: edgeLayerColourFieldHidden(slot),
+            validation: (rule) =>
+              rule.custom(staleLayerColourFieldMessage(slot, 'strength')).warning(),
+          }),
+        ]
+      }),
+      validation: (rule) => rule.custom(staleLayerColoursMessage).warning(),
+    }),
     ...(
       [
-        ['edgeHeightMobile', 'Height on phones'],
-        ['edgeHeightTablet', 'Height on tablets'],
-        ['edgeHeightDesktop', 'Height on desktops'],
+        ['edgeHeightMobile', 'Height on phones', 'mobile'],
+        ['edgeHeightTablet', 'Height on tablets', 'tablet'],
+        ['edgeHeightDesktop', 'Height on desktops', 'desktop'],
       ] as const
-    ).map(([name, title]) =>
+    ).map(([name, title, screen]) =>
       defineField({
         name,
         title,
-        description: `In pixels, ${EDGE_CUSTOM_MIN} to ${EDGE_CUSTOM_MAX}. Leave empty to use the edge height above (a screen size left empty keeps the smaller one’s).`,
+        description: `In pixels, ${EDGE_CUSTOM_MIN} to ${EDGE_CUSTOM_MAX}. Leave empty to use the edge height above (a screen size left empty keeps the smaller one’s). Still water, Lagoon and Reef take 40 to 64 px on phones, 40 to 120 on tablets and 40 to 160 on desktops.`,
         type: 'number',
         fieldset: 'edgeAdvanced',
         hidden: edgeOptionsHidden,
-        validation: (rule) => rule.integer().min(EDGE_CUSTOM_MIN).max(EDGE_CUSTOM_MAX),
+        validation: (rule) =>
+          rule
+            .integer()
+            .min(EDGE_CUSTOM_MIN)
+            .max(EDGE_CUSTOM_MAX)
+            .custom((value, context) => generatedCustomHeightMessage(screen, value, context)),
       }),
     ),
     defineField({
       name: 'spacing',
       title: 'Space above and below',
+      description:
+        'Default follows the site’s Density (Brand colours). Compact and Spacious keep their own spacing whatever the site’s Density is.',
       type: 'string',
       fieldset: 'layoutOptions',
       initialValue: 'default',
@@ -1115,7 +1446,11 @@ export const sectionStyle = defineType({
           return RESERVED_ANCHORS.includes(value) ? `"${value}" is used by the site itself` : true
         }),
     }),
-  ],
+  ].map((field) =>
+    field.name in CAPABILITY_FIELDS
+      ? builtBy('sectionStyle', field, CAPABILITY_FIELDS[field.name])
+      : field,
+  ),
 })
 
 /**

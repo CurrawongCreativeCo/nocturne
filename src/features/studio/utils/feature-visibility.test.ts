@@ -6,11 +6,13 @@ import { hiddenDocumentTypes, isTypeVisible } from './feature-visibility'
 
 describe('hiddenDocumentTypes', () => {
   it('hides nothing when every feature is on', () => {
-    expect(hiddenDocumentTypes({ ...DEFAULT_FEATURES, services: true }).size).toBe(0)
+    expect(hiddenDocumentTypes({ ...DEFAULT_FEATURES, services: true, locations: true }).size).toBe(
+      0,
+    )
   })
 
-  it('hides services until the profile turns them on (they start off)', () => {
-    expect([...hiddenDocumentTypes(DEFAULT_FEATURES)]).toEqual(['service'])
+  it('hides services and locations until the profile turns them on (they start off)', () => {
+    expect([...hiddenDocumentTypes(DEFAULT_FEATURES)]).toEqual(['service', 'place'])
   })
 
   it('hides the blog, forms, A/B tests, Stripe prices and team when they are off', () => {
@@ -38,12 +40,22 @@ describe('hiddenDocumentTypes', () => {
   })
 
   it('hides events and their categories when the events feature is off', () => {
-    const hidden = hiddenDocumentTypes({ ...DEFAULT_FEATURES, services: true, events: false })
+    const hidden = hiddenDocumentTypes({
+      ...DEFAULT_FEATURES,
+      services: true,
+      locations: true,
+      events: false,
+    })
     expect([...hidden].sort()).toEqual(['event', 'eventCategory'])
   })
 
   it('hides only what was switched off', () => {
-    const hidden = hiddenDocumentTypes({ ...DEFAULT_FEATURES, services: true, pricing: false })
+    const hidden = hiddenDocumentTypes({
+      ...DEFAULT_FEATURES,
+      services: true,
+      locations: true,
+      pricing: false,
+    })
     expect([...hidden]).toEqual(['stripePrice'])
     expect(isTypeVisible('stripePrice', hidden)).toBe(false)
     expect(isTypeVisible('post', hidden)).toBe(true)
@@ -54,6 +66,7 @@ describe('hiddenDocumentTypes', () => {
       hiddenDocumentTypes({
         ...DEFAULT_FEATURES,
         services: true,
+        locations: true,
         search: false,
         members: false,
         newsletter: false,

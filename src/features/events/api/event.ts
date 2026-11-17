@@ -7,6 +7,7 @@ import { siteUrl } from '@/config/site-url'
 import {
   eventCardFields,
   eventLastRelevant,
+  ctaIndicatorFields,
   linkFields,
   portableTextFields,
 } from '@/lib/sanity/fragments'
@@ -24,7 +25,7 @@ export const EVENT_QUERY = defineQuery(/* groq */ `
     _updatedAt,
     body[] { ${portableTextFields} },
     location { kind, name, address, url },
-    registration { label, variant, link { ${linkFields} } },
+    registration { label, variant, ${ctaIndicatorFields}, link { ${linkFields} } },
     "businessTimeZone": *[_id == "businessInfo"][0].timeZone
   }
 `)

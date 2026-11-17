@@ -1,14 +1,18 @@
 import { stegaClean } from 'next-sanity'
 
 import { FramedImage } from '@/components/ui/framed-image'
-import { PlainText } from '@/components/ui/plain-text'
-import { RichHeading } from '@/components/ui/rich-heading'
 import { SanityImage } from '@/components/ui/sanity-image'
+import { SectionHeader } from '@/components/ui/section-header'
 import { sectionTraits, type SectionDefaults } from '@/components/ui/section-style'
+import type { ElementDepth } from '@/lib/sanity/depth-options'
+import { resolveDivider } from '@/lib/sanity/divider-options'
 import { sectionTitle } from '@/lib/sanity/section-title'
+import { resolveTextRoles } from '@/lib/sanity/text-role'
 
 import { OpenImageButton } from './lightbox-provider'
 import type { SectionProps } from '../../../types'
+
+const HEADER_ROLES = ['eyebrow', 'heading', 'intro'] as const
 
 // How this section looks without a style. Keep it equal to the initial style in its schema.
 export const DEFAULTS: SectionDefaults = { container: 'max-w-content', align: 'start' }
@@ -38,20 +42,18 @@ export function GalleryHeader({ data }: { data: GalleryData }) {
   const { heading, intro } = data
   const title = sectionTitle(data)
   const { block, text } = sectionTraits(data.style, DEFAULTS)
-  if (!title && !intro) return null
-
   return (
-    <header className={`mb-12 max-w-measure-narrow ${block} ${text}`}>
-      {title && (
-        <RichHeading
-          as="h2"
-          blocks={heading}
-          fallback={title}
-          className="text-h2 font-semibold text-balance"
-        />
-      )}
-      <PlainText text={intro} className="mt-4 text-lead text-pretty text-ink-muted" />
-    </header>
+    <SectionHeader
+      eyebrow={data.eyebrow}
+      title={title}
+      heading={heading}
+      intro={intro}
+      design={resolveTextRoles(data.headerDesign, HEADER_ROLES)}
+      divider={resolveDivider(data.headerDesign?.divider)}
+      spacing="mb-12 max-w-measure-narrow"
+      block={block}
+      text={text}
+    />
   )
 }
 
@@ -68,6 +70,7 @@ export function Thumbnail({
   sizes,
   fill,
   design,
+  depth,
 }: {
   image: GalleryImage
   index: number
@@ -79,19 +82,30 @@ export function Thumbnail({
   /** Crop to a 4:3 box (the shape, motion and frame of the section's `imageDesign`); otherwise the picture keeps its own shape. */
   fill?: boolean
   design?: GalleryData['imageDesign']
+  /** Picture depth (task 147, `resolvePictureDepth`): a shadow and glow on the tile's still box (Masonry: its button). */
+  depth?: ElementDepth | undefined
 }) {
   const alt = stegaClean(image.alt)
   const label = `Open image ${index + 1} of ${total}${alt ? `: ${alt}` : ''}`
   const loading = eager ? 'eager' : 'lazy'
 
   return (
-    <OpenImageButton index={index} label={label} className={className}>
+    // Masonry draws a plain picture inside its button, which is the tile's outline (it clips and rounds the picture),
+    // so the depth goes on the button: a filter is not cut by the element's own overflow. Grid and Slider put it on
+    // the still box inside the button instead (FramedImage), so the button there is as it always was.
+    <OpenImageButton
+      index={index}
+      label={label}
+      className={!fill && depth ? `${className} ${depth.className}` : className}
+      style={!fill ? depth?.style : undefined}
+    >
       {fill ? (
         // `clip` keeps the hover zoom inside the picture's shape, even with no design set.
         <FramedImage
           image={image}
           alt=""
           design={design}
+          depth={depth}
           clip
           aspect="4/3"
           sizes={sizes}

@@ -123,6 +123,10 @@ Open http://localhost:3000/studio:
   - **Design:** colour and motion choices for the site. It stays hidden until those screens (_Brand colours_, _Motion presets_) exist.
   - **Advanced:** _Redirects_ send old addresses to new ones, _A/B tests_ run headline experiments, _Stripe prices_ are the synced pricing plans, and anything the site adds later lands here too.
 - **Announcement bar:** in Website settings → _Announcement bar_, a one-line message (up to 120 characters) shows above the header on every page. Add a link and the whole message becomes the link; tick _Visitors can dismiss it_ for a close button (it stays closed in that browser until the message text changes). _Show from_ / _Show until_ are optional; with neither it shows all the time, and a bar with no message shows nothing. The dates are checked in the visitor's browser, because pages are cached: the bar is always in the HTML but hidden, so it appears a moment after load (the page below shifts down once) and visitors outside the window never see a gap. In Presentation it follows the same dates, so an expired or future bar won't show there either.
+- **Header menu and dropdowns:** in Website settings → _Navigation_ → _Header_, each _Header menu_ link has a label, a link and optional _Sub-links_ (the header only; footer links stay flat). Give a link sub-links to make it a dropdown: up to **eight**, each with its own label and link, one level deep (a sub-link can't have sub-links). The parent's own link becomes optional:
+  - _With a link_, the label still goes to that page, and a small arrow beside it opens the dropdown. In the phone menu the page is listed first inside the dropdown, under the same label.
+  - _Without a link_, the label itself opens the dropdown and goes nowhere on its own, so put an overview page in the sub-links if visitors need one.
+  - A sub-link that isn't finished (no label, or no page chosen) is left off the site until it is; a link with neither a working link nor a working sub-link isn't shown. Visitors open a dropdown by clicking, by hovering a moment, or with Enter or Space, and close it with Escape, a click elsewhere, or by tabbing out. On phones each dropdown is a section of the menu that opens and closes in place.
 - **Share image:** every page gets a social card. Priority: the page's own _Share image_ (SEO group), then the site's default (Website settings → _Name, logo & icon_), then a generated one: in the `accent` colour, with the meta title (or page title) clamped to three lines and the site name, served as a PNG at `/api/og/<slug>`. Only one `og:image` is ever emitted. To restyle it, edit `src/app/api/og/[[...slug]]/route.tsx`; the font file is `src/assets/fonts/` and the colours are the `accent` and `accent-ink` design tokens, read as hex from `src/config/tokens.generated.ts` (the renderer can't read `oklch()`; see [Design tokens](#design-tokens)).
 - **Structured data:** a page's FAQ sections emit one schema.org `FAQPage` node between them (the questions on the page, answers as plain text, keyed by the page's URL), so keep answers self-contained. Every page also carries a `WebPage` node (see [Structured data rules](#structured-data-rules)). Nested pages (a slug such as `services/web-design`) show a breadcrumb trail above the content and emit a matching `BreadcrumbList`: Home, then each parent slug that has a published page (using its title), then the page. Create a page at each parent slug to have it appear; slug segments without a page are skipped. Top-level pages and Home show no breadcrumbs. The site-wide Organization and WebSite data comes from _Name, logo & icon_; once [Business info](#business-info) exists, the Organization becomes the matching LocalBusiness type with the address, phone and hours. All of it is built in `src/lib/structured-data/` and drawn through `src/components/ui/json-ld.tsx`.
 - **SEO preview:** the SEO group of a page shows how it will look in Google and as a social card, using the site's fallbacks (meta title → page title plus "| site name", the site description and share image). Text Google would cut off (over 60 characters for titles, 160 for descriptions) is marked "Cut off".
@@ -143,7 +147,7 @@ Open http://localhost:3000/studio:
   Nothing in stored content changed, and a section with nothing set looks exactly as it did. New sections start with that kind of section's usual look (a hero starts _Contrast_, testimonials _Tinted_) and _Fade up_. The _Call to action banner_'s own _Tone_ (Brand, Dark, Light) still colours its card; the Design background colours the band around it. In Studio lists a section reads like a sentence: "Hero · Split · Contrast". A hero that matches one of its presets shows the preset's name instead ("Hero · Split, image left"); a custom combination falls back to the layout and background.
 
 - **Start here** (toolbar, first for clients) is the first screen: a greeting, shortcut cards (_Edit your website_, _Write a blog post_, _Update the team_, _Business info and opening hours_, _Help_), your eight most recent changes with who made them and when, and up to five things to check in plain words. See [Start here](#start-here-studio-home-screen).
-- **Content health** (toolbar) lists pages with no meta description, images with no alt text, links to unpublished pages, links to missing sections or unpublished panels, redirect chains and loops, and pages nothing links to; click a row to fix it. It also checks shared sections (alt text always; links only while a published page uses them).
+- **Content health** (toolbar) lists pages with no meta description, images with no alt text, links to unpublished pages, links to missing sections or unpublished panels, redirect chains and loops, and pages nothing links to; click a row to fix it. It also checks shared sections (alt text always; links only while a published page uses them). Each group and item carries the id of the page-audit rule that finds the same problem ([Page audit](#page-audit)); the tool looks the same.
 - **Image and text guidance:** image fields say what suits their spot ("Recommended: 2400 × 1600 px, landscape.") and show a yellow warning, never an error, when an uploaded picture is narrower than that or a different shape by more than 15%, for example "This image is 1200 × 1800 (portrait). This spot looks best with a landscape image at least 2400 px wide." You can still publish; the warning is a nudge to swap the picture. SVGs are never checked. Section titles and intro text warn the same way when they run past what the design handles (a hero title over 80 characters, other headings over 60–70, intro text over 200). Current targets: hero background 2400 px wide, landscape; _Image + text_ 1600 px at 4:3; testimonial and author portraits 800 px square; logos 400–600 px wide if not SVG (SVG preferred).
 - **AI Assist** (`@sanity/assist`) helps with alt text, summaries, headlines, body copy and meta descriptions. It needs a Sanity **Growth** plan
   or higher (AI Assist is not on Free). On Free the plugin still loads and Studio works normally; the
@@ -235,6 +239,7 @@ Open http://localhost:3000/studio:
   Before merging changes to this flow, check a local Studio as agency and client: missing required field, a nested
   section error, warning-only document, hidden setting, keyboard navigation and focus after **Go to field**.
   Record the results in the PR; automated component tests do not replace that signed-in check.
+- **Studio keyboard and narrow-screen checks (developers):** `picker-keyboard.test.tsx` covers the preset and icon pickers by keyboard and `icon-button-names.test.ts` fails when an icon-only Studio button has no `aria-label`; give new ones a name. These do not replace a signed-in check at 390, 768, 1024 and 1440 px: record results in `docs/studio-audit/<date>/a11y-responsive.md` (the 4 November 2026 runs cover every screen in a real browser; only Presentation's preview content is still unverified).
 - **Publishing safely:** the first time a page or post is published, and whenever its address changes, Publish asks
   "Publish changes to `https://example.com/about`?" (the site's public address plus the page's path), with **Publish**
   and **Cancel**. Other edits to a live page publish straight away, with no dialog. If the page is already live and you changed its
@@ -838,6 +843,7 @@ src/
       utils/                       stripe-signature, map-stripe (event + price -> document), stripe-api (REST), config
     events/                        events: the event schema, event pages, calendar files
     services/                      services: the service schema, service pages and Service JSON-LD (features.services)
+    locations/                     locations: the `place` schema (titled Location), location pages and branch JSON-LD (features.locations)
       api/                         event.ts (EVENT_QUERY, EVENTS_INDEX_QUERY, EVENTS_FEED_QUERY, metadata, sitemap)
       components/                  event-view (server)
       schemas/                     event.ts, event-category.ts
@@ -1015,14 +1021,16 @@ three related posts) and `BLOG_INDEX_QUERY` (post and category slugs, for static
 - **`/api/site-info`** adds none: it is prerendered and reads only environment variables.
 - **Share images** add none: `/api/og/<slug>` reads the cached `PAGE_QUERY` and `SETTINGS_QUERY` entries that the page and layout already use.
 - **Unknown URLs** (typos, bots probing `/wp-admin` or `/blog/anything`) are answered from the cached page and blog indexes at no cost.
+- **Blog settings** adds one query, `BLOG_SETTINGS_QUERY`: the blog's post cards read their design from it (`getBlogCardDesign`), cached under its own tag, `blogSettings`, so a change to it refreshes the blog pages and nothing else. It is one cached entry for the whole site, so it costs one request per build and one per publish of that document, and a page view causes none.
 - **Link list** adds none: its links, profile and social icons are resolved inside `PAGE_QUERY` (the social icons come from the settings entry the footer already fetched), and which links are due is decided at request time from that cached data. The page option is one more field in `PAGE_QUERY`.
-- **Team** adds none to a page view: the members a Team section shows are resolved inside `PAGE_QUERY` (a `teamMember` change expires the pages, tagged `teamMember`). A profile page adds `TEAM_MEMBER_QUERY`, one per member, and `TEAM_INDEX_QUERY` (the slugs, for static params, the unknown-URL check and the sitemap) is shared by all of them, so unknown `/team/…` URLs cost nothing.
+- **Team** adds none to a page view: the members a Team section shows are resolved inside `PAGE_QUERY` (a `teamMember` change expires the pages, tagged `teamMember`). A profile page adds `TEAM_MEMBER_QUERY`, one per member (it also reads the Team page settings in the same request, tagged `teamPageSettings`), and `TEAM_INDEX_QUERY` (the slugs, for static params, the unknown-URL check and the sitemap) is shared by all of them, so unknown `/team/…` URLs cost nothing.
 - **Events** add none to a page view: an Events section's events are resolved inside `PAGE_QUERY` (an `event` or `eventCategory` change expires the pages, tagged `event` and `eventCategory`; the business time zone comes from the same query). An event page adds `EVENT_QUERY`, one per event, and `EVENTS_INDEX_QUERY` (the slugs, for static params, the unknown-URL check and the sitemap) is shared by all of them, so unknown `/events/…` URLs cost nothing. The calendar feed adds `EVENTS_FEED_QUERY`, one cached entry for the whole site; an event's `.ics` file reads the event's own entry. Which events are upcoming is decided per request from that cached data, so no visitor causes a Sanity request.
 - **Forms** add none to a page view: the `form` a section references is resolved inside `PAGE_QUERY` (without the
   recipient). A send costs one more, `FORM_QUERY` by the form's id, cached until the form changes. With
   `ENQUIRIES_STORE=1` a send also writes one document, and the first send per hour per server instance makes one
   unauthenticated query to check the dataset is private (see [Enquiries](#enquiries)); neither is read through the cache,
   and a page view still causes none.
+- **Locations** add none to a page view. A location page adds `LOCATION_QUERY`, one per location (the fields, the services offered there and the team members who list it, all in one request; a `place`, `service` or `teamMember` change expires it), and `LOCATION_INDEX_QUERY` (the slugs) is shared, so unknown `/locations/…` URLs cost nothing. A service page's locations are part of its own query. With `features.locations` off neither runs.
 - **Services** add none to a page view. A service page adds `SERVICE_QUERY`, one per service (the fields, the proof of work it links to and the team members who list it, all in one request; a `service`, `teamMember`, `post` or `page` change expires it), and `SERVICE_INDEX_QUERY` (the slugs, for static params, the unknown-URL check and the sitemap) is shared by all of them, so unknown `/services/…` URLs cost nothing. With `features.services` off neither runs.
 - **Pricing** adds none to a page view: the plans and their prices are resolved inside `PAGE_QUERY` (a `stripePrice` change expires the pages that show it, tagged `stripePrice`). A checkout adds one, `CHECKOUT_PRICE_QUERY` by price id, cached until that price changes, plus one call to Stripe. The webhook calls Stripe once per price event and writes to the Content Lake; it reads nothing through the cache.
 - **Section panels** add one small query, `DESIGN_COLOURS_QUERY` (Brand colours and gradients, tagged `designSettings`), and only while rendering a section that has a panel: a site with no panels never makes it, and a visitor never causes it. It exists so the panel's contrast uses the colours the page really draws; sharing the settings entry would mean importing the site feature from shared code.
@@ -1058,7 +1066,7 @@ To switch a deployment to webhook mode:
 3. In sanity.io/manage → your project → **API → Webhooks → Create webhook**:
    - **URL:** `https://your-site.com/api/revalidate`
    - **Dataset:** your dataset · **Trigger on:** Create, Update, Delete
-   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "redirect", "sharedSection", "post", "author", "category", "teamMember", "frame", "panel", "event", "eventCategory", "service", "form", "stripePrice", "experiment"]` · **Projection:** `{_type, "slug": slug.current}`
+   - **Filter:** `_type in ["page", "siteIdentity", "siteNavigation", "announcement", "cookieBanner", "designSettings", "businessInfo", "blogSettings", "teamPageSettings", "redirect", "sharedSection", "post", "author", "category", "teamMember", "frame", "panel", "event", "eventCategory", "service", "place", "form", "stripePrice", "experiment"]` · **Projection:** `{_type, "slug": slug.current}`
    - **HTTP method:** POST · **Secret:** the same value as step 1
    - Leave **Drafts** and **Versions** unchecked, so only publishes fire it
 4. Redeploy. To go back to live mode, remove the env var and delete the webhook.
@@ -1196,6 +1204,8 @@ private dataset, which is what the privacy check looks for.
 
 `src/features/pricing` plus the `pricingTable` section. Stripe is the source of truth for prices; Sanity holds a read-only copy (`stripePrice` documents) so editors can pick prices by reference and pages stay cached. There is no Stripe SDK: the few REST calls use `fetch`, as the forms do for Resend.
 
+**Plan cards** (task 156). Each plan can also carry a _Description_ (a line or two under the name), a _Detail line_ under the price (for example "90 minutes") and, on the highlighted plan, _Badge text_ (default "Most popular"). All are optional and draw nothing while empty. The agency-only _Design_ tab has a _Section header_ box (eyebrow, title and intro), a _Cards_ box (fill, border, the five text roles: title, price, body, label and description, and a decorative mark) and, on each plan, an _Appearance_ switch: "Use the section's card design" or "Customise this card", which changes only the properties chosen there. A customised plan's own mark replaces the card mark on that plan (None removes it). The highlighted plan's ring is the ink colour and twice as thick until a border is chosen. Every one is empty by default, and an empty design draws what the table always drew. The label role is the billing period and the detail line; the price steps from the nearest type-scale step because its default size sits off the scale. A brand-gradient border for the highlighted plan is deferred to the shared surface looks, proposed under task 159.
+
 **Environment** (all server-side; `.env.example` lists them; none has a `NEXT_PUBLIC_` prefix, and a secret must never get one):
 
 | Variable                | Purpose                                                                                                                                                                        |
@@ -1294,6 +1304,13 @@ Two events are sent for every site with a provider: **`form_submit`** (`form`: t
 - **In your reports.** Plausible shows an event once you add a goal of the same name (`form_submit`, `cta_click`, `link_click`) and, for the properties, a custom property; GA4 and PostHog record them straight away (GA4: mark `form_submit` as a key event to count it as a conversion).
 - **Adding an event.** Call `trackEvent('name', { ... })` (strings, numbers and booleans only) or put `trackAttributes('name', {...})` on a wrapper around a link or button. Never put personal information (names, email addresses, message text) in the props.
 - **Tests:** `tests/e2e/analytics-events.spec.ts` checks nothing fires before consent or after Reject all, and that `cta_click` and `form_submit` fire after Accept all. The providers' scripts are stubbed (the suite runs offline), so the test records the calls the dispatcher makes.
+
+### Header dropdowns
+
+- **Data.** `SETTINGS_QUERY` fetches `headerNav[].children[]` (one level; `footerNav` doesn't ask for them), so there is no extra request. `toHeaderNav` (`src/features/site/utils/header-nav.ts`, unit tested) turns it into what the header draws: unfinished entries dropped, at most `MAX_SUB_LINKS` (8) sub-links, anything deeper ignored. Flat menus render exactly as before. The schema (`schemas/nav-item.ts`) makes sub-links a separate `navSubItem` type without a `children` field, so nesting stops at one level; validators reject more than eight, grandchildren pasted in through the API, and sub-links in the footer. Existing `navItem`s are unchanged, so no migration.
+- **Desktop.** `NavDropdown` (`components/nav-dropdown.tsx`) is a disclosure, not an ARIA menu: a `<button aria-expanded aria-controls>` and a plain `<ul>` of links rendered on the server and passed in as children. Hover opens after 150 ms (mouse only) and closes 300 ms after leaving unless the dropdown was clicked open. Document `keydown`/`pointerdown` listeners exist only while open; the hover timer is cleared on unmount. The panel is shifted left by any overflow past the window's edge (16 px margin), and recomputed on resize. Before hydration, hover and focus show the panel through CSS (`:not([data-js])`). The header imports it through `nav-dropdown-lazy.tsx` (`next/dynamic`), so only pages whose header has a dropdown download its code; it is still server-rendered. No Motion, no positioning library; the chevron's rotation is `motion-safe` only.
+- **Phones.** Inside the existing `MobileMenu` each dropdown is a nested native `<details>`; Escape, link clicks and outside clicks still close the whole menu as before. The menu panel scrolls when it is taller than the screen.
+- **Tests.** Unit: `nav-item.test.ts`, `header-nav.test.ts`, `nav-dropdown.test.tsx` (jsdom), the settings query and content health (sub-links are checked for broken links and count against orphans; the walker was already recursive). Browser: `tests/e2e/nav-submenus.spec.ts` in its own `nav-submenus` project (the fake lake serves `navigationNested` through `POST /__fixture/navigation/<flat|nested>`, which every page's header would show).
 
 ### Site search
 
@@ -1472,7 +1489,7 @@ the same check as `src/types/sanity.types.ts`.
 | `type`   | `display`, `h1`, `h2`, `h3`, `h4`, `lead`, `body`, `small`: a fluid `clamp()` size, line height and letter spacing each                                     | `text-display`, `text-h1`, `text-h2`, `text-lead`, `text-small`...                                            |
 | `space`  | `section-y-compact`, `section-y`, `section-y-spacious`, `gutter`, `measure`, plus `measure-narrow` and `content` (widths)                                   | `py-section-compact`, `py-section`, `py-section-spacious`, `px-gutter`, `max-w-measure`, `max-w-content`      |
 | `radius` | `sm`, `control` (inputs, small buttons), `card`, `panel` (banners), `button`, `pill`                                                                        | `rounded-sm`, `rounded-control`, `rounded-card`, `rounded-panel`, `rounded-button`, `rounded-pill`            |
-| `shadow` | `card`, `raised`                                                                                                                                            | `shadow-card`, `shadow-raised`                                                                                |
+| `shadow` | `card`, `raised`, and optionally `soft`, `floating`                                                                                                         | `shadow-card`, `shadow-raised`, `shadow-soft`, `shadow-floating`                                              |
 | `motion` | `duration-fast`, `duration`, `duration-slow`, `ease-out`, `ease-in-out`, `reveal-distance`, `marquee-per-logo` (seconds per logo, optional)                 | `var(--duration)`, `var(--reveal-distance)`, `ease-out`; `motion` in `tokens.generated.ts` for JS             |
 
 Two optional groups sit beside these: `emphasis` (heading emphasis) and `glass` (frosted rows, see
@@ -1574,8 +1591,70 @@ Studio access; see _Studio roles and permissions_).
   (`accent-text`: a darker or lighter shade of Primary when Primary alone fails 4.5:1 on the page, while buttons and
   backgrounds keep your exact colour), the button colours (`cta`, `cta-ink`), the tints and borders when only the
   background changes, and the inks after a Dark appearance or a new background. Hover shades follow the colour
-  (`hover:bg-cta/85`). Colours you choose yourself are never changed; if they fail, Studio validation shows a warning
-  naming the ratio.
+  (`hover:bg-cta/85`). Colours you choose yourself are never changed.
+- **Contrast policy** (task 216). Colours you choose are never changed by the site, and the checks say what to do:
+  - **An error, on Brand colours only:** _Text_ on a _Background_, or _Muted text_ on a _Background_ or an _Alternate
+    background_, when you chose **both** colours under Advanced and the pair is below 4.5:1. It blocks publishing this
+    document, names the pair and the ratio, and offers **Use suggested colour** (the nearest shade of the text colour
+    that reaches 4.5:1, same hue, with **Undo**). The error sits on the text colour.
+  - Existing Brand colours documents with an explicitly chosen text/background pair that fails contrast must be corrected before their next publish. Use Use suggested colour to apply an accessible value; Undo restores the previous choice.
+  - **A warning, never an error:** a chosen colour on a background you did not choose (the default or a derived one),
+    Primary as text, and gradient stops. Derived text (the inks after a new background or Appearance, text on Primary,
+    accent text) is adjusted to 4.5:1 at render, with near-black or white, so the site stays readable whatever is chosen.
+  - **Brand-coloured text** (links and eyebrows, `accent-text`) renders a lightness-adjusted shade of Primary's hue
+    whenever Primary alone would fall below 4.5:1 on the Background or the Alternate background. Studio says so, naming
+    the shade, and the button and backgrounds keep your exact colour. **Use suggested colour** on Primary saves that
+    accessible shade as Primary, after which nothing is adjusted. There is no "use as chosen" switch for text, because
+    that would let a failing pair render.
+  - **Page and section documents never get contrast errors**, only warnings and the render-time fallbacks, because an
+    error there would stop content being published (`resolve-design-tokens-contrast-policy.test.ts` checks that no
+    schema outside Brand colours turns a colour check into an error). Contrast over pictures is unchanged.
+- **Density, Shape and Heading style** (task 216, agency only, in the thumbnail picker). Each restyles the whole site
+  from one choice, server-side as `:root` variables (`src/lib/design/site-decisions.ts`), with no client script and no
+  new request. Leaving one empty, or choosing **Standard** or **Soft**, adds nothing: the site is exactly
+  `tokens.json`. **Unset inherits; a section's own choice wins.**
+  - **Density** (_Compact_, _Standard_, _Airy_) moves the **Default** section spacing (`--spacing-section`, 4.5rem,
+    6rem or 7.5rem) and the side margin (`--spacing-gutter`, 1.125rem, 1.5rem or 1.875rem). A section set to
+    **Compact** or **Spacious** keeps its own spacing whatever the density is; a section left on Default, or with
+    nothing chosen, follows it.
+  - **Shape** (_Sharp_, _Soft_, _Round_) moves the card, panel and control corners (`--radius-card` 0.25, 1 or
+    1.75rem; `--radius-panel` 0.5, 1.5 or 2.25rem; `--radius-control` 0.25, 0.5 or 0.75rem). Buttons and pills stay
+    fully round.
+  - **Heading style** (_Standard_, _Editorial_, _Modern_, _Classic_) sets the weight, letter spacing and size of h1, h2
+    and h3 together (`src/lib/design/heading-styles.ts`; h4 and smaller keep their own). The weight is
+    `--heading-weight`, read by one rule at the end of `globals.css` that falls back to each heading's own weight
+    while it is unset. The values are provisional until reviewed on real pages. Fonts never change: Editorial looks
+    best with a display font, so until Currawong adds one it uses the site's body font.
+
+    | Style     | Weight   | Letter spacing | Size (display, h1, h2, h3)     |
+    | --------- | -------- | -------------- | ------------------------------ |
+    | Standard  | as built | as built       | as built                       |
+    | Editorial | 500      | -0.04em        | ×1.1, ×1.1, ×1.1, ×1.05        |
+    | Modern    | 700      | -0.03em        | unchanged                      |
+    | Classic   | 600      | -0.01em        | ×0.95, ×0.95, ×0.95, unchanged |
+
+  - **In Studio**, a preview under the colour mock-up shows a heading, body text, a button and a card at the chosen
+    density, shape and heading style, and above the form a note counts the sections that set their own spacing (Compact
+    or Spacious, drafts included) with a link to each. It makes one narrow Studio-only query (`SPACING_USAGE_QUERY`: each
+    page's and shared section's title, and only the sections that chose Compact or Spacious); the public site makes no
+    request for it.
+  - **Keep site-wide design changes in their own release.** A release publishes all or nothing, so a density, shape or
+    heading change should not ride along with unrelated content.
+- **Font pairings** (`src/config/font-pairings.ts`) are vetted display and body pairs, as data only: nothing here loads
+  a font. To use one, import both families from `next/font/google` under the names below and point the `font` tokens at
+  them (task 13); the design manifest (task 215) will read the same list. A test checks every family and weight against
+  next/font's own list.
+
+  | Id                      | Display             | Body            | Mood                |
+  | ----------------------- | ------------------- | --------------- | ------------------- |
+  | `inter`                 | `Inter`             | `Inter`         | modern              |
+  | `playfair-inter`        | `Playfair_Display`  | `Inter`         | editorial, refined  |
+  | `dm-serif-dm-sans`      | `DM_Serif_Display`  | `DM_Sans`       | editorial, friendly |
+  | `fraunces-inter`        | `Fraunces`          | `Inter`         | friendly, editorial |
+  | `lora-source-sans`      | `Lora`              | `Source_Sans_3` | classic, friendly   |
+  | `baskerville-work-sans` | `Libre_Baskerville` | `Work_Sans`     | classic, refined    |
+  | `space-grotesk-inter`   | `Space_Grotesk`     | `Inter`         | modern, technical   |
+  | `jakarta-manrope`       | `Plus_Jakarta_Sans` | `Manrope`       | modern, friendly    |
 
 With nothing set, no CSS is added. Otherwise `SiteShell` renders one `<style>` with `:root{...}` containing only
 what differs from `tokens.json`, on the server, so there is no flash and no JavaScript. It comes from
@@ -1585,7 +1664,8 @@ what differs from `tokens.json`, on the server, so there is no flash and no Java
 affected.
 
 The **primary button** (`CtaLink`, the form, search and sign-in buttons) uses the `cta` colour, which is near-black
-by default and becomes Primary once one is set. Use `bg-accent` where you want the accent itself.
+by default and becomes Primary once one is set. Use `bg-accent` where you want the accent itself. Its fill, depth and
+glow, and the secondary button's style, are chosen under Brand colours → Buttons (see _Buttons_).
 
 ### CMS branding
 
@@ -1842,21 +1922,22 @@ export const siteProfileInput = defineSiteProfile({
 typegen and the generators don't change, and content already in the dataset is never deleted. What a disabled
 feature does:
 
-| Feature                      | When off                                                                                                                                                                                                                                                                                                 |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `blog`                       | `/blog`, `/blog/<slug>`, `/blog/category/<slug>` and `/feed.xml` answer 404; posts leave the sitemap, `robots.txt` sitemap count and `llms.txt`; Blog leaves the desk and _New document_                                                                                                                 |
-| `search`                     | `/search` and `/api/search` answer 404; the header's search button is not rendered                                                                                                                                                                                                                       |
-| `members`                    | `/sign-in`, `/sign-out` and `/api/auth/*` answer 404                                                                                                                                                                                                                                                     |
-| `pricing`                    | The checkout action refuses ("Checkout isn't available right now"); Stripe prices leave the desk and _New document_                                                                                                                                                                                      |
-| `forms`                      | Forms leave the desk and _New document_ (the form section and submissions are untouched)                                                                                                                                                                                                                 |
-| `experiments`                | A/B tests leave the desk and _New document_ (a running test still serves; end it first)                                                                                                                                                                                                                  |
-| `team`                       | Profile pages go too (as `teamProfiles` off, below); Team leaves the desk and _New document_. A Team section already on a page keeps showing its cards (remove it from the page)                                                                                                                         |
-| `teamProfiles`               | Members have no pages: `/team/<slug>` answers 404, profile pages leave the sitemap, cards stop linking, and the profile fields (page address, full bio, qualifications, contact details) leave the Studio form                                                                                           |
-| `events`                     | `/events/<slug>`, `/events/<slug>.ics` and `/events/feed.ics` answer 404; event pages leave the sitemap; Events leaves the desk, _New document_ and Start here. An Events section already on a page keeps drawing its list, without links to event pages (remove it from the page)                       |
-| `services`                   | `/services/<slug>` answers 404; service pages leave the sitemap; Services leaves the desk and _New document_; the _Services they provide_ field leaves the team member form. A page at `services/<slug>` is then an ordinary CMS page (while on, `services/…` is reserved like `team/…`). Off by default |
-| `releases`                   | Studio's Releases tool, scheduled drafts and the release options in the version menu go. Variants (A/B tests) keep working. See _Content releases_                                                                                                                                                       |
-| `publishGate`                | `POST /api/publish` answers 404 (off by default). See _Publish gate_ under _Studio roles and permissions_                                                                                                                                                                                                |
-| `newsletter`, `businessInfo` | Recorded in the profile and reported by `/api/site-info`; nothing is hidden yet                                                                                                                                                                                                                          |
+| Feature                      | When off                                                                                                                                                                                                                                                                                                                                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `blog`                       | `/blog`, `/blog/<slug>`, `/blog/category/<slug>` and `/feed.xml` answer 404; posts leave the sitemap, `robots.txt` sitemap count and `llms.txt`; Blog leaves the desk and _New document_                                                                                                                                                                                       |
+| `search`                     | `/search` and `/api/search` answer 404; the header's search button is not rendered                                                                                                                                                                                                                                                                                             |
+| `members`                    | `/sign-in`, `/sign-out` and `/api/auth/*` answer 404                                                                                                                                                                                                                                                                                                                           |
+| `pricing`                    | The checkout action refuses ("Checkout isn't available right now"); Stripe prices leave the desk and _New document_                                                                                                                                                                                                                                                            |
+| `forms`                      | Forms leave the desk and _New document_ (the form section and submissions are untouched)                                                                                                                                                                                                                                                                                       |
+| `experiments`                | A/B tests leave the desk and _New document_ (a running test still serves; end it first)                                                                                                                                                                                                                                                                                        |
+| `team`                       | Profile pages go too (as `teamProfiles` off, below); Team leaves the desk and _New document_. A Team section already on a page keeps showing its cards (remove it from the page)                                                                                                                                                                                               |
+| `teamProfiles`               | Members have no pages: `/team/<slug>` answers 404, profile pages leave the sitemap, cards stop linking, and the profile fields (page address, full bio, qualifications, contact details) leave the Studio form                                                                                                                                                                 |
+| `events`                     | `/events/<slug>`, `/events/<slug>.ics` and `/events/feed.ics` answer 404; event pages leave the sitemap; Events leaves the desk, _New document_ and Start here. An Events section already on a page keeps drawing its list, without links to event pages (remove it from the page)                                                                                             |
+| `services`                   | `/services/<slug>` answers 404; service pages leave the sitemap; Services leaves the desk and _New document_; the _Services they provide_ field leaves the team member form. A page at `services/<slug>` is then an ordinary CMS page (while on, `services/…` is reserved like `team/…`). Off by default                                                                       |
+| `locations`                  | `/locations/<slug>` answers 404; location pages leave the sitemap; Locations leaves the desk and _New document_; the _Where it's offered_ and _Locations they work at_ fields leave the service and team member forms. Needs `businessInfo`. A page at `locations/<slug>` is then an ordinary CMS page (while on, `locations/…` is reserved like `services/…`). Off by default |
+| `releases`                   | Studio's Releases tool, scheduled drafts and the release options in the version menu go. Variants (A/B tests) keep working. See _Content releases_                                                                                                                                                                                                                             |
+| `publishGate`                | `POST /api/publish` answers 404 (off by default). See _Publish gate_ under _Studio roles and permissions_                                                                                                                                                                                                                                                                      |
+| `newsletter`, `businessInfo` | Recorded in the profile and reported by `/api/site-info`; nothing is hidden yet                                                                                                                                                                                                                                                                                                |
 
 Read it in code with `isFeatureEnabled('blog')` from `src/config/profile.ts` (shared code, so features may
 import it). Page-builder sections that depend on a disabled feature (a form, pricing table or newsletter section)
@@ -2334,11 +2415,17 @@ nothing in `src/app` may import it (a test fails if one does), because it would 
   after changing a section's fields, options, presets or rules, `client-editable.ts` or `tokens.json`.
 - **Slots** come from the shared slot registry (`src/features/pages/slots/registry.ts`), never from a list of their own. Top-level
   `slots` lists every registry slot (`name`, `title`, `max`) with the blocks it accepts (`type`, `noun`, `clientEditable` and the
-  block's `fields`). A section that has the field named by a slot (`hero.supporting` is `hero`'s `supporting`) lists it under
-  `slots`, and the registry's `max` becomes that field's `max`. Slots reserved for families that do not exist yet (`split.*`)
-  appear only at the top level. A registry block with no loaded schema type fails the build.
+  block's `fields`). A section lists a slot under `slots` when the registry's `SLOT_FAMILIES` puts the slot's family on it and it
+  has the field the slot names (`hero.supporting` is `hero`'s `supporting`; `split.media` is `mediaText`'s `media`), and the
+  registry's `max` becomes that field's `max`. A registry block with no loaded schema type fails the build.
 - **Rules** are functions, so the script evaluates each section's `registerSectionRules` once with no layout and once per
-  layout, and records `hasPicture`, `fixesAlignment` and `hasOwnBackgroundImage`.
+  layout, and records `hasPicture`, `fixesAlignment`, `hasOwnBackgroundImage`, `drawsBackground` and `ownsSurfaces` (the layout
+  draws its own surfaces, so the shared Panel doesn't apply: `src/lib/design/section-surfaces.ts`, which SectionRenderer also
+  applies on the page).
+- **Design capabilities** (task 275, being rolled out): a field a shared design builder made carries its `capability`. A
+  section that declares its capabilities also lists `capabilities` (each policy, its availability layout by layout and the
+  evidence behind it) and `contentSources`, and top-level `designCapabilities` holds the registry, the slot blocks and listings
+  that declare, and `coverage`: what is declared, what isn't yet, and the parts of the site the manifest says nothing about.
 - **Purpose and example:** give a section type `options.manifest = { purpose, example? }`. The build fails if `hero` or
   `mediaText` (`FAMILY_TYPES` in `scripts/design-manifest-utils.mjs`) has no purpose. Keep an example's keys to fields the
   section has; a test checks it.
@@ -2370,6 +2457,248 @@ Tests: `scripts/design-manifest-utils.test.mjs` (a small in-memory schema: optio
 layout, `clientEditable`, undetermined constraints, a missing purpose, a removed family), `scripts/design-manifest-cli.test.mjs`
 (byte-identical output, `--check` passing and failing) and `src/features/pages/schemas/design-manifest.test.ts` (every section present, every preset value in its
 field's list, nothing under `src/app` imports the manifest).
+
+#### Design capability contract
+
+The shared design abilities (surface and border, text roles, section header, decorative mark, depth and glow, icon, action
+indicator, picture framing, picture depth, overlay, glass, divider, section edge, motion and slots) are described once, in
+`src/lib/design/`, and every **section, slot block, listing** (the blog's post cards) **and view** (a page that isn't a
+section, such as the footer, declared by the task that brings it in) declares what it should offer of each. It is a contract and its checks, not a feature: no component adopts a capability by being declared, and the
+owning tasks (156, 158, 137, 146 and the rest) adopt them one at a time. Three things are kept apart:
+
+- **Policy** is what a component _should_ offer. It is written by hand with `declareCapabilities`, in a `<name>-capabilities.ts`
+  file beside the schema and wired in as `options.designCapabilities`, and never switches anything on. Every capability gets
+  one entry: **Required**, **Conditional** with a typed trigger (the component's anatomy, a layout or a stored setting, never
+  a task's progress), or **Not applicable** with a reason. A policy can name its `scope` (site, section, card or item; a list
+  when it applies at several), its `layouts` (every layout accounted for, by name), a `part` (when two policies share a scope)
+  and a `closingTask` (when another task than the capability's owner implements it here). A policy for text (or the section
+  header) names its `roles`, and a layout that draws only some of them says so: `{ roles: ['label'], reason }` (the others are
+  Not applicable there). **Each independently editable control is its own `part`**: a link's icon container and which icon it
+  shows, each divider position's centre icon, each slot of Image + text. One that works never verifies one that doesn't.
+- **Availability** is what it offers today, and is never written down. A layout is **verified** only when the schema offers
+  the marked field there (the Studio's own `hidden` rules, evaluated as an agency user, or a preset that sets it), the
+  policy applies to that layout, an evidence entry registers a render target for it and its probe case passes. Anything
+  else is **pending**. Text is verified **role by role**: an entry names one role (`role`), must probe the field the text style
+  builder stamped for that role, and verifies only that role; a role a layout doesn't draw is Not applicable there, never
+  a passing sibling. An exception, a declaration or a scratch probe never counts.
+- **Evidence** (`src/lib/design/capability-evidence.ts`) is one entry per adoption: the component, the schema field its
+  probe sets, the resolvers the renderer reaches the target through, the file that draws it, a CSS selector for the
+  element it renders on, and the layouts it covers. `src/app/design-capability-evidence.test.tsx` renders each case
+  with the field unset and then probed: a section through `SectionRenderer` (the section gallery's fixtures); a **slot
+  block inside every host the slot registry allows it in**, each host layout, all of which must pass; a **listing or view
+  through its own drawer** (`VIEW_DRAWERS` in `src/app/design-capability-views.tsx`, which draws the real component from the
+  data the site gives it, and fails saying so when it has none). A listing or view has a schema made from its real document
+  types (the blog's cards: `post`), so evidence reads the fields the Studio shows. The probe must set the field the entry
+  names or one inside it, and entries for different fields can't share one cell (give each control its own `part`), and requires the target
+  to exist both times, to keep its snapshot while unset and to change with the probe. It then disconnects the claimed
+  resolvers, replaying what they returned with the field unset, and requires the probe to stop changing the target, so a
+  named export that exists but isn't called fails. A target that is missing or ignored fails the check. A claim covers only what
+  its target proves: the slots' evidence proves a block is drawn (`part: 'block'`), not how each layout makes room for it
+  and places it (`part: 'placement'`). A placement is only ever claimed with `measured`: browser tests, named by file and
+  case, that measure where each layout puts the block at phone, tablet and desktop widths (a jsdom render has no layout), and
+  the check requires them to exist and not be skipped. Image + text's placement is verified that way
+  (`tests/e2e/media-text-placement.spec.ts`); the hero's is still pending (task 213).
+- **Content sources** are not probed as whole components, which would prove nothing about one source of several. Each is
+  verified by tests written for it, named in its evidence by file and case: what it draws from what is stored, what it draws
+  nothing without, and that disconnecting the resolver it comes through removes it. The check requires the cases to exist and
+  not be skipped, and `npm run test` runs them.
+
+Which fields are shared design controls is judged by **how they were built**, never by their names. Each shared builder
+marks the fields it makes with a provenance stamp that can't be typed by hand (`src/lib/design/builder-provenance.ts`;
+`options.capability` says which capability). A field in a component's Design group that no shared builder made needs a row
+in the reviewed exceptions (`src/lib/design/capability-exceptions.ts`): its field, justification, reviewer, whether it is
+permanent or temporary, and the task that removes it. Query and content-source settings are never design capabilities.
+
+The scan for private controls looks where design controls live, never at a name or a type: the Design group and any object
+inside it, any object whose options set `designSummary` (a link's or plan's own Appearance), and any context registered in
+`src/lib/design/capability-design-contexts.ts` (a listing's settings, say). Every field inside one needs a shared builder
+or a reviewed exception. An ordinary choice, switch or number elsewhere is not called a design control for being one, and
+free text outside those places isn't detected: review covers them, and the audit inventory is kept in
+`docs/nocturne/t275-canonical-patch/`. The exception register holds only what an enforced rule would otherwise reject.
+
+**The baseline** (`capability-baseline.json`, version 2: one entry per text role) lists the gaps a component hasn't closed yet,
+with the task that closes each, and it only shrinks. A gap closes by evidence. It changes any other way only through a
+reviewed row in `src/lib/design/capability-baseline-changes.ts`: an **`admit`** row (a new component or layout adopts every
+capability that applies; a gap it can't close in its own task is admitted with the reason, the reviewer, the date and the
+task that closes it, then `npm run design-capabilities -- --update-baseline` writes only admitted gaps) or a **`downgrade`**
+row (a pair that is now Not applicable, with why it never applied). A stale or incomplete row fails. CI checks the base commit
+out and runs `npm run design-capabilities -- --against-file .ci-base/capability-baseline.json`; locally use `-- --against-ref
+origin/main`. A missing base baseline fails in the template. Only an older client repository, made before the baseline
+existed, may pass `--allow-missing-base`, once, on the pull request that brings it in (the template refuses the flag).
+
+A change proposal is judged against what will actually be written. The accepted changes are re-checked until nothing new is
+rejected: a part with any rejection writes nothing, so a layout change in a rejected design part never lands, and what
+needed it is judged without it. A field inside a slot block is judged by that block's own contract.
+
+The tables below are generated from the declarations and the evidence by `npm run design-capability-docs` (also run by
+`npm run typegen`; CI fails when the committed README differs).
+
+<!-- design-capabilities:start -->
+
+**Components by capabilities.** `R` is Required and `C` Conditional. `✓` means every applicable layout and scope is verified, `…` none is yet, `◐` some are. `*` means some layouts or scopes opt out, with a reason in the declaration. `–` is Not applicable. The design manifest (`design-manifest.generated.json`) has the same by layout, with each policy, trigger, closing task and the evidence behind it.
+
+| Component                                | Surface | Text | Header | Mark | Depth | Icon | Action | Framing | Pic. depth | Overlay | Glass | Divider | Edge | Motion | Slots |
+| ---------------------------------------- | ------- | ---- | ------ | ---- | ----- | ---- | ------ | ------- | ---------- | ------- | ----- | ------- | ---- | ------ | ----- |
+| Hero (`hero`), 4 layouts                 | –       | R…   | R…     | R✓   | –     | –    | C✓     | R…*     | R✓*        | R…*     | R✓*   | R✓      | R✓   | R✓     | R◐    |
+| Rich text (`richText`)                   | –       | –    | –      | R✓   | –     | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Image + text (`mediaText`), 3 layouts    | –       | –    | R✓     | R✓   | –     | –    | C✓     | C…*     | R✓*        | R✓*     | R✓    | R✓      | R✓   | R✓     | R✓    |
+| Features grid (`featuresGrid`)           | C…      | R…   | R✓     | R✓   | C…    | R✓   | C…     | C…      | –          | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
+| Logo strip (`logoCloud`), 2 layouts      | –       | –    | R✓     | R✓   | –     | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Testimonials (`testimonials`), 2 layouts | R✓      | R✓   | R✓     | R✓   | R✓    | –    | –      | R…      | R✓         | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
+| FAQ (`faq`)                              | R✓      | R✓   | R✓     | R✓   | C✓    | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Call to action banner (`ctaBanner`)      | R…      | –    | R✓     | R✓   | R✓    | –    | C✓     | C…      | –          | R✓      | R…    | R✓      | R✓   | R✓     | –     |
+| Form (`formSection`)                     | R✓      | –    | R✓     | R✓   | R✓    | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Pricing table (`pricingTable`)           | R✓      | R✓   | R✓     | R✓   | R✓    | C✓   | –      | C…      | –          | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
+| Newsletter signup (`newsletterSignup`)   | R✓      | –    | R✓     | R✓   | R✓    | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Stats (`stats`), 2 layouts               | R✓*     | R✓*  | R✓     | R✓*  | C✓*   | –    | –      | C…      | –          | R✓      | R◐*   | R✓      | R✓   | R✓     | –     |
+| Gallery (`gallery`), 3 layouts           | –       | –    | R✓     | R✓   | –     | –    | –      | R…      | R✓         | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Location (`location`)                    | R✓      | R✓   | R✓     | R✓   | R✓    | R✓   | –      | C…      | C✓         | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
+| Team (`team`), 3 layouts                 | R✓      | R✓   | R✓     | R✓   | R✓    | –    | R✓     | R…      | R✓         | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
+| Video (`video`), 2 layouts               | –       | –    | R✓     | –    | –     | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Process (`process`), 2 layouts           | –       | R✓   | R✓     | R✓   | –     | R✓   | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Embed (`embed`)                          | R✓      | –    | R✓     | –    | R✓    | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Link list (`linkList`), 4 layouts        | R✓*     | R✓   | R✓     | R✓   | R✓*   | R✓*  | R✓*    | R◐*     | R✓         | R✓      | R…*   | R✓      | R✓   | R✓     | –     |
+| Events (`events`), 3 layouts             | R✓*     | R✓   | R✓     | R✓*  | R✓*   | –    | R✓*    | R…*     | C✓*        | R✓      | R◐*   | R✓      | R✓   | R✓     | –     |
+| Statistics bar (`statsBar`)              | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
+| Badges (`badgeRow`)                      | –       | –    | –      | –    | –     | R✓   | –      | –       | –          | –       | –     | –       | –    | –      | –     |
+| Logos (`logoRow`)                        | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
+| Launch date (`launchDate`)               | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
+| Image (`slotImage`)                      | –       | –    | –      | –    | –     | –    | –      | R…      | –          | –       | –     | –       | –    | –      | –     |
+| Video (`slotVideo`)                      | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
+| Event details card (`eventDetailsCard`)  | R…      | R…   | –      | R…   | R…    | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
+| Service page (`servicePage`)             | –       | R…   | –      | –    | –     | –    | –      | R…      | –          | –       | –     | R…      | –    | –      | –     |
+| Search results (`searchResults`)         | –       | R…   | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
+| Site footer (`siteFooter`)               | –       | –    | –      | –    | –     | R✓   | –      | –       | –          | –       | –     | R✓      | –    | –      | –     |
+| Team member page (`teamMemberPage`)      | –       | –    | –      | –    | –     | R✓   | –      | R…      | –          | –       | –     | R✓      | –    | –      | –     |
+| Blog post cards (`blogPostCards`)        | R✓      | R✓   | –      | R✓   | R✓    | –    | R✓     | R…      | C✓         | –       | C…    | –       | –    | –      | –     |
+
+| Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
+| -------------------------------------------------------- | -------- | --------------- | ------- |
+| Required                                                 | 274      | 0               | 40      |
+| Conditional                                              | 13       | 0               | 31      |
+
+A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
+
+| Closing task | Required pending | Conditional pending |
+| ------------ | ---------------- | ------------------- |
+| 151          | 1                | 0                   |
+| 157          | 1                | 0                   |
+| 159          | 3                | 8                   |
+| 177          | 9                | 20                  |
+| 213          | 7                | 0                   |
+| 276          | 2                | 3                   |
+| 280          | 17               | 0                   |
+
+**Evidence.** 302 capability entries, 563 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
+
+**Capabilities and their owners**
+
+| Capability                     | Owning task | What it does                                                                       |
+| ------------------------------ | ----------- | ---------------------------------------------------------------------------------- |
+| Surface and border (`surface`) | 156         | The fill, border and corners of a card or other surface                            |
+| Text roles (`text`)            | 156         | Size, weight and colour for each kind of text, with safe highlights                |
+| Section header (`header`)      | 156         | One shared eyebrow, heading and intro at the top of a section                      |
+| Decorative mark (`mark`)       | 156         | A faint word, picture or icon behind a section, card or item                       |
+| Depth and glow (`depth`)       | 146         | A shadow level and a glow on a card or other box                                   |
+| Icon (`icon`)                  | 158         | An icon from the shared set, in a shared container                                 |
+| Action indicator (`action`)    | 137         | The arrow on a link that covers a whole card, with its states and motion           |
+| Picture framing (`framing`)    | 177         | Adjust picture: a picture cropped to the shape the site draws it in                |
+| Picture depth (`pictureDepth`) | 147         | A shadow and glow on a framed picture                                              |
+| Overlay (`overlay`)            | 157         | A wash or gradient over a picture                                                  |
+| Glass (`glass`)                | 159         | A glass or solid panel behind content                                              |
+| Divider (`divider`)            | 151         | A decorative divider inside a section                                              |
+| Section edge (`edge`)          | 151         | A shaped edge between a section and the next (built by task 83)                    |
+| Motion (`motion`)              | 217         | Animation presets for a section and its parts (built by tasks 84 and 85)           |
+| Slots (`slots`)                | 219         | Typed places where a section takes one approved block (built by tasks 219 and 193) |
+
+**Content sources** are recorded apart from design capabilities and never stand in for them. Generic tabs are deliberately not a capability.
+
+| Source                      | Component      | Availability                           | Owning task | Approval gate                                                                                                  |
+| --------------------------- | -------------- | -------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------- |
+| `testimonials.manual`       | `testimonials` | verified                               | 156         | –                                                                                                              |
+| `testimonials.google`       | `testimonials` | pending                                | 277         | Task 277 Phase 1 decision record and the owner’s approval. No Google Cloud setup is approved                   |
+| `location.addressCard`      | `location`     | verified                               | 278         | –                                                                                                              |
+| `location.directionsLink`   | `location`     | verified                               | 278         | –                                                                                                              |
+| `location.clickToLoadEmbed` | `location`     | verified                               | 278         | –                                                                                                              |
+| `location.placeIdEmbed`     | `location`     | pending                                | 278         | A configured Maps Embed API key in a client-owned Google Cloud project. No project, key or billing is approved |
+| `cards.written`             | –              | pending (no component declares it yet) | 276         | –                                                                                                              |
+| `cards.services`            | –              | pending (no component declares it yet) | 276         | –                                                                                                              |
+| `cards.locations`           | –              | pending (no component declares it yet) | 276         | –                                                                                                              |
+| `cards.posts`               | –              | pending (no component declares it yet) | 276         | –                                                                                                              |
+
+**Reviewed exceptions.** Fields in a Design group that no shared builder made. An exception records how a field was built; it is never evidence that a capability works.
+
+| Component   | Fields                                                                                                                                                                              | Class     | Nature        | Reviewer | Removal task | Why it stays                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------- | -------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `hero`      | `eyebrowDesign`                                                                                                                                                                     | temporary | design        | owner    | 213          | Separator and colours for the eyebrow label list. Colour and type overlap the eyebrow text role.                                                                                                                                                                                                                                                                                                                                                                                        |
+| `hero`      | `proportion`                                                                                                                                                                        | permanent | layout        | owner    | –            | How Split shares the width between text and picture. A layout choice no capability covers.                                                                                                                                                                                                                                                                                                                                                                                              |
+| `hero`      | `imageShape`                                                                                                                                                                        | temporary | legacy        | owner    | 213          | Hidden and superseded by Image design, kept so stored choices still draw. Removing it needs a dry-run migration.                                                                                                                                                                                                                                                                                                                                                                        |
+| `logoCloud` | `logoColour`                                                                                                                                                                        | permanent | design        | owner    | –            | How logos are tinted. Specific to logos, and no capability covers it.                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `gallery`   | `columns`                                                                                                                                                                           | permanent | layout        | owner    | –            | Pictures across on a wide screen. A layout count.                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `location`  | `interactiveMap`                                                                                                                                                                    | permanent | contentSource | owner    | –            | Switches the click-to-load map on: a content-source setting that sits in Advanced. The source needs its own evidence.                                                                                                                                                                                                                                                                                                                                                                   |
+| `embed`     | `customHeight`                                                                                                                                                                      | permanent | layout        | owner    | –            | The exact height of a third-party frame, under Advanced.                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `events`    | `category`                                                                                                                                                                          | permanent | query         | owner    | –            | A query filter that sits in Advanced. Not a look.                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `events`    | `count`                                                                                                                                                                             | permanent | query         | owner    | –            | A query limit that sits in Advanced. Not a look.                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `linkList`  | `profileDesign`                                                                                                                                                                     | temporary | design        | owner    | 281          | Picture size, shape, ring and frame, and the name and bio colours, written before the shared parts existed.                                                                                                                                                                                                                                                                                                                                                                             |
+| `linkList`  | `categoryDesign`                                                                                                                                                                    | temporary | design        | owner    | 281          | Inline list styling: its type overlaps the text roles. The separator and phone layout may stay.                                                                                                                                                                                                                                                                                                                                                                                         |
+| `linkList`  | `socialDesign`                                                                                                                                                                      | temporary | design        | owner    | 281          | The social icon container and colour, overlapping the icon capability. Task 158 draws them through the shared IconContainer, but the stored paths (style, iconColour, background, backgroundStrength, border, borderColour) differ from the shared builder’s (iconShape, iconBackground, iconBorder …), so replacing the field would rename saved values. Owner decision, 8 November 2026: preserve the stored values and replace the field in task 281, which gains this in its scope. |
+| `linkList`  | `depthDesign.linkShadow`, `depthDesign.socialShadow`, `depthDesign.pictureShadow`, `depthDesign.glow`, `depthDesign.glowTargets`, `depthDesign.glowColour`, `links[].design.shadow` | temporary | design        | owner    | 281          | Legacy stored paths that differ from the shared depthFields builder (`depthDesign.*` and `links[].design.shadow`, against `shadow`, `glow` and `glowColour`), so replacing them would rename saved values. They carry the depth (and picture depth) marker and are read through resolveDepth. Owner decision, 9 November 2026: keep the stored values and replace the fields in task 281. No data is migrated.                                                                          |
+| `linkList`  | `linkDesign.arrowStyle`, `linkDesign.arrowColour`, `links[].design.arrowStyle`, `links[].design.arrowColour`                                                                        | temporary | design        | owner    | 281          | Written inline, under the stored names arrowStyle and arrowColour, which the shared actionFields (task 137) does not use. They carry the action indicator marker. Task 281 migrates them with the Link list’s other legacy design (owner-approved expansion of task 281, 8 November 2026); showArrows stays read until then.                                                                                                                                                            |
+| `hero`      | `partMotion`                                                                                                                                                                        | permanent | design        | owner    | –            | One animation per hero part (task 85), specific to the hero. It carries the motion marker.                                                                                                                                                                                                                                                                                                                                                                                              |
+
+**Not covered yet.** Parts of the site that are not sections, slot blocks or listings, so the manifest says nothing about them. Each has the tasks that will add its capabilities.
+
+| Not covered by the contract | Capabilities it will need | Capability tasks                         | Declared by          |
+| --------------------------- | ------------------------- | ---------------------------------------- | -------------------- |
+| Site header                 | Glass                     | 159                                      | Its capability tasks |
+| Mobile drawer               | Glass                     | 7 (Optional quick actions)               | Its capability tasks |
+| Booking facade              | Surface, Depth            | 148 (Waits for task 95, which builds it) | Its capability tasks |
+| Event pages                 | Framing, Divider          | 177, 151                                 | Its capability tasks |
+| Blog post page              | Framing                   | 177                                      | Its capability tasks |
+| Location pages              | Surface, Text             | 278                                      | Its capability tasks |
+
+<!-- design-capabilities:end -->
+
+**Inheritance.** One rule at every level: unset inherits, and None, Off, Transparent and Flat are values. Per property the
+most specific defined value wins, in this order: the design tokens (`tokens.json`), the site's decisions (Brand colours and
+Design settings), the family and layout preset (code), the section's own choices, then an item's own (a Link list link,
+a pricing plan). Never use `||` or `??` on a stored value before resolving it, a resolver returns only what was chosen, and
+a component replaces only the classes for the properties that were chosen (`src/lib/sanity/design-overrides.ts`). Visitor
+preferences (reduced motion, reduced transparency, more contrast) and render-time contrast fallbacks always win.
+
+**Adopting a capability.** A capability's owning task builds its shared parts first (a builder that marks its fields, a
+resolver, a component), then, for each component its contract lists as Required:
+
+1. build the field with the shared builder, in the component's Design group, in the standard groups (Cards, Text, Icons,
+   Actions, Pictures, Decoration, then the section style's own);
+2. have the component call the shared resolver and draw the result on its own element, replacing only the classes for what
+   was chosen, so a component with nothing set renders exactly as before;
+3. register an evidence entry for it (the field, its resolvers, the file, the element and the layouts it covers);
+4. run `npm run test` (the harness checks it renders and changes, with its resolvers disconnected, and snapshots the unset
+   output) and `npm run design-capabilities -- --update-baseline`, which removes the pairs that are now verified.
+
+**Recording Not applicable.** A component implements only the capabilities that suit its anatomy, and Not applicable is
+a reviewed, legitimate answer: write the reason a reader would accept ("No card surface", "Draws no icon"), naming the layout
+or the part when only some do not apply. `Not reviewed yet`, the reason `npm run new:section` starts with, is rejected by
+the checks, so a new section can't merge until each capability is reviewed. It also starts without a section-level
+decorative mark (its type is listed in `NO_SECTION_MARK`, `src/lib/design/section-surfaces.ts`): to offer one, declare `mark`
+Required, add its evidence and delete that line. If a capability a component needs is missing
+from the contract, stop and propose it for the template: never write a private surface, text, header, mark, depth, icon,
+arrow, framing, overlay, glass or divider control.
+
+**The checks** run in `npm run check` and CI, and each failure names the component, the capability and the fix:
+
+- every section, slot block and listing declares every capability, with reviewed reasons, typed triggers, every layout
+  accounted for and no contradictory policy for the same scope, part and layout;
+- evidence claims only what the schema offers and the policy applies to, and the harness cases pass;
+- no new private design field: one no shared builder made and no reviewed exception covers;
+- the baseline (`capability-baseline.json`, written once by `npm run design-capabilities -- --init-baseline`) only shrinks. A
+  Required or Conditional pair that isn't verified and isn't listed fails, and a listed pair that is now verified fails
+  until `-- --update-baseline` removes it, which refuses to add anything;
+- the generated README tables are current.
+
+**Change proposals** reject, with the reason, a design value in a capability-marked field, or a content source, that isn't
+verified for the section's layout (see _Change proposals_). Fields that carry no capability keep their ordinary checks.
 
 #### Change proposals
 
@@ -2442,7 +2771,24 @@ There is no site-wide density setting yet, so "density airy" sets the section's 
 3. **Design.** A Brand colours change that makes a text pair newly fail goes through `resolveDesignTokens` and is rejected
    (`contrast-fails`), naming the pair and its ratio. A section's panel that cannot be made readable is only a **warning**, as in
    the Studio, because the page falls back to a safe look. Contrast over a picture is never measured.
-4. **Permissions.** A patch to anything clients may not edit (`CLIENT_EDITABLE`, through the manifest's `clientEditable`) is
+4. **Capabilities** (task 275, [Design capability contract](#design-capability-contract)). A value in a field that is a shared
+   design capability (the manifest row's `capability`), or that feeds a content source (`contentSource`), must be **verified**
+   for the section's layout, in the manifest's `capabilities` and `contentSources`. A value that isn't is rejected with the
+   reason: `capability-not-verified` (the layout doesn't offer it, with its declared reason, or it is still pending, with the
+   task that closes it; the shared Panel is never offered where a layout draws its own surfaces) or
+   `content-source-not-verified` (with what the source is waiting for). The layout is the one the section is left in once the
+   whole proposal is applied (a layout change in the same proposal counts), and a section inserted whole is judged in the layout
+   it brings, else its default. Unsetting is never blocked, and fields that carry no capability keep the ordinary checks above.
+   A field is judged by the policies that govern it, never by the capability's other policies: the policy whose evidence
+   probes that field, or one in the same object (`cardDesign.border` stands for `cardDesign.background`), so a Verified
+   sibling can't authorise a Pending field, and a marked field no policy names is rejected. A section the manifest has no
+   declaration for can't be judged, so its marked fields are rejected too: the check never fails open.
+   **Every `set` and `insert` must also have somewhere to land** (`invalid-path`), whatever it changes. A parent object that
+   is missing is created, as the plan writes `setIfMissing` for it (`section.style.panel` on a section with no `style` yet),
+   and the value is then judged in full. A parent that can't be created is rejected, never skipped: a field of something
+   that isn't an object, a list member that isn't there, or an `insert` into a list that was never filled in. Unsetting a value
+   that isn't there is a harmless no-op.
+5. **Permissions.** A patch to anything clients may not edit (`CLIENT_EDITABLE`, through the manifest's `clientEditable`) is
    marked `needsAgencyReview`. `validate` only reports it. **`apply` enforces it:** unless the token is an Administrator's or
    Developer's, those patches are rejected as `agency-permission-required`, and the part they belong to is not written. A proposal
    made of agency-only changes (all three fixtures) therefore needs an agency token to apply.
@@ -3129,6 +3475,11 @@ look passes axe and fits at 375, 768 and 1280 px; the media sits where the layou
 button until clicked. The gallery has an entry for each look (`media-text-media-left`, `-stacked`, `-overlay`,
 `-supporting-video`, `-media-video`); the older entries use `image`, so their unchanged baselines show saved pages render
 as before. The new baselines are Linux-only: create them with the **Update visual baselines** workflow.
+`tests/e2e/media-text-placement.spec.ts` measures where each layout puts the supporting video at 375, 768 and 1280 px, on
+the `/media-text-placement` fixture page (not in the gallery, so it has no baseline): under the picture in the media column
+(Media left or right, Stacked), under the buttons over the picture (Text over media), or alone as the media when there is no
+picture. The video block is at most 36rem wide and starts at the picture's left edge. It is the evidence for the placement
+in the design capability contract.
 
 ### Image design
 
@@ -3137,6 +3488,18 @@ One treatment for a section's main picture: a **still frame with the picture mov
 the **Hero's Split layout**, **Gallery** (Grid and Slider) and **Team** portraits. Not on logos, icons, Masonry pictures
 or the small testimonial avatars, where it would not make sense. It is one component (`FramedImage`,
 `src/components/ui/framed-image.tsx`) used by all of them, so there is one implementation.
+
+**Image design or Profile image: the rule.** A picture is drawn by exactly one of the two, and the Studio never offers both on it.
+Use **Image design** (`FramedImage`) for a larger picture that is part of the layout: Image + text, the Hero, Gallery, and the team
+grid and slider. Use **Profile image** (`ProfileImage`, `src/components/ui/profile-image.tsx`) for a small portrait or logo that sits
+beside text: the Link list's profile picture, the testimonials' author avatar and the team **list** portrait. Profile image offers a
+**size** (Small, Medium, Large; Medium is each layout's own size) and an optional **ring** (solid or gradient, with a see-through gap),
+and draws through the shared shape geometry (`src/lib/sanity/image-frame-geometry.ts`), so "Adjust picture" can follow without changes
+to the layout. Both are agency only, in the Design tab, and empty means the picture looks as it always did.
+
+- **Testimonials → Design → Avatar:** Medium circle (48 px) with no ring by default.
+- **Testimonials → Design → Cards and Section header:** the title is `heading` when it has words, otherwise the old `title`, never both. Below it: the default card with nothing set; presets Quiet, Outlined, Tinted and Statement write theme colour names into the box. Each quote can carry highlighted words (exact phrases, the stored quote stays plain), a source (plain words only, never a badge; Other is an internal classification and is never shown, so the date stands alone), a date, a rating for that quote alone, an attribution line and a permission confirmation (Studio warns until confirmed, never drawn). No review structured data: live Google reviews are task 277's.
+- **Team (List layout only) → Design → Portrait:** the list's small portraits are drawn by `ProfileImage` (a rounded square, the card's corners), Medium with no ring by default, which is the same size and corners the list always had. A list whose **Image design still changes how its portraits look** keeps drawing with it (`FramedImage`), and Studio shows Image design, with a note above Image shape on how to reach Portrait, instead of Portrait, so one picture never has both. Set **Image shape to Standard and Picture motion to None** and Portrait appears (and Image design goes). Nothing saved is deleted or moved: the rest of the Image design stays stored and is ignored. What counts as "changes how it looks": Rounded, Square corners, Circle or Arch; Framed with a frame; Subtle or Medium parallax. Standard, Framed with no frame, and motion None draw what the list draws anyway, and a frame, its colour or inset on anything but Framed, or Custom, travel, direction or scale on a picture that is not moving, are inactive leftovers (including `custom: false`, which Studio writes on every Image design). Grid and Slider show Image design only. The one rule is `hasImageDesign` in `src/lib/sanity/team-portrait.ts`, used by Studio's controls, its note and the site's drawing.
 
 **For editors (agency only: Design tab → Image design).** Three pictures to choose from, in this order; leave them alone and
 the picture looks exactly as it always did.
@@ -3230,17 +3593,18 @@ for the reason given under _Parallax_ above.
 </LazySlider>
 ```
 
-| Prop            | What it does                                                                                                                 |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `label`         | Names the carousel for screen readers (required).                                                                            |
-| `perView`       | Slides in view at `base`, `sm`, `md`, `lg`, `xl` (Tailwind breakpoints). A missing breakpoint keeps the smaller one's count. |
-| `gap`           | Space (1.5 rem) between slides.                                                                                              |
-| `autoplay`      | Milliseconds between automatic slides. **Off by default and not exposed in the CMS.** See _Autoplay_ below.                  |
-| `initialIndex`  | The slide to start on, read once when the slider first measures itself (the lightbox opens on the picture clicked).          |
-| `onIndexChange` | Called with the position at the start and after every move. Pass a stable function.                                          |
-| `dots`          | The "Go to slide n" dots. On by default; the lightbox turns them off because a gallery can have 60 pictures.                 |
-| `directionLock` | Locks a drag to the axis it starts on, for a slider inside something that drags the other way (the lightbox).                |
-| `ref`           | A `SliderHandle` with `previous()` and `next()`, for a parent that handles keys itself.                                      |
+| Prop            | What it does                                                                                                                                          |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `label`         | Names the carousel for screen readers (required).                                                                                                     |
+| `perView`       | Slides in view at `base`, `sm`, `md`, `lg`, `xl` (Tailwind breakpoints). A missing breakpoint keeps the smaller one's count.                          |
+| `gap`           | Space (1.5 rem) between slides.                                                                                                                       |
+| `autoplay`      | Milliseconds between automatic slides. **Off by default and not exposed in the CMS.** See _Autoplay_ below.                                           |
+| `initialIndex`  | The slide to start on, read once when the slider first measures itself (the lightbox opens on the picture clicked).                                   |
+| `onIndexChange` | Called with the position at the start and after every move. Pass a stable function.                                                                   |
+| `dots`          | The "Go to slide n" dots. On by default; the lightbox turns them off because a gallery can have 60 pictures.                                          |
+| `directionLock` | Locks a drag to the axis it starts on, for a slider inside something that drags the other way (the lightbox).                                         |
+| `bleed`         | More room around the slides for a shadow (picture depth, task 147): `true` adds 12px below, `{ x, top, bottom }` sets each side (px). Off by default. |
+| `ref`           | A `SliderHandle` with `previous()` and `next()`, for a parent that handles keys itself.                                                               |
 
 - **How it moves.** The track is an `m.div` with `drag="x"` and a motion value for `x`. On release `snapIndex`
   (`slider-snap.ts`, pure and unit tested) picks the slide from the drag distance plus a short projection of the
@@ -3384,7 +3748,8 @@ the [Location](#location) section and team profile pages.
 ### Team
 
 Team members are documents (`teamMember`, in `src/features/team`), shown by the **Team** section and, when the site has
-profile pages, on their own page at `/team/<slug>`.
+
+- **Design (task 156, agency only).** A _Section header_ box (eyebrow, title and intro) and a _Cards_ box: fill, border, three text roles (title is the name, meta the role line, body the short bio) and a decorative mark, for the grid and slider cards and the list's rows alike, which draw the same surface. A section decorative mark sits in the section's own Design tab. Everything is empty by default and an empty design draws what the section always drew.profile pages, on their own page at `/team/<slug>`.
 
 - **A member.** _Name_ (required), _Role_, _Portrait_ (required, square, 800 px or wider; alt text is required and the usual
   image guidance warns about size and shape), _Short bio_ (up to 300 characters; the cards and the page's search
@@ -3489,14 +3854,18 @@ above includes `service`. Switching it off again removes the routes, Studio entr
   published document's id, so it survives a change of address and a draft or release id never reaches the page), `name`,
   `url`, `description` (the summary), `image`, `audience` (only when "Who it's for" is shown), `provider` (the site's
   `#organization`), `mainEntityOfPage` (the page's `#webpage`, whose `about` is the service) and an `Offer` in AUD **only when
-  the page shows a price with its unit**. Nothing the page doesn't show: no `areaServed`, rating or review. Visible questions
+  the page shows a price with its unit**, and an `areaServed` (a list of `@id`s) **only for the locations the page lists under "Where it's offered"** (see "Locations"). Nothing the page doesn't show: no rating or review. Visible questions
   are one `FAQPage` with `@id` `<page url>#faq`. Provenance names the field behind each value, and the shared parity check
   runs over every service page in `tests/e2e/structured-data.spec.ts`.
 - **Caching and webhook mode:** `service` is in `TAGS` and in the webhook filter. A service page is tagged `service`,
   `teamMember`, `post` and `page`; its sections add the section tags. Published reads check the cached index first, so
   probing `/services/anything` costs nothing.
-- **Not built yet:** `locations[]` and `areaServed` wait for the `location` type (task 212); the visibility rules for
-  services (F-1, F-2) arrive with the rules engine (task 225).
+- **Where it's offered:** `locations[]` on the service (shown only while `features.locations` is on). Empty means offered
+  everywhere: the page names no place and the markup has no `areaServed`. The page lists each place as a link, and each is
+  defined beside the `Service` as a short node (name and page, with the full node's `@id` and type), so every `@id` the page
+  refers to is defined on it, as a byline's `Person` is. The location's own page describes it in full. The field lives on the
+  service; the location page reads the other direction.
+- **Not built yet:** the visibility rules for services (F-1, F-2) arrive with the rules engine (task 225).
 - **Tests:** unit: `src/lib/structured-data/nodes/service.test.ts` (ids, draft and release prefixes, slug changes, offer,
   empty fields), `src/features/services/api/service.test.ts` (the reverse reads), `src/app/service-sections-field.test.ts`, `src/app/service-faq.test.tsx` (one FAQPage, no repeated id),
   `src/features/services/components/service-view.test.tsx` (no sections, no second read),
@@ -3506,13 +3875,93 @@ above includes `service`. Switching it off again removes the routes, Studio entr
   button, extra sections, JSON-LD and graph integrity, phone width, 404s, sitemap), plus `accessibility.spec.ts`,
   `prelaunch-gate.spec.ts` and `structured-data.spec.ts`.
 
+### Locations
+
+A page for each branch or area a business serves, so a multi-location business (or one that travels) gives search engines and
+visitors accurate places. It is a document in `src/features/locations` with its own page at `/locations/<slug>`, behind
+`features.locations` in `site.profile.ts`. **It is off by default**, and a single-location business creates none: **Business
+info stays the primary place** (footer, contact details, the site's `LocalBusiness`); a location is an _additional_ place, and
+the two never copy facts from each other. `locations` needs `businessInfo` (the profile refuses the combination otherwise).
+
+**The Sanity type is `place`, titled "Location" in Studio.** The page builder's _Location_ section already owns the type name
+`location` (stored on pages), so the document can't share it. Editors only ever see "Location"; the name matters in GROQ
+(`_type == "place"`), the webhook filter and the migration below. The JSON-LD `@id` uses `#location-…` regardless.
+
+**Enabling it for a site.** Run `npm run check:location-routes` first (read-only, like `check:service-routes`: it lists published
+pages whose address is exactly `locations/<something>`, which the route would shadow). Rename each page and redirect its old
+address before you switch the flag on. Then set `features: { locations: true }`, add the documents, and if the site uses webhook
+mode make sure the filter above includes `place`. Switching it off removes the routes, Studio entries and markup; documents stay.
+
+- **What an editor enters:** _What is it?_ (a **branch**: a place people can visit, or a **service area**: a region you travel
+  to), name, page address, a summary (160 characters at most; a warning, not an error, if empty), and optionally a picture and
+  "About this place" (how to get there, parking, the suburbs covered). A **branch** also has a phone, public email, address (a
+  suburb, state and postcode are required once any part is filled), time zone, opening hours, special days and, under
+  Advanced, map coordinates: the same fields, rules and wording as Business info (they share
+  `src/lib/sanity/schema/business-fields.ts`). A **service area** hides all of those, so a nonsensical combination (an area with
+  opening hours) can't be entered. If a branch is turned into an area, its old address, phone and hours stay in the document
+  but are neither shown nor marked up.
+- **Clients edit** everything except the coordinates (agency-only, as on Business info).
+- **Relationships have one owning side.** A service lists where it is offered (`service.locations`), and a team member lists
+  where they work (`teamMember.locations`); the location page reads both in reverse, inside its one query. A service with no
+  locations is offered everywhere, so it appears on every location's "Services here".
+- **The page:** one `<h1>`, summary, picture, description; for a branch "Visit or contact us" (address, a _Get directions_
+  link built from the street or the coordinates, phone, email), "Opening hours" with the _Open now_ badge and upcoming special
+  days; then "Services here" and "Who works here". A part with nothing to show is left out, heading and markup included.
+- **Structured data**, from `src/lib/structured-data/nodes/location.ts` (`buildLocation`) beside the page's `WebPage` (whose
+  `about` is the location). `@id` is `<origin>/#location-<document id>`, so a slug change moves the `url` and not the `@id`.
+  A **branch** is the site's business type (`businessSchemaType` of Business info, so a plumber's branch is a `Plumber`) with
+  `parentOrganization` (the site's `#organization`), `name`, `url`, `description` (the summary), `image`, `telephone`, `email`,
+  `address`, `geo` and `openingHoursSpecification`, each only when the page shows it. A **service area** is a `Place` with name,
+  page, description and image, never an address, phone or hours. Never a rating, review or offer. Services refer to a
+  location by `@id` in `areaServed` (see "Services"). Provenance names the field behind each value, and the shared parity check
+  runs over every location page in `tests/e2e/structured-data.spec.ts` and `tests/e2e/locations.spec.ts`.
+- **Organization `areaServed` stays off.** Business info's `serviceAreas` strings are still not shown by any template component, so
+  the site-wide `LocalBusiness` still omits `areaServed`. Service-area locations are where an area is now stated, visibly.
+- **Migrating Business info's `serviceAreas`.** `migrations/service-areas-to-locations` turns each string into a service-area
+  location (`_id` `place-area-<page address>`, name, page address; no summary, so Studio warns until one is written). It is
+  non-destructive and **dry-run first** (the default; it writes nothing): `npx sanity migration run service-areas-to-locations`
+  (see `migrations/README.md`), then add `--no-dry-run` by hand from a logged-in machine. The dry run prints each proposed
+  **create**, **skip** and **conflict**:
+  - the same normalised name (spacing, case, accents) always gives the same id, so a repeat run creates nothing
+    (`createIfNotExists` never overwrites either);
+  - blank, non-text or unusable names, and repeats within the list, are skipped with the reason;
+  - a page address already used by a different `place` (one made by hand), or by a published page at `locations/<name>`, is
+    a **conflict**: nothing is created, and a person decides (link the existing location, or rename and redirect the page);
+  - only the published Business info is read; its strings stay as they are, and nothing is deleted;
+  - **no service or team member is linked.** Which services an area serves is the business's decision.
+
+  Run `npm run check:location-routes` first, since the new pages take `/locations/<name>`.
+
+- **Rule F-8** (`src/lib/audit/rules/location-info.ts`, finding id `content.location-info`): a branch page should have an
+  address (an error if missing), opening hours (warning), a way to get directions (a street or coordinates; warning) and local
+  proof (a description or people who work there; a suggestion); a service area should say what it covers. Deterministic
+  presence only, never usefulness. It is a pure function over a location's facts using the finding contract from the Content
+  Intelligence architecture (`src/lib/audit/finding.ts`, where it is registered). **It is not active:** nothing runs it, not even
+  [`audit:page`](#page-audit), which reads rendered pages; the content runners arrive with task 225, which will register it beside
+  F-1 and F-2. No temporary runner exists.
+- **Caching and webhook mode:** `place` is in `TAGS` and in the webhook filter. A location page is tagged `place`, `service` and
+  `teamMember`, and a service page is also tagged `place`. Published reads check the cached index first, so probing
+  `/locations/anything` costs nothing.
+- **Not built (deferred):** `event.venue`, an optional reference from an event to a location. It is not a small change: an event's
+  address is read as text by the event page, cards, the calendar feed and its `.ics` files, search and the Event JSON-LD, so a
+  reference would have to be resolved and formatted in each (and tagged `place`) without duplicating facts. That is an Events
+  change, not Locations; the inline event location is unchanged. The `/locations` list is an ordinary page with the editors' own intro copy.
+- **Tests:** unit: `nodes/location.test.ts` (ids, draft and release prefixes, branch and service-area nodes, empty fields),
+  `parity.test.ts` (locations), `schemas/location.test.ts` (branch and service-area rules, switching kind), `api/location.test.ts` (reverse reads, off by default), `opening-hours.test.ts` (daylight saving, zones, overnight, unknown zone), `location-view.test.tsx` (the page and its markup agree), `location-info.test.ts` (F-8),
+  `migrations/service-areas-to-locations/index.test.ts`, `scripts/check-location-routes.test.mjs`, `profile.test.ts`,
+  `reserved-slug.test.ts`, `main-document.test.ts`, `feature-visibility.test.ts` and the client-editable and dataset-exposure
+  registry tests. End to end: `tests/e2e/locations.spec.ts` (a branch with everything, a service area that holds a phone and
+  hours it must not show, a branch with only the required fields, JSON-LD and graph integrity, phone width, 404s, sitemap),
+  plus `services.spec.ts` (`areaServed`), `accessibility.spec.ts`, `prelaunch-gate.spec.ts` and `structured-data.spec.ts`.
+
 ### Events
 
 A content calendar: what is on, when and where. Events are documents (`event`, in `src/features/events`), shown by the
-**Events** section and on their own pages at `/events/<slug>`, with a calendar file for each and a feed people can subscribe
-to. It is **not** booking availability (task 95): an event is something that happens, not a slot a customer picks. External
-calendar sync (Google or Outlook) is out of scope; the feed is the way in. A month grid is task 98; the section leads with a
-list and an agenda, which is what most clients need.
+
+- **Design (task 156, agency only).** A _Section header_ box and a _Cards_ box. The text roles (title, meta for the date, time and place, body for the summary) apply to every layout. Only **Featured** draws a card, so its fill, border and decorative mark are offered there alone: List and Agenda rows are text only, and Studio hides those controls on them. A section decorative mark works on every layout. Empty by default, and an empty design draws what the section always drew.**Events** section and on their own pages at `/events/<slug>`, with a calendar file for each and a feed people can subscribe
+  to. It is **not** booking availability (task 95): an event is something that happens, not a slot a customer picks. External
+  calendar sync (Google or Outlook) is out of scope; the feed is the way in. A month grid is task 98; the section leads with a
+  list and an agenda, which is what most clients need.
 
 **Default, presets, advanced.**
 
@@ -3988,17 +4437,191 @@ overlay, plus the unset defaults on a light and a dark tone). The fixture's `des
 colours; a palette served by `tests/e2e/design-settings.spec.ts` replaces it. Axe cannot measure text over a picture, so
 the real guard for pictures is the Studio warning and the overlay values above.
 
+### Card design
+
+Every card family composes the same shared parts (task 156), so a family states which text roles it draws and writes no design control of its own: `cardDesignField`, `headerDesignField`, `eyebrowField`, `itemDesignField` (`src/lib/sanity/schema/card-design-fields.ts`), `CardSurface`, `SectionHeader` and `DecorativeMark`. All are agency only, and with nothing set a family draws what it always drew.
+
+| Family          | Text roles                             | Where the fill, border and card mark apply                                                                                                                  |
+| --------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Testimonials    | quote, attribution, label              | every layout                                                                                                                                                |
+| Pricing table   | title, price, body, label, description | every plan, and a customised plan's own Appearance                                                                                                          |
+| Team            | title, meta, body                      | grid and slider cards, and the list's rows                                                                                                                  |
+| Events          | title, meta, body                      | Featured only; List and Agenda are text only                                                                                                                |
+| FAQ             | title, body                            | the **Cards** item style only; **Divided list**, the default, is text only                                                                                  |
+| Stats           | number, label                          | the **Cards** layout only; Inline offers no Cards box                                                                                                       |
+| Location        | title, body, meta                      | the details' panels, without a map image; beside one they are text only                                                                                     |
+| Process         | label, title, body (each step)         | none: a step draws no card                                                                                                                                  |
+| Link list       | eyebrow, label, description            | every link, and a customised link's own Appearance; Editorial's ruled rows draw no fill or border, and take only the mark                                   |
+| Blog post cards | meta, title, body                      | every card, from the **Blog settings** document; a chosen fill or border also brings the card's corners and padding, since a card has no surface by default |
+
+**Section header.** Every section with a heading has an optional _Eyebrow_ and a _Section header_ box (eyebrow, heading and intro roles), agency only: Features grid, Logo cloud, Image + text (its intro is the body), CTA banner, Form, Newsletter, Gallery, Video, Embed, Process, Link list, and the families above. Logo cloud and Link list gain an optional _Intro_. Each section keeps its header's element, spacing and classes (`SectionHeader` takes them as props), and a heading shown as a Link list wordmark picture has no text role to style, so Studio hides it there. The parity tests compare output without the letters of React's generated ids, which depend on where a component sits in the tree: which element each id points at is still compared (`stableOutput`).
+
+A control is offered only where it does something: `src/app/design-control-effects.test.tsx` reads each family's real schema and fails if any control offered on a layout or look leaves the output unchanged. A look that is a setting rather than a layout (FAQ's item style, Location's map image) has its own evidence for what it draws. An item style is the first field of its Cards box (`itemStyleField`), and unset is the first value.
+
+### Icons
+
+One component, `IconContainer` (`src/components/ui/icon-container.tsx`, task 158), draws the container around every icon: its shape (none, circle, rounded square or square), fill, strength, border, colour and size. It turns the choices into classes with `iconLook` and `SHAPE_RADIUS`, so a plain icon has no box, the shaped styles take the place's own fill and border one property at a time, and on glass rows the container is the same frosted glass. The Link list's icons, `SocialLinks` (the Link list, Location, the footer and a team member's page), a badge's icon, Pricing's checkmarks and the Features grid and Process icons all come through it, with nothing chosen drawing what they drew before.
+
+**Choosing the icon.** `badgeIconField` (`src/lib/sanity/schema/badge-icon-field.ts`) is the one field for an icon from the set, shown as the visual picker (`icon-picker-input.tsx`); the set has 18 icons, so the picker has no search (add one if it passes 40). Features grid items and Process steps keep their uploaded _Icon / image_ and gain an optional _Icon from the set_ (`iconName`). When both are stored, the set icon wins and the Studio says so; the uploaded icon stays stored and draws whole, as it always did, once the set icon is cleared. Pricing's checkmark stays a fixed icon, only wrapped by the container.
+
+**Icons box** (`iconsDesignField`, `src/lib/sanity/schema/card-design-fields.ts`, agency only, every control inheriting): the container, container colour, strength, border, border colour and icon colour of the section, block or page. It is on Features grid, Process, Location (the address pin and the social icons), Pricing (the checkmarks) and the Badges block (every badge, in every hero layout), and for two views that are not sections:
+
+- **Footer:** _Social icons_ in **Navigation** (`footerIconDesign`), offered once _Show social icons_ is on. It inherits _Social icon style_, so an empty box draws the footer exactly as before.
+- **Team member pages:** the **Team page settings** document (`teamPageSettings`, a singleton, agency only), one _Icons_ box for every member's page, which draws circles until one is chosen. A member never sets their own, so the pages stay consistent. The settings are read inside `TEAM_MEMBER_QUERY` (no extra request) under the `teamPageSettings` tag; add the type to the webhook filter (step 3 of _Live mode vs. webhook mode_).
+
+The Link list's own _Social icons_ box (`socialDesign`) keeps its stored paths (`style`, `iconColour`, `background`, `border`, which differ from the shared builder's) and stays a reviewed temporary exception until task 281, which replaces the field and gains this in its scope. It draws through `IconContainer`.
+
+`src/app/footer-team-icons.test.tsx` holds the footer's and a team page's six controls to the property each names (corners, colour, fill, strength, border, border colour), and `social-links.test.tsx` pins the social icons' classes.
+
+### Depth and glow on cards
+
+A shadow level, an optional glow and, on a card that is one link, a hover lift (task 146). The shared pieces are in `src/lib/sanity/depth-options.ts` (`depthLook` for a box, `depthFilter` for a picture, `resolveCardDepth` and `resolveCardLift` for a card) and `depthFields` (`surface-design.ts`, a registered shared builder), which adds _Shadow_, _Glow_, _Glow colour_ and, where cards link, _Hover lift_ to a family's Cards box (`shadow`, `glow`, `glowColour`, `lift`; agency only, every control inheriting). Pictures are task 147's (see _Picture depth and glow_); buttons, forms and the embed are task 148's (see _Buttons_).
+
+- **Order.** A plan's own Appearance, then the section's Cards box, then the site's **Card depth** (Brand colours: Flat, Soft, Raised or Floating), then what the family draws today. Each property is taken from the first level that chose it, so a section's Soft stays Soft whatever the site chose (it draws the `shadow-soft` token, which has today's card shadow), and a plan set to Flat is flat under a Raised site.
+- **Unset changes nothing.** The site's Card depth is the CSS variable `--card-depth`, defined only when a level is chosen (`site-decisions.ts`, `SITE_DECISIONS.cardDepth`) and read only by cards, as `var(--card-depth, <what the family draws>)`. `--shadow-card` is never remapped, so a social button or anything else that draws the card shadow without being a card keeps it. The card classes changed (`shadow-card` to `shadow-(--card-depth,var(--shadow-card))`, and a shadow-free card gains `shadow-(--card-depth,0_0_#0000)`), and the computed shadow is the same.
+- **Which cards.** Testimonials, Pricing (and each plan), Team (cards and rows), Events (Featured), Location (the cards without a map image), the CTA banner (a depth-only Cards box: its fill is its tone), FAQ (Cards style), Stats (Cards layout), Blog post cards (from Blog settings) and, for the site's Card depth only, the event details card, whose own control waits for task 280. A post card draws no surface until a fill or border is chosen, so depth waits for one too. Features grid has no card yet (task 276).
+- **Glow** is decorative and off until chosen; it is added to the card's own shadow (or the site's), in a theme colour that follows the section's tone.
+- **Hover lift** (None or Lift) applies only to a card that links to a page: Team (a member with a page), Events (Featured, an event with a page) and Blog post cards. It rises 4 px and shows a deeper shadow under the pointer or keyboard focus (`:has(a:focus-visible)`, as the action indicator does), with CSS only (`.card-lift` in `globals.css`): the card is wrapped (`CardSurface lift`) so an `overflow-hidden` card can't clip the shadow layer, which is drawn once and only fades in. Transform and opacity animate, never `box-shadow`. Visitors who ask for less motion see no lift. Unset keeps what a card did: Team cards still rise with the Motion library's `HoverLift`, and choosing None or Lift replaces it.
+- **Link list** keeps its own `depthDesign.*` and `links[].design.shadow` paths, read through `resolveDepth` (now built on `depthLook` and `depthFilter`); they are a reviewed temporary exception until task 281 moves them. An explicit Soft now draws `var(--shadow-soft, var(--shadow-card))`, the same pixels.
+- **Tests.** `depth-options.test.ts`, `site-decisions.test.ts`, each family's own tests, the Task 275 evidence (`<family>.depth.card`, `pricingTable.depth.item`), and in the browser `design-settings.spec.ts` (computed shadows under each site-wide Card depth), `card-lift.spec.ts` and `blog-card-design.spec.ts` (hover, keyboard focus, reduced motion and axe).
+
+### Picture depth and glow
+
+A shadow and an optional glow on a picture (task 147), drawn as a CSS `drop-shadow` filter so it follows the picture's real outline (a round crop, a ring, a decorative frame) instead of its box. It reuses Task 146's pieces: `depthFilter()` and the `depth.picture-*` and `depth.glow-*` tokens (`src/lib/sanity/depth-options.ts`, `scripts/build-tokens.mjs`).
+
+**Editors and agencies.** Each consumer below has an agency-only, collapsed **Picture depth and glow** box (`pictureDepthDesign`, built by `pictureDepthFields` in `surface-design.ts`, a registered shared builder): _Shadow_ (Flat, Soft, Raised, Floating), _Glow_ (Off, Soft, Strong) and _Glow colour_ (the theme colours the glow offers). Clients cannot see it. Blog settings holds the post cards' as **Post card pictures**.
+
+| Consumer        | Offered                                              | Where the filter goes                                                                                      |
+| --------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Image + text    | Side and Stacked (Required)                          | `FramedImage`'s still box, or the `<img>` of a plain picture                                               |
+| Hero            | Split (Required)                                     | The same, inside the entrance wrapper                                                                      |
+| Testimonials    | Grid and Slider (Required)                           | `ProfileImage`'s outer element, so it follows a ring or frame                                              |
+| Team            | Grid, Slider and List (Required)                     | The portrait (`FramedImage`) with an inset (below); the List's `ProfileImage` outer element, with no inset |
+| Gallery         | Grid, Slider and Masonry (Required)                  | Grid and Slider: each tile's still box inside its button. Masonry: the tile's button, which is its outline |
+| Location        | Conditional: a map image is set                      | The map picture itself, keeping its ring and corners                                                       |
+| Events          | Conditional: the Featured card's event has a picture | The picture, inset (below)                                                                                 |
+| Blog post cards | Conditional: the post has a main image               | The card's picture, never the card                                                                         |
+
+**Not offered**, and why: the Link list's profile picture keeps its own legacy fields (`depthDesign.pictureShadow`, a temporary exception until task 281); logos and wordmarks, background pictures, dividers and frame artwork are not framed pictures; Hero Overlay, Full-bleed and Editorial and Image + text Overlay draw their picture as a background or too small to carry it; the Slot image block is drawn by its host section; the Gallery's lightbox shows the picture itself, never a tile's shadow.
+
+**Unset changes nothing.** Empty, Flat with Glow Off, and any value the schema does not offer all draw exactly what the picture drew before: the markup is byte-identical (checked for every consumer, with and without an Image design, and in every layout). There is no level above the picture's own, so the site's Card depth and a card's own depth never reach a picture, and a picture's depth never reaches its card. Flat and Off are stored but look the same as unset, because none of these pictures draws a shadow of its own.
+
+**The filter sits on the still box, never on what moves.** Under Image design's motion or a section's Parallax the picture moves inside its frame (`FramedImage`); the filter is on the frame, which is stationary, so the shadow does not move with the picture. A plain picture has no box and carries it on the `<img>`. The Location's map has no frame of its own, so under the section's Parallax the whole picture drifts and the shadow with it. The Hero's entrance animates a wrapper around the picture and is untouched.
+
+**Room for the shadow.** A card that clips (Team's and Events Featured's) would cut a flush picture's shadow off at its edge. When a depth is chosen the picture is inset inside the space it already has, by the room that depth needs (`PICTURE_CLEARANCE`, `pictureClearance`, `pictureInset` and `pictureInsetBeyond` in `depth-options.ts`): the card keeps its height, the picture its ratio (1:1 for Team, 16:9 for Events) and the text its place, and the vertical padding is exact, not rounded (a half pixel moves the text). A portrait that a shape or frame already insets keeps its 24px and takes more at the sides only where its depth needs more. The rooms are measured, not estimated: the distance at which each fade falls to a tint of 8/255 (about 3%, the card's own ring) in Chromium, plus 2px, with the first approved sizes as a floor.
+
+| Shadow   | Glow Off | Soft glow | Strong glow |
+| -------- | -------- | --------- | ----------- |
+| Flat     | none     | 12 / 12   | 22 / 22     |
+| Soft     | 8 / 4    | 14 / 12   | 22 / 22     |
+| Raised   | 16 / 6   | 18 / 14   | 26 / 22     |
+| Floating | 28 / 12  | 30 / 18   | 34 / 24     |
+
+(Side / top, in px.) These depend on the filter tokens. `scripts/build-tokens.test.mjs` pins them and fails, with instructions, if the picture shadows or glows change: measure the clearances again first.
+
+**Slider.** A Gallery tile has no card around it, so the shared `Slider`'s 12px of room would cut its shadow. `bleed` takes sizes: `{ x, top, bottom }`. The viewport grows by the same amount it is pulled back by, so slide widths, scroll distances and the page's layout are unchanged, and a slider that asks for none is byte-identical. The Gallery asks only when a depth is chosen: 22px at the sides, 36px above and 72px below (the controls draw over it). `bleed={true}` is the Testimonials' 12px extra below its cards.
+
+**Known limitation: the Gallery Slider's outer edge.** The sides are capped at 22px: the page gutter and the slide gap are both 24px, and more would scroll the page or show the next slide's edge. Floating with a Strong glow reaches about 32px, so at the first slide's left edge and the last slide's right edge a faint tail (about 22/255, 9%) is cut off in a straight line. On a narrow screen that edge is 2px from the screen's edge and invisible; on a screen wider than the page's content it shows mid-page. Above and below, the fade is complete (under 3/255). An edge fade would hide it but is new behaviour that touches picture content and focus rings, so it is not part of this task. Check it on a real site (issue #172) before choosing to accept it or add one.
+
+**Performance.** A filter on a parallax picture costs raster and compositing time. Measured on a production build of two identical long pages (Image + text with Image design motion, and with the section's Parallax preset; three sections each) with and without Floating, in Chromium (headless shell, Pixel 7 profile, 4x CPU throttle, 24px scrolled per frame):
+
+| Frame pacing (7 interleaved pairs, about 1,300 frames per cell) | Median | p95  | p99  | Frames over 25 ms, per run | Over 50 ms |
+| --------------------------------------------------------------- | ------ | ---- | ---- | -------------------------- | ---------- |
+| Design parallax, no filter                                      | 16.7   | 16.8 | 16.8 | 2, 0, 0, 0, 0, 0, 0        | 0          |
+| Design parallax, Floating                                       | 16.7   | 16.7 | 16.8 | 0, 0, 0, 1, 0, 0, 0        | 0          |
+| Section parallax, no filter                                     | 16.7   | 16.8 | 16.8 | 0, 1, 1, 2, 0, 0, 1        | 0          |
+| Section parallax, Floating                                      | 16.7   | 16.7 | 16.8 | 1, 1, 0, 1, 1, 0, 0        | 0          |
+
+| Chrome trace (median of 5 runs; ranges never overlapped) | Raster tasks | Raster time | Draw time | Compositing | Paint |
+| -------------------------------------------------------- | ------------ | ----------- | --------- | ----------- | ----- |
+| Design parallax, no filter                               | 111          | 36 ms       | 377 ms    | 120 ms      | 5 ms  |
+| Design parallax, Floating                                | 206          | 738 ms      | 1,474 ms  | 123 ms      | 5 ms  |
+| Design parallax, Floating + Strong glow                  | 174          | 1,407 ms    | 3,351 ms  | 151 ms      | 4 ms  |
+| Section parallax, no filter                              | 126          | 42 ms       | 393 ms    | 128 ms      | 8 ms  |
+| Section parallax, Floating                               | 241          | 720 ms      | 1,540 ms  | 139 ms      | 6 ms  |
+| Section parallax, Floating + Strong glow                 | 210          | 1,482 ms    | 3,533 ms  | 162 ms      | 6 ms  |
+
+Over about 190 frames that is roughly 2 ms of draw work per frame without the filter, 8 ms with Floating and 18 ms with Floating and a Strong glow. Read this carefully: frame pacing did not change (every frame sat on the 60 Hz interval), but raster time rose about 17 to 20 times and draw time about 4 times, and more again with a Strong glow. **That is not proof of smooth scrolling on a phone**: headless Chromium has no real GPU (it rasterises in software), the CPU throttle may not reach the GPU process, the trace did not expose presented or dropped frames, and work on different threads is not a frame's duration. Floating stays available for parallax pictures provisionally; Floating with a Strong glow on a moving picture is the high-risk combination. If real-device testing shows jank, the smallest restriction is probably no glow on a moving picture before no Floating. The fixture pages `picture-depth-perf-off` and `picture-depth-perf-floating` (tests/e2e/fixtures/dataset.mjs) reproduce the comparison; the measuring scripts were throwaway and are not kept. The real-device check is tracked in issue #172.
+
+**Tests.** `depth-options.test.ts` (levels, clearance, the exact inset), `picture-depth-fields.test.ts` and `picture-depth-scope.test.ts` (the builder, and that a section-level object satisfies a card-scoped capability), `framed-image.test.ts` and `profile-image.test.tsx`, a `*-depth.test.tsx` for each consumer (unset parity in every branch, the filter's place, accessibility), and `tests/e2e/picture-depth*.spec.ts` (and the Blog's in `blog-card-design.spec.ts`) in a real browser: the filter's place, the card's size and text unchanged, the stationary frame under parallax, reduced motion, no JavaScript, axe, hydration and layout shift. Whether a shadow is cut off is read from screenshots (`picture-depth-helpers.ts`): with and without the filter, so the difference is the shadow itself, at the edges of whatever clips, with a control that clips on purpose to show the reading sees it. The Task 275 evidence for every pair is `<component>.pictureDepth.*` in `capability-evidence.ts`.
+
+### Action indicator
+
+The arrow at the end of a card that is one link (task 137). One component, `ActionIndicator` (`src/components/ui/action-indicator.tsx`), draws it: a glyph (Chevron, Arrow, External link or None), an optional `IconContainer`, a theme colour and a motion (None, Nudge, Lift or Draw). It replaces `LinkArrow` and the five handwritten hover nudges (Link list Stacked, Cards, Editorial and Glass rows, and the Events List chevron).
+
+- **Decoration.** It is `aria-hidden` and takes no focus: the card's one link is still its one keyboard destination. An External link glyph points diagonally for a link that leaves the site and across for a page on it, and the chevron and arrow mirror in right-to-left text (CSS, from `data-action-glyph`).
+- **CSS only, no client JavaScript** (`globals.css`, `[data-action-motion]`). The nearest `.group` puts the indicator in its hover, focus or pressed state. Focus counts both when the link is the card (`.group:focus-visible`) and when a link stretched inside a card that cannot take focus is focused (`.group:has(a:focus-visible)`), so hover and keyboard focus give the same feedback. Motion plays only under `prefers-reduced-motion: no-preference`, moves once per state change and never loops. Nudge and Lift move 3 px.
+- **Kept as they were.** With nothing chosen a place draws what it always drew: the Link list's Stacked, Cards and Glass rows nudge 2 px and Editorial 4 px; the Events List keeps its own chevron path, 4 px nudge and small-screen hiding (`legacy-small`, `legacy-large` and `legacyChevron` are internal, not Studio options). Choosing a motion moves a place to the preset's distance.
+- **Choosing it.** `actionFields` (`surface-design.ts`, a registered shared builder) adds _Indicator_, _Indicator motion_ and _Indicator colour_ (`actionStyle`, `actionMotion`, `actionColour`) to a family's Cards box, agency only, and `resolveCardAction` (`src/lib/sanity/card-action.ts`) turns them into what is drawn, over the place's own default. **Events** (List: a chevron; Featured: none; Agenda: not applicable), **Team** (Grid, Slider and List rows, on a card that links to a member's page) and **Blog post cards** (_Blog settings > Post cards_) default to none apart from the Events List. Accordion chevrons, sliders and the lightbox are not action indicators.
+- **Link list.** It keeps `linkDesign.arrowStyle`, `arrowColour` and the per-link equivalents under their stored names, with the hidden `showArrows` still read; they are a temporary exception until task 281 moves them onto the shared fields. CTA buttons (hero, Image + text, CTA banner) draw it from the `cta` object's own fields (see _Buttons_), and Features grid cards close with task 276.
+- **Tests.** `action-indicator*.test.tsx` hold the markup, the CSS rules and the focus selector against both structures (a link that is the whole card, a stretched link); each family has its own tests and evidence (`events.action.card`, `team.action.card`, `blogPostCards.action.card`). `tests/e2e/action-indicator.spec.ts` checks hover, keyboard focus, right-to-left and reduced motion in a browser (run by CI).
+
+### Buttons
+
+The site's buttons share one style, chosen once under **Brand colours → Buttons** (task 148; agency only, collapsed, every choice optional). Nothing is set per section.
+
+| Control                | Choices                             | Default |
+| ---------------------- | ----------------------------------- | ------- |
+| Main button fill       | Solid, Brand gradient               | Solid   |
+| Main button gradient   | One of the gradients under Advanced | –       |
+| Main button depth      | Flat, Soft, Raised                  | Flat    |
+| Main button glow       | Off, Soft, Strong                   | Off     |
+| Secondary button style | Outline, Soft fill                  | Outline |
+
+The secondary button never has a shadow or glow. Each choice is a CSS variable set on `:root` only when it differs from today's look (`SITE_DECISIONS`, `resolveDesignTokens`), so an unset site renders and styles exactly what it did.
+
+- **Where it is read.** `CtaLink`, `ctaClassName` and `ctaColours` (`src/components/ui/button-style.ts`, re-exported by `cta-link.tsx`; the module has no imports, so the contact and search forms use it without joining their client bundles) add the hooks `cta-fill`, `cta-primary-depth` and `cta-soft`. Their rules (`globals.css`, outside every layer) read `--button-*` and hand back with `revert-layer` while a variable is unset. The Link list's featured link takes the fill only: its depth is the Link list's own.
+- **Brand gradient.** It names a gradient from Advanced (`brandGradients`; deleted or invalid ones fall back to Solid). `resolveDesignTokens` blends it the way `linear-gradient()` does (sRGB), samples every stop, each midpoint and 16 points per transition, and picks the text colour that reaches 4.5:1 along all of it. If none does, the button stays Solid and Brand colours says why. These are warnings, never errors, as for every derived pair; a second warning says when most of the gradient is under 3:1 against the page or the inverse background, where the button would lose its edge (the label still identifies it). Hover and press lay a veil of the colour opposite the text over the gradient, so the text colour never changes and no filter is used.
+- **Depth and glow.** One `box-shadow` list (`--button-shadow`), the card shadow scale and Task 146's glow sizes in Primary. Soft and Raised also give **hover depth** in Task 146's technique: the deeper shadow is a layer that only fades in (opacity) and the button rises 2 px (`translate`); `box-shadow` is never animated. It follows the pointer (where there is one) and keyboard focus, and reduced motion gets none of it. The global focus outline is drawn outside the shadow on every tone.
+- **Soft fill.** A tint of the button's own text colour (`color-mix(in srgb, currentColor 10%, transparent)`, 18% on hover, 26% pressed), so it follows every tone. A tint moves the fill towards the text, which would take white text on a mid-tone Primary under 4.5:1 (axe found it on the CTA banner's brand card), so on a section or card in the Primary colour (`data-tone="accent"`) the secondary keeps its outline. The same tint can lower the text of the page, alternate or inverse tones (for example `#767676` on white is 4.54:1, and 4.0:1 with a 10% tint), so `resolveDesignTokens` checks Text, Text on the alternate background and Inverse text at the strongest tint (pressed, 26%) and, if any would fall under 4.5:1, does not emit the Soft fill variables at all: the secondary stays Outline everywhere and Brand colours warns which pair and by how much.
+- **Indicator.** The `cta` object carries the shared `actionFields` (_Indicator_, _Indicator motion_, _Indicator colour_; agency only, None by default), so a saved button is unchanged. `CtaLink` draws it through `ActionIndicator` and becomes its `group` only then; each button is its own group, so hover or focus on one never moves its neighbour's.
+- **Form, Newsletter and Embed cards.** The shared Cards box (`cardDesignField`: Task 156's surface fields and Task 146's depth fields; agency only, empty by default). A form draws **no wrapper** until its section chooses a surface or a depth (a site Card depth alone is not a choice); a depth alone draws the standard card (the Location details card's tinted, outlined look); a transparent card draws no shadow; once there is a card, the site's Card depth reaches it. The Embed facade is a card already: it takes the same fields through its lazy boundary (the server works out its classes and style, `cardSurfaceProps`), and the site's Card depth reaches it. After the click, the provider's iframe keeps its own ring.
+- **Shared coverage.** Buttons are one shared component, not a section, so the contract does not declare it: its Required pairs (Hero, Image + text and CTA banner action; Form, Newsletter and Embed surface and depth) are verified on those sections by evidence (`<section>.action.item`, `<section>.surface.card`, `<section>.depth.card`), and the style itself by the tests below. The Booking facade stays in "Not covered yet" until task 95 builds it; its Cards box is this one.
+
+**Candidate inventory** (every `CtaLink` consumer, `ctaClassName` consumer and hand-styled button, and the form and facade cards):
+
+| Candidate                                                                             | Status       | Why                                                                                         |
+| ------------------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------- |
+| Hero, Image + text and CTA banner buttons (`CtaGroup`)                                | Offered now  | Fill, depth, glow, secondary style and the indicator                                        |
+| Header button (desktop and mobile), event registration, service enquiry (`CtaLink`)   | Offered now  | Same component; they read the style, and the indicator where their fields are set           |
+| Location section and page directions, Events "see all" (`ctaClassName`)               | Offered now  | Same classes                                                                                |
+| Link list featured link (`ctaColours`)                                                | Offered now  | Fill only; its shadow and glow are the Link list's own (task 281 moves them)                |
+| Search form and contact form submit buttons                                           | Offered now  | Now `ctaClassName('light')`                                                                 |
+| Form, Newsletter and Embed cards                                                      | Offered now  | The shared Cards box                                                                        |
+| Quick-search dialog submit                                                            | On request   | Compatible (`bg-cta`); a dialog control the first rollout leaves alone                      |
+| Sign-in, sign-out, sign-in prompt and error-page buttons                              | On request   | Compatible; system pages, not brand surfaces                                                |
+| Embed facade's own "load" and "Cookie settings" buttons                               | On request   | Compatible (ink buttons); they are the provider card's controls                             |
+| Booking facade                                                                        | Not suitable | Does not exist until task 95 builds it; it will then take the same Cards box                |
+| Social icon buttons, slider and lightbox controls, accordion triggers, Link list rows | Not suitable | Icons and controls, not calls to action; each has its own design (task 158, Not applicable) |
+
+**Tests.** `resolve-design-tokens-buttons.test.ts` (variables, unset parity, gradient sampling, fallback, warnings), `cta-link.test.tsx` (classes, hooks, indicator and the `globals.css` rules), `search-form.test.tsx`, `contact-form.test.tsx`, `form-card.test.tsx`, `embed-facade-card.test.ts`, `form-card-field.test.ts`, the Task 275 evidence, and in the browser `tests/e2e/button-style.spec.ts` (run by CI after every other spec): defaults, the gradient, depth, glow and a soft secondary on every tone, hover, press, keyboard focus, reduced motion, neighbouring indicators, form cards, the embed and axe. A sibling check of the compiled CSS in Chromium found the faint-gradient case behind the second warning.
+
+### Decorative marks
+
+A faint word, picture or icon behind a section, card or item (task 156): the shared `decorativeMark` type (`src/lib/sanity/schema/decorative-mark.ts`), drawn by one server component, `DecorativeMark` (`src/components/ui/decorative-mark.tsx`), with no JavaScript. Empty or None draws nothing, and adds nothing to the page's markup. A section's sits in `style.mark`, on every section except Embed and Video (`takesSectionMark`, held to each section's capability declaration by a test); a card family's sits in its Cards box as `cardDesign.mark`. Testimonials offer both. Pricing plans and Link list links also offer one at item scope, on a customised item only: it replaces the card's, None removes it, and unset keeps the card's (`cardMarkChoice`).
+
+- **Content:** up to 24 characters of words, an icon from the shared set, or a picture. Pictures are approved frames (_Design > Image frames_), resized by the image CDN like every frame (`frameMaskUrl`, never the original) and drawn as a CSS mask so they take a tint, or in their own colours. Whether the CDN sends a CORS header makes no difference in Chromium, which `tests/e2e/card-design.spec.ts` measures as painted pixels; WebKit was checked by hand and Firefox not at all. A mask that failed to load would draw nothing and change nothing else on the page. Words are drawn from an attribute, so they are never read, copied or indexed as content.
+- **Bounds:** size relative to the container, Same, Smaller or Hidden on phones, nine anchors, offset ±25%, rotation ±30° in 5° steps, opacity 2–20% for words and icons and up to 40% for pictures. `resolveDecorativeMark` applies them again when drawing, so a stored value can't draw outside them.
+- **Layers:** picture, then overlay, then the mark, then the panel, then the content. On a section with a panel the mark sits inside the panel by default, over its fill; _Behind the panel_ puts it under. On a card it sits over the card's fill and under its text.
+- **Decorative only:** `aria-hidden`, no pointer events, never focusable, clipped to its own box, absolutely placed, so it can't cause a horizontal scroll, reach a neighbour or shift layout.
+- **Contrast:** `markOpacityAt` (`src/lib/color/mark-contrast.ts`) measures the text against its surface with the mark composited over it. A combination that fails lowers the opacity when drawn, or drops the mark if no opacity is safe; Studio's Opacity field warns with the same decision, and it is never an error. A picture in its own colours counts as anything from black to white, and so does what sits behind the text on a section with a picture or gradient. A panel without one is a known colour.
+- **Size:** relative to the container's width, and no taller than the container, so a short, wide card shows a whole mark.
+- **Position:** unset is the top centre, where a mark stays visible above cards that stack full width on a phone. A middle-anchored section mark sits behind opaque cards, so it is mostly hidden there: use the top, or a card mark. The Layer control only appears on a section that has a panel.
+
+Card contrast is one lookup for any family (`src/lib/color/card-contrast.ts`): each role in its chosen colour across the section, card and item levels, else the colour the family draws it in (`RoleDefaultColours`). `withCardTextContrast` adds the Background colour warning from it; a family can narrow it to the roles it measures and word it itself (`contrast`), as the Link list does for its label on a card or a Glass row.
+
 ### Decorative dividers
 
-A decorative divider is a small rule _inside_ a section, between two parts of its content: a line, a fading line or three
-dots, with an optional middle between two lines: a diamond, an icon (the badge icon set), a few words ("Stay connected")
+A decorative divider is a small rule _inside_ a section, between two parts of its content: a line, a fading line, a double
+line, a dotted line, a gradient or three dots, with an optional middle between two lines: a diamond, an icon (the badge icon set), a few words ("Stay connected")
 or a small picture. Not to be confused with [Section dividers](#section-dividers), the shaped edge between two sections.
 
 | Option              | Choices                                                                                                     |
 | ------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Divider             | None (default), Line, Fading line, Three dots, as pictures                                                  |
-| In the middle       | Nothing, Diamond, Icon, Words (up to about 30 characters; As typed or Capitals), Picture                    |
-| Size in the middle  | Small, Medium (default), Large, for an icon, the words or a picture                                         |
+| Divider             | None (default), Line, Fading line, Three dots, Double, Dotted line, Gradient, as pictures                   |
+| In the middle       | Nothing, Diamond, Icon, Words (up to about 30 characters; As typed or Capitals), Picture, Ornament          |
+| Size in the middle  | Small, Medium (default), Large, for an icon, the words, a picture or an Ornament                            |
+| Finish              | Flat (default) or Glow, as pictures; only for Line, Double and Gradient                                     |
 | Length              | Short, Medium (default), Long, Full width: the whole rule, or each line beside a middle                     |
 | Thickness           | Thin (default), Bold                                                                                        |
 | Colours (collapsed) | Line colour (Inherit is the line colour) and Colour in the middle (Inherit follows the lines); theme or hex |
@@ -4007,9 +4630,23 @@ Words also offer **Letter spacing**: Normal, Wide or Extra wide. Unset preserves
 spacing (including the wider capitals). This is the same choice as Link list service categories.
 
 Each option appears only once it applies (three dots take no middle and no length). A fading line fades towards its outer
-ends around a middle. Lines, diamonds, icons and pictures are decoration and hidden from screen readers; words in the
+ends around a middle. **Double** is two fine lines with a 3px gap, **Dotted line** a line made of dots (it takes a middle,
+where Three dots does not) and **Gradient** a line from the Primary to the Secondary colour, fading at its ends; a Gradient
+has no line colour (it is always Primary to Secondary), and one stored before the style was chosen is kept, not drawn, and
+comes back if the style is changed. In forced colours a Gradient is a plain system-text line. Their sizes are the Divider
+Design Lab's, for a line of `t` px (Thin 1, Bold 2): Double `2t + 3` tall, Dotted line dots of radius `1.1t` every `5t + 3`
+px, Gradient `t + 1` tall. Lines, diamonds, icons and pictures are decoration and hidden from screen readers; words in the
 middle are read like any text. A picture is a small mark with a transparent background, shown without a blurred
 preview (no alt text: it is decoration). CSS and server components only, no JavaScript.
+
+**Finish and Ornament (task 151, Slice 7, second batch).** **Glow** is a finish of the line, never a style: a soft halo of
+the line's own colour, the Lab's `0 0 (6 + 2t)px t px` at 55% on a Line and a Double, and for a Gradient (whose end fade is a
+mask that would clip a shadow) a blurred copy of the gradient on its own masked layer. It paints outside the line's box and adds
+nothing to the layout. It is offered only for Line, Double and Gradient; unset, Flat and any unknown value draw Flat, and a Glow
+stored for any other style is kept and not drawn. Forced colours drop the halo and keep the lines. The **Ornament** centre is
+the Lab's flourish, two soft arches either side of a small diamond (90 by 18 px at Medium; Small and Large keep its
+proportions), drawn in the middle's colour and sized by _Size in the middle_. It is decoration, hidden from screen readers and
+not focusable; Three dots never take it.
 
 - **Code.** The schema type is `decorativeDivider` (`src/lib/sanity/schema/decorative-divider.ts`, registered in
   `sharedSchemaTypes`), queried with `decorativeDividerFields` (`src/lib/sanity/fragments.ts`), resolved by
@@ -4082,20 +4719,102 @@ None of them draws a see-through surface of its own that the panel checks would 
 
 ### Section dividers
 
-A section can end in a shape instead of a straight line: a diagonal, a wave, a curve, an arch or a layered wave. The
-section below shows through the cut, whatever its background is (a flat tone, a gradient or a picture), and moves up to
+A section can end in a shape instead of a straight line: a diagonal, a wave, a curve, an arch, a layered wave, Tide, Contour,
+Still water, Lagoon, Reef, or Elevated, which is a straight edge with a shadow. The section below shows through the cut, whatever its background is (a flat tone, a gradient or a picture), and moves up to
 meet it, so the colours and spacing come out right without anything to configure.
 
 **For editors** (Design tab, agency only). Under _Bottom edge_ pick a picture: None (the default, a straight edge),
-Diagonal, Wave, Curve, Arch or Layered wave. Then, as they apply to the shape:
+Diagonal, Wave, Curve, Arch, Layered wave, Tide, Contour, Still water, Lagoon, Reef or Elevated. Then, as they apply to the shape:
 
-- **Edge height**: Small, Medium or Large. Smaller on phones.
-- **Flip**: mirror the shape left to right (Diagonal, Wave and Layered wave; Curve and Arch are symmetrical, so it is not offered).
-- **Accent line**: none, or a thin line along the edge in Primary, Secondary or Highlight.
+- **Edge height**: Small, Medium or Large. Smaller on phones. Still water, Lagoon and Reef are not drawn at Small: Studio refuses it, and a
+  Small saved before the shape was chosen is drawn at Medium.
+- **Flip**: mirror the shape left to right (Diagonal, Wave, Layered wave, Tide, Contour, Still water, Lagoon and Reef; Curve and Arch are
+  symmetrical, so it is not offered).
+- **Accent line**: none, or a thin line along the edge in Primary, Secondary or Highlight. Not for Tide or Contour, whose
+  crest and lines are their own ornament.
 - **Back wave colour** (Layered wave only): Secondary or Highlight, drawn behind the front wave and partly see-through.
+- **Crest colour** (Tide only): the softer crest behind the edge, in **Primary** at 25% (the default), **Secondary** at 25%,
+  or **Echo**, this section's own colour at 40%. A picture or a gradient has no single colour to echo, so over one the crest
+  is Primary.
+- **Line colour** (Contour only): its three lines in **Primary** (the default) or the **muted text** colour, in the
+  colours of the section below.
+- **Still water only**: one calm crest with a soft layer above it, and an optional layer below. **Crest position**
+  (Standard, Centred, Shifted), **Depth** (Shallow, Standard, Deep: how far the layers reach), **Layer strength** (Light,
+  Standard, Strong), **Colours** (Tint: Primary; Ink: text over Primary; Highlight: Highlight over Secondary) and **Layer
+  below** (a second layer over the section below, in that section's colours). Layer below is not offered at Shallow, where
+  the layer is too thin to read; if one was saved before Shallow was chosen it is kept, not drawn, and the field says so.
+  Left empty, each is the shape's own default (Standard, Tint, no layer below). Still water offers neither Invert nor the
+  accent line.
+- **Lagoon and Reef only**: the two bolder layered shapes, each with **two layers above the cut** that trade places across
+  the width (one rises with the crests, the other in the valleys), so each shows alone in places and the two overlap in
+  others. Lagoon (the Leap Frog composition, corrected: no slivers, no pinch at the edges) has nothing below the cut; Reef
+  adds a layer below it, over the section that follows. Their crest position, depth and layer below are fixed (Standard
+  depth, one arrangement; Shallow with two upper layers is not offered), so Studio offers only **Flip**, **Layer strength**
+  (Light, Standard, Strong) and **Colours** (Tint: Secondary with Ink, or Secondary with Primary for Reef; Ink: text colour
+  led; Highlight: Highlight led). A crest position, depth or layer-below switch saved under another shape is kept, not
+  drawn, and the field says so. Reef has no hairline in this first pass.
+- **Elevated only**: a straight boundary that casts a soft shadow onto the section below, in place of a cut. One
+  choice, **Shadow**: Soft (the default: 18 px deep, starting at 16% of the text colour) or Deep (28 px, 24%). It
+  has none of the cut's settings (no height or custom heights, Flip, Invert, accent line or back wave colour); any of
+  those stored under another shape is ignored and kept, so choosing another shape brings it back. The shadow is a
+  decoration drawn outside the section, over what follows it: nothing is masked, no room is reserved, the section
+  below is not pulled up and no footer band is drawn, so it takes no space and cannot be clipped by a section that
+  clips its own overflow. It uses the same stacking step as an edge, so it falls on the sections after it and on the
+  footer and stays under the sticky header. It is hidden in forced colours, does not depend on mask support, and on a
+  Minimal page the last section's shadow is not drawn (nothing follows it). It needs a section below with some
+  light in it: on a near-black section it is nearly invisible. After a shaped edge, an Elevated section still takes
+  that edge's overlap, as any section would.
+- **Visibility advisory** (Still water, Lagoon and Reef; Studio only): beside the Colours field, one message says when a
+  layer above the edge is faint against its section, naming the layer and, only if it helps on the same background, a
+  stronger strength or another colour set. It never blocks publishing and changes nothing saved or drawn. It reads the
+  effective colours and strength (an unset field is its default), the layers' own colours and opacities, the section's
+  tone and the site's Brand colours, and measures each layer's blend against the background with the contrast ratio the other
+  checks use, flagging anything under **1.2:1** (provisional; a decorative layer is not text, so WCAG's text ratios do not
+  apply). The message is plain ("Lagoon's second layer may be hard to see on this background. Try Tint, or check it in
+  Preview."); the ratios stay in the tests. It gives no verdict where it cannot know the scene: a background picture, a
+  gradient, a layout that draws its own picture or video (a hero's background), a Page (Surface) section, which is see-through
+  under an edge, a background set by the section type, or colours that could not be read. There it says to look in Preview. The layer below the edge is judged too, against what the page paints under it (below), and a layer that cannot be judged is named as such: a layer above that passes never stands for it.
+- **Layer colours** (Advanced: edge; Still water, Lagoon and Reef; task 151, Slice 8): give a layer its own brand colour and
+  its own strength, under `style.edgeLayerColours`. The layers are the **first layer above** and **second layer above**
+  (Lagoon and Reef) and the **layer below** (Reef always; Still water when its switch is on at a depth that offers one).
+  Each has a colour (Primary, Secondary, Highlight or Text; stored as `accent`, `accent-2`, `highlight`, `ink`) and a strength
+  (Light, Standard or Strong); the six fields are `above1`, `above1Strength`, `above2`, `above2Strength`, `below` and
+  `belowStrength`. There is no hex and no free picker. **Precedence:** a field left empty follows the recipe (Colours) for its
+  colour and the shared Layer strength for its strength, each on its own, so a colour with no strength and a strength with no
+  colour are both fine. A set field wins for that layer only: the other layers keep following Colours and Layer strength,
+  and changing either later never moves a set field. A strength replaces the shared one for its layer with the same cap
+  and the same layer ratios (the second layer at 60% of the first, the layer below at 85%), and Standard beats a shared
+  Strong. An empty, null or unknown value counts as unset. **Clearing:** each colour field's first choice, **Use recipe
+  colour**, and each strength field's, **Use Layer strength**, clears that field alone and returns it to the recipe or the
+  shared strength (it unsets the field; nothing is stored in its place). **Reset all layer overrides**, under the group,
+  unsets the whole `edgeLayerColours` object in one step and touches no other style setting; it is disabled while nothing
+  is stored and in read-only mode. With the group cleared, every layer is exactly what it was before the group existed (a
+  frozen test holds the unset output). Studio's field menu (the "…" beside a field) offers only Copy and Paste, so the
+  warnings name these controls instead. **Layers a shape does not draw** (a second layer above on Still water, a
+  layer below on Lagoon, or on Still water with the switch off or at Shallow) keep what is stored, draw nothing for it, and
+  show it with a warning, on the field and on the group, naming the control that clears it; once cleared the field is hidden. Geometry is
+  untouched: the cut and every layer's path are the same with and without these fields. **Deferred, not implemented:** Reef's
+  hairline and its White veil colour (a hairline-only option), which wait for the hairline itself, a geometry change.
+- **Visibility advisory, the layer below** (task 151, Slice 8; Studio only): the layer below the edge sits in the edge frame, over
+  the section that follows, so it is judged over that section as the page paints it: an inverse or Brand follower remaps
+  Primary and Text (the generated follower-tone rules), an alt or Page follower leaves the page's own colours, the footer's band
+  (Alt) is what follows the last section, and a Minimal page has no band, so the page's own background shows. Studio reads the
+  follower from the document it already holds and makes no request. It is judged only when its presence and background are
+  established: a rich text, features grid, CTA banner or newsletter signup with a stored Background, or an embed the page can
+  resolve. Everything else is **not assessed**, with its own Preview note: a form with no form, or whose form cannot be
+  checked from here; a pricing table with no plans or with plans that are references; an embed the page cannot draw; a shared
+  or members-only section; a picture, gradient or layout that draws its own background; a Background left to the section
+  type; a section whose place on the page cannot be read; any other section type. It never skips ahead to the section after
+  one, and never assumes the footer. An unassessed layer adds no ratio and no suggestion, and a faint layer above is still
+  warned about beside the note. Suggestions keep every set field and are checked through the real composition for every
+  assessed layer; they may name a set field as Studio labels it ("Layer below: colour" set to Primary), and nothing is
+  ever changed for the editor. Not modelled: a follower that draws nothing for a reason not listed, dark-mode palettes, and
+  sections outside a page's or service's section list.
 - **Advanced: edge** (collapsed): **Invert** (the shape bulges into the next section instead; not offered for Diagonal,
   where it is the same as Flip) and a **custom height** for phones, tablets (from 768 px) and desktops (from 1024 px), in
-  pixels from 16 to 320. A screen size left empty keeps the smaller one's height; the phone falls back to Medium.
+  pixels from 16 to 320. A screen size left empty keeps the smaller one's height; the phone falls back to Medium. Still water,
+  Lagoon and Reef take 40 to 64 px on phones, 40 to 120 on tablets and 40 to 160 on desktops, each on its own; a stored value outside them
+  is drawn at the nearest one (Studio shows an error).
 
 The edge belongs to the **upper** section: one owner per boundary, it moves with its section when reordered, and a shared
 section carries its own edge wherever it is used. To change a boundary, edit the section above it.
@@ -4108,7 +4827,7 @@ section carries its own edge wherever it is used. To change a boundary, edit the
   the others are written by hand. Everything is unit tested (`section-edges.test.ts`): the paths stay inside the box,
   run the full width, and Flip and Invert each change a wave.
 - _The cut_: `SectionFrame` wraps a section that has an edge in `[data-section-edge-frame]` (lifted with a `z-index` that `SectionRenderer` lowers
-  for each later section, so every cut sits above whatever follows it) and sets `--edge-mask`, an SVG data URI of the shape. `globals.css` applies it to the
+  one step for each edge frame after it, so every cut sits above whatever follows it) and sets `--edge-mask`, an SVG data URI of the shape. `globals.css` applies it to the
   `<section>` as `mask-image` (and `-webkit-mask-image`) in two layers: a solid one for everything above the bottom band,
   and the shape for the band, so **only the bottom band is cut and the content area is never masked**. The section adds the
   edge's height to its bottom padding (`--edge-h`), so its content stays out of the band. Nothing samples colours.
@@ -4125,22 +4844,75 @@ section carries its own edge wherever it is used. To change a boundary, edit the
   so it keeps its width however the shape stretches.
 - Browsers **without mask support** show a straight edge: the section is still taller by the edge's height and the next one
   still meets it, only the cut is missing, and the SVGs are hidden (`@supports not`).
+- _Tide and Contour_ (task 151) are **compositions**: a cut, plus decorative parts on either side of it, drawn from fixed
+  functions in `edge-fixed.ts` (copied exactly from the approved Divider Design Lab) with the shared crest grammar in
+  `edge-crest.ts`. Tide is one asymmetric crest with a softer crest behind it, over the section below; at Large and custom
+  heights the back crest keeps 60% of its separation (keyed on the height setting, not on pixels), at Small and Medium all
+  of it. Contour is a sweeping cut with three 1.5 px lines that follow it over the section below, the first along the cut,
+  fading from full strength to 65% and 40%. `SectionFrame` draws a composition's parts as their own SVGs (`data-edge-part`:
+  `under-1` before the section, `line-1` after it), so no rule for them can reach today's back wave or accent line
+  (`data-edge-layer`), and today's shapes keep their own code path, unchanged (`section-edge-parity.test.tsx` holds their
+  markup byte for byte).
+- _A composition's colours_: its parts in the frame are drawn over the section below, so they take **that section's tone**,
+  as anything inside it would: rules generated by `scripts/build-tokens.mjs` from the same table as the tones
+  (`tokens.generated.css`) give them the following section's colour variables, found from the markup (the wrapper after
+  the edge's own is `[data-edge-above]`, and its section is plain or in a frame of its own; one `:has()` each, never
+  nested). With no section below (an empty one, the footer's band, a Minimal page) or without `:has()`, they keep the
+  page's colours, as today's back wave does. **Echo** is the colour of the section the edge belongs to: the frame carries
+  its tone (`data-edge-echo`) and resolves `--edge-echo` there, before the parts inherit it, so their own remapping can't
+  turn it into the section below's colour. The parts are hidden in **forced colours** and without mask support.
+- _Still water_ (task 151, Slice 3) is the first **generated** shape: its geometry is drawn by one generator
+  (`edge-layered.ts`, ported from the Divider Design Lab's `family()` and `repairDepth()`) from one row of a closed preset
+  table (`edge-presets.ts`) and a few stepped controls. No stored number reaches the shape, so every shape a page can ask
+  for is one of 30 (3 crest positions, 5 depth and layer-below pairs, Flip) that `edge-layered.test.ts` draws and checks.
+  Its layer above is drawn inside the section, clipped by the cut, and its layer below in the frame over the section below,
+  taking that section's tone (the same parts and rules as Tide and Contour). The geometry reads **no height**: it is made
+  once, at the constants the Lab reaches from a 100 px band up (a visible floor of 3.5% of the band, 3% of headroom), and
+  stretched to whatever band the page draws. At a band of 100 px and over this is the Lab's shape, path for path; below it,
+  the Lab's own output changes with the band and, on a phone band of 40 px, repairs its upper layer away entirely, so
+  production deliberately does not follow it there. A line is 32 cubic segments (within 0.05 px of its curve at the tallest
+  band, 160 px). The cost is motion headroom: 3% of the band is 1.2 px on a 40 px band, which Task 217 will have to work
+  with. A fourth preset is a row in `edge-presets.ts`, the value, title, picker entry and thumbnail, and its own checksums;
+  `edge-layered.ts`, `section-frame.tsx` and the CSS do not change.
+- _The geometry contract_ (Stage 3A section 6, run by `edge-layered.test.ts` with the checks in
+  `edge-geometry.test-utils.ts`, which ship nothing): no accidental sliver, edge wedge or long taper (over 6% of the width);
+  no layer pressed against the band; no pinch at an edge; no line steeper than 1.2 px per px at any width and band a page
+  can draw (the cut everywhere, a fill only where it shows); and each enabled layer clears **3 px over at least 10% of the
+  width**, after the band clips it. The band heights tested are every integer from 40 to 160, a quarter-px scan between, and
+  every token band from 320 to 2560 px wide; slope is checked at the narrowest and widest width of each screen size, where
+  height over width is greatest and least. The first failure going down is at 32 px, so 40 px has real margin. Checksums of
+  all 30 shapes are frozen in a snapshot, so a later slice cannot change Still water unseen.
+- _Lagoon and Reef_ (task 151, Slice 4) are two more rows of the same preset table, drawn by the same generator with its
+  second upper layer and a same-side repair pass (the Lab's own, which keeps two layers on one side from running together).
+  Each has two geometries, the shape and its mirror. They are held to the contract above unchanged, plus a **same-side
+  separation** rule: of two fills on one side of the cut, each must stand alone, reaching 3 px beyond the other, over at least
+  10% of the width. Presence from the cut cannot tell two nested fills from two layers (a fill that always sits inside
+  another clears 3 px everywhere and adds only a darker strip), so it is a separate check, with a regression case. The
+  bounds of Still water held for both (zero failures at every band from 40 to 160 px and every token band; the first failure
+  going down is at 30 px for Lagoon and 31.75 px for Reef), so no row narrows its heights. Reef is the Lab's shape without
+  its hairline, which reserves room above the cut, so Reef's cut sits a little differently from the Lab's.
 
 **Edge cases.**
 
-| Case                             | What happens                                                                                                                                                                                                                                                                                                                                                  |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| First section                    | Works like any other; the hero's LCP picture is still preloaded.                                                                                                                                                                                                                                                                                              |
-| Last section                     | The footer takes the edge like a section would: `SectionRenderer` adds a band of the footer's colour (`bg-surface-alt`) under the cut (`[data-edge-backdrop]`) and hides the footer's top border. If a project changes the footer's background, change `[data-edge-backdrop]` in `globals.css` to match.                                                      |
-| Members-only sections            | A locked section is a stub with no style, so it has no edge and nothing is pulled up under it; the cut above it shows the page colour. Once unlocked, its own edge draws, but the section after it is not pulled up, because the public page does not know the edge until sign-in. In preview (draft mode) every section is complete, so edges work normally. |
-| A/B variants and shared sections | Both go through the same `SectionRenderer`; a shared section's edge comes with its `style`.                                                                                                                                                                                                                                                                   |
-| Anchors                          | The section below an edge has `scroll-margin-top: 6rem + the edge's height`, so a `#link` lands with the whole cut in view.                                                                                                                                                                                                                                   |
-| Reordering                       | Neighbours are worked out at render time, so moving a section moves its edge with it.                                                                                                                                                                                                                                                                         |
+| Case                                | What happens                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| First section                       | Works like any other; the hero's LCP picture is still preloaded.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Last section                        | The footer takes the edge like a section would: `SectionRenderer` adds a band of the footer's colour (`bg-surface-alt`) under the cut (`[data-edge-backdrop]`) and hides the footer's top border. If a project changes the footer's background, change `[data-edge-backdrop]` in `globals.css` to match.                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Members-only sections               | A locked section is a stub with no style, so it has no edge and nothing is pulled up under it; the cut above it shows the page colour. Once unlocked, its own edge draws, but the section after it is not pulled up, because the public page does not know the edge until sign-in. In preview (draft mode) every section is complete, so edges work normally.                                                                                                                                                                                                                                                                                                                                                                                        |
+| A/B variants and shared sections    | Both go through the same `SectionRenderer`; a shared section's edge comes with its `style`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Anchors                             | The section below an edge has `scroll-margin-top: 6rem + the edge's height`, so a `#link` lands with the whole cut in view.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| A section that renders nothing      | An edge on a form section with no form, an empty team, a pricing table with no plans and the like draws no cut, so it pulls nothing up: the section below is pulled up only under a cut that was really drawn (`--edge-live` in `globals.css`, read from the markup: the wrapper above holds a frame, or a pending boundary that may still fill in). The footer's band follows the same rule.                                                                                                                                                                                                                                                                                                                                                        |
+| An edge above an empty edge section | When an edged section is followed right away by an edged section that renders nothing, the first cut shows the page background, even though a third section follows: the third is pulled up only under a cut drawn right above it, and the empty section drew none.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| Minimal pages                       | There is no footer, so the footer-coloured band is not drawn: the page's own background shows under the last section's cut. Cover the screen's iOS overscroll fix (the picture reaching past the page's first or last section) works for a section with no edge of its own, wherever it sits: plain, in the wrapper under an edge, or in draft mode's wrappers. A section with its own bottom edge is masked to its box, so its picture can't reach past it: on a Minimal page whose first section has its own bottom edge, the strip iOS uncovers above it is still the page background (an open follow-up). A last section's own cut already shows the page background, and the strip below it matches. Checked in Chromium, not on a real iPhone. |
+| Long pages                          | A frame's `z-index` steps down once per edge frame (from 39, under the sticky header's 40), not once per section, so 38 edged sections stay distinct on a page of any length; a plain section takes no step. Beyond 38 edges the steps stop at 1 and later frames tie in document order.                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Reordering                          | Neighbours are worked out at render time, so moving a section moves its edge with it.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 
 **Adding a shape.** Add the line to `LINES` in `section-edges.ts` (a path in the 0 to 1 box that runs from one side to the
-other), the value to `SECTION_EDGES` and its title in `section-style-options.ts`, a picker entry in
-`section-style.ts` and a thumbnail in `thumbnails/edge-thumbnails.tsx` and the registry (a test fails until all agree), then
-add a gallery pair to `tests/e2e/fixtures/dataset.mjs` and run `npm run typegen`.
+other), or, for a shape with decorative parts, a composition in `edge-fixed.ts` registered in `COMPOSITIONS`; then the
+value to `SECTION_EDGES` and its title in `section-style-options.ts`, a picker entry in `section-style.ts` and a thumbnail in
+`thumbnails/edge-thumbnails.tsx` and the registry (a test fails until all agree), then add a gallery pair to
+`tests/e2e/fixtures/dataset.mjs` and run `npm run typegen`. Leave `section-edge-parity.test.tsx` as it is: it holds the
+shapes there were when it was captured.
 
 **Tests.** Unit: `section-edges.test.ts` (paths, heights, spacing variables), `section-style.test.ts` (`resolveEdge`: options that do
 nothing for a shape are ignored), `section-style.test.ts` in the schema folder (which options show for which shape). End to
@@ -4149,7 +4921,35 @@ that the section below is pulled up by exactly the edge's height while its conte
 mask and its `-webkit-` twin, the layered wave's layers, heights and breakpoints, and the `/edges` fixture page (followers,
 members stub, shared section, anchor margin, footer band, layout shift). Gallery pairs are `edge-*` entries (the section
 below has a key ending `--below` and is drawn in the same frame); their visual baselines are Linux-only, so run the
-**Update visual baselines** workflow after changing a shape or the CSS.
+**Update visual baselines** workflow after changing a shape or the CSS. Stability: `section-edge-css.test.tsx` matches the real
+rules in `globals.css` against the real markup (an empty section, draft mode, a pending boundary, the first and last section
+of a Minimal page through every wrapper, the footer's band); `section-renderer.test.ts` covers the stacking on pages of 35 to
+60 sections; `tests/e2e/section-edge-stability.spec.ts` (`/edge-empty`, `/edge-minimal`, `/edge-minimal-follower`) checks what
+the browser then draws, from its own pixels; and `tests/e2e/section-edge-hairlines.spec.ts` (`/edge-seams`) measures, at several
+pixel ratios and widths, whether any of the page's background shows along a cut. It measures only: no extra pixel of overlap is
+added unless it finds one. A control at each pixel ratio must find a deliberate 1px gap where it was made, and none without it,
+so a pass is evidence.
+
+Still water: `edge-layered.test.ts` (the Lab equivalence, every reachable combination through `resolveEdge`, the contract above,
+Flip, strength and palette, segment deviation, frozen checksums), `section-style.test.ts` (`resolveEdge`: Small, the custom
+bounds, Shallow without a layer below), the schema tests (which fields show, and each Studio warning or error), and
+`tests/e2e/section-edge-layered.spec.ts` (`/edge-layered`): the layers' pixels, paint order over a mark, a gradient and a
+picture, clipping at the cut, the 3 px floor on a 40 px phone band, stored heights, the 390 px comparison with the Lab, the
+sticky header and the fallbacks. It runs in WebKit locally too.
+Lagoon and Reef: `edge-lagoon-reef.test.ts` (every reachable combination, the contract, the separation rule and its regression, the
+Lab, parts and paint, frozen checksums) and `tests/e2e/section-edge-lagoon-reef.spec.ts` (`/edge-lagoon-reef`): that each fill
+makes a visible contribution after clipping and overlap (three zone colours, each the browser's own blend, each painted 3 px
+deep over a tenth of the width), paint order, clipping, stored steps and heights, Flip and the fallbacks.
+
+Tide and Contour: `edge-fixed.test.ts` compares their paths with the Lab's own definitions (copied verbatim into the test)
+and holds them as exact strings; `section-frame-composition.test.tsx` checks how `SectionFrame` draws a composition (order,
+attributes, Echo on the frame, and that today's shapes never take its branches); `section-edge-css.test.tsx` matches the
+generated follower-tone and Echo rules against the real markup in every wrapping. `tests/e2e/section-edge-composed.spec.ts`
+(`/edge-composed`) reads the browser's own pixels and computed colours: the cut along each shape's line, the parts under the
+section above and over the section below, Tide's 60% rule, the section below's tone, Echo against the real section below,
+the sticky header above them, Classic's colours unchanged beside them, and the forced-colours and no-mask rules. The edge
+specs also run in WebKit locally with `npx playwright test -c playwright.webkit.config.ts` (Playwright's WebKit build, not
+Safari or an iPhone).
 
 ### Paragraphs in plain text
 
@@ -4590,12 +5390,14 @@ _None_ arrows and _No container_ icons are real values and are never mistaken fo
 **Inherit** button first, so going back is one click; switching a card back to _Use the Link list design_ keeps its
 choices but the page ignores them (and the query never sends them).
 
+- **A decorative mark** follows the same rule as a whole choice, not property by property: the list's _Cards_ puts one on every link, a customised link's own replaces it, and its _None_ removes it from that link. See [Decorative marks](#decorative-marks).
 - **Glass stays glass.** On Glass rows a colour **tints** the glass at the glass strength (or the chosen strength) through
   CSS variables `.glass-row` reads (`--glass-tint`, `--glass-border-width`, `--glass-border-colour`), so the blur, the
   glass's shadow and the nearly solid fallback (no blur support, reduced transparency) all stay. Only _Solid_ makes it
   opaque. Solid cards draw their border as an inset ring, so a thicker border never changes a card's size.
 - **Icon containers** (`iconLook`, `src/lib/sanity/surface-options.ts`) use the social icon shapes; the container keeps the
-  layout's size whatever the shape, so mixed shapes line up. Social buttons use the same surface primitives.
+  layout's size whatever the shape, so mixed shapes line up. Every icon container is drawn by one component,
+  `IconContainer` (`src/components/ui/icon-container.tsx`): see _Icons_ under Card design.
 - **Contrast.** A card background or text colour is measured on the card it draws on: Studio layers the list's and the
   card's choices (`src/lib/color/card-contrast.ts`), over the section's background, or for glass over the darkest and
   lightest photo. Transparent glass never passes on its own: its text sits on the photo. Warnings only.
@@ -5067,13 +5869,13 @@ A preset sets the values once, as ordinary patches relative to the section (pare
 
 The pictures the picker shows are in `src/lib/sanity/schema/thumbnails/`, drawn in one visual language: simple wireframes at 4:3 (blocks are headings, thin lines are text, a framed panel with a hill and a sun is a picture, a pill is a button), readable at the 160 px a card gives them. They are not screenshots, so they never go stale. The parts are in `wireframe.tsx`; draw a new thumbnail from them rather than with new shapes.
 
-| Kind            | Files                                                                                                  | Shown for                                                                                             |
-| --------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| Section layouts | `hero-thumbnails.tsx`, `stats-thumbnails.tsx`, `testimonials-thumbnails.tsx`, `gallery-thumbnails.tsx` | each section's `variant` (the hero, Stats, Testimonials and Gallery layouts)                          |
-| Hero presets    | `hero-thumbnails.tsx`                                                                                  | the six presets, and the Split proportions and shapes                                                 |
-| Animations      | `animation-thumbnails.tsx`                                                                             | the Animation field: none, fade up, subtle, fade, slide, staggered, float, parallax (three strengths) |
-| Tones           | `tone-thumbnails.tsx`                                                                                  | the Tone field: live swatches, not pictures                                                           |
-| Insert menu     | `public/section-previews/<typeName>.svg`                                                               | the "Add item" menu in the page builder (static files)                                                |
+| Kind                          | Files                                                                                                  | Shown for                                                                                             |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| Section layouts, card presets | `hero-thumbnails.tsx`, `stats-thumbnails.tsx`, `testimonials-thumbnails.tsx`, `gallery-thumbnails.tsx` | each section's `variant` (the hero, Stats, Testimonials and Gallery layouts)                          |
+| Hero presets                  | `hero-thumbnails.tsx`                                                                                  | the six presets, and the Split proportions and shapes                                                 |
+| Animations                    | `animation-thumbnails.tsx`                                                                             | the Animation field: none, fade up, subtle, fade, slide, staggered, float, parallax (three strengths) |
+| Tones                         | `tone-thumbnails.tsx`                                                                                  | the Tone field: live swatches, not pictures                                                           |
+| Insert menu                   | `public/section-previews/<typeName>.svg`                                                               | the "Add item" menu in the page builder (static files)                                                |
 
 `registry.ts` maps every value stored in content to its thumbnail (`sectionVariantThumbnails[type][variant]`, `animationThumbnails`, `toneThumbnails`). `heroPresetThumbnails`, `heroProportionThumbnails` and `heroImageShapeThumbnails` are the hero's own. Dividers will add their entries when that field exists.
 
@@ -5112,6 +5914,10 @@ A dialog under an image field where an editor sees the picture inside the exact 
 - Pointer events use pointer capture, so mouse, pen and touch share one path. Updates are batched to one per animation frame and only the picture's transform changes. Every listener and frame request is removed when the dialog closes.
 - Tests: Vitest (maths, geometry, style helpers, and Testing Library for the dialog), Playwright + axe on the brand preview page. The Testing Library tests use `jsdom` (`// @vitest-environment jsdom` at the top of the file); everything else stays in Node.
 - **Real Studio checks** (open, drag, keyboard, touch, Apply, Undo, reopen, Reset, publish, and the draft in Presentation against the published page) need a signed-in scratch project and are done by hand once a field is opted in; record them in the PR.
+
+### Page breadcrumb (Studio)
+
+A page's place in the site shows above its fields: **Pages › services › web-design**. Each ancestor that has a page is a link to it; an ancestor with no page is plain text, and the current page is last. Editors and clients both see it, on `page` documents only. It is read from the slug, so it follows the slug as you type, and a page that has not been published yet still links (Sanity opens the draft). In a narrow pane (under 380 px) the ancestors fold behind a **…** button that lists them. The one query is a single listener per open page (`*[_type == "page"]{_id, slug}`), not one per keystroke. Developers: `PageBreadcrumbInput` is wired into `StudioInputs` in `sanity.config.ts`; the segment logic is `utils/page-breadcrumb.ts`; a preview for axe is on `/studio-brand-preview` (tests/e2e/page-breadcrumb.spec.ts).
 
 ### Sanity workflow (migrations and schema deploy)
 
@@ -5212,7 +6018,7 @@ for 30 days, including disabled and unconfigured runs. The run's colour is not e
 It holds `outcome`, `reason`, `skipReason`, `mode` (`live`, `prelaunch`, `unknown` or `null`), `modeSource` (`site-info`, `profile` or `null`), `synthetic`, `test` (synthetic runs only: `expectedOutcome`, `healthStatus`, `testStatus`, `problems`), `checkedAt`, `url`,
 `repoTemplateVersion` (the repository's own `template-version.json`, not necessarily what is deployed), `setup.missing`
 (names only), `summary` (`pass`, `warn`, `fail`), `failures` (`id`, `area`, `title`, `fix`), `dataset.private`, `enquiries` (`exposed`, `none-found`, `refused`, `unverified` or `not-checked`) and
-`enquiriesExposed` (true only when `enquiries` is `exposed`). It never carries a value from the environment except the site's own address.
+`enquiriesExposed` (true only when `enquiries` is `exposed`) and `audit` (`state`: `not-run`, `ok` or `unavailable`; with counts when `ok`; see [Page audit](#page-audit)). It never carries a value from the environment except the site's own address.
 
 | Outcome        | Means                                                                                           | Run              | Issue                 |
 | -------------- | ----------------------------------------------------------------------------------------------- | ---------------- | --------------------- |
@@ -5253,6 +6059,13 @@ non-synthetic `healthy` or `warning` result is ever shown as health.
   "none". The deprecated `ENQUIRIES_STORE` only adds a sentence to the
   unverified line. Because the live checks run the way a launch does, a client who has not replaced the template favicon or
   copy will see those failures daily; fix them, or set `HEALTH_CHECKS=off` until launch.
+- **The page audit.** On a live site the workflow also runs `npm run audit:page --confirm` on the home page and five
+  sitemap pages ([Page audit](#page-audit)). A **confirmed blocker** (a page search engines cannot index, seen on two
+  requests a few seconds apart) is a failure like any other: it fails the run and goes in the same issue, one line per
+  rule, and not again if `launch:check` already fails for the same cause. Errors and warnings stay advisory lines. If the
+  audit step ran and left no usable result (it crashed, timed out, or wrote something unreadable) the run is a **warning**
+  with `audit.state: "unavailable"`, never a pass, and it **leaves an open issue alone** instead of closing it, since it
+  cannot say the blocker has gone. A workflow without the step, a pre-launch site and an unknown state are `not-run`.
 - **One issue, labelled `health`.** On a real failure it opens _Production health check failing_ with the failing lines and
   how to fix each; while the problem persists later runs rewrite the same issue instead of adding more. The next
   healthy or warning run closes it with a comment. Disabled, unconfigured and skipped runs leave it alone. Turn on GitHub
@@ -5305,7 +6118,7 @@ When you add a section or a content type, add an example of it to the fixture da
   client site that is pre-launch, or has a feature switched off, runs the same suite as the template. Ordinary builds
   (`npm run dev`, `npm run build`, Vercel) use `site.profile.ts` as usual, and the flag is refused in every Vercel
   build, Preview and Production (`scripts/e2e-profile.mjs`). The fixture is a copy of the template's `site.profile.ts`
-  that differs only in its import path and in `services: true` (Services are off in the template, as a plan feature, and the
+  that differs only in its import path and in `services: true` and `locations: true` (both are off in the template, as plan features, and the
   suite tests them); a template-only test fails if they drift, so change both together.
 - **Some checks run only in the template.** Tests of what the template ships skip themselves on a client site, which
   customises those files on purpose: the bare `studio-brand.json`, the commented-out `launch` example in
@@ -5507,6 +6320,156 @@ tests (`npx playwright install chromium` once per machine) with reduced motion o
 final state; the cookie banner appears as a first-time visitor sees it. `--max-urls=N` limits pages (default 200, so up
 to 800 images).
 
+### Page audit
+
+`npm run audit:page -- https://example.com.au/services/plumbing` audits **one page of a deployed site** and says what is
+wrong with it, with the evidence. It is the page-level view of what `launch:check` checks site-wide, plus checks that
+only make sense for one page: structured data against the page's text, the page's main entity, its internal links,
+and whether AI search can read it (Content Intelligence architecture, §4, §6, §8.2 and §11). It sends only `GET` and
+`HEAD` requests to the site, and reads Sanity with a client that cannot write (below).
+
+```bash
+npm run audit:page -- https://example.com.au/about            # one page
+npm run audit:page -- https://example.com.au --sample=10      # the home page and 10 sitemap pages
+npm run audit:page -- https://example.com.au/about --json     # also writes audit.json
+```
+
+| Option                | Does                                                                                                                                                                                                                                                                               |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<url>`               | The page. A bare domain means its home page. A redirect to another page of the same site is followed and the page it ends on is audited; one that leaves the site is refused (below).                                                                                              |
+| `--sample=N`          | Also audits the home page and the first `N` pages of the sitemap (0 to 25), and compares titles and descriptions across them. Without it only `<url>` is judged; the home page is still fetched, to compare titles and descriptions with and to find the nodes every page carries. |
+| `--confirm`           | Audits each page that has a blocker a second time, after a pause (at most five pages), and only a blocker seen twice counts for the exit code and `audit.json`'s `blocked`. The daily health run uses it, so one bad response cannot open an incident.                             |
+| `--expect-origin=URL` | The production domain the pages declare in their canonical and JSON-LD, when you audit a preview or a local server. It is only compared with: the audit never requests anything from it.                                                                                           |
+| `--json`              | Also writes the findings to `audit.json` in the current folder (git-ignored).                                                                                                                                                                                                      |
+| `--bypass`            | Sends `x-vercel-protection-bypass` (`VERCEL_AUTOMATION_BYPASS_SECRET`) to the site's own host, to audit a protected preview.                                                                                                                                                       |
+
+**What you get.** Findings, grouped by severity (blockers, errors, warnings, suggestions) and, within a severity,
+deterministic before heuristic before judgement. There is no score. Every finding says **what was seen** (`observed`),
+**where it came from** (`source`: `html`, `headers`, `json-ld` or `content`) and **when** (`at`), what was **expected**,
+**why** it matters in one sentence, **how to fix it** (with a Studio intent where the fix is a field), and **how to check**
+(`verify`: run the same command again). The shape is the shared finding contract, `Finding` in `src/lib/audit/finding.ts`.
+
+**The exit code.** `1` only when there is a **blocker**: a page search engines cannot index (it does not answer 200, it is
+`noindex`, robots.txt disallows it, or its canonical link redirects or fails). Errors, warnings and suggestions never fail
+the run. `2` means the audit could not run (a usage error, an address that redirects to another origin, a crash). A `noindex` page the editor hid on purpose (its _Hide from search engines_ switch is on) is
+a suggestion, not a blocker.
+
+**What it will and will not fetch.** The audit is not a crawler. `scripts/audit-page/guard.mjs` wraps every request it
+sends to a site, whatever the page says:
+
+- **Only `http:` and `https:`, only `GET` and `HEAD`**, with no username or password in the address (an address that has
+  them is refused), and never an `authorization` or `cookie` header.
+- **One permitted origin: the one you name** (plus the `https` version of an `http` address on the default port). A
+  redirect, link, sitemap entry, `<loc>` in a sitemap index or canonical that names any other host, including
+  `localhost`, a private address (`10.x`, `192.168.x`, `169.254.169.254`, `[::1]`) or a look-alike host, is **not requested**.
+  Internal links are the only links checked, and they are by definition on that origin. The address you type is trusted, which
+  is how you audit a local server; nothing the page says widens it, and the audit does not resolve DNS, so a name that
+  points somewhere private is not caught.
+- **Redirects are followed by hand**, up to five hops, within the origin. The hop that would leave it is returned unfollowed:
+  for a sampled page that is a `seo.status` finding, and for the page you asked for the audit stops and exits 2, naming
+  where it redirects, so you can run it on that address.
+- **`--expect-origin` only changes comparison.** It says which domain a page's canonical and JSON-LD should name. It is
+  not a permitted origin, and a redirect to it is refused like any other.
+- **Bounded.** 15 seconds per request, 180 seconds and 600 requests for the whole audit, 6 at a time, 150 internal links,
+  25 sampled pages, 5 pages re-checked by `--confirm`, and at most 2 MB of any response is read (the rest is cancelled, so
+  an endless body costs the cap, not the memory). Anything not sent because of a limit is left out of the findings, not
+  reported as broken, and is counted in the notes and in `audit.json`'s `network`.
+- **The Sanity token goes to Sanity only.** It is used by the content client alone, which cannot follow a redirect; the
+  site is never sent it. `audit.json` lists the permitted origins and how many requests were sent or refused.
+
+**The content side.** With `NEXT_PUBLIC_SANITY_PROJECT_ID` and `SANITY_API_READ_TOKEN` set (the environment, then
+`.env.local`; `NEXT_PUBLIC_SANITY_DATASET` defaults to `production`), the audit also reads the page's **published**
+document by its path and the site's _Site identity_ and _Business info_, and attaches `documentId`, the field `path` and a
+Studio intent (`edit;id=…;type=…;path=…`, the form Content health uses) to each finding whose fix is a field. A Viewer token
+is enough. Without them it says so and runs the HTML checks alone. Reading is done by `scripts/audit-page/sanity.mjs`, a
+small script client for Node only: it is never bundled into the site, it is never given to a browser, and it has **no
+method that writes**. Its one request is `GET /data/query/<dataset>?perspective=published`; no mutation, action or upload
+URL appears in the audit's code, and the tests record every request the audit makes and fail on anything but a query (or,
+for the site, a `GET` or `HEAD`). Drafts are never read.
+
+#### Rules
+
+Each rule is a pure function in `src/lib/audit/rules/`, with a unit test, and has a **ruleId that never changes
+meaning**: a rule that changes what it looks for gets a new id, and the old one is retired in `src/lib/audit/finding.ts`
+(`RULES`, which also holds each rule's title and README anchor). A test fails if a rule has no row here.
+
+| Rule                                                                     | Severity                 | What it finds, and what to do                                                                                                                                                                                                                                                               |
+| ------------------------------------------------------------------------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <a id="rule-seo-status"></a>`seo.status`                                 | blocker                  | The page does not answer 200 (or the request failed). Publish the page, or find out why the server fails. Nothing else is reported for that page.                                                                                                                                           |
+| <a id="rule-seo-noindex"></a>`seo.noindex`                               | blocker (suggestion)     | `noindex` in the robots meta tag or the `X-Robots-Tag` header. A suggestion when the page's _Hide from search engines_ switch is on. Clear the switch, and check no header sets it.                                                                                                         |
+| <a id="rule-seo-robots-blocked"></a>`seo.robots-blocked`                 | blocker                  | robots.txt disallows the page for Googlebot (longest matching rule wins, as Google documents).                                                                                                                                                                                              |
+| <a id="rule-seo-canonical-missing"></a>`seo.canonical-missing`           | warning                  | No `<link rel="canonical">`. Pages declare it in `generateMetadata`.                                                                                                                                                                                                                        |
+| <a id="rule-seo-canonical-elsewhere"></a>`seo.canonical-elsewhere`       | warning                  | The canonical names a different page that answers 200 (or another domain, which is not fetched). Right for a deliberate copy; the audit cannot tell.                                                                                                                                        |
+| <a id="rule-seo-canonical-status"></a>`seo.canonical-status`             | blocker                  | The canonical is on the site and redirects, 404s or fails. Point it at the final address, or at the page. A canonical that is the page itself needs no request: the page just answered 200.                                                                                                 |
+| <a id="rule-seo-title-missing"></a>`seo.title-missing`                   | error                    | No `<title>`.                                                                                                                                                                                                                                                                               |
+| <a id="rule-seo-title-duplicate"></a>`seo.title-duplicate`               | error                    | Another page in the sample has the same title (case and spacing ignored). It says which, and how many pages were compared.                                                                                                                                                                  |
+| <a id="rule-seo-description-missing"></a>`seo.description-missing`       | warning                  | No meta description.                                                                                                                                                                                                                                                                        |
+| <a id="rule-seo-description-duplicate"></a>`seo.description-duplicate`   | warning                  | Another page in the sample has the same description.                                                                                                                                                                                                                                        |
+| <a id="rule-seo-h1-count"></a>`seo.h1-count`                             | error                    | Not exactly one visible `<h1>`.                                                                                                                                                                                                                                                             |
+| <a id="rule-seo-heading-order"></a>`seo.heading-order`                   | warning                  | A level is skipped going down (an h2 followed by an h4). Starting on a lower level, or going back up, is not reported.                                                                                                                                                                      |
+| <a id="rule-sd-json-ld-invalid"></a>`sd.json-ld-invalid`                 | error                    | A JSON-LD script that is not valid JSON.                                                                                                                                                                                                                                                    |
+| <a id="rule-sd-visible-parity"></a>`sd.visible-parity`                   | error                    | Structured data that the page does not show, by property class (E2 §3.5): phones, emails, addresses, hours, prices, dates and names as typed values; descriptions from rendered text; plus the deny list. The same helper (`checkParity`) as `tests/e2e/structured-data.spec.ts`.           |
+| <a id="rule-sd-graph-integrity"></a>`sd.graph-integrity`                 | error                    | An `@id` defined twice on the page or contradicting another page's; a reference to an `@id` no node defines; a `WebPage` that is not `isPartOf` the website or has no `publisher`; no `WebPage` for the page itself (a `noindex` page carries none); a draft or release-version id.         |
+| <a id="rule-sd-main-entity"></a>`sd.main-entity`                         | warning                  | A service, article, person, event or location page whose main entity is not the document's: no node with the `@id` its document id gives it, the wrong type, or a `WebPage` that is not `about` it. Needs the content side. An ordinary page has none, and an undated event makes no claim. |
+| <a id="rule-links-internal-broken"></a>`links.internal-broken`           | error                    | An internal link that answers 404, 410, a server error or fails. Every distinct same-site link is requested with `HEAD` (then `GET` if the server refuses `HEAD`), at most 150 per audit. 401 and 403 are gated pages, not broken ones.                                                     |
+| <a id="rule-a11y-image-alt"></a>`a11y.image-alt`                         | warning                  | An `<img>` with no `alt` attribute. `alt=""` is a deliberate "decorative" and passes, and so do images hidden from assistive technology. Whether alt text is _good_ is a judgement the audit never makes.                                                                                   |
+| <a id="rule-ai-snippet-blocked"></a>`ai.snippet-blocked`                 | warning                  | `nosnippet`, `max-snippet:N` (N above -1), or `data-nosnippet` over at least half of the main text. Google needs a page to be indexed and snippet-eligible to show it in AI Overviews. A deliberate limit is fine; it says so.                                                              |
+| <a id="rule-ai-main-text-missing"></a>`ai.main-text-missing`             | error                    | `<main>` is empty or missing in the HTML the server sends, so a crawler that does not run JavaScript sees nothing.                                                                                                                                                                          |
+| <a id="rule-ai-crawler-policy"></a>`ai.crawler-policy`                   | error (site)             | robots.txt blocks a different set of AI crawlers than the _Let AI crawlers_ switch in Site identity says (all five of `AI_CRAWLERS` when off, none when on or unset).                                                                                                                       |
+| <a id="rule-ai-search-crawler-coupling"></a>`ai.search-crawler-coupling` | suggestion (site)        | Until task 228 splits the switch in two, opting out of AI training also blocks PerplexityBot, which Perplexity uses to find pages for its search answers.                                                                                                                                   |
+| <a id="rule-ai-llms-txt-consistency"></a>`ai.llms-txt-consistency`       | suggestion (site)        | llms.txt links to a page the sitemap does not list. Checked only when the file exists and the sitemap was read whole. Google says it does not use llms.txt, so this is only consistency.                                                                                                    |
+| <a id="rule-links-anchor-missing"></a>`links.anchor-missing`             | (Content health only)    | A link jumps to a section the page does not have.                                                                                                                                                                                                                                           |
+| <a id="rule-links-panel-unpublished"></a>`links.panel-unpublished`       | (Content health only)    | A button opens a panel with no published version.                                                                                                                                                                                                                                           |
+| <a id="rule-links-redirect-chain"></a>`links.redirect-chain`             | (Content health only)    | A redirect takes extra hops, or loops.                                                                                                                                                                                                                                                      |
+| <a id="rule-links-orphan-page"></a>`links.orphan-page`                   | (Content health only)    | No menu or page links to the page.                                                                                                                                                                                                                                                          |
+| <a id="rule-content-location-info"></a>`content.location-info`           | (rule F-8, not run here) | See [Locations](#locations). A pure function over a location document; no runner calls it yet.                                                                                                                                                                                              |
+
+**AI-search readiness is not AI visibility** (E2 §8.2). The `ai.*` rules show that nothing technical stops a search or
+answer engine reading and quoting the page. They do not show that it is cited, and there is no AI visibility score:
+Google, Bing and the assistants do not report that through any API this audit can read. `noindex` is reported once, by
+`seo.noindex`. The audit cannot know whether a limit is intended, so `ai.snippet-blocked` says it may be.
+
+**Content health uses the same ids.** The Content health tool in Studio gives each group and item the `ruleId` of the
+audit rule that finds the same problem, and nothing else about the tool changes. `seo.description-missing`,
+`a11y.image-alt` and `links.internal-broken` are found by both: the tool finds them in the content (including drafts), the
+audit in the rendered page. Redirect chains, orphan pages, missing anchors and unpublished panels are content checks the
+audit cannot see in HTML, so they have an id and no audit rule.
+
+**In the daily health run.** On a live site the Health workflow runs `npm run audit:page -- "$PRODUCTION_URL" --json
+--sample=5 --confirm` after the other checks. What it does with the result is in [Health checks](#health-checks): a
+confirmed blocker fails the run, errors and warnings are up to five advisory lines in the issue and the run summary, and an
+audit that leaves no result is a warning that keeps an open issue open. The step needs only `jiti` (the audit loads the
+site's TypeScript rules through it; `scripts/audit-page/dependencies.test.mjs` fails if it ever imports another package),
+so it installs that one package, at the version `package-lock.json` pins, into a temporary folder and links it in, instead
+of running `npm ci` for the whole project. That is about a second and a few kilobytes against a minute or two and hundreds
+of megabytes, and the other checks, which use only Node's built-ins, are untouched. The audit itself is expected to add well under a minute
+(not yet measured on a live site; more if a blocker is re-checked), inside a step limited to five minutes. A pre-launch site is not audited.
+
+**Limits.** It reads the HTML the server sends, without running JavaScript, so a page that only fills in after hydration
+looks empty (which is what `ai.main-text-missing` says). Text parity is only as good as the page's text: hidden containers
+count as visible (a closed accordion is in the markup), text hidden by CSS cannot be told apart. Titles and descriptions are
+compared only with the pages in the sample. The audit does not run rule F-3 (a phone number typed into rich text that differs
+from Business info; task 225) or the thin-page and completeness rules. It cannot tell whether a `noindex`, a canonical
+elsewhere or a snippet limit is meant.
+
+**Adding a rule.** Add the id and title to `TITLES` in `src/lib/audit/finding.ts`, write a pure function
+`(page: PageSnapshot, context: AuditContext) => Finding[]` in `src/lib/audit/rules/` (build findings with `makeFinding`, so
+none can lack its evidence, `why`, `fix` or `verify`), add it to `PAGE_RULES` in `src/lib/audit/page-audit.ts`, write its
+unit test, and add a row to the table above with `<a id="rule-…"></a>`. If the rule needs something from the HTML, add a
+reader to `scripts/launch-check/html.mjs` and fill it in `scripts/audit-page/snapshot.mjs`, so `launch:check` and the
+audit read pages the same way.
+
+**Tests.** `src/lib/audit/fixtures.ts` builds a small made-up site: clean pages whose HTML and JSON-LD come from the real
+node builders, and five deliberately broken pages, each one defect away from a clean one: a repeated title
+(`seo.title-duplicate`), a branch phone number in JSON-LD that the page does not show (`sd.visible-parity`), a `WebPage`
+that is not part of the website (`sd.graph-integrity`), a canonical that redirects (`seo.canonical-status`) and an image
+with no alt text (`a11y.image-alt`). `scripts/audit-page/run.test.mjs` serves them through `launch:check`'s own request code
+and a fake Content Lake, and asserts that the broken pages produce **exactly** those five ruleIds, that the clean pages
+produce no deterministic finding at warning or above, that every finding has its evidence, and that no request is a write. `guard.test.mjs` holds the negative tests of the URL rules above (every scheme, private address
+and look-alike host refused, off-origin redirects not followed, no credentials sent, the limits), and `run.test.mjs` checks the
+same end to end against a hostile page. `tests/e2e/page-audit.spec.ts` runs the real command against the production build the
+end-to-end suite serves: `npx playwright test tests/e2e/page-audit.spec.ts --project=desktop`.
+
 ### Performance budgets
 
 CI fails when a page gets heavier or slower than these. They run against the same production build and fake
@@ -5602,8 +6565,8 @@ tooling: `npm run check` (or CI) is the shared gate.
 npm run new:section pricing-table
 ```
 
-This creates the schema, GROQ fragment, component and thumbnail, registers each one, adds a placeholder
-to the section gallery's fixtures, and runs typegen.
+This creates the schema, its design capability declaration, GROQ fragment, component and thumbnail, registers each one,
+adds a placeholder to the section gallery's fixtures, and runs typegen.
 The section is immediately in Studio's _Add item_ menu with a title and text field, a **Design** tab (the shared
 `style`, see [Section style](#section-style)) and a `SectionFrame` in its component. Then:
 
@@ -5615,10 +6578,15 @@ The section is immediately in Studio's _Add item_ menu with a title and text fie
    initial style), and style it with the
    [design tokens](#design-tokens) (`bg-surface-alt`, `text-ink-muted`, `py-section`, `text-h2`): a raw colour class fails the
    `no-raw-palette` test
-4. Optionally replace `public/section-previews/pricingTable.svg`
-5. Give the placeholder entry the generator added to the section gallery (`gallerySections` in
+4. Review each design capability in `src/features/pages/schemas/sections/pricing-table-capabilities.ts`. The generator
+   starts every one as Not applicable with the reason "Not reviewed yet", and `npm run check` fails until each is Required,
+   Conditional (with a trigger) or Not applicable (with a reason). See
+   [Design capability contract](#design-capability-contract).
+5. Optionally replace `public/section-previews/pricingTable.svg`
+6. Give the placeholder entry the generator added to the section gallery (`gallerySections` in
    `tests/e2e/fixtures/dataset.mjs`) real content, one entry per variant, then add the screenshot baselines
-   with `npm run test:e2e:update` (see _Section gallery and visual regression_).
+   with `npm run test:e2e:update` (see _Section gallery and visual regression_). The section's parity and capability
+   snapshots are written the first time `npm run test` runs; review and commit them.
 
 Guidance is not automatic for new fields: give `imageField` the spot's `aspect` (`'4:3'`), `minWidth` (px) and/or
 `orientation`, and add `lengthWarning(rule, max, 'Headings')` (`src/lib/sanity/schema/length-guidance.ts`) to titles and

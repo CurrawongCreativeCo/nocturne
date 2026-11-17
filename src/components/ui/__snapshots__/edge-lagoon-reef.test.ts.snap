@@ -1,0 +1,10 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`frozen geometry > keeps the checksum of each Lagoon and Reef shape, so a later slice cannot change it unseen 1`] = `
+{
+  "lagoon · standard · standard · false · false": "41b6a755e7f4951a",
+  "lagoon · standard · standard · false · true": "ca8d390c9d96d9d2",
+  "reef · standard · standard · true · false": "79aec741ba7ef3ae",
+  "reef · standard · standard · true · true": "c15c68accd3bf98b",
+}
+`;

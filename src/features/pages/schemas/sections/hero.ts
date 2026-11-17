@@ -3,7 +3,9 @@ import { defineArrayMember, defineField, defineType, type PreviewValue } from 's
 
 import { slotField } from '@/features/pages/slots/slot-field'
 import { SPLIT_IMAGE_SHAPES, SPLIT_PROPORTIONS } from '@/features/pages/utils/hero-split'
+import { ownsSurfaces } from '@/lib/design/section-surfaces'
 import { DEFAULT_HEADING_TONES, headingPlainText } from '@/lib/sanity/heading-text'
+import { hiddenFromClients } from '@/lib/sanity/roles'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageDesignField } from '@/lib/sanity/schema/image-design'
@@ -13,6 +15,7 @@ import { presetField, presetsOption } from '@/lib/sanity/schema/preset-field'
 import { matchPreset } from '@/lib/sanity/schema/preset-match'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
+import { pictureDepthFields } from '@/lib/sanity/schema/surface-design'
 import {
   HeroCentredTextThumbnail,
   HeroEditorialThumbnail,
@@ -29,6 +32,7 @@ import {
   HeroSplitThumbnail,
 } from '@/lib/sanity/schema/thumbnails/hero-thumbnails'
 
+import { heroCapabilities } from './hero-capabilities'
 import { heroEyebrowDesignField } from './hero-eyebrow'
 import { heroPartMotionField } from './hero-part-motion'
 import { imageSideOptions } from './image-side'
@@ -218,6 +222,7 @@ export const hero = defineType({
   // The preset bar above the form: the one place to choose a hero's design (README, "Hero presets").
   options: {
     ...presetsOption(HERO_PRESETS, HERO_PRESET_LABELS),
+    designCapabilities: heroCapabilities,
     manifest: {
       purpose:
         'The opening section of a page: a heading, a short introduction and up to two buttons, with an optional picture in one of four layouts.',
@@ -262,6 +267,16 @@ export const hero = defineType({
         ],
       }),
       heroEyebrowDesignField,
+      // A rule under the title (task 151), agency only. Drawn by HeroText when the hero has a title and
+      // something under it; empty is None, so a hero that never chose one is unchanged.
+      defineField({
+        name: 'dividerDesign',
+        title: 'Divider under the title',
+        type: 'decorativeDivider',
+        group: 'design',
+        description: 'A rule between the title and the intro or buttons. Optional.',
+        hidden: hiddenFromClients,
+      }),
       // Select words in the title to highlight them. Replaces the plain `title` below, which is read
       // only until the "Hero titles to heading text" migration has run (migrations/README.md).
       headingField({
@@ -309,6 +324,8 @@ export const hero = defineType({
       }),
       // Split's picture: its shape, how it moves inside its frame and decorative frames (agency only, Design tab).
       imageDesignField({ hidden: notSplit }),
+      // A shadow and glow on Split's picture (task 147), beside Image design so it never moves with it.
+      pictureDepthFields({ hidden: notSplit }),
       // A small picture beside the oversized heading; the Editorial layout is the only one to use it.
       imageField({
         name: 'secondaryImage',
@@ -369,7 +386,7 @@ export const hero = defineType({
         hasOwnBackgroundImage: () => true,
         // Only these two draw the picture behind the text; a panel sits over it.
         // Full background draws its own text panel, so a section Panel would double it.
-        ownsSurfaces: (section) => layoutOf(section) === 'full-bleed',
+        ownsSurfaces: (section) => ownsSurfaces('hero', section.variant),
         drawsBackground: (section) => ['overlay', 'full-bleed'].includes(layoutOf(section)),
       },
     },

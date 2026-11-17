@@ -98,6 +98,13 @@ function walkFields(fields, context, depth = 0) {
 
 function describe(field, path, topField, schemaValue, required, context, depth) {
   const named = context.types.get(field.type)
+  // The shared design capability the field is, when a shared builder marked it (lib/design).
+  const capability = field.options?.capability ?? named?.options?.capability
+  // The text role a text style field was built for (the checks refuse a role its stamp doesn't back).
+  const role = field.options?.textRole ?? named?.options?.textRole
+  // Agency-only and design-ness are inherited: a field inside one is the same (lib/design/schema-capabilities).
+  const agencyOnly = context.agencyOnly === true || context.agencyOnlyField?.(field) === true
+  const design = context.design === true || Boolean(field.options?.designSummary)
   const row = {
     path,
     kind: field.type,
@@ -106,15 +113,27 @@ function describe(field, path, topField, schemaValue, required, context, depth) 
       limit: context.prefix === '' ? context.limits?.[field.name] : undefined,
     }),
     ...(listOf(field) ? { list: listOf(field) } : {}),
-    clientEditable: context.editable(context.rootType, topField),
+    ...(capability ? { capability } : {}),
+    ...(role ? { role } : {}),
+    clientEditable: context.editable(context.rootType, topField) && !agencyOnly,
+    ...(design ? { design: true } : {}),
   }
   const rows = [row]
   if (depth >= MAX_DEPTH) return rows
 
-  const child = (fields, prefix, attributes, extraStack) =>
+  const child = (fields, prefix, attributes, extraStack, own = {}) =>
     walkFields(
       fields,
-      { ...context, topField, prefix, attributes, stack: [...context.stack, ...extraStack] },
+      {
+        ...context,
+        topField,
+        prefix,
+        attributes,
+        stack: [...context.stack, ...extraStack],
+        agencyOnly,
+        design,
+        ...own,
+      },
       depth + 1,
     )
 
@@ -127,9 +146,13 @@ function describe(field, path, topField, schemaValue, required, context, depth) 
       const node = memberNode(schemaValue, typeName)
       const memberNamed = context.types.get(typeName)
       const memberFields = member.fields ?? memberNamed?.fields
-      if (memberFields && !context.stack.includes(typeName)) {
+      // Only a named type can hold itself; inline objects are all `object`, so they never stop a walk.
+      if (memberFields && !(memberNamed && context.stack.includes(typeName))) {
         const attributes = attributesOf(node, context.namedAttributes)
-        rows.push(...child(memberFields, `${memberPath}.`, attributes, [typeName]))
+        const own = context.agencyOnlyField?.(member) === true ? { agencyOnly: true } : {}
+        rows.push(
+          ...child(memberFields, `${memberPath}.`, attributes, memberNamed ? [typeName] : [], own),
+        )
       } else if (!memberFields) {
         rows.push({
           path: memberPath,
@@ -137,6 +160,7 @@ function describe(field, path, topField, schemaValue, required, context, depth) 
           ...constraints(member, { requiredBySchema: false }),
           ...(listOf(member) ? { list: listOf(member) } : {}),
           clientEditable: row.clientEditable,
+          ...(design ? { design: true } : {}),
         })
       }
     }
@@ -145,9 +169,9 @@ function describe(field, path, topField, schemaValue, required, context, depth) 
 
   const ownFields =
     field.fields ?? (named && named.name !== 'sectionStyle' ? named.fields : undefined)
-  if (ownFields && !context.stack.includes(field.type)) {
+  if (ownFields && !(named && context.stack.includes(field.type))) {
     const attributes = attributesOf(schemaValue, context.namedAttributes)
-    rows.push(...child(ownFields, `${path}.`, attributes, [field.type]))
+    rows.push(...child(ownFields, `${path}.`, attributes, named ? [field.type] : []))
   }
   return rows
 }
@@ -160,6 +184,7 @@ export function describeFields(type, deps, { limits } = {}) {
     attributes: deps.namedAttributes(type.name),
     namedAttributes: deps.namedAttributes,
     editable: deps.isClientEditable,
+    agencyOnlyField: deps.agencyOnlyField,
     prefix: '',
     stack: [type.name],
     limits,
@@ -176,20 +201,27 @@ export function evaluateRules(type, variants, rulesFor) {
       hasPicture: rules.hasPicture?.(section) === true,
       fixesAlignment: rules.fixesAlignment?.(section) === true,
       hasOwnBackgroundImage: rules.hasOwnBackgroundImage?.(section) === true,
+      drawsBackground: rules.drawsBackground?.(section) === true,
+      // The shared Panel doesn't apply where this is true (lib/design/section-surfaces.ts).
+      ownsSurfaces: rules.ownsSurfaces?.(section) === true,
     }
   }
   return [null, ...variants.map((variant) => variant.value)].map(evaluate)
 }
 
 /**
- * The registry slots a section offers: `<section>.<field>` where the section has that field. The
- * registry's `max` is the slot field's known maximum.
+ * The registry slots a section offers: `<family>.<field>` where the family is on this section (the
+ * registry's SLOT_FAMILIES: `split` is mediaText) and the section has that field. The registry's `max`
+ * is the slot field's known maximum.
  */
 function sectionSlots(section, deps) {
   const fieldNames = new Set((section.fields ?? []).map((field) => field.name))
+  const families = deps.slots?.SLOT_FAMILIES ?? {}
   return Object.keys(deps.slots?.SLOTS ?? {})
     .map((slot) => ({ slot, family: slot.split('.')[0], path: slot.split('.')[1] }))
-    .filter(({ family, path }) => family === section.name && fieldNames.has(path))
+    .filter(
+      ({ family, path }) => (families[family] ?? family) === section.name && fieldNames.has(path),
+    )
 }
 
 function describeSection(section, deps) {
@@ -201,6 +233,14 @@ function describeSection(section, deps) {
   }
   const fields = describeFields(section, deps, { limits })
   const variants = listOf((section.fields ?? []).find((field) => field.name === 'variant') ?? {})
+  const contract = deps.capabilitiesFor?.(section.name)
+  // A field a content source's evidence probes belongs to that source (change proposals judge it so).
+  for (const [source, entry] of Object.entries(contract?.contentSources ?? {})) {
+    for (const path of entry.fields ?? []) {
+      const row = fields.find((candidate) => candidate.path === path)
+      if (row) row.contentSource = source
+    }
+  }
   return {
     type: section.name,
     title: section.title ?? section.name,
@@ -215,6 +255,7 @@ function describeSection(section, deps) {
       set,
     })),
     rules: evaluateRules(section.name, variants ?? [], deps.rulesFor),
+    ...(contract ?? {}),
   }
 }
 
@@ -265,8 +306,12 @@ function describeSlots(deps) {
  * @param deps.schemaJson       schema.json from `sanity schema extract` (which fields are required)
  * @param deps.rulesFor         (type) => registered section rules
  * @param deps.isClientEditable (type, field) => boolean
- * @param deps.slots           { SLOTS, SLOT_BLOCKS } from the shared slot registry
+ * @param deps.agencyOnlyField  (field definition) => whether the Studio hides it from clients; a row
+ *                              under one is never client-editable (lib/design/schema-capabilities)
+ * @param deps.slots           { SLOTS, SLOT_BLOCKS, SLOT_FAMILIES } from the shared slot registry
  * @param deps.limitsFor        (type) => the section's exported LIMITS, if any
+ * @param deps.capabilitiesFor  (type) => the section's `capabilities` and `contentSources`, if declared
+ * @param deps.designCapabilities the contract's registry, slot blocks, listings and coverage
  */
 export function buildDesignManifest(deps) {
   const types = new Map(
@@ -301,5 +346,8 @@ export function buildDesignManifest(deps) {
     sectionStyle: { fields: describeFields(deps.sectionStyle, resolved) },
     designSettings: { fields: describeFields(deps.designSettings, resolved) },
     tokens,
+    // The design capability contract beyond the sections: its registry, the slot blocks and listings
+    // it covers, and what it doesn't cover (lib/design/capability-manifest.ts).
+    ...(deps.designCapabilities ? { designCapabilities: deps.designCapabilities } : {}),
   }
 }

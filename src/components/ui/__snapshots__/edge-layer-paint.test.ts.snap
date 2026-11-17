@@ -1,0 +1,672 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`unset paint and opacity of the generated edges > is frozen for every shape, palette, strength, depth and layer-below switch 1`] = `
+{
+  "lagoon/highlight/light/deep/below": [
+    "over highlight 0.154",
+    "over accent-2 0.0924",
+  ],
+  "lagoon/highlight/light/deep/no-below": [
+    "over highlight 0.154",
+    "over accent-2 0.0924",
+  ],
+  "lagoon/highlight/light/shallow/below": [
+    "over highlight 0.154",
+    "over accent-2 0.0924",
+  ],
+  "lagoon/highlight/light/shallow/no-below": [
+    "over highlight 0.154",
+    "over accent-2 0.0924",
+  ],
+  "lagoon/highlight/light/standard/below": [
+    "over highlight 0.154",
+    "over accent-2 0.0924",
+  ],
+  "lagoon/highlight/light/standard/no-below": [
+    "over highlight 0.154",
+    "over accent-2 0.0924",
+  ],
+  "lagoon/highlight/standard/deep/below": [
+    "over highlight 0.22",
+    "over accent-2 0.132",
+  ],
+  "lagoon/highlight/standard/deep/no-below": [
+    "over highlight 0.22",
+    "over accent-2 0.132",
+  ],
+  "lagoon/highlight/standard/shallow/below": [
+    "over highlight 0.22",
+    "over accent-2 0.132",
+  ],
+  "lagoon/highlight/standard/shallow/no-below": [
+    "over highlight 0.22",
+    "over accent-2 0.132",
+  ],
+  "lagoon/highlight/standard/standard/below": [
+    "over highlight 0.22",
+    "over accent-2 0.132",
+  ],
+  "lagoon/highlight/standard/standard/no-below": [
+    "over highlight 0.22",
+    "over accent-2 0.132",
+  ],
+  "lagoon/highlight/strong/deep/below": [
+    "over highlight 0.308",
+    "over accent-2 0.1848",
+  ],
+  "lagoon/highlight/strong/deep/no-below": [
+    "over highlight 0.308",
+    "over accent-2 0.1848",
+  ],
+  "lagoon/highlight/strong/shallow/below": [
+    "over highlight 0.308",
+    "over accent-2 0.1848",
+  ],
+  "lagoon/highlight/strong/shallow/no-below": [
+    "over highlight 0.308",
+    "over accent-2 0.1848",
+  ],
+  "lagoon/highlight/strong/standard/below": [
+    "over highlight 0.308",
+    "over accent-2 0.1848",
+  ],
+  "lagoon/highlight/strong/standard/no-below": [
+    "over highlight 0.308",
+    "over accent-2 0.1848",
+  ],
+  "lagoon/ink/light/deep/below": [
+    "over ink 0.154",
+    "over accent 0.0924",
+  ],
+  "lagoon/ink/light/deep/no-below": [
+    "over ink 0.154",
+    "over accent 0.0924",
+  ],
+  "lagoon/ink/light/shallow/below": [
+    "over ink 0.154",
+    "over accent 0.0924",
+  ],
+  "lagoon/ink/light/shallow/no-below": [
+    "over ink 0.154",
+    "over accent 0.0924",
+  ],
+  "lagoon/ink/light/standard/below": [
+    "over ink 0.154",
+    "over accent 0.0924",
+  ],
+  "lagoon/ink/light/standard/no-below": [
+    "over ink 0.154",
+    "over accent 0.0924",
+  ],
+  "lagoon/ink/standard/deep/below": [
+    "over ink 0.22",
+    "over accent 0.132",
+  ],
+  "lagoon/ink/standard/deep/no-below": [
+    "over ink 0.22",
+    "over accent 0.132",
+  ],
+  "lagoon/ink/standard/shallow/below": [
+    "over ink 0.22",
+    "over accent 0.132",
+  ],
+  "lagoon/ink/standard/shallow/no-below": [
+    "over ink 0.22",
+    "over accent 0.132",
+  ],
+  "lagoon/ink/standard/standard/below": [
+    "over ink 0.22",
+    "over accent 0.132",
+  ],
+  "lagoon/ink/standard/standard/no-below": [
+    "over ink 0.22",
+    "over accent 0.132",
+  ],
+  "lagoon/ink/strong/deep/below": [
+    "over ink 0.308",
+    "over accent 0.1848",
+  ],
+  "lagoon/ink/strong/deep/no-below": [
+    "over ink 0.308",
+    "over accent 0.1848",
+  ],
+  "lagoon/ink/strong/shallow/below": [
+    "over ink 0.308",
+    "over accent 0.1848",
+  ],
+  "lagoon/ink/strong/shallow/no-below": [
+    "over ink 0.308",
+    "over accent 0.1848",
+  ],
+  "lagoon/ink/strong/standard/below": [
+    "over ink 0.308",
+    "over accent 0.1848",
+  ],
+  "lagoon/ink/strong/standard/no-below": [
+    "over ink 0.308",
+    "over accent 0.1848",
+  ],
+  "lagoon/tint/light/deep/below": [
+    "over accent-2 0.154",
+    "over ink 0.0924",
+  ],
+  "lagoon/tint/light/deep/no-below": [
+    "over accent-2 0.154",
+    "over ink 0.0924",
+  ],
+  "lagoon/tint/light/shallow/below": [
+    "over accent-2 0.154",
+    "over ink 0.0924",
+  ],
+  "lagoon/tint/light/shallow/no-below": [
+    "over accent-2 0.154",
+    "over ink 0.0924",
+  ],
+  "lagoon/tint/light/standard/below": [
+    "over accent-2 0.154",
+    "over ink 0.0924",
+  ],
+  "lagoon/tint/light/standard/no-below": [
+    "over accent-2 0.154",
+    "over ink 0.0924",
+  ],
+  "lagoon/tint/standard/deep/below": [
+    "over accent-2 0.22",
+    "over ink 0.132",
+  ],
+  "lagoon/tint/standard/deep/no-below": [
+    "over accent-2 0.22",
+    "over ink 0.132",
+  ],
+  "lagoon/tint/standard/shallow/below": [
+    "over accent-2 0.22",
+    "over ink 0.132",
+  ],
+  "lagoon/tint/standard/shallow/no-below": [
+    "over accent-2 0.22",
+    "over ink 0.132",
+  ],
+  "lagoon/tint/standard/standard/below": [
+    "over accent-2 0.22",
+    "over ink 0.132",
+  ],
+  "lagoon/tint/standard/standard/no-below": [
+    "over accent-2 0.22",
+    "over ink 0.132",
+  ],
+  "lagoon/tint/strong/deep/below": [
+    "over accent-2 0.308",
+    "over ink 0.1848",
+  ],
+  "lagoon/tint/strong/deep/no-below": [
+    "over accent-2 0.308",
+    "over ink 0.1848",
+  ],
+  "lagoon/tint/strong/shallow/below": [
+    "over accent-2 0.308",
+    "over ink 0.1848",
+  ],
+  "lagoon/tint/strong/shallow/no-below": [
+    "over accent-2 0.308",
+    "over ink 0.1848",
+  ],
+  "lagoon/tint/strong/standard/below": [
+    "over accent-2 0.308",
+    "over ink 0.1848",
+  ],
+  "lagoon/tint/strong/standard/no-below": [
+    "over accent-2 0.308",
+    "over ink 0.1848",
+  ],
+  "reef/highlight/light/deep/below": [
+    "over highlight 0.294",
+    "over accent-2 0.17639999999999997",
+    "under accent-2 0.24989999999999998",
+  ],
+  "reef/highlight/light/deep/no-below": [
+    "over highlight 0.294",
+    "over accent-2 0.17639999999999997",
+    "under accent-2 0.24989999999999998",
+  ],
+  "reef/highlight/light/shallow/below": [
+    "over highlight 0.294",
+    "over accent-2 0.17639999999999997",
+    "under accent-2 0.24989999999999998",
+  ],
+  "reef/highlight/light/shallow/no-below": [
+    "over highlight 0.294",
+    "over accent-2 0.17639999999999997",
+    "under accent-2 0.24989999999999998",
+  ],
+  "reef/highlight/light/standard/below": [
+    "over highlight 0.294",
+    "over accent-2 0.17639999999999997",
+    "under accent-2 0.24989999999999998",
+  ],
+  "reef/highlight/light/standard/no-below": [
+    "over highlight 0.294",
+    "over accent-2 0.17639999999999997",
+    "under accent-2 0.24989999999999998",
+  ],
+  "reef/highlight/standard/deep/below": [
+    "over highlight 0.42",
+    "over accent-2 0.252",
+    "under accent-2 0.357",
+  ],
+  "reef/highlight/standard/deep/no-below": [
+    "over highlight 0.42",
+    "over accent-2 0.252",
+    "under accent-2 0.357",
+  ],
+  "reef/highlight/standard/shallow/below": [
+    "over highlight 0.42",
+    "over accent-2 0.252",
+    "under accent-2 0.357",
+  ],
+  "reef/highlight/standard/shallow/no-below": [
+    "over highlight 0.42",
+    "over accent-2 0.252",
+    "under accent-2 0.357",
+  ],
+  "reef/highlight/standard/standard/below": [
+    "over highlight 0.42",
+    "over accent-2 0.252",
+    "under accent-2 0.357",
+  ],
+  "reef/highlight/standard/standard/no-below": [
+    "over highlight 0.42",
+    "over accent-2 0.252",
+    "under accent-2 0.357",
+  ],
+  "reef/highlight/strong/deep/below": [
+    "over highlight 0.588",
+    "over accent-2 0.35279999999999995",
+    "under accent-2 0.49979999999999997",
+  ],
+  "reef/highlight/strong/deep/no-below": [
+    "over highlight 0.588",
+    "over accent-2 0.35279999999999995",
+    "under accent-2 0.49979999999999997",
+  ],
+  "reef/highlight/strong/shallow/below": [
+    "over highlight 0.588",
+    "over accent-2 0.35279999999999995",
+    "under accent-2 0.49979999999999997",
+  ],
+  "reef/highlight/strong/shallow/no-below": [
+    "over highlight 0.588",
+    "over accent-2 0.35279999999999995",
+    "under accent-2 0.49979999999999997",
+  ],
+  "reef/highlight/strong/standard/below": [
+    "over highlight 0.588",
+    "over accent-2 0.35279999999999995",
+    "under accent-2 0.49979999999999997",
+  ],
+  "reef/highlight/strong/standard/no-below": [
+    "over highlight 0.588",
+    "over accent-2 0.35279999999999995",
+    "under accent-2 0.49979999999999997",
+  ],
+  "reef/ink/light/deep/below": [
+    "over ink 0.294",
+    "over accent-2 0.17639999999999997",
+    "under accent 0.24989999999999998",
+  ],
+  "reef/ink/light/deep/no-below": [
+    "over ink 0.294",
+    "over accent-2 0.17639999999999997",
+    "under accent 0.24989999999999998",
+  ],
+  "reef/ink/light/shallow/below": [
+    "over ink 0.294",
+    "over accent-2 0.17639999999999997",
+    "under accent 0.24989999999999998",
+  ],
+  "reef/ink/light/shallow/no-below": [
+    "over ink 0.294",
+    "over accent-2 0.17639999999999997",
+    "under accent 0.24989999999999998",
+  ],
+  "reef/ink/light/standard/below": [
+    "over ink 0.294",
+    "over accent-2 0.17639999999999997",
+    "under accent 0.24989999999999998",
+  ],
+  "reef/ink/light/standard/no-below": [
+    "over ink 0.294",
+    "over accent-2 0.17639999999999997",
+    "under accent 0.24989999999999998",
+  ],
+  "reef/ink/standard/deep/below": [
+    "over ink 0.42",
+    "over accent-2 0.252",
+    "under accent 0.357",
+  ],
+  "reef/ink/standard/deep/no-below": [
+    "over ink 0.42",
+    "over accent-2 0.252",
+    "under accent 0.357",
+  ],
+  "reef/ink/standard/shallow/below": [
+    "over ink 0.42",
+    "over accent-2 0.252",
+    "under accent 0.357",
+  ],
+  "reef/ink/standard/shallow/no-below": [
+    "over ink 0.42",
+    "over accent-2 0.252",
+    "under accent 0.357",
+  ],
+  "reef/ink/standard/standard/below": [
+    "over ink 0.42",
+    "over accent-2 0.252",
+    "under accent 0.357",
+  ],
+  "reef/ink/standard/standard/no-below": [
+    "over ink 0.42",
+    "over accent-2 0.252",
+    "under accent 0.357",
+  ],
+  "reef/ink/strong/deep/below": [
+    "over ink 0.588",
+    "over accent-2 0.35279999999999995",
+    "under accent 0.49979999999999997",
+  ],
+  "reef/ink/strong/deep/no-below": [
+    "over ink 0.588",
+    "over accent-2 0.35279999999999995",
+    "under accent 0.49979999999999997",
+  ],
+  "reef/ink/strong/shallow/below": [
+    "over ink 0.588",
+    "over accent-2 0.35279999999999995",
+    "under accent 0.49979999999999997",
+  ],
+  "reef/ink/strong/shallow/no-below": [
+    "over ink 0.588",
+    "over accent-2 0.35279999999999995",
+    "under accent 0.49979999999999997",
+  ],
+  "reef/ink/strong/standard/below": [
+    "over ink 0.588",
+    "over accent-2 0.35279999999999995",
+    "under accent 0.49979999999999997",
+  ],
+  "reef/ink/strong/standard/no-below": [
+    "over ink 0.588",
+    "over accent-2 0.35279999999999995",
+    "under accent 0.49979999999999997",
+  ],
+  "reef/tint/light/deep/below": [
+    "over accent-2 0.294",
+    "over accent 0.17639999999999997",
+    "under accent 0.24989999999999998",
+  ],
+  "reef/tint/light/deep/no-below": [
+    "over accent-2 0.294",
+    "over accent 0.17639999999999997",
+    "under accent 0.24989999999999998",
+  ],
+  "reef/tint/light/shallow/below": [
+    "over accent-2 0.294",
+    "over accent 0.17639999999999997",
+    "under accent 0.24989999999999998",
+  ],
+  "reef/tint/light/shallow/no-below": [
+    "over accent-2 0.294",
+    "over accent 0.17639999999999997",
+    "under accent 0.24989999999999998",
+  ],
+  "reef/tint/light/standard/below": [
+    "over accent-2 0.294",
+    "over accent 0.17639999999999997",
+    "under accent 0.24989999999999998",
+  ],
+  "reef/tint/light/standard/no-below": [
+    "over accent-2 0.294",
+    "over accent 0.17639999999999997",
+    "under accent 0.24989999999999998",
+  ],
+  "reef/tint/standard/deep/below": [
+    "over accent-2 0.42",
+    "over accent 0.252",
+    "under accent 0.357",
+  ],
+  "reef/tint/standard/deep/no-below": [
+    "over accent-2 0.42",
+    "over accent 0.252",
+    "under accent 0.357",
+  ],
+  "reef/tint/standard/shallow/below": [
+    "over accent-2 0.42",
+    "over accent 0.252",
+    "under accent 0.357",
+  ],
+  "reef/tint/standard/shallow/no-below": [
+    "over accent-2 0.42",
+    "over accent 0.252",
+    "under accent 0.357",
+  ],
+  "reef/tint/standard/standard/below": [
+    "over accent-2 0.42",
+    "over accent 0.252",
+    "under accent 0.357",
+  ],
+  "reef/tint/standard/standard/no-below": [
+    "over accent-2 0.42",
+    "over accent 0.252",
+    "under accent 0.357",
+  ],
+  "reef/tint/strong/deep/below": [
+    "over accent-2 0.588",
+    "over accent 0.35279999999999995",
+    "under accent 0.49979999999999997",
+  ],
+  "reef/tint/strong/deep/no-below": [
+    "over accent-2 0.588",
+    "over accent 0.35279999999999995",
+    "under accent 0.49979999999999997",
+  ],
+  "reef/tint/strong/shallow/below": [
+    "over accent-2 0.588",
+    "over accent 0.35279999999999995",
+    "under accent 0.49979999999999997",
+  ],
+  "reef/tint/strong/shallow/no-below": [
+    "over accent-2 0.588",
+    "over accent 0.35279999999999995",
+    "under accent 0.49979999999999997",
+  ],
+  "reef/tint/strong/standard/below": [
+    "over accent-2 0.588",
+    "over accent 0.35279999999999995",
+    "under accent 0.49979999999999997",
+  ],
+  "reef/tint/strong/standard/no-below": [
+    "over accent-2 0.588",
+    "over accent 0.35279999999999995",
+    "under accent 0.49979999999999997",
+  ],
+  "still-water/highlight/light/deep/below": [
+    "over highlight 0.11199999999999999",
+    "under accent-2 0.09519999999999999",
+  ],
+  "still-water/highlight/light/deep/no-below": [
+    "over highlight 0.11199999999999999",
+  ],
+  "still-water/highlight/light/shallow/below": [
+    "over highlight 0.11199999999999999",
+  ],
+  "still-water/highlight/light/shallow/no-below": [
+    "over highlight 0.11199999999999999",
+  ],
+  "still-water/highlight/light/standard/below": [
+    "over highlight 0.11199999999999999",
+    "under accent-2 0.09519999999999999",
+  ],
+  "still-water/highlight/light/standard/no-below": [
+    "over highlight 0.11199999999999999",
+  ],
+  "still-water/highlight/standard/deep/below": [
+    "over highlight 0.16",
+    "under accent-2 0.136",
+  ],
+  "still-water/highlight/standard/deep/no-below": [
+    "over highlight 0.16",
+  ],
+  "still-water/highlight/standard/shallow/below": [
+    "over highlight 0.16",
+  ],
+  "still-water/highlight/standard/shallow/no-below": [
+    "over highlight 0.16",
+  ],
+  "still-water/highlight/standard/standard/below": [
+    "over highlight 0.16",
+    "under accent-2 0.136",
+  ],
+  "still-water/highlight/standard/standard/no-below": [
+    "over highlight 0.16",
+  ],
+  "still-water/highlight/strong/deep/below": [
+    "over highlight 0.22399999999999998",
+    "under accent-2 0.19039999999999999",
+  ],
+  "still-water/highlight/strong/deep/no-below": [
+    "over highlight 0.22399999999999998",
+  ],
+  "still-water/highlight/strong/shallow/below": [
+    "over highlight 0.22399999999999998",
+  ],
+  "still-water/highlight/strong/shallow/no-below": [
+    "over highlight 0.22399999999999998",
+  ],
+  "still-water/highlight/strong/standard/below": [
+    "over highlight 0.22399999999999998",
+    "under accent-2 0.19039999999999999",
+  ],
+  "still-water/highlight/strong/standard/no-below": [
+    "over highlight 0.22399999999999998",
+  ],
+  "still-water/ink/light/deep/below": [
+    "over ink 0.11199999999999999",
+    "under accent 0.09519999999999999",
+  ],
+  "still-water/ink/light/deep/no-below": [
+    "over ink 0.11199999999999999",
+  ],
+  "still-water/ink/light/shallow/below": [
+    "over ink 0.11199999999999999",
+  ],
+  "still-water/ink/light/shallow/no-below": [
+    "over ink 0.11199999999999999",
+  ],
+  "still-water/ink/light/standard/below": [
+    "over ink 0.11199999999999999",
+    "under accent 0.09519999999999999",
+  ],
+  "still-water/ink/light/standard/no-below": [
+    "over ink 0.11199999999999999",
+  ],
+  "still-water/ink/standard/deep/below": [
+    "over ink 0.16",
+    "under accent 0.136",
+  ],
+  "still-water/ink/standard/deep/no-below": [
+    "over ink 0.16",
+  ],
+  "still-water/ink/standard/shallow/below": [
+    "over ink 0.16",
+  ],
+  "still-water/ink/standard/shallow/no-below": [
+    "over ink 0.16",
+  ],
+  "still-water/ink/standard/standard/below": [
+    "over ink 0.16",
+    "under accent 0.136",
+  ],
+  "still-water/ink/standard/standard/no-below": [
+    "over ink 0.16",
+  ],
+  "still-water/ink/strong/deep/below": [
+    "over ink 0.22399999999999998",
+    "under accent 0.19039999999999999",
+  ],
+  "still-water/ink/strong/deep/no-below": [
+    "over ink 0.22399999999999998",
+  ],
+  "still-water/ink/strong/shallow/below": [
+    "over ink 0.22399999999999998",
+  ],
+  "still-water/ink/strong/shallow/no-below": [
+    "over ink 0.22399999999999998",
+  ],
+  "still-water/ink/strong/standard/below": [
+    "over ink 0.22399999999999998",
+    "under accent 0.19039999999999999",
+  ],
+  "still-water/ink/strong/standard/no-below": [
+    "over ink 0.22399999999999998",
+  ],
+  "still-water/tint/light/deep/below": [
+    "over accent 0.11199999999999999",
+    "under accent 0.09519999999999999",
+  ],
+  "still-water/tint/light/deep/no-below": [
+    "over accent 0.11199999999999999",
+  ],
+  "still-water/tint/light/shallow/below": [
+    "over accent 0.11199999999999999",
+  ],
+  "still-water/tint/light/shallow/no-below": [
+    "over accent 0.11199999999999999",
+  ],
+  "still-water/tint/light/standard/below": [
+    "over accent 0.11199999999999999",
+    "under accent 0.09519999999999999",
+  ],
+  "still-water/tint/light/standard/no-below": [
+    "over accent 0.11199999999999999",
+  ],
+  "still-water/tint/standard/deep/below": [
+    "over accent 0.16",
+    "under accent 0.136",
+  ],
+  "still-water/tint/standard/deep/no-below": [
+    "over accent 0.16",
+  ],
+  "still-water/tint/standard/shallow/below": [
+    "over accent 0.16",
+  ],
+  "still-water/tint/standard/shallow/no-below": [
+    "over accent 0.16",
+  ],
+  "still-water/tint/standard/standard/below": [
+    "over accent 0.16",
+    "under accent 0.136",
+  ],
+  "still-water/tint/standard/standard/no-below": [
+    "over accent 0.16",
+  ],
+  "still-water/tint/strong/deep/below": [
+    "over accent 0.22399999999999998",
+    "under accent 0.19039999999999999",
+  ],
+  "still-water/tint/strong/deep/no-below": [
+    "over accent 0.22399999999999998",
+  ],
+  "still-water/tint/strong/shallow/below": [
+    "over accent 0.22399999999999998",
+  ],
+  "still-water/tint/strong/shallow/no-below": [
+    "over accent 0.22399999999999998",
+  ],
+  "still-water/tint/strong/standard/below": [
+    "over accent 0.22399999999999998",
+    "under accent 0.19039999999999999",
+  ],
+  "still-water/tint/strong/standard/no-below": [
+    "over accent 0.22399999999999998",
+  ],
+}
+`;

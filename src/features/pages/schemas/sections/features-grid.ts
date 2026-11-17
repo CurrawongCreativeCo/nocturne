@@ -3,11 +3,19 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { badgeIconField } from '@/lib/sanity/schema/badge-icon-field'
+import {
+  eyebrowField,
+  headerDesignField,
+  iconsDesignField,
+} from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
+
+import { featuresGridCapabilities } from './features-grid-capabilities'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -22,10 +30,12 @@ export const featuresGrid = defineType({
   title: 'Features grid',
   type: 'object',
   icon: ThLargeIcon,
+  options: { designCapabilities: featuresGridCapabilities },
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
+      eyebrowField(),
       headingField({
         name: 'heading',
         title: 'Section title',
@@ -57,12 +67,19 @@ export const featuresGrid = defineType({
             name: 'featureItem',
             type: 'object',
             fields: [
+              badgeIconField({
+                name: 'iconName',
+                title: 'Icon from the set',
+                description:
+                  'Optional. Chosen from the shared set. When both this and an uploaded icon are set, this one is drawn; the uploaded icon is kept and used again if this is cleared.',
+              }),
               imageField({
                 name: 'icon',
                 title: 'Icon / image',
                 // Decorative: the feature title next to it says what it means.
                 requireAlt: false,
-                description: 'SVG or square image. Decorative, so screen readers skip it.',
+                description:
+                  'SVG or square image, drawn whole. Decorative, so screen readers skip it. Not drawn when an icon from the set is chosen.',
               }),
               defineField({ name: 'title', type: 'string', validation: (rule) => rule.required() }),
               defineField({ name: 'text', type: 'text', rows: 3 }),
@@ -71,6 +88,8 @@ export const featuresGrid = defineType({
           }),
         ],
       }),
+      headerDesignField({}, { divider: true }),
+      iconsDesignField(),
       accessField,
     ],
     { align: 'center' },

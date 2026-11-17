@@ -1,13 +1,28 @@
 import { PinIcon } from '@sanity/icons/Pin'
-import { defineField, defineType, type PreviewValue } from 'sanity'
+import {
+  defineField,
+  defineType,
+  type ConditionalPropertyCallback,
+  type PreviewValue,
+} from 'sanity'
 
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import {
+  cardDesignField,
+  eyebrowField,
+  headerDesignField,
+  iconsDesignField,
+} from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
+import { sectionAtStylePath } from '@/lib/sanity/schema/section-form'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle } from '@/lib/sanity/schema/section-variant'
+import { pictureDepthFields } from '@/lib/sanity/schema/surface-design'
+
+import { locationCapabilities } from './location-capabilities'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -19,11 +34,23 @@ const LIMITS = {
   directionsLabel: 30,
 } as const
 
+/** The text roles the details draw (location-capabilities.ts), and what each is drawn in. */
+export const LOCATION_ROLES = [{ role: 'title' }, { role: 'body' }, { role: 'meta' }] as const
+export const LOCATION_ROLE_COLOURS = { title: 'ink', body: 'muted', meta: 'ink' } as const
+
+/** Beside a map image the details stack with no card, so there is no fill, border or mark to set. */
+const hasPicture: ConditionalPropertyCallback = ({ document, path }) =>
+  Boolean(
+    (sectionAtStylePath(document, path) as { mapImage?: { asset?: unknown } } | undefined)?.mapImage
+      ?.asset,
+  )
+
 export const location = defineType({
   name: 'location',
   title: 'Location',
   type: 'object',
   icon: PinIcon,
+  options: { designCapabilities: locationCapabilities },
   description:
     'Shows the address, opening hours, phone and email from Business info. Edit those there, once.',
   // Content, plus the agency-only Design tab (the shared `style` field that sectionFields adds).
@@ -31,6 +58,7 @@ export const location = defineType({
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
+      eyebrowField(),
       headingField({
         name: 'heading',
         title: 'Title',
@@ -92,6 +120,23 @@ export const location = defineType({
           rule.required(),
           lengthWarning(rule, LIMITS.directionsLabel, 'Labels'),
         ],
+      }),
+      headerDesignField({}, { divider: true }),
+      iconsDesignField(),
+      cardDesignField({
+        description:
+          'Text for the address, contact and hours. They sit on cards only without a map image, so a card’s fill, border and mark are shown then.',
+        roles: LOCATION_ROLES,
+        defaults: LOCATION_ROLE_COLOURS,
+        inherits: 'the section’s own',
+        surface: { hidden: hasPicture },
+        markHidden: hasPicture,
+        depth: { hidden: hasPicture },
+      }),
+      // A shadow and glow on the map picture (task 147): there only while the section has one.
+      pictureDepthFields({
+        hidden: ({ parent }) =>
+          !(parent as { mapImage?: { asset?: unknown } } | undefined)?.mapImage?.asset,
       }),
       accessField,
     ],

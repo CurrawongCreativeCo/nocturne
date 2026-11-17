@@ -1,0 +1,36 @@
+import { describe, expect, it } from 'vitest'
+
+import { decorativeDividerFields, sectionStyleFields } from './fragments'
+import { sectionStyle } from './schema/section-style'
+
+describe('sectionStyleFields', () => {
+  it('projects every bottom-edge field the Studio has, so none is lost on its way to the page', () => {
+    // Task 151: Tide's crest colour and Contour's line colour were once in the schema and not the query,
+    // so the page drew the defaults whatever was chosen.
+    const projected = new Set(sectionStyleFields.match(/\b[a-zA-Z]+\b/g))
+    const edgeFields = (sectionStyle.fields as unknown as { name: string }[])
+      .map((field) => field.name)
+      .filter((name) => name.startsWith('edge'))
+    expect(edgeFields.length).toBeGreaterThan(5)
+    expect(edgeFields.filter((name) => !projected.has(name))).toEqual([])
+  })
+
+  it('projects each field of the per-layer colours by name (task 151, Slice 8)', () => {
+    const group = (
+      sectionStyle.fields as unknown as { name: string; fields?: { name: string }[] }[]
+    ).find((field) => field.name === 'edgeLayerColours')
+    const inner = group?.fields?.map((field) => field.name) ?? []
+    expect(inner).toHaveLength(6)
+    const projection = /edgeLayerColours\s*\{([^}]*)\}/.exec(sectionStyleFields)?.[1] ?? ''
+    const projected = new Set(projection.match(/\b[a-zA-Z0-9]+\b/g))
+    expect(inner.filter((name) => !projected.has(name))).toEqual([])
+  })
+})
+
+describe('decorativeDividerFields', () => {
+  it('projects the finish with the rest of the divider, so every consumer’s existing query carries it', () => {
+    const projected = decorativeDividerFields.split(/[,\n]/).map((part) => part.trim())
+    expect(projected).toContain('finish')
+    expect(projected).toContain('thickness')
+  })
+})

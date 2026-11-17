@@ -6,6 +6,7 @@ import {
   groupOpeningHours,
   localMoment,
   openStatusAt,
+  resolveTimeZone,
   upcomingSpecialHours,
   weeklyRanges,
   type HoursEntry,
@@ -192,5 +193,89 @@ describe('openStatusAt', () => {
 
   it('does not guess without hours', () => {
     expect(openStatusAt([], [], 'Australia/Sydney', at('10:00'))).toBeNull()
+  })
+})
+
+describe('time zones, daylight saving and overnight hours', () => {
+  const sunday: HoursEntry[] = [{ days: ['sun'], opens: '02:30', closes: '10:00' }]
+
+  it('reads the wall clock across the start of daylight saving (Sydney, 4 October 2026)', () => {
+    // 02:00 AEST becomes 03:00 AEDT: 01:59 is the last minute before the jump.
+    expect(localMoment(new Date('2026-10-03T15:59:00Z'), 'Australia/Sydney')).toMatchObject({
+      date: '2026-10-04',
+      time: '01:59',
+    })
+    expect(localMoment(new Date('2026-10-03T16:00:00Z'), 'Australia/Sydney')).toMatchObject({
+      date: '2026-10-04',
+      time: '03:00',
+    })
+    // Hours that begin inside the skipped hour start being open as soon as the clock passes them.
+    expect(openStatusAt(sunday, [], 'Australia/Sydney', new Date('2026-10-03T15:59:00Z'))).toEqual({
+      open: false,
+    })
+    expect(openStatusAt(sunday, [], 'Australia/Sydney', new Date('2026-10-03T16:00:00Z'))).toEqual({
+      open: true,
+      until: '10:00 am',
+    })
+  })
+
+  it('reads the wall clock across the end of daylight saving (Sydney, 5 April 2026)', () => {
+    // 03:00 AEDT becomes 02:00 AEST, so 02:30 happens twice; both are Sunday 5 April.
+    for (const instant of ['2026-04-04T15:30:00Z', '2026-04-04T16:30:00Z'])
+      expect(localMoment(new Date(instant), 'Australia/Sydney')).toMatchObject({
+        date: '2026-04-05',
+        time: '02:30',
+      })
+  })
+
+  it('keeps one instant in different places on different days and times', () => {
+    const instant = new Date('2026-10-03T16:00:00Z')
+    expect(localMoment(instant, 'Australia/Sydney')).toMatchObject({ day: 'sun', time: '03:00' })
+    // Perth has no daylight saving: UTC+8, just past midnight on the same Sunday.
+    expect(localMoment(instant, 'Australia/Perth')).toMatchObject({ day: 'sun', time: '00:00' })
+    expect(localMoment(instant, 'Australia/Brisbane')).toMatchObject({ day: 'sun', time: '02:00' })
+  })
+
+  it('does not support overnight ranges: a closing time before the opening time is ignored, never guessed', () => {
+    const night: HoursEntry[] = [{ days: ['fri'], opens: '22:00', closes: '02:00' }]
+    // Friday 23:00 Sydney: not "open", because the row is not a valid range (use two rows instead).
+    expect(
+      openStatusAt(night, [], 'Australia/Sydney', new Date('2026-10-16T23:00:00+11:00')),
+    ).toBeNull()
+    const split: HoursEntry[] = [
+      { days: ['fri'], opens: '22:00', closes: '23:59' },
+      { days: ['sat'], opens: '00:00', closes: '02:00' },
+    ]
+    expect(
+      openStatusAt(split, [], 'Australia/Sydney', new Date('2026-10-16T23:00:00+11:00')),
+    ).toEqual({
+      open: true,
+      until: '11:59 pm',
+    })
+    expect(
+      openStatusAt(split, [], 'Australia/Sydney', new Date('2026-10-17T01:00:00+11:00')),
+    ).toEqual({
+      open: true,
+      until: '2:00 am',
+    })
+  })
+
+  it('applies a special day on the location’s own date, not the server’s', () => {
+    // 16:00 UTC on 3 October is already 4 October in Sydney.
+    const closed = [{ date: '2026-10-04', closed: true }]
+    expect(
+      openStatusAt(sunday, closed, 'Australia/Sydney', new Date('2026-10-03T16:00:00Z')),
+    ).toEqual({ open: false })
+    expect(
+      openStatusAt(sunday, closed, 'Australia/Perth', new Date('2026-10-03T14:00:00Z')),
+    ).toEqual({ open: false })
+  })
+})
+
+describe('resolveTimeZone', () => {
+  it('keeps a real zone and falls back for a missing or unknown one, without throwing', () => {
+    expect(resolveTimeZone('Australia/Perth')).toBe('Australia/Perth')
+    for (const value of [undefined, null, '', 'Mars/Olympus', 'not a zone'])
+      expect(resolveTimeZone(value)).toBe('Australia/Sydney')
   })
 })

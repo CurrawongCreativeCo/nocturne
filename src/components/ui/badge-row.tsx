@@ -1,4 +1,14 @@
+import { resolveIconDesign, type IconDesignInput, type OwnIcon } from '@/lib/sanity/surface-options'
+
 import { BadgeIcon } from './badge-icon'
+import { IconContainer } from './icon-container'
+
+/** A badge's icon with nothing chosen: no container, in the accent (set on the icon itself). */
+const OWN: OwnIcon = {
+  shape: 'plain',
+  background: 'bg-surface-alt',
+  border: 'ring-1 ring-inset ring-line',
+}
 
 interface BadgeData {
   _key: string
@@ -11,6 +21,8 @@ interface Props {
   badges: readonly BadgeData[]
   /** Centre the badges when the hero's text is centred. */
   centred?: boolean
+  /** The block's Icons box: the container and colour of every badge's icon. */
+  iconDesign?: IconDesignInput | null
   className?: string
 }
 
@@ -19,8 +31,9 @@ interface Props {
  * supporting slot, README "Adding a slot block"). The pills wrap rather than shrink, so a long label
  * on a phone drops to its own line. Colour comes from the tone it sits in, never its own.
  */
-export function BadgeRow({ badges, centred = false, className = '' }: Props) {
+export function BadgeRow({ badges, centred = false, iconDesign, className = '' }: Props) {
   if (badges.length === 0) return null
+  const design = resolveIconDesign(iconDesign)
 
   return (
     <ul
@@ -32,7 +45,9 @@ export function BadgeRow({ badges, centred = false, className = '' }: Props) {
           key={badge._key}
           className="inline-flex items-center gap-2 rounded-full border border-line px-3.5 py-1.5 text-small font-medium text-ink"
         >
-          <BadgeIcon name={badge.icon} className="text-accent-text" />
+          <IconContainer design={design} own={OWN} size="size-7">
+            <BadgeIcon name={badge.icon} className={design.colour ? '' : 'text-accent-text'} />
+          </IconContainer>
           {badge.label}
         </li>
       ))}

@@ -7,6 +7,7 @@ import { SPLIT_LAYOUTS } from '@/features/pages/utils/split-layout'
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { isClientView } from '@/lib/sanity/roles'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageDesignField } from '@/lib/sanity/schema/image-design'
 import { imageField } from '@/lib/sanity/schema/image-field'
@@ -15,6 +16,7 @@ import { presetsOption } from '@/lib/sanity/schema/preset-field'
 import { matchPreset } from '@/lib/sanity/schema/preset-match'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { joinSubtitle, toneTitle, variantField } from '@/lib/sanity/schema/section-variant'
+import { pictureDepthFields } from '@/lib/sanity/schema/surface-design'
 import {
   SplitMediaLeftThumbnail,
   SplitMediaRightThumbnail,
@@ -23,6 +25,7 @@ import {
 } from '@/lib/sanity/schema/thumbnails/split-thumbnails'
 
 import { imageSideOptions } from './image-side'
+import { mediaTextCapabilities } from './media-text-capabilities'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 export const LIMITS = {
@@ -145,6 +148,7 @@ export const mediaText = defineType({
   // The preset bar above the form: the one place to choose a look (README, "Image + text").
   options: {
     ...presetsOption(SPLIT_PRESETS, SPLIT_PRESET_LABELS),
+    designCapabilities: mediaTextCapabilities,
     manifest: {
       purpose:
         'Media beside, above or behind a block of text, with an optional title, up to two buttons and one extra block such as a video. Use it to explain one idea with a picture or a video.',
@@ -220,6 +224,10 @@ export const mediaText = defineType({
       imageDesignField({
         hidden: ({ parent }: { parent?: { variant?: string } }) => isOverlay(parent ?? {}),
       }),
+      // A shadow and glow on the picture (task 147), beside Image design so it never moves with it.
+      pictureDepthFields({
+        hidden: ({ parent }: { parent?: { variant?: string } }) => isOverlay(parent ?? {}),
+      }),
       defineField({
         name: 'imagePosition',
         title: 'Media side',
@@ -230,6 +238,7 @@ export const mediaText = defineType({
         hidden: notSide,
         validation: (rule) => rule.required(),
       }),
+      headerDesignField({}, { divider: true }),
       accessField,
       // Set by the presets above the form; the stored value is the layout the section renders. Hidden
       // so there is one picker, not two. A hidden field keeps its value, and the list subtitle shows it.

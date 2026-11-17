@@ -4,6 +4,7 @@ export const aiCrawlersBlocked: Record<string, unknown>
 export const customBrowserIcon: Record<string, unknown>
 export const experimentRunning: Record<string, unknown>
 export const footerSocialOn: Record<string, unknown>
+export const navigationNested: Record<string, unknown>
 export const releaseVersions: Record<string, unknown>[]
 export const variantDocuments: Record<string, Record<string, unknown>[]>
 export const SAMPLE_PRIMARY: string

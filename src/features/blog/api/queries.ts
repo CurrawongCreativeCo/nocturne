@@ -1,6 +1,11 @@
 import { defineQuery } from 'next-sanity'
 
-import { imageFields, portableTextFields, seoFields } from '@/lib/sanity/fragments'
+import {
+  decorativeMarkFields,
+  imageFields,
+  portableTextFields,
+  seoFields,
+} from '@/lib/sanity/fragments'
 
 /**
  * Blog queries. Kept few, like the page queries: the index, a category, the feed and the sitemap
@@ -9,7 +14,7 @@ import { imageFields, portableTextFields, seoFields } from '@/lib/sanity/fragmen
  */
 
 /** What a post card (index, category, related posts, RSS feed) needs. */
-const postCardFields = /* groq */ `
+export const postCardFields = /* groq */ `
   _id,
   title,
   "slug": slug.current,
@@ -32,6 +37,32 @@ const postFilter = /* groq */ `
  * for an unknown slug and when none was asked for (no category has a null slug); `categories` feeds the filter links and only
  * lists categories that have a post.
  */
+/** What a post card draws from Blog settings (features/blog/schemas/blog-settings.ts). */
+export const blogSettingsFields = /* groq */ `
+  cardDesign {
+    background { colour, hex },
+    backgroundStrength,
+    border,
+    borderColour { colour, hex },
+    shadow,
+    glow,
+    glowColour { colour, hex },
+    lift,
+    meta { size, weight, colour { colour, hex }, textCase, tracking, leading, fontStyle },
+    title { size, weight, colour { colour, hex }, textCase, tracking, leading, fontStyle },
+    body { size, weight, colour { colour, hex }, textCase, tracking, leading, fontStyle },
+    mark { ${decorativeMarkFields} },
+    actionStyle,
+    actionMotion,
+    actionColour { colour, hex }
+  },
+  pictureDepthDesign { shadow, glow, glowColour { colour, hex } }
+`
+
+export const BLOG_SETTINGS_QUERY = defineQuery(/* groq */ `
+  *[_id == "blogSettings"][0] { ${blogSettingsFields} }
+`)
+
 export const POSTS_QUERY = defineQuery(/* groq */ `{
   "posts": *[${postFilter}] | order(publishedAt desc, _id desc) [$start...$end] { ${postCardFields} },
   "total": count(*[${postFilter}]),

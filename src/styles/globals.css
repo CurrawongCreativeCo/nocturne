@@ -75,15 +75,71 @@
   [data-screen-backdrop] {
     clip-path: inset(var(--screen-backdrop-top, 0) 0 var(--screen-backdrop-bottom, 0));
   }
+  /*
+   * "The first (or last) section" is the first (or last) section or wrapper in <main>: a section with a bottom
+   * edge sits in a frame, the one below an edge in a wrapper, and in draft mode every section in an editable
+   * wrapper inside one more, so the section itself is one to three levels down. A section is last only if no
+   * section or wrapper follows it (the footer's colour band is not one). A section in its own edge frame is
+   * matched too, but the frame's mask clips its picture to its box, so there the clip reaches nothing (an
+   * open follow-up for a first section with a bottom edge; README, "Section dividers").
+   */
   body:has([data-minimal-page]:not([style*='display: none']))
     main
-    > section:first-of-type
+    > section:not(:is(section, div) ~ *)
+    > [data-screen-backdrop],
+  body:has([data-minimal-page]:not([style*='display: none']))
+    main
+    > div:not(:is(section, div) ~ *)
+    > section
+    > [data-screen-backdrop],
+  body:has([data-minimal-page]:not([style*='display: none']))
+    main
+    > div:not(:is(section, div) ~ *)
+    > :is([data-section-edge-frame], [data-section-elevated])
+    > section
+    > [data-screen-backdrop],
+  body:has([data-minimal-page]:not([style*='display: none']))
+    main
+    > [data-sanity]
+    > div:first-child
+    > section
+    > [data-screen-backdrop],
+  body:has([data-minimal-page]:not([style*='display: none']))
+    main
+    > [data-sanity]
+    > div:first-child
+    > :is([data-section-edge-frame], [data-section-elevated])
+    > section
     > [data-screen-backdrop] {
     --screen-backdrop-top: -100lvh;
   }
   body:has([data-minimal-page]:not([style*='display: none']))
     main
-    > section:last-of-type
+    > section:not(:has(~ :is(section, div):not([data-edge-backdrop])))
+    > [data-screen-backdrop],
+  body:has([data-minimal-page]:not([style*='display: none']))
+    main
+    > div:not([data-edge-backdrop]):not(:has(~ :is(section, div):not([data-edge-backdrop])))
+    > section
+    > [data-screen-backdrop],
+  body:has([data-minimal-page]:not([style*='display: none']))
+    main
+    > div:not([data-edge-backdrop]):not(:has(~ :is(section, div):not([data-edge-backdrop])))
+    > :is([data-section-edge-frame], [data-section-elevated])
+    > section
+    > [data-screen-backdrop],
+  body:has([data-minimal-page]:not([style*='display: none']))
+    main
+    > [data-sanity]
+    > div:not([data-edge-backdrop]):not(:has(~ div:not([data-edge-backdrop])))
+    > section
+    > [data-screen-backdrop],
+  body:has([data-minimal-page]:not([style*='display: none']))
+    main
+    > [data-sanity]
+    > div:not([data-edge-backdrop]):not(:has(~ div:not([data-edge-backdrop])))
+    > :is([data-section-edge-frame], [data-section-elevated])
+    > section
     > [data-screen-backdrop] {
     --screen-backdrop-bottom: -100lvh;
   }
@@ -377,6 +433,35 @@
   z-index: var(--edge-z, 1);
 }
 
+/*
+ * Elevated (task 151, Slice 6): a straight boundary and a shadow. It has its own attribute, so the cut's rules
+ * (the mask, the bottom padding, the follower's pull-up, the footer band) do not apply to it. It takes the same
+ * stacking step as an edge frame: above the sections after it, so its shadow falls on them, and under the
+ * sticky header (z-40). The shadow is the Lab's: ink at the strength, 35% of it by 40% of the way, then clear.
+ */
+[data-section-elevated] {
+  z-index: var(--edge-z, 1);
+}
+
+[data-section-elevated='soft'] {
+  --shadow-depth: 18px;
+  --shadow-strength: 16%;
+}
+
+[data-section-elevated='deep'] {
+  --shadow-depth: 28px;
+  --shadow-strength: 24%;
+}
+
+[data-edge-shadow] {
+  height: var(--shadow-depth);
+  background: linear-gradient(
+    color-mix(in srgb, var(--color-ink) var(--shadow-strength), transparent),
+    color-mix(in srgb, var(--color-ink) calc(var(--shadow-strength) * 0.35), transparent) 40%,
+    transparent
+  );
+}
+
 [data-section-edge-frame] > section[data-spacing='compact'] {
   padding-bottom: calc(var(--spacing-section-compact) + var(--edge-h));
 }
@@ -389,8 +474,21 @@
   padding-bottom: calc(var(--spacing-section-spacious) + var(--edge-h));
 }
 
+/*
+ * What the section below an edge really takes (--edge-live): its own --edge-above while the section above
+ * drew its cut, and none when that section rendered nothing (a form with no form, an empty team, no
+ * plans): a cut that isn't there must not pull the next section up over the last visible one. "Drew its
+ * cut" is read from the markup, not the settings: the section above's wrapper holds a frame, or a pending
+ * boundary that may still fill in (a <template>), so a section that streams in keeps today's behaviour
+ * until it has resolved. A browser without :has() keeps today's behaviour too.
+ */
 [data-edge-above] {
-  margin-top: calc(var(--edge-above) * -1);
+  --edge-live: var(--edge-above);
+  margin-top: calc(var(--edge-live) * -1);
+}
+
+div:not(:has([data-section-edge-frame], template)) + [data-edge-above] {
+  --edge-live: 0px;
 }
 
 /* A section that rendered nothing must not pull the next one up under the edge. */
@@ -399,15 +497,15 @@
 }
 
 [data-edge-above] section[data-spacing='compact'] {
-  padding-top: calc(var(--spacing-section-compact) + var(--edge-above));
+  padding-top: calc(var(--spacing-section-compact) + var(--edge-live));
 }
 
 [data-edge-above] section[data-spacing='default'] {
-  padding-top: calc(var(--spacing-section) + var(--edge-above));
+  padding-top: calc(var(--spacing-section) + var(--edge-live));
 }
 
 [data-edge-above] section[data-spacing='spacious'] {
-  padding-top: calc(var(--spacing-section-spacious) + var(--edge-above));
+  padding-top: calc(var(--spacing-section-spacious) + var(--edge-live));
 }
 
 /*
@@ -423,7 +521,7 @@
 
 /* The sticky header's room (scroll-mt-24) plus the edge, so a link lands with the whole cut in view. */
 [data-edge-above] section[id] {
-  scroll-margin-top: calc(6rem + var(--edge-above));
+  scroll-margin-top: calc(6rem + var(--edge-live));
 }
 
 /* The footer takes the last section's edge like a section: a band of its colour under the cut. */
@@ -433,7 +531,21 @@
   background-color: var(--color-surface-alt);
 }
 
-main:has([data-edge-backdrop]) ~ [data-site-chrome] footer {
+/*
+ * No band where no cut was drawn above it (the last section rendered nothing), and none on a Minimal page,
+ * which has no footer for it to match: the page's own background shows under the cut instead.
+ */
+div:not(:has([data-section-edge-frame], template)) + [data-edge-backdrop],
+body:has([data-minimal-page]:not([style*='display: none'])) [data-edge-backdrop] {
+  display: none;
+}
+
+/*
+ * The footer's top border is hidden only under a drawn band. :has() can't be nested, so "drawn" is read as
+ * "the wrapper above the band is not empty" (an edge section either renders its frame, a pending boundary,
+ * or nothing at all); a wrapper that held something else would hide the border, as before task 151.
+ */
+main:has(div:not(:empty) + [data-edge-backdrop]) ~ [data-site-chrome] footer {
   border-top-color: transparent;
 }
 
@@ -461,6 +573,48 @@ main:has([data-edge-backdrop]) ~ [data-site-chrome] footer {
 /* Without mask support the edge stays straight, so its line and back wave have nothing to follow. */
 @supports not ((mask-image: none) or (-webkit-mask-image: none)) {
   [data-section-edge-frame] > svg {
+    display: none;
+  }
+
+  /* A composed edge's parts too, wherever they are drawn: its over parts are inside the section. */
+  [data-edge-part] {
+    display: none;
+  }
+}
+
+/*
+ * A composed edge's parts are decoration whose meaning is colour, so forced colours hide them; the cut still
+ * shows the boundary. Only [data-edge-part]: today's back wave and accent line keep their behaviour (task 151).
+ */
+@media (forced-colors: active) {
+  [data-edge-part] {
+    display: none;
+  }
+}
+
+/*
+ * On a Minimal page nothing follows the last section: no footer, so no section for its shadow to fall on, and a
+ * strip that hangs past the page's end would only make the page scroll further. It is not drawn there. "Last"
+ * is read as the last section's wrapper in <main> (or in draft mode's editable wrapper), the same reading the
+ * screen backdrop's clip uses above; Elevated always has a wrapper, which carries its stacking step.
+ */
+body:has([data-minimal-page]:not([style*='display: none']))
+  main
+  > div:not([data-edge-backdrop]):not(:has(~ :is(section, div):not([data-edge-backdrop])))
+  > [data-section-elevated]
+  > [data-edge-shadow],
+body:has([data-minimal-page]:not([style*='display: none']))
+  main
+  > [data-sanity]
+  > div:not([data-edge-backdrop]):not(:has(~ div:not([data-edge-backdrop])))
+  > [data-section-elevated]
+  > [data-edge-shadow] {
+  display: none;
+}
+
+/* Elevated's shadow is decoration whose meaning is colour too: forced colours hide it, and the straight boundary shows. */
+@media (forced-colors: active) {
+  [data-edge-shadow] {
     display: none;
   }
 }
@@ -613,4 +767,248 @@ main:has([data-edge-backdrop]) ~ [data-site-chrome] footer {
       linear-gradient(#000 0 0) content-box exclude,
       linear-gradient(#000 0 0);
   }
+}
+
+/*
+ * ActionIndicator (components/ui/action-indicator.tsx, task 137): the arrow at the end of a linked
+ * card. No JavaScript. The nearest `.group` ancestor (the link) puts it in its hover, focus or
+ * pressed state, so keyboard focus gives what hover gives. Motion plays only for visitors who haven't
+ * asked for less, and nothing loops: a state change moves it once.
+ */
+@layer components {
+  /* Right-to-left: the chevron and arrow face the other way; the diagonal 'out' arrow keeps its path. */
+  :where([dir='rtl']) [data-action-glyph]:not([data-action-glyph='out']) path {
+    transform-box: view-box;
+    transform-origin: 50% 50%;
+    transform: scaleX(-1);
+  }
+
+  [data-action-motion] {
+    --action-on: 0;
+    --action-press: 1;
+    --action-move: 3px;
+    --action-x: 1;
+    --action-y: 0;
+  }
+  [data-action-motion][data-action-distance='legacy-small'] {
+    --action-move: 2px;
+  }
+  [data-action-motion][data-action-distance='legacy-large'] {
+    --action-move: 4px;
+  }
+  /* Nudge follows the glyph: a diagonal arrow moves up and across. */
+  [data-action-motion='nudge'][data-action-direction='out'] {
+    --action-y: -1;
+  }
+  [data-action-motion='lift'] {
+    --action-x: 0;
+    --action-y: -1;
+  }
+  :where([dir='rtl']) [data-action-motion='nudge'][data-action-direction='inline'] {
+    --action-x: -1;
+  }
+  /* The distances the Link list always moved were across only, whatever the glyph. */
+  [data-action-motion][data-action-distance^='legacy'] {
+    --action-y: 0;
+  }
+
+  @media (hover: hover) {
+    :where(.group):hover [data-action-motion] {
+      --action-on: 1;
+    }
+  }
+  /* The link itself (the group) or a link inside it, as in a card whose title link is stretched over it. */
+  :where(.group):focus-visible [data-action-motion],
+  :where(.group):has(a:focus-visible) [data-action-motion] {
+    --action-on: 1;
+  }
+  :where(.group):active [data-action-motion] {
+    --action-press: 0.92;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    [data-action-motion] {
+      scale: var(--action-press);
+      transition:
+        translate var(--duration-fast),
+        scale var(--duration-fast);
+    }
+    [data-action-motion='nudge'],
+    [data-action-motion='lift'] {
+      translate: calc(var(--action-x) * var(--action-on) * var(--action-move))
+        calc(var(--action-y) * var(--action-on) * var(--action-move));
+    }
+    [data-action-motion='draw'] path {
+      stroke-dasharray: 1;
+    }
+    @media (hover: hover) {
+      :where(.group):hover [data-action-motion='draw'] path {
+        animation: action-draw calc(var(--duration-fast) * 2) ease-out;
+      }
+    }
+    :where(.group):focus-visible [data-action-motion='draw'] path,
+    :where(.group):has(a:focus-visible) [data-action-motion='draw'] path {
+      animation: action-draw calc(var(--duration-fast) * 2) ease-out;
+    }
+  }
+}
+
+@keyframes action-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/*
+ * Hover lift (task 146): a card that is one link rises a little and gains a deeper shadow under the
+ * pointer or keyboard focus. The card is wrapped (`.card-lift`, CardSurface) so nothing clips the shadow
+ * layer, which is drawn once and only fades in: transform and opacity animate, never box-shadow.
+ * Visitors who ask for less motion get no lift at all, and a touch screen never hovers. Focus is the
+ * link's own outline, drawn as it always was.
+ */
+@layer components {
+  .card-lift {
+    position: relative;
+    height: 100%;
+  }
+  .card-lift__shadow {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-floating);
+    opacity: 0;
+    pointer-events: none;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .card-lift {
+      transition: transform var(--duration-fast) var(--ease-out);
+    }
+    .card-lift__shadow {
+      transition: opacity var(--duration-fast) var(--ease-out);
+    }
+    @media (hover: hover) {
+      .card-lift:hover {
+        transform: translateY(-0.25rem);
+      }
+      .card-lift:hover > .card-lift__shadow {
+        opacity: 1;
+      }
+    }
+    .card-lift:has(a:focus-visible) {
+      transform: translateY(-0.25rem);
+    }
+    .card-lift:has(a:focus-visible) > .card-lift__shadow {
+      opacity: 1;
+    }
+  }
+}
+
+/*
+ * Site-wide heading weight (README, "Brand colours and design"; task 216). `--heading-weight` is set on
+ * :root only when Brand colours has a Heading style other than Standard. This rule is outside every
+ * layer so it beats the components' `font-semibold` and friends; while the variable is undefined,
+ * `revert-layer` hands the weight back to those layers, so nothing changes until a style is chosen.
+ * h4 and below are not headings of a section, so they keep their own weight whatever the style.
+ */
+h1,
+h2,
+h3 {
+  font-weight: var(--heading-weight, revert-layer);
+}
+
+/*
+ * Site-wide button style (README, "Brand colours and design"; task 148). `CtaLink` and `ctaClassName`
+ * carry these hooks; every variable is set on :root only when Brand colours → Buttons chooses
+ * something, so while it is unset each declaration is `revert-layer` and the button keeps the classes
+ * it always had. Outside every layer, like the heading weight above, so they beat those classes.
+ *
+ * - `.cta-fill` (main button, either surface): the Brand gradient and the text colour chosen to read
+ *   along all of it. Hover and press lay a veil over the gradient; the text colour never changes, and no
+ *   filter touches it.
+ * - `.cta-primary-depth`: the main button's shadow and glow, one box-shadow list, and (with a Soft or Raised
+ *   depth) hover depth: a deeper shadow on a layer that fades in and a small rise, for pointer and keyboard
+ *   focus, none under reduced motion. Outlines are drawn outside the box-shadow, so keyboard focus keeps the
+ *   global `:focus-visible` outline.
+ * - `.cta-soft` (secondary button): a tint of its own text colour instead of the outline. It has no
+ *   shadow or glow hook at all.
+ */
+.cta-fill {
+  background-image: var(--button-fill, revert-layer);
+  color: var(--button-fill-ink, revert-layer);
+}
+.cta-fill:hover {
+  background-image:
+    linear-gradient(
+      color-mix(in srgb, var(--button-fill-veil) 14%, transparent),
+      color-mix(in srgb, var(--button-fill-veil) 14%, transparent)
+    ),
+    var(--button-fill, revert-layer);
+}
+.cta-fill:active {
+  background-image:
+    linear-gradient(
+      color-mix(in srgb, var(--button-fill-veil) 28%, transparent),
+      color-mix(in srgb, var(--button-fill-veil) 28%, transparent)
+    ),
+    var(--button-fill, revert-layer);
+}
+.cta-primary-depth {
+  box-shadow: var(--button-shadow, revert-layer);
+  position: var(--button-hover-position, revert-layer);
+}
+/* Hover depth: a deeper shadow drawn once on a layer that only fades in, never an animated box-shadow. */
+.cta-primary-depth::after {
+  content: var(--button-hover-content, none);
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--button-hover-shadow, none);
+  opacity: 0;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cta-primary-depth {
+    transition-property: var(--button-hover-transition, revert-layer);
+  }
+  .cta-primary-depth::after {
+    transition: opacity var(--duration-fast) var(--ease-out);
+  }
+  @media (hover: hover) {
+    .cta-primary-depth:hover {
+      translate: var(--button-hover-translate, revert-layer);
+    }
+    .cta-primary-depth:hover::after {
+      opacity: 1;
+    }
+  }
+  .cta-primary-depth:focus-visible {
+    translate: var(--button-hover-translate, revert-layer);
+  }
+  .cta-primary-depth:focus-visible::after {
+    opacity: 1;
+  }
+}
+.cta-soft {
+  background-color: var(--button-secondary-fill, revert-layer);
+  --tw-ring-color: var(--button-secondary-ring, revert-layer);
+}
+.cta-soft:hover {
+  background-color: var(--button-secondary-fill-hover, revert-layer);
+}
+.cta-soft:active {
+  background-color: var(--button-secondary-fill-active, revert-layer);
+}
+/*
+ * A tint of the text colour moves the fill towards the text, so under white text on a mid-tone Primary it
+ * takes the contrast below 4.5:1 (axe found it on the CTA banner's brand card). A section or card in the
+ * Primary colour keeps the secondary's outline instead.
+ */
+[data-tone='accent'] .cta-soft,
+[data-tone='accent'] .cta-soft:hover,
+[data-tone='accent'] .cta-soft:active {
+  background-color: revert-layer;
+  --tw-ring-color: revert-layer;
 }

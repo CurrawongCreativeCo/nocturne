@@ -28,7 +28,7 @@ const PLACEHOLDER_IMAGE = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" 
 const DEFAULT_CTA = 'rgb(3, 7, 18)'
 const SAMPLE_CTA = 'rgb(11, 110, 79)' // SAMPLE_PRIMARY
 
-type Palette = 'off' | 'light' | 'dark'
+type Palette = 'off' | 'light' | 'dark' | 'card-raised' | 'card-floating'
 
 /** Serves a palette, then expires the cached settings the way the Sanity webhook does. */
 async function usePalette(request: APIRequestContext, palette: Palette) {
@@ -200,4 +200,106 @@ test.describe('with a sample palette', () => {
       expect(violations.map(({ id }) => id)).toEqual([])
     })
   }
+})
+
+/**
+ * Site-wide Card depth (task 146), as the browser draws it. `--card-depth` is defined only when a level
+ * is chosen: cards follow it, a section's or plan's own choice wins, and a non-card that draws the card
+ * shadow (a social button) does not.
+ */
+test.describe('Card depth', () => {
+  const CARD_SHADOW = '0px 1px 3px 0px'
+  const RAISED = '0px 10px 15px -3px'
+  const FLOATING = '0px 20px 40px -12px'
+
+  /** The shadow layers that are not the inset ring a card draws as its border. */
+  const outerShadows = (locator: Locator) =>
+    locator.evaluate((element) =>
+      getComputedStyle(element)
+        .boxShadow.replace(/\([^)]*\)/g, '()')
+        .split(',')
+        .map((layer) => layer.trim())
+        .filter((layer) => layer && layer !== 'none')
+        .filter((layer) => !layer.includes('inset') && !/(^|\s)0px 0px 0px 0px$/.test(layer)),
+    )
+  const section = (page: Page, title: string) =>
+    page
+      .locator('#main-content section')
+      .filter({ has: page.getByRole('heading', { name: title }) })
+  const quote = (page: Page, title: string) => section(page, title).locator('figure')
+  const plan = (page: Page, title: string, index = 0) =>
+    section(page, title).locator('ul.grid > li').nth(index)
+
+  /** The first request after an expiry may still get the old copy, so it is polled. */
+  const shadowsOf = (page: Page, find: () => Locator) => async () => {
+    await page.goto('/card-depth')
+    return outerShadows(find())
+  }
+
+  test('with no Card depth, a quote card keeps its original shadow and a plan stays shadow-free', async ({
+    page,
+    request,
+  }) => {
+    await usePalette(request, 'off')
+    await page.goto('/card-depth')
+    const original = await outerShadows(quote(page, 'Quotes unset'))
+    expect(original.join(' ')).toContain(CARD_SHADOW)
+    expect(await outerShadows(plan(page, 'Plans unset'))).toEqual([])
+  })
+
+  test('a site-wide Raised reaches shadow-free plans and shadowed quotes alike', async ({
+    page,
+    request,
+  }) => {
+    await usePalette(request, 'card-raised')
+    await expect
+      .poll(async () => (await shadowsOf(page, () => plan(page, 'Plans unset'))()).join(' '))
+      .toContain(RAISED)
+    expect((await outerShadows(quote(page, 'Quotes unset'))).join(' ')).toContain(RAISED)
+  })
+
+  test('a section’s Soft overrides a site-wide Floating, and Floating reaches the other cards', async ({
+    page,
+    request,
+  }) => {
+    await usePalette(request, 'card-floating')
+    await expect
+      .poll(async () => (await shadowsOf(page, () => quote(page, 'Quotes unset'))()).join(' '))
+      .toContain(FLOATING)
+    const soft = (await outerShadows(quote(page, 'Quotes soft'))).join(' ')
+    expect(soft).toContain(CARD_SHADOW)
+    expect(soft).not.toContain(FLOATING)
+  })
+
+  test('a plan set to Flat overrides a site-wide Raised, and the other plans keep it', async ({
+    page,
+    request,
+  }) => {
+    await usePalette(request, 'card-raised')
+    await expect
+      .poll(async () => (await shadowsOf(page, () => plan(page, 'Plans flat', 1))()).join(' '))
+      .toContain(RAISED)
+    expect(await outerShadows(plan(page, 'Plans flat', 0))).toEqual([])
+  })
+
+  test('a social button, which draws the card shadow but is not a card, ignores the site’s Card depth', async ({
+    page,
+    request,
+  }) => {
+    const button = () => page.getByRole('link', { name: 'Instagram' })
+    const drawn = async () => {
+      await page.goto('/card-depth')
+      return (await outerShadows(button())).join(' ')
+    }
+    await usePalette(request, 'off')
+    await expect.poll(drawn).toContain(CARD_SHADOW)
+    await usePalette(request, 'card-floating')
+    // Cards have taken the new depth by the time the button is read back.
+    await expect
+      .poll(async () => (await shadowsOf(page, () => quote(page, 'Quotes unset'))()).join(' '))
+      .toContain(FLOATING)
+    const after = await drawn()
+    expect(after).toContain(CARD_SHADOW)
+    expect(after).not.toContain(FLOATING)
+  })
 })

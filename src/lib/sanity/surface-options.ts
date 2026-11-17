@@ -47,10 +47,11 @@ const RING_WIDTH: Record<SurfaceBorder, string> = {
   thick: 'ring-3',
 }
 
-/** How much of the background colour shows: the glass strengths, then Solid. */
-export const SURFACE_STRENGTHS = ['light', 'medium', 'strong', 'solid'] as const
+/** How much of the background colour shows: a faint Wash, the glass strengths, then Solid. */
+export const SURFACE_STRENGTHS = ['wash', 'light', 'medium', 'strong', 'solid'] as const
 export type SurfaceStrength = (typeof SURFACE_STRENGTHS)[number]
 export const SURFACE_STRENGTH_TITLES: Record<SurfaceStrength, string> = {
+  wash: 'Wash',
   light: 'Light',
   medium: 'Medium',
   strong: 'Strong',
@@ -58,6 +59,8 @@ export const SURFACE_STRENGTH_TITLES: Record<SurfaceStrength, string> = {
 }
 /** 0 to 1. The see-through strengths are the glass tokens', so a tint matches the glass it sits in. */
 export const SURFACE_STRENGTH_FRACTION: Record<SurfaceStrength, number> = {
+  // A faint tint (task 156): light enough that muted text keeps its contrast. Not a glass token.
+  wash: 0.12,
   light: glass.light,
   medium: glass.medium,
   strong: glass.strong,
@@ -135,6 +138,8 @@ export interface OwnRingSurface {
   borderWidth?: SurfaceBorder
   /** The colour a width alone is drawn in. */
   borderColour?: string
+  /** The surface isn't a link or a button, so a chosen fill keeps no hover shade. */
+  still?: boolean
 }
 
 /** What glass draws while a property is unchanged. */
@@ -164,8 +169,9 @@ export function ringSurfaceLook(design: SurfaceDesign, own: OwnRingSurface): Loo
       SURFACE_STRENGTH_FRACTION[design.strength ?? 'solid'],
     )
     // A hover a shade towards the text colour, which reads on any fill (and on none).
-    background =
-      'bg-(--surface-bg) hover:bg-[color-mix(in_oklch,var(--surface-bg),var(--color-ink)_7%)]'
+    background = own.still
+      ? 'bg-(--surface-bg)'
+      : 'bg-(--surface-bg) hover:bg-[color-mix(in_oklch,var(--surface-bg),var(--color-ink)_7%)]'
   }
   let border = own.border
   if (design.border !== undefined || design.borderColour !== undefined) {
@@ -263,6 +269,8 @@ export interface OwnIcon {
   border: string
   /** The icon's colour class while no colour is chosen. */
   colour?: string
+  /** The colour a chosen strength washes (CSS), when no container colour is chosen. */
+  fill?: string
 }
 
 /** The fill and border a shaped container starts from in a layout that draws its icons plain. */
@@ -292,7 +300,7 @@ export function iconLook(design: IconDesign, own: OwnIcon): IconLook {
   const surface = ringSurfaceLook(design, {
     background: fromPlain ? DEFAULT_ICON_CONTAINER.background : own.background,
     border: fromPlain ? DEFAULT_ICON_CONTAINER.border : own.border,
-    fill: 'var(--color-surface-alt)',
+    fill: own.fill ?? 'var(--color-surface-alt)',
   })
   return {
     shape,

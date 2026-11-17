@@ -57,6 +57,17 @@ interface Props {
    * down to close) isn't also dragging this one sideways. Off by default.
    */
   directionLock?: boolean
+  /**
+   * More room around the slides for a shadow that reaches past the 12px every slider allows (picture depth,
+   * task 147). The viewport grows by the same amount it is pulled back by, so the slides' width, the
+   * scroll distances and the page's layout are exactly what they were. Off by default.
+   *
+   * `true` adds 12px more below the slides, for a shadow that reaches out of a card. Sizes (px) say how far it
+   * reaches on each side: the sides are limited by the page gutter and the gap between slides (overflowing the
+   * first would scroll the page, and past the second the neighbouring slide's edge would show), and the top by
+   * the space under the section's header.
+   */
+  bleed?: boolean | { x: number; top: number; bottom: number }
   ref?: Ref<SliderHandle>
   className?: string
   /** One child per slide. */
@@ -142,11 +153,13 @@ export function Slider({
   onIndexChange,
   dots = true,
   directionLock = false,
+  bleed = false,
   ref,
   className = '',
   children,
 }: Props) {
   const slides = Children.toArray(children)
+  const sized = typeof bleed === 'object' ? bleed : undefined
   const count = slides.length
   const startRef = useRef(initialIndex)
 
@@ -355,9 +368,20 @@ export function Slider({
         role={ready ? undefined : 'group'}
         aria-label={ready ? undefined : label}
         tabIndex={ready ? undefined : 0}
-        className={`-m-3 [scrollbar-width:none] p-3 [&::-webkit-scrollbar]:hidden ${
-          ready ? 'overflow-hidden' : 'snap-x snap-mandatory scroll-px-3 overflow-x-auto'
+        className={`${sized ? '' : bleed ? '-mx-3 -mt-3 -mb-6' : '-m-3'} [scrollbar-width:none] ${sized ? '' : bleed ? 'px-3 pt-3 pb-6' : 'p-3'} [&::-webkit-scrollbar]:hidden ${
+          ready
+            ? 'overflow-hidden'
+            : `snap-x snap-mandatory ${sized ? '' : 'scroll-px-3'} overflow-x-auto`
         }`}
+        style={
+          sized
+            ? {
+                margin: `-${sized.top}px -${sized.x}px -${sized.bottom}px`,
+                padding: `${sized.top}px ${sized.x}px ${sized.bottom}px`,
+                scrollPaddingInline: sized.x,
+              }
+            : undefined
+        }
       >
         <m.div
           ref={trackRef}

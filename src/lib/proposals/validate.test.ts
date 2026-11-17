@@ -83,6 +83,82 @@ describe('the whole proposal', () => {
   })
 })
 
+describe('replacing one member of a slot or a list', () => {
+  const video = (key: string) => ({
+    _key: key,
+    _type: 'slotVideo',
+    source: 'youtube',
+    url: 'https://www.youtube.com/watch?v=abc',
+  })
+  const withContent = {
+    ...deps,
+    documents: {
+      ...deps.documents,
+      'page-home': {
+        _id: 'page-home',
+        _type: 'page',
+        _rev: 'rev-home-1',
+        pageBuilder: [
+          { _key: 'hero1', _type: 'hero', variant: 'split', supporting: [video('v1')] },
+          {
+            _key: 'list1',
+            _type: 'linkList',
+            variant: 'stacked',
+            links: [{ _key: 'a', _type: 'linkItem', label: 'One' }],
+          },
+        ],
+      },
+    },
+  }
+  const member = `${HERO}.supporting[_key=="v1"]`
+  const run = (
+    patches: ChangeProposal['changes'][number]['patches'],
+    extra: Partial<ValidateDeps> = {},
+  ) => validateProposal(proposal(patches), { ...withContent, ...extra })
+
+  it('rejects a block the slot does not accept, set directly or inserted', () => {
+    const blocks = [{ _key: 'v1', _type: 'featuresGrid', heading: 'x' }]
+    expect(codes(run([{ set: { [member]: blocks[0] } }]))).toEqual(['slot-block-not-allowed'])
+    expect(codes(run([{ insert: { replace: `${HERO}.supporting[0]`, items: blocks } }]))).toEqual([
+      'slot-block-not-allowed',
+    ])
+    expect(codes(run([{ insert: { after: `${HERO}.supporting[-1]`, items: blocks } }]))).toContain(
+      'slot-block-not-allowed',
+    )
+  })
+
+  it('rejects a member with no type', () => {
+    expect(codes(run([{ set: { [member]: { _key: 'v1' } } }]))).toEqual(['slot-block-not-allowed'])
+  })
+
+  it('accepts an allowed block set directly, and sends it to the agency for review', () => {
+    const result = run([{ set: { [member]: video('v1') } }])
+    expect(result.rejected).toEqual([])
+    expect(result.content.applies).toBe(true)
+    expect(result.needsAgencyReview).toBe(true)
+  })
+
+  it('does not let a client-level run write it, allowed or not', () => {
+    const allowed = run([{ set: { [member]: video('v1') } }], { agencyPermitted: false })
+    expect(codes(allowed)).toEqual(['agency-permission-required'])
+    expect(allowed.applicable).toEqual([])
+    const refused = run([{ set: { [member]: { _key: 'v1', _type: 'featuresGrid' } } }], {
+      agencyPermitted: false,
+    })
+    expect(codes(refused)).toContain('slot-block-not-allowed')
+    expect(refused.applicable).toEqual([])
+  })
+
+  it('leaves an ordinary list member replaceable, for a client as well', () => {
+    const link = { _key: 'a', _type: 'linkItem', label: 'Two' }
+    const at = 'pageBuilder[_key=="list1"].links[_key=="a"]'
+    expect(run([{ set: { [at]: link } }]).rejected).toEqual([])
+    const client = run([{ set: { [at]: link } }], { agencyPermitted: false })
+    expect(client.rejected).toEqual([])
+    expect(client.content.applies).toBe(true)
+  })
+})
+
 describe('rejection reasons', () => {
   const reasonFor = (patches: ChangeProposal['changes'][number]['patches']) =>
     codes(validateProposal(proposal(patches), deps))
@@ -207,6 +283,32 @@ describe('rejection reasons', () => {
         { set: { [`${HERO}.supporting`]: [{ _key: 'x', _type: 'featuresGrid', heading: 'x' }] } },
       ]),
     ).toEqual(['slot-block-not-allowed'])
+  })
+
+  it('applies the split family’s slot rules to Image + text', () => {
+    const SPLIT = 'pageBuilder[_key=="split1"]'
+    const withSplit = {
+      ...deps,
+      documents: {
+        ...deps.documents,
+        'page-home': {
+          _id: 'page-home',
+          _type: 'page',
+          _rev: 'rev-home-1',
+          pageBuilder: [{ _key: 'split1', _type: 'mediaText', variant: 'side' }],
+        },
+      },
+    }
+    const image = (key: string) => ({
+      _key: key,
+      _type: 'slotImage',
+      image: { _type: 'image', asset: { _type: 'reference', _ref: 'image-a' } },
+    })
+    const media = (items: unknown[]) =>
+      codes(validateProposal(proposal([{ set: { [`${SPLIT}.media`]: items } }]), withSplit))
+    expect(media([image('a')])).toEqual([])
+    expect(media([image('a'), image('b')])).toEqual(['limit-exceeded'])
+    expect(media([{ _key: 's', _type: 'statsBar', items: [] }])).toEqual(['slot-block-not-allowed'])
   })
 
   it('slot-block-not-allowed: an item with no type', () => {

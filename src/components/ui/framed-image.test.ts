@@ -1,15 +1,26 @@
-import { createElement, type ComponentProps, type ReactNode } from 'react'
+import { createElement, type ComponentProps, type CSSProperties, type ReactNode } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
+
+import { resolvePictureDepth } from '@/lib/sanity/depth-options'
 
 import { FramedImage } from './framed-image'
 
 // The picture and the lazy Parallax are tested on their own; here they are markers.
 vi.mock('./sanity-image', () => ({
-  SanityImage: ({ className, fill }: { className?: string; fill?: boolean }) =>
+  SanityImage: ({
+    className,
+    fill,
+    style,
+  }: {
+    className?: string
+    fill?: boolean
+    style?: CSSProperties
+  }) =>
     createElement('img', {
       'data-fill': fill ? '' : undefined,
       className,
+      style,
       alt: 'A team at work',
     }),
 }))
@@ -165,5 +176,62 @@ describe('FramedImage', () => {
     expect(html).toContain('overflow-hidden')
     expect(html).toContain('rounded-card')
     expect(html).toContain('group-hover:scale-105')
+  })
+
+  describe('picture depth', () => {
+    const depth = resolvePictureDepth({ shadow: 'floating', glow: 'soft' })
+    const ANIMATED = { appearance: 'framed', motion: 'subtle' } as const
+    // Every way FramedImage draws a picture: plain, clipped, moving, framed.
+    const BRANCHES = {
+      plain: {},
+      clip: { clip: true },
+      moving: { design: { motion: 'subtle' } },
+      framed: { design: { appearance: 'framed' } },
+      'framed and moving': { design: ANIMATED },
+      'section parallax': { context: { sectionTravel: 0.1 } },
+    } as const
+
+    it('is no different from before while unset, in every branch', () => {
+      for (const [name, props] of Object.entries(BRANCHES)) {
+        const before = render(props)
+        expect(render({ ...props, depth: undefined }), name).toBe(before)
+        expect(before, name).not.toContain('depth-filter')
+      }
+    })
+
+    it('puts the filter on a plain picture’s <img>, which has no box of its own', () => {
+      const html = render({ depth })
+      expect(html).toMatch(/<img[^>]*class="[^"]*\[filter:var\(--depth-filter\)\]/)
+      expect(html).toContain('--depth-filter:')
+      expect(html).not.toContain('data-framed-image')
+    })
+
+    it('puts it on the still outer box, never on the picture, when there is one', () => {
+      for (const [name, props] of Object.entries(BRANCHES)) {
+        if (name === 'plain') continue
+        const html = render({ ...props, depth })
+        const box = /<div[^>]*data-framed-image[^>]*>/.exec(html)?.[0] ?? ''
+        expect(box, name).toContain('[filter:var(--depth-filter)]')
+        expect(box, name).toContain('--depth-filter:')
+        // Nothing inside the box, where Parallax and the scale act, carries the filter.
+        expect(html.slice(html.indexOf(box) + box.length), name).not.toContain('depth-filter')
+      }
+    })
+
+    it('keeps the box’s ratio, place and shape classes unchanged beside the filter', () => {
+      const without = render({ design: { appearance: 'circle' }, clip: true })
+      const withDepth = render({ design: { appearance: 'circle' }, clip: true, depth })
+      expect(withDepth.replace(' [filter:var(--depth-filter)]', '')).toContain(
+        /class="([^"]+)"/.exec(without)?.[1] ?? 'missing',
+      )
+      expect(withDepth).toContain('aspect-square')
+      expect(withDepth).toContain('rounded-full')
+    })
+
+    it('includes the decorative frame in the shadow by drawing it inside the filtered box', () => {
+      const html = render({ design: { appearance: 'framed' }, depth })
+      const box = html.indexOf('data-framed-image')
+      expect(html.indexOf('data-image-frame')).toBeGreaterThan(box)
+    })
   })
 })

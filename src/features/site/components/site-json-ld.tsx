@@ -1,6 +1,7 @@
 import { JsonLd } from '@/components/ui/json-ld'
 import { siteLanguage } from '@/config/env'
 import { siteUrl } from '@/config/site-url'
+import { getToday } from '@/lib/get-today'
 import { DEFAULT_TIME_ZONE } from '@/lib/opening-hours'
 import { urlFor } from '@/lib/sanity/image'
 import { PUBLISHED } from '@/lib/sanity/live'
@@ -9,7 +10,6 @@ import { buildOrganization } from '@/lib/structured-data/nodes/organization'
 import { buildWebSite } from '@/lib/structured-data/nodes/website'
 
 import { getSettings } from '../api/get-settings'
-import { getToday } from '../api/get-today'
 
 /**
  * schema.org Organization + WebSite, built from Site settings, so search engines show the

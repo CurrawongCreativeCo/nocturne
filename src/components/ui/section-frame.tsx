@@ -4,6 +4,7 @@ import { LazyFloat } from '@/components/motion/float-lazy'
 import { MotionDiv } from '@/components/motion/motion-elements'
 import { LazyParallax } from '@/components/motion/parallax-lazy'
 import { enterProps, revealChild, type ParallaxPlan } from '@/components/motion/presets'
+import { resolveDecorativeMark } from '@/lib/sanity/decorative-mark-options'
 import {
   panelChoice,
   panelDomProps,
@@ -12,14 +13,23 @@ import {
 } from '@/lib/sanity/section-panel'
 import type { SiteDesign } from '@/lib/sanity/site-design'
 
+import { DecorativeMark } from './decorative-mark'
 import { SectionBackground } from './section-background'
 import {
+  closeToBottom,
   closeToTop,
+  cutMaskImage,
   edgeBackLine,
+  edgeComposition,
   edgeHeightIsCustom,
   edgeHeightStyle,
   edgeLine,
   edgeMaskImage,
+  isLineShape,
+  type EdgeComposition,
+  type EdgePaint,
+  type EdgePart,
+  type EdgeShadow,
   type ResolvedEdge,
 } from './section-edges'
 import {
@@ -52,11 +62,6 @@ interface Props {
    * itself never drifts.
    */
   media?: ReactNode | ((parallax: ParallaxPlan | undefined) => ReactNode)
-  /**
-   * The section draws its own surfaces (the Link list's cards), so the shared Panel doesn't apply
-   * and a stored choice is ignored. Mirrors the `ownsSurfaces` rule its schema registers.
-   */
-  ownsSurfaces?: boolean
   'aria-labelledby'?: string
   children: ReactNode
 }
@@ -85,6 +90,69 @@ function EdgeSvg({ children, ...rest }: { children: ReactNode; 'data-edge-layer'
 }
 
 /**
+ * A composed edge's parts (new shapes only; today's shapes never reach this): each part its own SVG, named
+ * by where it is drawn and its order (`data-edge-part`: `under-1`, `line-1`, `over-1`), so its CSS can never
+ * match today's back wave or accent line (`data-edge-layer`). A fill covers from its line to the band's far
+ * side; a line keeps its width however the band stretches. Over parts sit at -z-10 inside the section: above
+ * its background and mark, which come before them, and below its content.
+ */
+function EdgeParts({
+  parts,
+  name,
+}: {
+  parts: readonly EdgePart[]
+  name: 'under' | 'line' | 'over'
+}) {
+  const className = name === 'over' ? `${EDGE_SVG_CLASS} -z-10` : EDGE_SVG_CLASS
+  return parts.map((part, index) => {
+    const id = `${name}-${String(index + 1)}`
+    return (
+      <svg
+        key={id}
+        data-edge-part={id}
+        aria-hidden="true"
+        focusable="false"
+        viewBox="0 0 1 1"
+        preserveAspectRatio="none"
+        className={className}
+        style={EDGE_SVG_STYLE}
+      >
+        {part.kind === 'fill' ? (
+          <path
+            d={part.side === 'over' ? closeToBottom(part.line) : closeToTop(part.line)}
+            fill={paintOf(part.paint)}
+            fillOpacity={part.opacity}
+          />
+        ) : (
+          <path
+            d={part.line}
+            fill="none"
+            stroke={paintOf(part.paint)}
+            strokeOpacity={part.opacity}
+            strokeWidth={part.widthPx}
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+        )}
+      </svg>
+    )
+  })
+}
+
+/**
+ * A part's colour: a theme role, or Echo, the colour of the section the edge belongs to. Echo is resolved on
+ * the frame (`data-edge-echo`, tokens.generated.css), so a part over the next section can't read that
+ * section's tone for it.
+ */
+const paintOf = (paint: EdgePaint) =>
+  paint === 'echo' ? 'var(--edge-echo)' : `var(--color-${paint})`
+
+/** A composed edge's over parts, inside the section, where its own mask clips them at the cut. */
+function EdgeOverLayers({ parts }: { parts: readonly EdgePart[] }) {
+  return <EdgeParts parts={parts} name="over" />
+}
+
+/**
  * The <section> every page-builder section renders inside: tone (`data-tone`, which recolours
  * everything within, see tokens.generated.css), spacing, width, the anchor `id` and the motion
  * preset, all from the section's shared `style`. A section supplies only its content.
@@ -104,9 +172,10 @@ function EdgeSvg({ children, ...rest }: { children: ReactNode; 'data-edge-layer'
  * through the cut) and the accent line (over it).
  */
 export function SectionFrame(props: Props) {
-  // Only a section with a panel needs the site's colours and gradients, so only it waits for them.
-  if (!props.ownsSurfaces && panelChoice(props.style?.panel))
-    return <PanelSectionFrame {...props} />
+  // Only a section with a panel needs the site's colours and gradients, so only it waits for them. A
+  // layout that draws its own surfaces never has one: SectionRenderer leaves its stored choice out
+  // (lib/design/section-surfaces.ts).
+  if (panelChoice(props.style?.panel)) return <PanelSectionFrame {...props} />
   return <SectionFrameView {...props} />
 }
 
@@ -125,7 +194,6 @@ function SectionFrameView({
   className = '',
   background,
   media,
-  ownsSurfaces = false,
   'aria-labelledby': labelledBy,
   children,
 }: Props & { design?: SiteDesign }) {
@@ -138,24 +206,39 @@ function SectionFrameView({
   // A panel is on the content container, so every section gets it with no code of its own. The same
   // decision the Studio's warning makes (resolveSectionPanel), from the colours and gradients the page
   // really draws; with none (they couldn't be read) a gradient is checked with the conservative bound.
-  const panel = ownsSurfaces
-    ? null
-    : resolveSectionPanel({
-        panel: style?.panel,
-        strength: style?.panelStrength,
-        tone: resolved.tone,
-        hasPicture: Boolean(resolved.image),
-        overlay: pictureOverlay(style, resolved.tone),
-        gradient: resolved.gradient,
-        gradients: design?.gradients,
-        site: design?.colours,
-        hasOwnBackground: Boolean(background),
-        overlaps:
-          Boolean(resolved.edge) || resolved.motion === 'parallax' || resolved.motion === 'float',
-      })
+  const panel = resolveSectionPanel({
+    panel: style?.panel,
+    strength: style?.panelStrength,
+    tone: resolved.tone,
+    hasPicture: Boolean(resolved.image),
+    overlay: pictureOverlay(style, resolved.tone),
+    gradient: resolved.gradient,
+    gradients: design?.gradients,
+    site: design?.colours,
+    hasOwnBackground: Boolean(background),
+    // Elevated cuts nothing away, so nothing changes under a panel at the section's foot.
+    overlaps:
+      (Boolean(resolved.edge) && resolved.edge?.shape !== 'elevated') ||
+      resolved.motion === 'parallax' ||
+      resolved.motion === 'float',
+  })
   const panelProps = panel ? panelDomProps(panel) : undefined
+  // A mark sits above the background and overlay. With a panel it stays behind the content unless asked
+  // to go behind the panel: inside the panel's box, over its fill. The container is only made a stacking
+  // layer when there is a mark to lay it over.
+  const mark = resolveDecorativeMark(style?.mark)
+  const markInPanel = Boolean(panel) && mark?.layer !== 'panel'
+  const markProps = {
+    input: style?.mark,
+    scope: 'section',
+    tone: resolved.tone,
+    // Only a picture or gradient is unknown behind the text: a panel without one is a known colour.
+    backdrop: Boolean(resolved.image ?? resolved.gradient),
+  } as const
+  const markInContainer = mark && markInPanel ? <DecorativeMark {...markProps} nested /> : null
+  const markClass = !mark ? '' : markInPanel ? 'relative isolate' : 'relative'
   const containerClass =
-    `${resolved.containerClass} ${containerClassName} ${panelProps?.className ?? ''}`.trim()
+    `${resolved.containerClass} ${containerClassName} ${panelProps?.className ?? ''} ${markClass}`.trim()
   const panelAttributes = panelProps
     ? {
         'data-panel': panelProps.render,
@@ -189,6 +272,38 @@ function SectionFrameView({
       {mediaNode}
     </>
   )
+  // Only present with a mark: an empty slot would shift every useId below it (the parity snapshots hold this).
+  const behind =
+    mark && !markInPanel ? (
+      <>
+        {background}
+        <DecorativeMark {...markProps} />
+      </>
+    ) : (
+      background
+    )
+  // A composed edge is worked out once: the frame draws its under parts, the section its over parts. They
+  // join the slot above only when there are some, for the same reason (section-edge-parity.test.tsx).
+  const composition = resolved.edge ? edgeComposition(resolved.edge) : undefined
+  const overParts = composition?.parts.filter((part) => part.side === 'over') ?? []
+  const backLayers =
+    overParts.length > 0 ? (
+      <>
+        {behind}
+        <EdgeOverLayers parts={overParts} />
+      </>
+    ) : (
+      behind
+    )
+  const withMark = (inside: ReactNode) =>
+    markInContainer ? (
+      <>
+        {markInContainer}
+        {inside}
+      </>
+    ) : (
+      inside
+    )
 
   const section = (
     <section
@@ -206,7 +321,7 @@ function SectionFrameView({
         placement={resolved.backgroundImage}
         isFirst={isFirst}
       />
-      {background}
+      {backLayers}
       {plan.kind === 'enter' && plan.target === 'container' ? (
         <MotionDiv
           {...enterProps(plan)}
@@ -214,7 +329,7 @@ function SectionFrameView({
           className={containerClass}
           style={panelProps?.style}
         >
-          {content}
+          {withMark(content)}
         </MotionDiv>
       ) : plan.kind === 'enter' ? (
         <MotionDiv
@@ -223,40 +338,98 @@ function SectionFrameView({
           className={containerClass}
           style={panelProps?.style}
         >
-          {Children.map(
-            [children, mediaNode && <Fragment key="media">{mediaNode}</Fragment>],
-            (child) =>
-              child ? <MotionDiv {...revealChild(plan.childVariants)}>{child}</MotionDiv> : null,
+          {withMark(
+            Children.map(
+              [children, mediaNode && <Fragment key="media">{mediaNode}</Fragment>],
+              (child) =>
+                child ? <MotionDiv {...revealChild(plan.childVariants)}>{child}</MotionDiv> : null,
+            ),
           )}
         </MotionDiv>
       ) : (
         <div className={containerClass} style={panelProps?.style} {...panelAttributes}>
-          {content}
+          {withMark(content)}
         </div>
       )}
     </section>
   )
 
-  return resolved.edge ? <EdgeFrame edge={resolved.edge}>{section}</EdgeFrame> : section
+  if (!resolved.edge) return section
+  if (resolved.edge.shape === 'elevated')
+    return <ElevatedFrame shadow={resolved.edge.shadow ?? 'soft'}>{section}</ElevatedFrame>
+  return (
+    <EdgeFrame edge={resolved.edge} composition={composition} tone={resolved.tone}>
+      {section}
+    </EdgeFrame>
+  )
 }
 
-function EdgeFrame({ edge, children }: { edge: ResolvedEdge; children: ReactNode }) {
+/**
+ * Elevated (task 151, Slice 6): a straight boundary that casts a soft shadow onto the section below. The frame
+ * lifts the section a step above the sections after it, as an edge's does (globals.css), so the shadow falls on
+ * them and stays under the sticky header; the shadow is a strip that starts where the section ends and is
+ * painted over what follows. Nothing is masked and no room is reserved: the strip is absolutely placed and
+ * takes no part in layout, the section below is not pulled up, and the strip is outside the section, so a
+ * section that clips its overflow cannot clip it. It is its own attribute, not the edge frame's, so none of
+ * the cut's rules (mask, bottom padding, follower, footer band) reach it.
+ */
+function ElevatedFrame({ shadow, children }: { shadow: EdgeShadow; children: ReactNode }) {
+  return (
+    <div data-section-elevated={shadow} className="relative">
+      {children}
+      <div
+        data-edge-shadow=""
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-full"
+      />
+    </div>
+  )
+}
+
+/**
+ * A composed edge (new shapes only) takes the branches below that read `composition`: its mask from its cut,
+ * its under fills before the section and its under lines after it, and Echo's colour from the section's
+ * tone. Today's shapes have no composition, so they take the original branches, unchanged, in the same
+ * three slots.
+ */
+function EdgeFrame({
+  edge,
+  composition,
+  tone,
+  children,
+}: {
+  edge: ResolvedEdge
+  composition: EdgeComposition | undefined
+  /** The section's tone, whose colour Echo is. */
+  tone: string
+  children: ReactNode
+}) {
   const transform = { flip: edge.flip, invert: edge.invert }
   const accent = edge.accent === 'none' ? undefined : `var(--color-${edge.accent})`
+  // Today's shapes are drawn from their line; a new one only from its composition.
+  const line = isLineShape(edge.shape) ? edge.shape : undefined
+  const echoes = composition?.parts.some((part) => part.paint === 'echo') ?? false
+  const under = (kind: EdgePart['kind']) =>
+    composition?.parts.filter((part) => part.side === 'under' && part.kind === kind) ?? []
 
   return (
     <div
       data-section-edge-frame={edge.shape}
       data-edge-custom={edgeHeightIsCustom(edge.height) ? '' : undefined}
+      data-edge-echo={echoes ? tone : undefined}
       className="relative"
       style={
         {
           ...edgeHeightStyle(edge.height, '--edge-h'),
-          '--edge-mask': edgeMaskImage(edge.shape, transform),
+          '--edge-mask': composition
+            ? cutMaskImage(composition.cut)
+            : line && edgeMaskImage(line, transform),
         } as CSSProperties
       }
     >
-      {edge.shape === 'layered' ? (
+      {composition ? (
+        <EdgeParts parts={under('fill')} name="under" />
+      ) : edge.shape === 'layered' ? (
         <EdgeSvg data-edge-layer="back">
           <path
             d={closeToTop(edgeBackLine(transform))}
@@ -266,10 +439,12 @@ function EdgeFrame({ edge, children }: { edge: ResolvedEdge; children: ReactNode
         </EdgeSvg>
       ) : null}
       {children}
-      {accent ? (
+      {composition ? (
+        <EdgeParts parts={under('stroke')} name="line" />
+      ) : accent && line ? (
         <EdgeSvg data-edge-layer="line">
           <path
-            d={edgeLine(edge.shape, transform)}
+            d={edgeLine(line, transform)}
             fill="none"
             stroke={accent}
             strokeWidth={3}

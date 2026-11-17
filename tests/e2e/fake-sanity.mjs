@@ -16,8 +16,17 @@ import {
   designSettingsVariants,
   documents,
   experimentRunning,
+  footerDividerOn,
+  teamPageDividerOn,
   footerSocialOn,
+  blogPostWithoutPicture,
+  blogSettingsDesigned,
+  blogSettingsPictureDepth,
+  buttonStyleDesign,
+  withButtonStyle,
+  blogSettingsLifted,
   markerUnset,
+  navigationNested,
   releaseVersions,
   variantDocuments,
 } from './fixtures/dataset.mjs'
@@ -43,7 +52,7 @@ let usersMeCalls = 0
 const SETTINGS_VARIANTS = { default: null, aiCrawlersBlocked, customBrowserIcon, markerUnset }
 let settingsPatch = null
 
-/** The designSettings variant being served (`light` or `dark`), or null for none; POST /__fixture/design/<off|light|dark>. */
+/** The designSettings variant being served (`light`, `dark`, or a site-wide Card depth, Density or Shape), or null for none; POST /__fixture/design/<off|light|dark|card-raised|card-floating|density-airy|density-compact|shape-round|shape-sharp|heading-editorial|heading-modern|heading-classic>. */
 let designPatch = null
 
 /** Whether the fixture experiment is running; switched by POST /__fixture/experiment/<on|off>. */
@@ -51,6 +60,27 @@ let experimentPatch = null
 
 /** Whether the footer's social icons are on; switched by POST /__fixture/footer-social/<on|off>. */
 let footerSocialPatch = null
+
+/** Whether every member's page has a divider under their summary; switched by POST /__fixture/team-divider/<on|off>. */
+let teamDividerOn = false
+
+/** Whether the footer has a divider above its bottom row; switched by POST /__fixture/footer-divider/<on|off>. */
+let footerDividerPatch = null
+
+/** Whether the blog's cards have a design; switched by POST /__fixture/blog-settings/<on|lift|off>. */
+let blogSettingsPatch = null
+
+/** A post with no picture, served while a picture depth is on (POST /__fixture/blog-settings/depth-*). */
+let blogExtraPost = null
+
+/** Whether the header menu has dropdowns; switched by POST /__fixture/navigation/<flat|nested>. */
+let navigationPatch = null
+
+/** Whether the site-wide button style is on (task 148); switched by POST /__fixture/button-style/<on|off>. */
+let buttonStyleOn = false
+
+/** How many queries the lake has served, for GET /__fixture/query-count. */
+let queryCount = 0
 
 /** Writes the site made (the Stripe webhook syncing prices), served back by GET /__fixture/mutations. */
 const mutations = []
@@ -64,10 +94,12 @@ const BASE_ID = /^versions.[^.]+./
  */
 function datasetFor(perspective, variant) {
   // A served palette replaces the fixture's own designSettings (gradients only), like a real edit.
+  const served = designPatch ?? (buttonStyleOn ? buttonStyleDesign : null)
   const published = [
-    ...(designPatch ? documents.filter((doc) => doc._id !== designPatch._id) : documents),
-    ...(designPatch ? [designPatch] : []),
+    ...(served ? documents.filter((doc) => doc._id !== served._id) : documents),
+    ...(served ? [served] : []),
   ]
+    .map((doc) => (buttonStyleOn ? withButtonStyle(doc) : doc))
     .map((doc) =>
       settingsPatch && doc._id === 'siteIdentity' ? { ...doc, ...settingsPatch } : doc,
     )
@@ -75,8 +107,17 @@ function datasetFor(perspective, variant) {
       footerSocialPatch && doc._id === 'siteNavigation' ? { ...doc, ...footerSocialPatch } : doc,
     )
     .map((doc) =>
+      footerDividerPatch && doc._id === 'siteNavigation' ? { ...doc, ...footerDividerPatch } : doc,
+    )
+    .map((doc) =>
+      navigationPatch && doc._id === 'siteNavigation' ? { ...doc, ...navigationPatch } : doc,
+    )
+    .map((doc) =>
       experimentPatch && doc._type === 'experiment' ? { ...doc, ...experimentPatch } : doc,
     )
+  if (blogSettingsPatch) published.push(blogSettingsPatch)
+  if (teamDividerOn) published.push(teamPageDividerOn)
+  if (blogExtraPost) published.push(blogExtraPost)
   // Content variants replace the base documents with the same id, like the real Content Lake.
   const variantDocs = variant ? (variantDocuments[variant] ?? []) : []
   const swapped = new Set(variantDocs.map((doc) => doc._id))
@@ -99,7 +140,7 @@ async function readBody(req) {
   return body
 }
 
-createServer(async (req, res) => {
+async function handle(req, res) {
   const url = new URL(req.url ?? '/', 'http://localhost')
   if (req.method === 'GET' && url.pathname === '/__fixture/picture.png') {
     res.writeHead(200, { 'content-type': 'image/png', 'cache-control': 'public, max-age=3600' })
@@ -113,7 +154,10 @@ createServer(async (req, res) => {
     res.writeHead(204).end()
     return
   }
-  const design = /^\/__fixture\/design\/(off|light|dark)$/.exec(url.pathname)?.[1]
+  const design =
+    /^\/__fixture\/design\/(off|light|dark|card-raised|card-floating|density-airy|density-compact|shape-round|shape-sharp|heading-editorial|heading-modern|heading-classic)$/.exec(
+      url.pathname,
+    )?.[1]
   if (req.method === 'POST' && design) {
     designPatch = design === 'off' ? null : designSettingsVariants[design]
     res.writeHead(204).end()
@@ -122,6 +166,47 @@ createServer(async (req, res) => {
   const footerSocial = /^\/__fixture\/footer-social\/(on|off)$/.exec(url.pathname)?.[1]
   if (req.method === 'POST' && footerSocial) {
     footerSocialPatch = footerSocial === 'on' ? footerSocialOn : null
+    res.writeHead(204).end()
+    return
+  }
+  const teamDivider = /^\/__fixture\/team-divider\/(on|off)$/.exec(url.pathname)?.[1]
+  if (req.method === 'POST' && teamDivider) {
+    teamDividerOn = teamDivider === 'on'
+    res.writeHead(204).end()
+    return
+  }
+  const footerDivider = /^\/__fixture\/footer-divider\/(on|off)$/.exec(url.pathname)?.[1]
+  if (req.method === 'POST' && footerDivider) {
+    footerDividerPatch = footerDivider === 'on' ? footerDividerOn : null
+    res.writeHead(204).end()
+    return
+  }
+  const blogSettings = /^\/__fixture\/blog-settings\/(on|lift|off|depth-[a-zA-Z]+)$/.exec(
+    url.pathname,
+  )?.[1]
+  if (req.method === 'POST' && blogSettings) {
+    const depth = blogSettings.startsWith('depth-')
+      ? blogSettingsPictureDepth[blogSettings.slice('depth-'.length)]
+      : undefined
+    blogSettingsPatch =
+      blogSettings === 'on'
+        ? blogSettingsDesigned
+        : blogSettings === 'lift'
+          ? blogSettingsLifted
+          : (depth ?? null)
+    blogExtraPost = depth ? blogPostWithoutPicture : null
+    res.writeHead(204).end()
+    return
+  }
+  const buttonStyle = /^\/__fixture\/button-style\/(on|off)$/.exec(url.pathname)?.[1]
+  if (req.method === 'POST' && buttonStyle) {
+    buttonStyleOn = buttonStyle === 'on'
+    res.writeHead(204).end()
+    return
+  }
+  const navigation = /^\/__fixture\/navigation\/(flat|nested)$/.exec(url.pathname)?.[1]
+  if (req.method === 'POST' && navigation) {
+    navigationPatch = navigation === 'nested' ? navigationNested : null
     res.writeHead(204).end()
     return
   }
@@ -170,6 +255,13 @@ createServer(async (req, res) => {
     res.end(JSON.stringify({ transactionId: 'fixture', results: [] }))
     return
   }
+  // Every query served so far, so a spec can hold a page to the request budget (README, "Request budget").
+  if (req.method === 'GET' && url.pathname === '/__fixture/query-count') {
+    res.writeHead(200, { 'content-type': 'application/json' })
+    res.end(JSON.stringify({ count: queryCount }))
+    return
+  }
+
   if (!url.pathname.includes('/data/query/')) {
     res.writeHead(404).end()
     return
@@ -182,6 +274,7 @@ createServer(async (req, res) => {
     return
   }
 
+  queryCount += 1
   let query = url.searchParams.get('query') ?? ''
   let params = {}
   let perspective = url.searchParams.get('perspective') ?? 'published'
@@ -210,6 +303,92 @@ createServer(async (req, res) => {
     res.writeHead(400, { 'content-type': 'application/json' })
     res.end(JSON.stringify({ error: 'Invalid query' }))
   }
-}).listen(PORT, () => {
+}
+
+// A request that throws (a malformed body or parameter, say) used to reject outside every try, and Node
+// ends the process on an unhandled rejection: every in-flight connection is reset (ECONNRESET) and every
+// later one refused, for the rest of the run. It now answers that one request and the lake stays up.
+//
+// keepAliveTimeout: 0, on purpose: the lake never times out an idle keep-alive connection. With Node's default (5000 ms,
+// plus keepAliveTimeoutBuffer's 1000 ms, so the socket's timer is 6000 ms) a race was demonstrated with Node 24.22.2 and
+// undici 7.30.1 (tests/e2e/diagnostics/evidence/keepalive-race-2026-11-16/): the client reuses a connection well inside
+// its own idle limit, the lake's one thread is busy (GROQ evaluation is synchronous) past the 6000 ms deadline, and when
+// the thread frees, the timer fires before the request already sent is read; Node destroys the socket and the client
+// gets ECONNRESET. With no server idle timer that cannot happen. Idle connections are closed instead by the client (undici
+// retires idle sockets itself: 4000 ms by default now that no `Keep-Alive: timeout=5` hint is sent, 3000 ms with it) and,
+// for any client that never does, by the lake's exit at the end of the run. Only this one setting changes:
+// headersTimeout, requestTimeout and server.timeout keep Node's defaults. That race is the mechanism this removes; it is
+// not shown to be the cause of any particular CI failure.
+const server = createServer({ keepAliveTimeout: 0 }, (req, res) => {
+  const started = Date.now()
+  // Diagnostics only: a request that took over a second, or that the client gave up on before it was answered.
+  res.on('close', () => {
+    const took = Date.now() - started
+    if (!res.writableFinished)
+      console.error(
+        'fake-sanity client closed early:',
+        req.method,
+        (req.url ?? '').slice(0, 120),
+        `after ${took}ms`,
+      )
+    else if (took > SLOW_MS)
+      console.error(
+        'fake-sanity slow request:',
+        req.method,
+        (req.url ?? '').slice(0, 120),
+        `${took}ms`,
+      )
+  })
+  handle(req, res).catch((error) => {
+    console.error(
+      'fake-sanity request error:',
+      req.method,
+      (req.url ?? '').slice(0, 120),
+      error instanceof Error ? error.message : error,
+    )
+    if (res.headersSent) res.destroy()
+    else {
+      res.writeHead(400, { 'content-type': 'application/json' })
+      res.end(JSON.stringify({ error: 'Invalid request' }))
+    }
+  })
+})
+
+// More diagnostics, all quiet unless something goes wrong, and none of it changes how a request is answered:
+// a connection that errors is named with how long it had been open; a stretch where the one thread was
+// too busy to serve anyone (GROQ evaluation is synchronous) is named with its length; and a non-zero exit
+// says so, so a lake that went away mid-build is in the log. Node's own handling of sockets is unchanged.
+const SLOW_MS = 1000
+const STALL_MS = 250
+server.on('connection', (socket) => {
+  const opened = Date.now()
+  socket.on('error', (error) => {
+    console.error(
+      'fake-sanity socket error:',
+      error.code ?? error.message,
+      `after ${Date.now() - opened}ms`,
+    )
+  })
+})
+let ticked = Date.now()
+setInterval(() => {
+  const now = Date.now()
+  const stalled = now - ticked - 100
+  ticked = now
+  if (stalled > STALL_MS) console.error(`fake-sanity event loop stalled for ${stalled}ms`)
+}, 100).unref()
+process.on('exit', (code) => {
+  if (code) console.error(`fake-sanity exiting with code ${code}`)
+})
+
+// Opt-in connection and request diagnostics for the CI investigation of the build's connection resets
+// (E2E_LAKE_DIAGNOSTICS=1; see tests/e2e/diagnostics/README.md). Off, nothing is loaded and nothing changes; on, it
+// only adds listeners and a low-frequency sampler, and answers, times out and pools exactly as above.
+if (process.env.E2E_LAKE_DIAGNOSTICS === '1') {
+  const { installLakeDiagnostics } = await import('./diagnostics/lake-diagnostics.mjs')
+  installLakeDiagnostics(server, { port: PORT })
+}
+
+server.listen(PORT, () => {
   console.log(`fake Content Lake on http://localhost:${PORT}`)
 })

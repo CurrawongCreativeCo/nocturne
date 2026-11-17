@@ -23,6 +23,7 @@ export const decorativeDividerFields = /* groq */ `
   style,
   width,
   thickness,
+  finish,
   centre,
   text,
   textCase,
@@ -67,10 +68,14 @@ export const linkFields = /* groq */ `
   bookingUrl
 `
 
+/** A button's optional indicator (task 148): the shared action fields stored on the `cta` object. */
+export const ctaIndicatorFields = /* groq */ `actionStyle, actionMotion, actionColour { colour, hex }`
+
 export const ctaFields = /* groq */ `
   _key,
   label,
   variant,
+  ${ctaIndicatorFields},
   link { ${linkFields} }
 `
 
@@ -126,9 +131,20 @@ export const statsBarFields = /* groq */ `
   caption
 `
 
+/** An Icons box (`iconsDesignField`): the container and colour of the icons a section, block or page draws. */
+export const iconDesignFields = /* groq */ `
+  iconShape,
+  iconColour { colour, hex },
+  iconBackground { colour, hex },
+  iconBackgroundStrength,
+  iconBorder,
+  iconBorderColour { colour, hex }
+`
+
 /** A `badgeRow` (schema: lib/sanity/schema/badge-row.ts): project it as `badgeRow { ${badgeRowFields} }`. */
 export const badgeRowFields = /* groq */ `
-  badges[] { _key, label, icon }
+  badges[] { _key, label, icon },
+  iconDesign { ${iconDesignFields} }
 `
 
 /** A `logoRow` (schema: lib/sanity/schema/logo-row.ts): project it as `logoRow { ${logoRowFields} }`. */
@@ -206,7 +222,28 @@ export const splitSupportingFields = /* groq */ `
  * A section's shared layout and style options (schema: lib/sanity/schema/section-style.ts). Every
  * section fragment projects it as `style { ${sectionStyleFields} }`; SectionFrame reads it.
  */
+/** A decorative mark (lib/sanity/schema/decorative-mark.ts), its approved picture resolved to a CDN URL. */
+export const decorativeMarkFields = /* groq */ `
+  kind,
+  text,
+  font,
+  align,
+  "pictureUrl": picture->{"url": select(format == "picture" => picture.asset->url, svg.asset->url)}.url,
+  keepColours,
+  icon,
+  size,
+  phoneScale,
+  anchor,
+  offsetX,
+  offsetY,
+  colour { colour, hex },
+  opacity,
+  rotation,
+  layer
+`
+
 export const sectionStyleFields = /* groq */ `
+  mark { ${decorativeMarkFields} },
   tone,
   spacing,
   width,
@@ -244,6 +281,22 @@ export const sectionStyleFields = /* groq */ `
   edgeFlip,
   edgeAccent,
   edgeLayer,
+  edgeTideLayer,
+  edgeLineColour,
+  edgeShadow,
+  edgeCrest,
+  edgeDepth,
+  edgeStrength,
+  edgePalette,
+  edgeLayerBelow,
+  edgeLayerColours {
+    above1,
+    above1Strength,
+    above2,
+    above2Strength,
+    below,
+    belowStrength
+  },
   edgeInvert,
   edgeHeightMobile,
   edgeHeightTablet,

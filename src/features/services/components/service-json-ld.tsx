@@ -2,12 +2,13 @@ import { stegaClean } from 'next-sanity'
 
 import { JsonLd } from '@/components/ui/json-ld'
 import { WebPageJsonLd } from '@/components/ui/web-page-json-ld'
-import { servicePath } from '@/config/paths'
+import { locationPath, servicePath } from '@/config/paths'
 import { siteUrl } from '@/config/site-url'
 import { urlFor } from '@/lib/sanity/image'
 import { graph } from '@/lib/structured-data/graph'
 import { serviceId } from '@/lib/structured-data/ids'
 import { buildFaqPage } from '@/lib/structured-data/nodes/faq-page'
+import { buildLocationReference } from '@/lib/structured-data/nodes/location'
 import { buildService } from '@/lib/structured-data/nodes/service'
 
 import type { ServiceData } from '../types'
@@ -18,7 +19,14 @@ import { serviceQuestions } from '../utils/questions'
  * shows questions. The nodes come from `src/lib/structured-data/`; this cleans the page's values of
  * stega, resolves the picture and passes only what `ServiceView` renders.
  */
-export function ServiceJsonLd({ service }: { service: ServiceData }) {
+export function ServiceJsonLd({
+  service,
+  businessType,
+}: {
+  service: ServiceData
+  /** The schema.org type of the site's business, for the short node of each listed branch. */
+  businessType: string
+}) {
   const { image } = service
   const path = servicePath(stegaClean(service.slug))
   const url = new URL(path, siteUrl).toString()
@@ -53,6 +61,7 @@ export function ServiceJsonLd({ service }: { service: ServiceData }) {
             summary: stegaClean(service.summary),
             image: shareImage,
             audience: stegaClean(service.audience),
+            locationIds: service.locations.map(({ _id }) => _id),
             price:
               typeof priceFrom === 'number' && priceUnit
                 ? { amount: priceFrom, unit: priceUnit }
@@ -63,6 +72,18 @@ export function ServiceJsonLd({ service }: { service: ServiceData }) {
           questions.length > 0 &&
             !service.hasFaqSections &&
             buildFaqPage({ url, doc: service._id, questions }),
+          // Each listed location is defined here, briefly, so the `areaServed` ids resolve on this
+          // page; the location's own page describes it in full.
+          ...service.locations.map((place) =>
+            buildLocationReference({
+              origin: siteUrl,
+              id: place._id,
+              url: new URL(locationPath(stegaClean(place.slug)), siteUrl).toString(),
+              name: stegaClean(place.name),
+              kind: stegaClean(place.kind),
+              businessType,
+            }),
+          ),
         )}
       />
     </>

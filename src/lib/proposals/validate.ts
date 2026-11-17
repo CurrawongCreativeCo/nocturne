@@ -2,11 +2,12 @@ import { resolveDesignTokens, type DesignOverrides } from '@/lib/color/resolve-d
 import { isClientEditable as registryIsClientEditable } from '@/lib/sanity/client-editable'
 import { panelProblem } from '@/lib/sanity/section-panel'
 
+import { capabilityVerdicts, layoutOfSection, type MarkedField } from './capabilities'
 import {
   getAt,
   insertAt,
   parsePath,
-  setAt,
+  setCreatingParents,
   unsetAt,
   type InsertPosition,
   type PathSegment,
@@ -39,7 +40,10 @@ import type {
  *    the value is in its list, a slot block is allowed there and an array's limit holds.
  * 3. Design: a Brand colours change that makes a text pair fail (through `resolveDesignTokens`) is
  *    rejected; a section's panel that cannot be made readable is only a warning, as it is in Studio.
- * 4. Permissions: a change to anything clients may not edit (CLIENT_EDITABLE, through the manifest)
+ * 4. Capabilities: a value in a field that is a shared design capability, or feeds a content source,
+ *    must be verified for the section's layout in the manifest (capabilities.ts); anything else is
+ *    rejected with the reason. Fields that carry no capability keep the ordinary checks.
+ * 5. Permissions: a change to anything clients may not edit (CLIENT_EDITABLE, through the manifest)
  *    is marked `needsAgencyReview`.
  *
  * The Sanity schema's own validation rules cannot run here; scripts/proposal.mjs runs them on the
@@ -58,6 +62,12 @@ export interface ValidateDeps {
   agencyPermitted?: boolean
   /** Defaults to the CLIENT_EDITABLE registry. */
   isClientEditable?: (type: string, field: string) => boolean
+  /**
+   * How many times the accepted changes are re-judged against what would actually be written before the
+   * proposal is rejected as unstable (default 8). A part can only stop applying once, so two parts settle
+   * in at most four rounds: the cap is a guard that fails closed, and a hook for tests.
+   */
+  maxRounds?: number
 }
 
 /** Fields that are the section's look rather than its content, besides the ones typed as a style. */
@@ -105,8 +115,10 @@ interface Inspection {
   reasons: Rejection[]
   warnings: string[]
   review: boolean
-  /** The section the unit changes (its `_key`), for the panel check. */
+  /** The section the unit changes (its `_key`), for the panel and capability checks. */
   sectionKey?: string
+  /** Capability and content-source fields the value sets, judged once the layout is known. */
+  marked: MarkedField[]
   /** The name of the top-level field it changes, for attributing a contrast failure. */
   field?: string
 }
@@ -246,6 +258,8 @@ interface ValueCheck {
   problems: Rejection[]
   /** The rows the value touches, for the permission check. */
   touched: ManifestField[]
+  /** The touched rows that are a shared design capability or feed a content source, with their paths. */
+  marked: MarkedField[]
 }
 
 /** The block types the slot at `arrayPath` accepts, or undefined when the array isn't a slot. */
@@ -296,6 +310,7 @@ function checkValue(check: ValueCheck, path: string, value: unknown) {
     problems.push(reject('value-not-allowed', `${path} cannot be null: unset it to inherit.`))
     return
   }
+  if (row && (row.capability || row.contentSource)) check.marked.push({ path, row })
 
   if (Array.isArray(value)) {
     if (row && row.kind !== 'array' && !OPAQUE_KINDS.has(row.kind)) {
@@ -363,20 +378,50 @@ function checkValue(check: ValueCheck, path: string, value: unknown) {
   }
 }
 
-/** Sorts a unit into a part from where it lands: a style, an image design, or one of the look fields. */
-function partOf(scope: Scope | undefined, topField: string | undefined, designDocument: boolean) {
+/**
+ * Sorts a unit into a part from where it lands: a style, an image design, one of the look fields, or a
+ * row the manifest says is a design object (`design: true`, such as a link's own Appearance).
+ */
+function partOf(
+  scope: Scope | undefined,
+  topField: string | undefined,
+  designDocument: boolean,
+  row?: ManifestField,
+) {
   if (designDocument) return 'design'
   if (!scope || !topField) return 'content'
+  if (row?.design === true) return 'design'
   const kind = scope.rows.get(topField)?.kind ?? ''
   return DESIGN_KINDS.has(kind) || DESIGN_FIELDS.has(topField) || topField.endsWith('Design')
     ? 'design'
     : 'content'
 }
 
+/**
+ * The rows above `segments` that are a shared design capability or feed a content source. A value
+ * inside a marked object (`cardDesign.label.size`, `dividerDesign.afterProfile.style`) is judged by the
+ * object's own marker too, so a nested path is never a way round it.
+ */
+function markedAncestors(scope: Scope, segments: readonly PathSegment[]): MarkedField[] {
+  const found: MarkedField[] = []
+  for (let end = 1; end < segments.length; end++) {
+    const path = manifestPath(scope, segments.slice(0, end))
+    const row = path === null ? undefined : scope.rows.get(path)
+    if (path !== null && row && (row.capability || row.contentSource)) found.push({ path, row })
+  }
+  return found
+}
+
 function inspect(unit: Unit, deps: ValidateDeps): Inspection {
   const { manifest, documents } = deps
   const editable = deps.isClientEditable ?? registryIsClientEditable
-  const result: Inspection = { part: 'content', reasons: [], warnings: [], review: false }
+  const result: Inspection = {
+    part: 'content',
+    reasons: [],
+    warnings: [],
+    review: false,
+    marked: [],
+  }
   const fail = (code: RejectionCode, message: string) => {
     result.reasons.push(reject(code, message))
     return result
@@ -477,7 +522,7 @@ function inspect(unit: Unit, deps: ValidateDeps): Inspection {
   const path = manifestPath(scope, relative)
   const first = relative[0]
   result.field = first?.kind === 'field' ? first.name : undefined
-  result.part = partOf(scope, result.field, designDocument)
+  result.part = partOf(scope, result.field, designDocument, path ? scope.rows.get(path) : undefined)
   if (path === null || !exists(scope, path)) {
     return fail(
       'unknown-path',
@@ -485,12 +530,19 @@ function inspect(unit: Unit, deps: ValidateDeps): Inspection {
     )
   }
 
-  const check: ValueCheck = { scope, problems: result.reasons, touched: [] }
+  const check: ValueCheck = { scope, problems: result.reasons, touched: [], marked: [] }
   const top = result.field ? scope.rows.get(result.field) : undefined
   if (top) check.touched.push(top)
 
   if (unit.operation === 'set') {
-    checkValue(check, path, unit.value)
+    // The value's own markers (checkValue) and those of the objects it sits inside: all must pass.
+    check.marked.push(...markedAncestors(scope, relative))
+    // Replacing one member of a slot is judged as inserting it is: only the blocks the slot allows.
+    const last = relative[relative.length - 1]
+    const arrayPath = last?.kind === 'field' ? null : manifestPath(scope, relative.slice(0, -1))
+    const slotTypes = arrayPath === null ? undefined : slotBlocks(scope, arrayPath)
+    if (arrayPath !== null && slotTypes) checkMembers(check, arrayPath, [unit.value], slotTypes)
+    else checkValue(check, path, unit.value)
   } else if (unit.operation === 'unset') {
     const row = scope.rows.get(path)
     if (row) check.touched.push(row)
@@ -507,6 +559,9 @@ function inspect(unit: Unit, deps: ValidateDeps): Inspection {
       )
     } else {
       check.touched.push(row)
+      // An insert changes the array itself, so a marked array (a slot) is judged, as well as its ancestors.
+      check.marked.push(...markedAncestors(scope, relative))
+      if (row.capability || row.contentSource) check.marked.push({ path, row })
       const current = getAt(scope.fragment, relative)
       const length = Array.isArray(current) ? current.length : 0
       const replaced = unit.position?.where === 'replace' ? 1 : 0
@@ -520,8 +575,15 @@ function inspect(unit: Unit, deps: ValidateDeps): Inspection {
     }
   }
   result.review = result.review || check.touched.some((row) => !row.clientEditable)
+  result.marked = check.marked
   return result
 }
+
+/** What judges a field inside a slot block: the slots, and each block's own contract. */
+const blockContext = (manifest: DesignManifest) => ({
+  slots: manifest.slots,
+  slotBlocks: manifest.designCapabilities?.slotBlocks,
+})
 
 /** Inserting whole sections into pageBuilder: each must be a section type the manifest describes. */
 function checkSectionInsert(unit: Unit, manifest: DesignManifest, result: Inspection): Inspection {
@@ -542,6 +604,7 @@ function checkSectionInsert(unit: Unit, manifest: DesignManifest, result: Inspec
       scope: sectionScope(manifest, section, item),
       problems: result.reasons,
       touched: [],
+      marked: [],
     }
     for (const [key, value] of Object.entries(item)) {
       if (key === '_type' || key === '_key') continue
@@ -553,16 +616,29 @@ function checkSectionInsert(unit: Unit, manifest: DesignManifest, result: Inspec
       }
       checkValue(check, key, value)
     }
+    // A section inserted whole is judged in the layout it brings, else its default.
+    for (const verdict of capabilityVerdicts(
+      section,
+      layoutOfSection(section, item.variant),
+      check.marked,
+      blockContext(manifest),
+    )) {
+      result.reasons.push(reject(verdict.code, verdict.message))
+    }
     result.review = result.review || check.touched.some((row) => !row.clientEditable)
   }
   return result
 }
 
-/** The document after `unit`, for checks that need the result (limits are checked before; this is for design). */
+/**
+ * The document after `unit`, for checks that need the result (limits are checked before; this is for
+ * design). A set creates the object fields it goes through, as the plan will (plan.ts); an unset of a
+ * value that isn't there changes nothing. Throws when a set or an insert has nowhere to land.
+ */
 function applyUnit(document: DocumentSnapshot, unit: Unit): DocumentSnapshot {
   const segments = parsePath(unit.path)
   if (!segments) return document
-  if (unit.operation === 'set') return setAt(document, segments, unit.value)
+  if (unit.operation === 'set') return setCreatingParents(document, segments, unit.value)
   if (unit.operation === 'unset') return unsetAt(document, segments)
   if (unit.operation === 'insert' && unit.position && Array.isArray(unit.value)) {
     return insertAt(document, segments, unit.position.where, unit.value)
@@ -570,19 +646,119 @@ function applyUnit(document: DocumentSnapshot, unit: Unit): DocumentSnapshot {
   return document
 }
 
+/**
+ * The document after `units`, in order. A unit that can't be applied (a set or an insert through a
+ * parent that is missing and can't be created, or isn't an object or a list) is rejected, never
+ * skipped: a skipped unit would be accepted without the checks that read the result, and the write would
+ * then fail or land somewhere unchecked. A rejected unit is left out of the result.
+ */
+function applyUnits(
+  document: DocumentSnapshot,
+  units: { unit: Unit; inspection: Inspection }[],
+): DocumentSnapshot {
+  let patched = document
+  for (const { unit, inspection } of units) {
+    try {
+      patched = applyUnit(patched, unit)
+    } catch (error) {
+      const message = `${unit.path} can't be applied to ${unit.documentId}: ${error instanceof Error ? error.message : 'it goes through something that is missing or is not an object or list'} The proposal can't set or insert through a parent that isn't there and can't be created.`
+      if (!inspection.reasons.some((reason) => reason.message === message)) {
+        inspection.reasons.push(reject('invalid-path', message))
+      }
+    }
+  }
+  return patched
+}
+
+interface Entry {
+  unit: Unit
+  inspection: Inspection
+}
+
+/**
+ * The document after `entries`, in order, as the one `subject` is judged in. A unit that can't be
+ * applied (a set or an insert through a parent that is missing and can't be created, or isn't an object
+ * or list) is rejected, never skipped: a skipped unit would be accepted without the checks that read the
+ * result, and the write would then fail or land somewhere unchecked. Only the subject's own failure is
+ * recorded here; another unit that can't land in this world is judged in its own.
+ */
+function applyWorld(
+  document: DocumentSnapshot,
+  entries: readonly Entry[],
+  subject: Entry,
+): DocumentSnapshot {
+  let patched = document
+  for (const entry of entries) {
+    try {
+      patched = applyUnit(patched, entry.unit)
+    } catch (error) {
+      if (entry !== subject) continue
+      const message = `${entry.unit.path} can't be applied to ${entry.unit.documentId}: ${error instanceof Error ? error.message : 'it goes through something that is missing or is not an object or list'} The proposal can't set or insert through a parent that isn't there and can't be created.`
+      if (!entry.inspection.reasons.some((reason) => reason.message === message)) {
+        entry.inspection.reasons.push(reject('invalid-path', message))
+      }
+    }
+  }
+  return patched
+}
+
+/**
+ * Capability and content-source fields, judged in the world that will really be written (I4): each value
+ * must be verified for the layout its section is drawn in once the changes that will land are applied.
+ * A part with any rejection writes nothing, so another part's changes are only counted where that part
+ * still applies: a layout change in a design part that is rejected never lands, and a link inserted in a
+ * content part that is rejected is never there to give a design to. The subject's own part is judged as
+ * if it lands (if it can't, it is rejected anyway). Reasons are only ever added, so this settles.
+ */
+function judgeInWorld(
+  document: DocumentSnapshot,
+  entries: readonly Entry[],
+  subject: Entry,
+  live: Readonly<Record<ProposalPart, boolean>>,
+  deps: ValidateDeps,
+) {
+  const world = entries.filter(
+    (entry) =>
+      entry === subject ||
+      (entry.inspection.reasons.length === 0 &&
+        (entry.inspection.part === subject.inspection.part || live[entry.inspection.part])),
+  )
+  const patched = applyWorld(document, world, subject)
+  const { inspection } = subject
+  if (inspection.reasons.length > 0) return
+  if (inspection.marked.length === 0 || !inspection.sectionKey) return
+  const sections = Array.isArray(patched.pageBuilder) ? (patched.pageBuilder as unknown[]) : []
+  const section = sections.find(
+    (item): item is Record<string, unknown> =>
+      isRecord(item) && item._key === inspection.sectionKey,
+  )
+  const entry = deps.manifest.sections.find((candidate) => candidate.type === section?._type)
+  if (!section || !entry) {
+    // Not found once the changes that will land are applied: its values can't be checked, so they're rejected.
+    inspection.reasons.push(
+      reject(
+        'invalid-path',
+        `The section this change is to can't be found once the proposal's other changes that will be written are applied, so its design values can't be checked.`,
+      ),
+    )
+    return
+  }
+  for (const verdict of capabilityVerdicts(
+    entry,
+    layoutOfSection(entry, section.variant),
+    inspection.marked,
+    blockContext(deps.manifest),
+  )) {
+    inspection.reasons.push(reject(verdict.code, verdict.message))
+  }
+}
+
 /** Brand colours: a change that makes a text pair newly fail is rejected, on the units that touch it. */
 function checkBrandContrast(
   document: DocumentSnapshot,
   units: { unit: Unit; inspection: Inspection }[],
 ) {
-  let patched = document
-  for (const { unit } of units) {
-    try {
-      patched = applyUnit(patched, unit)
-    } catch {
-      return
-    }
-  }
+  const patched = applyUnits(document, units)
   const before = new Set(
     resolveDesignTokens(document as DesignOverrides)
       .checks.filter((c) => !c.pass)
@@ -608,14 +784,7 @@ function checkPanels(
   units: { unit: Unit; inspection: Inspection }[],
   deps: ValidateDeps,
 ) {
-  let patched = document
-  for (const { unit } of units) {
-    try {
-      patched = applyUnit(patched, unit)
-    } catch {
-      return
-    }
-  }
+  const patched = applyUnits(document, units)
   const site = deps.documents.designSettings
     ? resolveDesignTokens(deps.documents.designSettings as DesignOverrides).colours
     : undefined
@@ -681,7 +850,85 @@ export function validateProposal(proposal: unknown, deps: ValidateDeps): Proposa
 
   const inspected = explode(typed).map((unit) => ({ unit, inspection: inspect(unit, deps) }))
 
-  // Design checks run on what is still acceptable, per document, once the parts are separate.
+  // A client-level run can't write what clients may not edit. This is a rejection like any other, made
+  // before the checks that read what will be written: a layout change it rejects never lands, so what
+  // depends on it is judged without it.
+  if (deps.agencyPermitted === false) {
+    for (const { unit, inspection } of inspected) {
+      if (inspection.review && inspection.reasons.length === 0) {
+        inspection.reasons.push(
+          reject(
+            'agency-permission-required',
+            `${unit.path} changes something clients may not edit. It needs a token held by an Administrator or Developer.`,
+          ),
+        )
+      }
+    }
+  }
+
+  // Brand colours are read as one document, so every set must have somewhere to land before the contrast
+  // is judged. (A page's units are each judged in the world that will be written, below: a unit that
+  // can't land there is rejected there, and one that only fails because of a change that won't be
+  // written is not.)
+  for (const documentId of new Set(inspected.map((entry) => entry.unit.documentId))) {
+    const document = deps.documents[documentId]
+    if (document?._type !== 'designSettings') continue
+    applyUnits(
+      document,
+      inspected.filter(
+        (entry) => entry.unit.documentId === documentId && entry.inspection.reasons.length === 0,
+      ),
+    )
+  }
+
+  // What will be written is the accepted units of the parts that apply (a part with a rejection writes
+  // nothing). Judge every unit in that world: capability and content-source values against the layout
+  // the section really ends up in, Brand colours for contrast. A rejection can stop a part applying,
+  // which changes the world the other part is judged in, so repeat until nothing new is rejected. A
+  // reason is never removed, so this settles; if it somehow does not, fail closed.
+  const partApplies = (part: ProposalPart) => {
+    const own = inspected.filter((entry) => entry.inspection.part === part)
+    return own.length > 0 && own.every((entry) => entry.inspection.reasons.length === 0)
+  }
+  const reasonCount = () =>
+    inspected.reduce((total, entry) => total + entry.inspection.reasons.length, 0)
+  const documentIds = [...new Set(inspected.map((entry) => entry.unit.documentId))]
+  const maxRounds = deps.maxRounds ?? 8
+  let settled = false
+  for (let round = 0; round < maxRounds && !settled; round++) {
+    const before = reasonCount()
+    const live = { content: partApplies('content'), design: partApplies('design') }
+    for (const documentId of documentIds) {
+      const document = deps.documents[documentId]
+      const entries = inspected.filter((entry) => entry.unit.documentId === documentId)
+      if (document?._type === 'page') {
+        for (const subject of entries) {
+          if (subject.inspection.reasons.length === 0) {
+            judgeInWorld(document, entries, subject, live, deps)
+          }
+        }
+      } else if (document?._type === 'designSettings') {
+        checkBrandContrast(
+          document,
+          entries.filter((entry) => entry.inspection.reasons.length === 0),
+        )
+      }
+    }
+    settled = reasonCount() === before
+  }
+  if (!settled) {
+    for (const { inspection } of inspected) {
+      if (inspection.reasons.length > 0) continue
+      inspection.reasons.push(
+        reject(
+          'proposal-unstable',
+          `The changes in this proposal depend on each other in a way that didn't settle after ${String(maxRounds)} checks, so none of it is accepted. Split it into smaller proposals.`,
+        ),
+      )
+    }
+  }
+
+  // Panels warn, never reject: read from the design changes that are still acceptable.
   const byDocument = new Map<string, typeof inspected>()
   for (const entry of inspected) {
     if (entry.inspection.part !== 'design' || entry.inspection.reasons.length > 0) continue
@@ -689,12 +936,7 @@ export function validateProposal(proposal: unknown, deps: ValidateDeps): Proposa
   }
   for (const [documentId, entries] of byDocument) {
     const document = deps.documents[documentId]
-    if (!document) continue
-    if (document._type === 'designSettings') {
-      checkBrandContrast(document, entries)
-    } else if (document._type === 'page') {
-      checkPanels(document, entries, deps)
-    }
+    if (document?._type === 'page') checkPanels(document, entries, deps)
   }
 
   for (const { unit, inspection } of inspected) {
@@ -710,18 +952,6 @@ export function validateProposal(proposal: unknown, deps: ValidateDeps): Proposa
       const rejected: RejectedPatch = { ...base, reasons: inspection.reasons }
       part.rejected.push(rejected)
     } else {
-      if (inspection.review && deps.agencyPermitted === false) {
-        part.rejected.push({
-          ...base,
-          reasons: [
-            reject(
-              'agency-permission-required',
-              `${unit.path} changes something clients may not edit. It needs a token held by an Administrator or Developer.`,
-            ),
-          ],
-        })
-        continue
-      }
       const accepted: AcceptedPatch = {
         ...base,
         needsAgencyReview: inspection.review,

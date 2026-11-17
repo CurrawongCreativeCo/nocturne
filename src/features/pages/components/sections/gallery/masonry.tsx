@@ -1,4 +1,5 @@
 import { SectionFrame } from '@/components/ui/section-frame'
+import { resolvePictureDepth } from '@/lib/sanity/depth-options'
 
 import { LightboxProvider } from './lightbox-provider'
 import {
@@ -25,6 +26,7 @@ const columnClasses = {
 export function GalleryMasonry({ data, isFirst }: SectionProps<'gallery'>) {
   const { images } = data
   const columns = columnCount(data)
+  const depth = resolvePictureDepth(data.pictureDepthDesign)
 
   return (
     <SectionFrame style={data.style} defaults={DEFAULTS} isFirst={isFirst}>
@@ -39,6 +41,7 @@ export function GalleryMasonry({ data, isFirst }: SectionProps<'gallery'>) {
                 total={images.length}
                 eager={isFirst && i < columns}
                 sizes={columnSizes(columns)}
+                depth={depth}
                 className="group block w-full overflow-hidden rounded-card bg-surface-alt"
               />
             </li>

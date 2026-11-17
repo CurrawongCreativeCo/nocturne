@@ -3,6 +3,7 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { eyebrowField, headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageField } from '@/lib/sanity/schema/image-field'
 import { presetField } from '@/lib/sanity/schema/preset-field'
@@ -12,6 +13,8 @@ import {
   LogoCloudGridThumbnail,
   LogoCloudMarqueeThumbnail,
 } from '@/lib/sanity/schema/thumbnails/logo-cloud-thumbnails'
+
+import { logoCloudCapabilities } from './logo-cloud-capabilities'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -51,10 +54,12 @@ export const logoCloud = defineType({
   title: 'Logo strip',
   type: 'object',
   icon: ImagesIcon,
+  options: { designCapabilities: logoCloudCapabilities },
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
+      eyebrowField(),
       headingField({
         name: 'heading',
         title: 'Title',
@@ -64,6 +69,12 @@ export const logoCloud = defineType({
         requiredUnless: 'title',
       }),
       legacyTitleField(LIMITS.title),
+      defineField({
+        name: 'intro',
+        type: 'text',
+        rows: 2,
+        description: 'A sentence under the title. Optional, and empty draws nothing.',
+      }),
       defineField({
         name: 'logos',
         type: 'array',
@@ -88,6 +99,7 @@ export const logoCloud = defineType({
           }),
         ],
       }),
+      headerDesignField({}, { divider: true }),
       accessField,
       // Shown first in the Content tab.
       variantField(LOGO_CLOUD_VARIANTS),

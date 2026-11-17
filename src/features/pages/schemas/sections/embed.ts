@@ -11,6 +11,7 @@ import {
 } from '@/config/embed-providers'
 import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
+import { eyebrowField, headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { presetField } from '@/lib/sanity/schema/preset-field'
@@ -22,6 +23,9 @@ import {
   EmbedShortThumbnail,
   EmbedTallThumbnail,
 } from '@/lib/sanity/schema/thumbnails/embed-thumbnails'
+
+import { embedCapabilities } from './embed-capabilities'
+import { formCardField } from './form-card-field'
 
 /** Longest text the design handles. Longer text still publishes, with a warning. */
 const LIMITS = {
@@ -38,11 +42,13 @@ export const embed = defineType({
   title: 'Embed',
   type: 'object',
   icon: PlugIcon,
+  options: { designCapabilities: embedCapabilities },
   // Content, plus the agency-only Design tab (the shared `style` field that sectionFields adds).
   groups: sectionGroups,
   fieldsets: sectionFieldsets,
   fields: sectionFields(
     [
+      eyebrowField(),
       headingField({
         name: 'heading',
         title: 'Title',
@@ -121,6 +127,12 @@ export const embed = defineType({
           },
         ],
         hidden: ({ parent }) => !(parent as Parent)?.provider,
+      }),
+      headerDesignField({}, { divider: true }),
+      formCardField({
+        subject: 'the embedded content’s card',
+        unset: 'Empty keeps the card as it is drawn now.',
+        colour: 'muted',
       }),
       accessField,
     ],

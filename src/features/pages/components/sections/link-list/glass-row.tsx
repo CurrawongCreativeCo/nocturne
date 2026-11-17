@@ -1,8 +1,8 @@
 import { stegaClean } from 'next-sanity'
 import type { CSSProperties } from 'react'
 
+import { ActionIndicator } from '@/components/ui/action-indicator'
 import { buttonFeedback } from '@/components/ui/cta-link'
-import { LinkArrow } from '@/components/ui/link-arrow'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { SanityLink } from '@/components/ui/sanity-link'
 import type { GlassStrength } from '@/lib/color/glass-contrast'
@@ -12,8 +12,16 @@ import type { LinkArrowStyle } from '@/lib/sanity/link-arrow-options'
 import { servedThumbnail } from '@/lib/sanity/link-thumbnail-framing'
 import type { SanityImageData } from '@/types/sanity'
 
-import { LinkIcon, LinkText, hasThumbnail, ownEyebrow, type OwnLinkText } from './link-design'
-import { type ListLink } from './link-list-types'
+import {
+  LinkIcon,
+  LinkMark,
+  LinkText,
+  hasThumbnail,
+  ownEyebrow,
+  withMark,
+  type OwnLinkText,
+} from './link-design'
+import { type LinkContext, type ListLink } from './link-list-types'
 import type { LinkCardDesign } from '../../../utils/link-card-design'
 
 // The glass itself (blur, surface, border, shadow) is `.glass-row` in globals.css, from the glass tokens;
@@ -60,6 +68,7 @@ export function GlassRow({
   arrowStyle,
   design,
   className = '',
+  mark,
 }: {
   link: ListLink
   strength: GlassStrength
@@ -69,6 +78,8 @@ export function GlassRow({
   design: LinkCardDesign
   /** A shadow class from Design › Depth and glow, in place of the glass's own. */
   className?: string
+  /** The link's decorative mark, behind the row's text. */
+  mark: LinkContext['mark']
 }) {
   const thumbnail = link.item.thumbnail as SanityImageData | null | undefined
   const served = thumbnailFor(link.large, isFramed(thumbnail))
@@ -84,8 +95,12 @@ export function GlassRow({
   return (
     <SanityLink
       link={link.link}
-      className={`${ROW} ${STRENGTH[strength]} ${link.large ? 'min-h-20' : 'min-h-14'} ${className}`}
+      className={withMark(
+        `${ROW} ${STRENGTH[strength]} ${link.large ? 'min-h-20' : 'min-h-14'} ${className}`,
+        mark,
+      )}
     >
+      <LinkMark mark={mark} />
       {hasThumbnail(link) && thumbnail && (
         <span className="relative w-[30%] max-w-32 shrink-0 bg-surface-alt">
           <SanityImage
@@ -117,10 +132,12 @@ export function GlassRow({
         <LinkText link={link} design={design} own={text(link.large)} className="flex-1" />
         {arrow !== 'none' && (
           <span className={BADGE} style={arrowStyle}>
-            <LinkArrow
-              arrow={arrow}
+            <ActionIndicator
+              glyph={arrow}
               external={link.kind === 'external'}
-              className="size-4! motion-safe:transition-transform motion-safe:group-hover:translate-x-0.5"
+              motion="nudge"
+              distance="legacy-small"
+              className="size-4!"
             />
           </span>
         )}
