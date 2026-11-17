@@ -2567,19 +2567,19 @@ exports[`design capability evidence > team.mark.section@slider: the probe change
 
 exports[`design capability evidence > team.motion.section@grid: the probe changes the registered target 1`] = `
 [
-  "2db2259c29848162 (3208 characters)",
+  "9bf7f1ab906eca13 (3209 characters)",
 ]
 `;
 
 exports[`design capability evidence > team.motion.section@list: the probe changes the registered target 1`] = `
 [
-  "f77267dfe3f746fa (3375 characters)",
+  "3ceb43058722b08a (3376 characters)",
 ]
 `;
 
 exports[`design capability evidence > team.motion.section@slider: the probe changes the registered target 1`] = `
 [
-  "bd7d05c5c24587a7 (2805 characters)",
+  "e42a2ea09eea6f3d (2806 characters)",
   "194d073417972434 (61 characters)",
 ]
 `;
@@ -2607,13 +2607,13 @@ exports[`design capability evidence > team.pictureDepth.card@grid: the probe cha
   "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
   "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
   "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
-  "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
+  "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=144,63,504,504&w=600&h=600&fit=crop&auto=format">",
 ]
 `;
 
 exports[`design capability evidence > team.pictureDepth.card@slider: the probe changes the registered target 1`] = `
 [
-  "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
+  "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=144,63,504,504&w=600&h=600&fit=crop&auto=format">",
   "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
 ]
 `;
