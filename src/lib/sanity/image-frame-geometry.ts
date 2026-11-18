@@ -525,6 +525,42 @@ const sectionBackground: FramingResolver = {
   resolve: () => [],
 }
 
+/** The service page's picture column: half the 80rem container (service-view.tsx, `md:grid-cols-2`). */
+const SERVICE_PAGE_PX = 640
+
+/** The share image's size (features/services/api/service.ts metadata): 1200 x 630, the shape social cards use. */
+const SHARE_IMAGE = { width: 1200, height: 630 } as const
+
+/**
+ * A service's picture (task 177), one field read three ways, all from the same stored crop and hotspot:
+ * - the service page draws it 16:9 with the card's corners, requested at 1200 x 675, so the CDN serves exactly the
+ *   area this editor shows (`servedRect`, which `visibleArea` is);
+ * - the sharing metadata (Open Graph) asks for 1200 x 630 from the same crop and hotspot, so it is a wider cut of the
+ *   same area: it keeps the width and trims a little top and bottom, shown as an outline;
+ * - the structured data (JSON-LD) asks for the crop box at its own ratio, which for a crop saved here is the 16:9 area
+ *   above, so it needs no outline of its own; with nothing saved it is the whole upload.
+ * They agree on one framing, so the field has one editor: the page is the main shape, and the share image an outline.
+ */
+const serviceImage: FramingResolver = {
+  designPath: { drop: 1 },
+  resolve: () => [
+    {
+      label: 'Service page',
+      aspect: 16 / 9,
+      corner: 'card',
+      insetPct: 0,
+      drawnPx: SERVICE_PAGE_PX,
+    },
+    {
+      label: 'Share image (social cards)',
+      aspect: SHARE_IMAGE.width / SHARE_IMAGE.height,
+      corner: 'none',
+      insetPct: 0,
+      drawnPx: SHARE_IMAGE.width,
+    },
+  ],
+}
+
 /** Registry keys, set on an image field with `framing('…')` (lib/sanity/schema/image-framing-option.ts). */
 export const FRAMING_RESOLVERS = {
   linkListProfile,
@@ -538,6 +574,7 @@ export const FRAMING_RESOLVERS = {
   teamPortrait,
   testimonialAvatar,
   sectionBackground,
+  serviceImage,
   // new-framing: resolver
 } satisfies Record<string, FramingResolver>
 

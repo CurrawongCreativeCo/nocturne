@@ -2490,6 +2490,12 @@ exports[`design capability evidence > richText.overlay.section: the probe change
 ]
 `;
 
+exports[`design capability evidence > servicePage.framing.picture: the probe changes the registered target 1`] = `
+[
+  "90629f845455f3ae (244 characters)",
+]
+`;
+
 exports[`design capability evidence > siteFooter.divider.section: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > siteFooter.icon.section: the probe changes the registered target 1`] = `

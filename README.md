@@ -2566,7 +2566,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | Image (`slotImage`)                      | –       | –    | –      | –    | –     | –    | –      | R✓      | –          | –       | –     | –       | –    | –      | –     |
 | Video (`slotVideo`)                      | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Event details card (`eventDetailsCard`)  | R…      | R…   | –      | R…   | R…    | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
-| Service page (`servicePage`)             | –       | R…   | –      | –    | –     | –    | –      | R…      | –          | –       | –     | R…      | –    | –      | –     |
+| Service page (`servicePage`)             | –       | R…   | –      | –    | –     | –    | –      | R✓      | –          | –       | –     | R…      | –    | –      | –     |
 | Search results (`searchResults`)         | –       | R…   | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Site footer (`siteFooter`)               | –       | –    | –      | –    | –     | R✓   | –      | –       | –          | –       | –     | R✓      | –    | –      | –     |
 | Team member page (`teamMemberPage`)      | –       | –    | –      | –    | –     | R✓   | –      | R✓      | –          | –       | –     | R✓      | –    | –      | –     |
@@ -2574,7 +2574,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 
 | Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
 | -------------------------------------------------------- | -------- | --------------- | ------- |
-| Required                                                 | 282      | 0               | 33      |
+| Required                                                 | 283      | 0               | 32      |
 | Conditional                                              | 33       | 0               | 11      |
 
 A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
@@ -2583,13 +2583,12 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | ------------ | ---------------- | ------------------- |
 | 157          | 1                | 0                   |
 | 159          | 3                | 8                   |
-| 177          | 1                | 0                   |
 | 178          | 1                | 0                   |
 | 213          | 7                | 0                   |
 | 276          | 2                | 3                   |
 | 280          | 18               | 0                   |
 
-**Evidence.** 334 capability entries, 618 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
+**Evidence.** 335 capability entries, 619 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
 **Capabilities and their owners**
 
@@ -5954,7 +5953,7 @@ resolver in `FRAMING_RESOLVERS` and `framing('…')` on the field.
 | Testimonial avatar                                                                        | Offered      | Circle at the section's Avatar size                                                                    |
 | Blog post main image                                                                      | Task 178     | The card and the post page draw it at different ratios, so one framing cannot serve both               |
 | Hero backgrounds (Full background, Image with panel) and every section's Background image | Offered      | Focus mode (below): the hotspot only, at phone, tablet and desktop                                     |
-| Service image                                                                             | On request   | Drawn 16:9 beside the summary                                                                          |
+| Service image                                                                             | Offered      | One framing, three readers: the page (16:9), the share image (1200 x 630) and the structured data      |
 | Place (location) image                                                                    | On request   | Drawn 16:9 on its own page                                                                             |
 | Blog author photo                                                                         | On request   | A 1:1 photo under each post                                                                            |
 | Hero small picture (Editorial)                                                            | On request   | A small 1:1 picture beside the heading                                                                 |
@@ -5970,10 +5969,17 @@ a team member's portrait and an event's picture. An evidence entry can name that
 schema `type` and a fixture `id`): `field` and the probe's keys are then relative to the document, the harness reads the document
 through the page's own query with the probe applied, and the claim is that the stored value reaches the target from the document,
 as it does on the site. Team's grid, slider and list portraits, Events' Featured picture and a member's own page are verified this
-way. Two gaps stay Pending in `capability-baseline.json`, and neither is relabelled not applicable: `blogPostCards` (the Blog
-main image) moved to Task 178 by a reviewed `transfer` row (`capability-baseline-changes.ts`, owner, 18 November 2026), because the card and
-the post page need one framing each and today's crop behaviour on both is unchanged; and `servicePage` (the service image), which is
-**on request** and still belongs to Task 177 in the baseline, so Task 177 is not claimed to have no remaining gaps.
+way. One gap stays Pending in `capability-baseline.json`, and it is not relabelled not applicable: `blogPostCards` (the Blog main image) moved to
+Task 178 by a reviewed `transfer` row (`capability-baseline-changes.ts`, owner, 18 November 2026), because the card and the post page need
+one framing each and today's crop behaviour on both is unchanged. No entry is assigned to Task 177.
+
+**Service image.** The service's picture is one field read three ways from the same stored crop and hotspot: the page draws it 16:9 at
+1200 x 675, the sharing metadata (Open Graph) asks the URL builder for 1200 x 630 from it, and the structured data asks for the crop box at its
+own ratio. They agree, so the field has one editor (`FRAMING_RESOLVERS.serviceImage`): the page is the main shape and the share image an
+outline, which is a wider cut of the same area (it keeps the width and trims a little top and bottom). A crop saved here is the page's area, so
+the structured data needs no outline of its own; with nothing saved it is the whole upload. Nothing is rendered differently: each reader already
+served the area `visibleArea` gives, and `service-image-framing.test.tsx` pins all three against the editor's areas. The evidence
+(`servicePage.framing.picture`) draws the real `ServicePicture` from a fixture service.
 
 **Focus mode (covering backgrounds).** Image + text's Text over media, the Hero's Full background and Image with panel, and every
 section's Background image cover their section, so there is no fixed shape to place a crop in and it is not drawn through `FramedImage`. The picture field offers **Focus** in place of

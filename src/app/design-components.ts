@@ -8,6 +8,7 @@ import { slotImage } from '@/features/pages/schemas/slot-image'
 import { slotVideo } from '@/features/pages/schemas/slot-video'
 import { SLOT_BLOCKS, SLOT_FAMILIES } from '@/features/pages/slots/registry'
 import { searchResultsCapabilities } from '@/features/search/schemas/search-results-capabilities'
+import { service } from '@/features/services/schemas/service'
 import { servicePageCapabilities } from '@/features/services/schemas/service-page-capabilities'
 import { siteFooterCapabilities } from '@/features/site/schemas/site-footer-capabilities'
 import { siteNavigation } from '@/features/site/schemas/site-navigation'
@@ -50,6 +51,8 @@ const named = [
   siteNavigation,
   teamMember,
   teamPageSettings,
+  // The document a service's page is drawn from.
+  service,
   ...[
     badgeRow,
     blockContent,
@@ -192,6 +195,12 @@ const VIEW_SCHEMAS: readonly SchemaField[] = [
     name: 'siteFooter',
     type: 'object',
     fields: [{ name: 'navigation', type: 'siteNavigation' }],
+  },
+  {
+    // A service's page: the service, whose picture the page and the sharing metadata draw.
+    name: 'servicePage',
+    type: 'object',
+    fields: [{ name: 'service', type: 'service', group: 'content' }],
   },
   {
     // A member's page: the member, in the design Team page settings holds for every member.

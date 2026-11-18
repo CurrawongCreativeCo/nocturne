@@ -585,7 +585,7 @@ exports[`the design capability contract > servicePage: reports what it offers to
 {
   "capabilities": [
     "text required section: pending (280)",
-    "framing required section: pending (177)",
+    "framing required section: verified",
     "divider required section: pending (280)",
   ],
   "sources": [],
