@@ -5,7 +5,8 @@ import { headingPlainText } from '@/lib/sanity/heading-text'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { eyebrowField, headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
-import { imageField } from '@/lib/sanity/schema/image-field'
+import { imageField, imageOptions } from '@/lib/sanity/schema/image-field'
+import { framing } from '@/lib/sanity/schema/image-framing-option'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { sectionFields, sectionFieldsets, sectionGroups } from '@/lib/sanity/schema/section-style'
 import { variantField, variantSubtitle } from '@/lib/sanity/schema/section-variant'
@@ -160,6 +161,8 @@ export const video = defineType({
         description:
           'Shown before the video plays, and instead of it for visitors who ask for less motion.',
         validation: (rule) => rule.required(),
+        // "Adjust picture" (task 177): before play, in the frame's Shape.
+        options: { ...imageOptions, ...framing('videoPoster') },
       }),
       defineField({
         name: 'captions',

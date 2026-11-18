@@ -27,6 +27,8 @@ interface Props {
   imageClassName: string
   /** Picture depth (Split only): a shadow and glow on the still picture, never on what moves inside it. */
   depth?: ElementDepth | undefined
+  /** Serve what "Adjust picture" shows (task 177; FramedImage's `framing`): Split's picture opts in. */
+  framing?: boolean
 }
 
 /**
@@ -49,6 +51,7 @@ export function HeroPicture({
   frameClassName,
   imageClassName,
   depth,
+  framing = false,
 }: Props) {
   const picture = (classes: string) => (
     <FramedImage
@@ -67,6 +70,7 @@ export function HeroPicture({
       aspect={aspect}
       className={classes}
       depth={depth}
+      framing={framing}
     />
   )
 

@@ -54,6 +54,11 @@ export function bindModalDialog(
   }
 
   const handleClose = () => {
+    // The browser fires `close` as a queued task, after close() returns. If the dialog is open again
+    // by then, the event belongs to an earlier, silent close: React's development Strict Mode
+    // destroys a binding (closing the dialog) and binds and shows it again in the same tick, and the
+    // first close's event would otherwise shut the lightbox the moment it opened (issue #188).
+    if (dialog.open) return
     finish()
     onClose?.()
   }

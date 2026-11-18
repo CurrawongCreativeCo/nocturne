@@ -62,6 +62,15 @@ export const IMAGE_FRAME_PRESETS = [
 ] as const
 export type ImageFramePreset = (typeof IMAGE_FRAME_PRESETS)[number]
 
+/** Arch ratios, width to height. Unset is 4:5, the ratio an arch has always had. */
+export const IMAGE_ARCH_RATIOS = ['4/5', '3/4', '2/3'] as const
+export type ImageArchRatio = (typeof IMAGE_ARCH_RATIOS)[number]
+export const IMAGE_ARCH_RATIO_TITLES: Record<ImageArchRatio, string> = {
+  '4/5': '4:5',
+  '3/4': '3:4',
+  '2/3': '2:3',
+}
+
 /** `none` draws no frame; `custom` uses approved artwork from a `frame` document. */
 export const IMAGE_FRAMES = ['none', ...IMAGE_FRAME_PRESETS, 'custom'] as const
 export type ImageFrame = (typeof IMAGE_FRAMES)[number]
@@ -117,10 +126,7 @@ const range = (value: unknown, min: number, max: number): number | undefined =>
     ? Math.min(max, Math.max(min, value))
     : undefined
 
-// --- Which fields the Studio shows -----------------------------------------------------------
-
-/** Frames belong to the Framed appearance only. */
-export const showsFrame = (appearance: string | undefined): boolean => appearance === 'framed'
+// --- Which frame is chosen --------------------------------------------------------------------
 
 export const movesPicture = (motion: string | undefined): boolean =>
   motion === 'subtle' || motion === 'medium'
@@ -128,23 +134,65 @@ export const movesPicture = (motion: string | undefined): boolean =>
 export interface ImageDesignShape {
   appearance?: string | null
   motion?: string | null
+  /** The older frame field: it counts only beside the older Framed appearance. */
   frame?: string | null
+  /** The frame, for any shape (task 177). Set, it wins over `frame`. */
+  frameStyle?: string | null
+  frameInset?: number | null
   custom?: boolean | null
+}
+
+/**
+ * The frame a design draws, whatever its shape. Shape and frame are separate choices: `frameStyle`
+ * holds the frame for any shape. Content saved before that keeps its look: the older Framed
+ * appearance draws its `frame` (the Simple line when none was chosen) over Standard corners, and a
+ * `frame` left over on any other shape is still ignored, as it always was.
+ */
+export function chosenFrame(design: ImageDesignShape | null | undefined): ImageFrame {
+  const chosen = pick(IMAGE_FRAMES, design?.frameStyle)
+  if (chosen) return chosen
+  if (design?.appearance !== 'framed') return 'none'
+  return pick(IMAGE_FRAMES, design.frame) ?? IMAGE_FRAME_PRESETS[0]
+}
+
+/** A built-in frame's inset when none is stored. An approved custom frame fills the picture (0). */
+export function defaultFrameInset(frame: ImageFrame): number {
+  return frame === 'none' || frame === 'custom' ? 0 : FRAME_INSET_DEFAULTS[frame]
+}
+
+/**
+ * Whether a frame draws anything past the picture's edge. The offset border always does (down and to
+ * the right, by its inset). A line drawn exactly on the edge (inset 0) reaches half its stroke past
+ * it. An approved frame and the Organic brush stay inside.
+ */
+export function frameReachesOut(frame: ImageFrame, inset: number): boolean {
+  if (frame === 'offset-border') return true
+  if (frame === 'thin-line' || frame === 'double-line' || frame === 'corner-brackets') {
+    return inset === 0
+  }
+  return false
 }
 
 /** Which Advanced controls apply to the current choices (the fieldset disappears when none do). */
 export function imageDesignUses(design: ImageDesignShape | null | undefined) {
   const moving = movesPicture(design?.motion ?? undefined)
-  const framed = showsFrame(design?.appearance ?? undefined) && design?.frame !== 'none'
+  const frame = chosenFrame(design)
+  const framed = frame !== 'none'
+  const inset =
+    range(design?.frameInset, FRAME_INSET.min, FRAME_INSET.max) ?? defaultFrameInset(frame)
+  const arch = design?.appearance === 'arch'
+  const overlap = framed && frameReachesOut(frame, inset)
   return {
     /** The Custom switch: exact motion values. */
     custom: moving,
     travel: moving && design?.custom === true,
     direction: moving && design?.custom === true,
     scale: moving && design?.custom === true,
+    archRatio: arch,
     frameColour: framed,
     frameInset: framed,
-    any: moving || framed,
+    frameOverlap: overlap,
+    any: moving || framed || arch,
   }
 }
 
@@ -159,8 +207,13 @@ export interface ImageDesignInput {
   direction?: string | null
   scale?: number | null
   frame?: string | null
+  frameStyle?: string | null
   frameColour?: string | null
   frameInset?: number | null
+  /** An Arch's ratio (IMAGE_ARCH_RATIOS); unset is 4:5. */
+  archRatio?: string | null
+  /** The frame may run into the space around the picture; unset, the layout keeps room for it. */
+  frameOverlap?: boolean | null
   /** The CDN URL of the chosen `frame` document's artwork. */
   customFrameUrl?: string | null
 }
@@ -171,8 +224,17 @@ export type ResolvedFrame =
 
 export interface ResolvedImageDesign {
   shape: ImageAppearance
+  /** The ratio the shape forces (Circle 1:1, Arch 4:5 or its chosen ratio), if it forces one. */
+  ratio: ForcedAspect | undefined
   motion: ImageMotion | null
   frame: ResolvedFrame | null
+  /**
+   * How a line frame (Simple, Double, Offset) is drawn: along the shape's outline on Rounded, Circle
+   * and Arch, or as the built-in artwork's rectangle, as Standard and Framed always have.
+   */
+  outline: 'shape' | 'artwork'
+  /** Room the layout keeps for the frame past the picture's edge; null when it needs none or may overlap. */
+  reach: FrameReach | null
 }
 
 export interface ImageDesignContext {
@@ -182,6 +244,8 @@ export interface ImageDesignContext {
   sectionTravel?: number
   /** The first section of the page: its picture rests unshifted at scroll 0. */
   isFirst?: boolean
+  /** The picture's ratio when its shape forces none (FramedImage's `aspect`), for the frame's reach. */
+  aspect?: string
 }
 
 export function imageAppearance(value: string | null | undefined): ImageAppearance | undefined {
@@ -196,16 +260,110 @@ export function appearanceFromHeroShape(shape: string | null | undefined): Image
   return shape === 'rounded' ? 'standard' : (imageAppearance(shape) ?? 'standard')
 }
 
-/** The ratio a shape forces, if it does: a circle is always square, an arch is tall. */
-export function forcedAspect(shape: ImageAppearance): '1/1' | '4/5' | undefined {
-  return shape === 'circle' ? '1/1' : shape === 'arch' ? '4/5' : undefined
+export type ForcedAspect = '1/1' | ImageArchRatio
+
+/** The ratio a shape forces, if it does: a circle is always square, an arch is tall (4:5 unless chosen). */
+export function forcedAspect(
+  shape: ImageAppearance,
+  archRatio?: string | null,
+): ForcedAspect | undefined {
+  if (shape === 'circle') return '1/1'
+  if (shape === 'arch') return pick(IMAGE_ARCH_RATIOS, archRatio) ?? '4/5'
+  return undefined
 }
+
+/** A ratio such as '4/3' as a number (width over height). */
+export function aspectValue(ratio: string): number {
+  const [width = 1, height = 1] = ratio.split('/').map(Number)
+  return width / height
+}
+
+/** Shapes whose own outline a line frame follows. Standard, Square corners and Framed keep the artwork. */
+const OUTLINED_SHAPES: readonly ImageAppearance[] = ['rounded', 'circle', 'arch']
+const OUTLINE_FRAMES: readonly ImageFramePreset[] = ['thin-line', 'double-line', 'offset-border']
+
+/**
+ * One side's reach past the picture's edge: `share` of the picture's width plus `px` CSS pixels. A
+ * vertical side's share is already converted from the picture's height through its ratio.
+ */
+export interface SideReach {
+  share: number
+  px: number
+}
+export interface FrameReach {
+  top: SideReach
+  right: SideReach
+  bottom: SideReach
+  left: SideReach
+}
+
+/** Half of each built-in frame's widest stroke, in CSS pixels (components/ui/image-frames.tsx). */
+const HALF_STROKE: Record<ImageFramePreset, number> = {
+  'thin-line': 1,
+  'double-line': 1,
+  'offset-border': 1,
+  'organic-brush': 1.5,
+  'corner-brackets': 1.5,
+}
+
+/**
+ * How far a frame's drawing reaches past the picture, per side, for a picture of `aspect` (width over
+ * height). Null when it stays inside. The offset border reaches its inset down and to the right, plus
+ * half its stroke; a line drawn on the edge (inset 0) reaches half its stroke on every side.
+ */
+export function frameReach(frame: ResolvedFrame | null, aspect: number): FrameReach | null {
+  if (!frame || frame.kind === 'custom') return null
+  const { preset, inset } = frame
+  if (!frameReachesOut(preset, inset)) return null
+  const edge: SideReach = inset === 0 ? { share: 0, px: HALF_STROKE[preset] } : { share: 0, px: 0 }
+  if (preset !== 'offset-border') return { top: edge, right: edge, bottom: edge, left: edge }
+  const px = HALF_STROKE[preset]
+  return {
+    top: edge,
+    right: { share: inset / 100, px },
+    bottom: { share: round(inset / 100 / aspect), px },
+    left: edge,
+  }
+}
+
+/**
+ * The picture box's width and margins that keep a frame's reach inside the space the layout gives
+ * it, so a gap between pictures stays the gap that was set. Margins in percent are of the containing
+ * block's width on every side, which is what the shares are in. The parent must contain the margins
+ * (`display: flow-root`).
+ */
+export function reserveStyle(reach: FrameReach): {
+  width: string
+  marginTop: string
+  marginRight: string
+  marginBottom: string
+  marginLeft: string
+} {
+  const fixed = reach.left.px + reach.right.px
+  const scale = 1 + reach.left.share + reach.right.share
+  const width = `(100% - ${fixed}px) / ${round(scale)}`
+  const side = ({ share, px }: SideReach) =>
+    share === 0 ? `${px}px` : `calc((${width}) * ${round(share)} + ${px}px)`
+  return {
+    width: `calc(${width})`,
+    marginTop: side(reach.top),
+    marginRight: side(reach.right),
+    marginBottom: side(reach.bottom),
+    marginLeft: side(reach.left),
+  }
+}
+
+const round = (value: number) => Math.round(value * 1e6) / 1e6
 
 /**
  * What to draw for a picture's design. Rules, all applied here so no caller repeats them:
  * - An unknown or missing appearance falls back to the context's shape, then Standard.
- * - A frame exists only for Framed; Framed with no frame chosen gets the Simple line, and a custom
- *   frame whose file is missing (or not on the CDN) falls back to it too.
+ * - The frame is `chosenFrame`: Frame (`frameStyle`) on any shape, else the older Framed's own frame
+ *   (the Simple line if none was chosen). A custom frame whose file is missing (or not on the CDN)
+ *   falls back to the Simple line.
+ * - Circle is 1:1; Arch is 4:5 unless another Arch ratio is chosen.
+ * - A frame that reaches past the picture gets room in the layout (`reach`), unless Allow frame
+ *   overlap is on.
  * - Travel, direction and scale count only for Custom motion; a frame's colour and inset only for a frame.
  * - Motion None falls back to the section's own Parallax, when it has one.
  */
@@ -238,14 +396,14 @@ export function resolveImageDesign(
       : resolveImageMotion({ travel, direction, scale, isFirst: context.isFirst })
 
   let frame: ResolvedFrame | null = null
-  if (showsFrame(shape)) {
-    const chosen = pick(IMAGE_FRAMES, design.frame) ?? IMAGE_FRAME_PRESETS[0]
+  const chosen = chosenFrame({ ...design, appearance: shape })
+  if (chosen !== 'none') {
     const colour = pick(IMAGE_FRAME_COLOURS, design.frameColour) ?? 'accent'
     const insetOf = (fallback: number) =>
       range(design.frameInset, FRAME_INSET.min, FRAME_INSET.max) ?? fallback
     if (chosen === 'custom' && isCdnUrl(design.customFrameUrl)) {
       frame = { kind: 'custom', url: design.customFrameUrl, colour, inset: insetOf(0) }
-    } else if (chosen !== 'none') {
+    } else {
       const presetName = chosen === 'custom' ? IMAGE_FRAME_PRESETS[0] : chosen
       frame = {
         kind: 'preset',
@@ -256,5 +414,18 @@ export function resolveImageDesign(
     }
   }
 
-  return { shape, motion, frame }
+  const ratio = forcedAspect(shape, design.archRatio)
+  const outline =
+    frame?.kind === 'preset' &&
+    OUTLINED_SHAPES.includes(shape) &&
+    OUTLINE_FRAMES.includes(frame.preset)
+      ? 'shape'
+      : 'artwork'
+  // The box's own ratio: forced by the shape, else the caller's (4:3 for a framed picture).
+  const reach =
+    design.frameOverlap === true
+      ? null
+      : frameReach(frame, aspectValue(ratio ?? context.aspect ?? '4/3'))
+
+  return { shape, ratio, motion, frame, outline, reach }
 }

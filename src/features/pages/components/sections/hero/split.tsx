@@ -77,6 +77,7 @@ export function HeroSplit({ data, isFirst = false, greeting }: SectionProps<'her
         plan={parts.image}
         design={data.imageDesign}
         depth={resolvePictureDepth(data.pictureDepthDesign)}
+        framing
         fallbackShape={fallbackShape}
         isFirst={isFirst}
         aspect="4/3"

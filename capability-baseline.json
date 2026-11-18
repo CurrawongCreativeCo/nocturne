@@ -52,14 +52,6 @@
     },
     {
       "component": "hero",
-      "capability": "framing",
-      "scope": "section",
-      "part": "picture",
-      "layouts": ["split"],
-      "closingTask": 177
-    },
-    {
-      "component": "hero",
       "capability": "overlay",
       "scope": "section",
       "layouts": ["overlay", "full-bleed"],
@@ -90,14 +82,6 @@
       "closingTask": 276
     },
     {
-      "component": "testimonials",
-      "capability": "framing",
-      "scope": "card",
-      "part": "avatar",
-      "layouts": ["grid", "slider"],
-      "closingTask": 177
-    },
-    {
       "component": "ctaBanner",
       "capability": "surface",
       "scope": "card",
@@ -110,14 +94,6 @@
       "scope": "section",
       "layouts": [null],
       "closingTask": 159
-    },
-    {
-      "component": "gallery",
-      "capability": "framing",
-      "scope": "card",
-      "part": "tile",
-      "layouts": ["grid", "masonry", "slider"],
-      "closingTask": 177
     },
     {
       "component": "team",
@@ -140,13 +116,6 @@
       "scope": "card",
       "part": "picture",
       "layouts": ["featured"],
-      "closingTask": 177
-    },
-    {
-      "component": "slotImage",
-      "capability": "framing",
-      "scope": "item",
-      "layouts": [null],
       "closingTask": 177
     },
     {

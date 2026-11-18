@@ -258,6 +258,21 @@ export function isFramed(image: { crop?: unknown; hotspot?: unknown } | null | u
 }
 
 /**
+ * How a stored framing applies where a picture is drawn (task 177): `area` in a fixed shape, where the CDN is asked
+ * for exactly the area "Adjust picture" shows; `focus` on a covering background, which has no fixed shape to place
+ * a crop in, so only the hotspot applies, as CSS `object-position` ("Focus mode"); `none` when nothing is stored
+ * that this placement uses. The one answer FramedImage and the backgrounds both ask, so the page and the editor
+ * (which offers Adjust picture or Focus by the same placement) agree.
+ */
+export function framingMode(
+  image: { crop?: unknown; hotspot?: unknown } | null | undefined,
+  placement: 'shape' | 'cover',
+): 'area' | 'focus' | 'none' {
+  if (placement === 'shape') return isFramed(image) ? 'area' : 'none'
+  return image?.hotspot ? 'focus' : 'none'
+}
+
+/**
  * The one answer to "what part of the upload does the picture show?", for the renderer and the
  * editor alike: the stored framing, else the default. Null for an uncropped shape (no placement),
  * which shows the whole picture whatever is stored.

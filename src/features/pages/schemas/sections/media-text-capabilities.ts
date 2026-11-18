@@ -18,14 +18,25 @@ export const mediaTextCapabilities = declareCapabilities<SplitLayout>({
     // The trailing indicator on the buttons: the shared action fields on the cta object (task 148).
     note: 'Drawn by CtaLink from the button’s own Indicator fields',
   },
-  framing: {
-    ...backgroundFraming<SplitLayout>({
+  framing: [
+    // The section's picture (task 177): drawn by FramedImage, which serves what "Adjust picture" shows.
+    {
+      policy: 'required',
+      scope: 'section',
+      part: 'picture',
+      layouts: {
+        side: 'applies',
+        stacked: 'applies',
+        overlay: { notApplicable: 'Its media is the background: see the background part' },
+      },
+    },
+    // Unchanged by the picture part: Focus mode (the background) is task 177's last step.
+    backgroundFraming<SplitLayout>({
       side: 'applies',
       stacked: 'applies',
       overlay: { notApplicable: 'Its media is the background; the shared picture isn’t offered' },
     }),
-    note: 'The media picture is framed on the Slot image block',
-  },
+  ],
   pictureDepth: {
     policy: 'required',
     scope: 'section',

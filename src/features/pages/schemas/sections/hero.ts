@@ -9,7 +9,8 @@ import { hiddenFromClients } from '@/lib/sanity/roles'
 import { accessField } from '@/lib/sanity/schema/access-field'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageDesignField } from '@/lib/sanity/schema/image-design'
-import { imageField } from '@/lib/sanity/schema/image-field'
+import { imageField, imageOptions } from '@/lib/sanity/schema/image-field'
+import { framing } from '@/lib/sanity/schema/image-framing-option'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { presetField, presetsOption } from '@/lib/sanity/schema/preset-field'
 import { matchPreset } from '@/lib/sanity/schema/preset-match'
@@ -312,6 +313,8 @@ export const hero = defineType({
         requireAlt: false,
         minWidth: 2400,
         orientation: 'landscape',
+        // "Adjust picture" (task 177) in Split, where it is cut to a shape; behind the text it covers the section.
+        options: { ...imageOptions, ...framing('heroImage') },
       }),
       defineField({
         name: 'imagePosition',

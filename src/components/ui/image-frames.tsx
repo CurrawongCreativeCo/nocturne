@@ -2,10 +2,12 @@ import type { CSSProperties, ReactNode } from 'react'
 
 import { frameMaskUrl } from '@/lib/sanity/frame-mask'
 import type {
+  ImageAppearance,
   ImageFrameColour,
   ImageFramePreset,
   ResolvedFrame,
 } from '@/lib/sanity/image-design-options'
+import { appearanceCorner, CORNER_PX, type FrameCorner } from '@/lib/sanity/image-frame-geometry'
 
 /** Full class names, so Tailwind's scanner sees them. A frame takes the colour of a design token. */
 const TEXT_COLOUR: Record<ImageFrameColour, string> = {
@@ -86,6 +88,76 @@ const FRAMES: Record<ImageFramePreset, (inset: number) => ReactNode> = {
       />
     )
   },
+}
+
+/**
+ * The outline of the shapes a line frame follows (task 177), from the same corner the picture's own
+ * clip is cut with (`appearanceCorner`; components/ui/framed-image.tsx).
+ */
+const OUTLINE_RADIUS: Partial<Record<FrameCorner, string>> = {
+  rounded: `${CORNER_PX.rounded}px`,
+  circle: '50%',
+  arch: 'calc(infinity * 1px) calc(infinity * 1px) 0 0',
+}
+
+/** A line along the shape, centred on the line the artwork would draw: `inset` percent in, `width` px wide. */
+function outlineStyle(radius: string, inset: number, width: number, shift = false): CSSProperties {
+  const half = `${width / 2}px`
+  const near = `calc(${inset}% - ${half})`
+  // The offset border is the same outline moved down and to the right by its inset.
+  const far = shift ? `calc(${-inset}% - ${half})` : near
+  return {
+    top: near,
+    left: near,
+    right: far,
+    bottom: far,
+    borderWidth: width,
+    borderRadius: radius,
+  }
+}
+
+/**
+ * A Simple, Double or Offset frame on Rounded, Circle or Arch: the shape's own outline instead of the
+ * built-in rectangle. Same inset, stroke widths and colour as the artwork, so only the corners differ.
+ * The offset outline sits under the picture (its box paints over it), so only the part outside shows.
+ */
+export function ShapeOutline({
+  frame,
+  shape,
+  colour: override,
+}: {
+  frame: Extract<ResolvedFrame, { kind: 'preset' }>
+  shape: ImageAppearance
+  colour?: string
+}) {
+  const radius = OUTLINE_RADIUS[appearanceCorner(shape)] ?? '0'
+  const colour = override ? '' : TEXT_COLOUR[frame.colour]
+  const line = 'pointer-events-none absolute border-solid border-current'
+  const layers =
+    frame.preset === 'double-line'
+      ? [
+          { key: 'outer', style: outlineStyle(radius, frame.inset, 2) },
+          { key: 'inner', style: outlineStyle(radius, frame.inset + 2.5, 1) },
+        ]
+      : [
+          {
+            key: 'line',
+            style: outlineStyle(radius, frame.inset, 2, frame.preset === 'offset-border'),
+          },
+        ]
+  return (
+    <div
+      aria-hidden="true"
+      data-image-frame={frame.preset}
+      data-frame-outline={shape}
+      className={`pointer-events-none absolute inset-0 ${colour}`.trim()}
+      style={override ? { color: override } : undefined}
+    >
+      {layers.map(({ key, style }) => (
+        <div key={key} className={line} style={style} />
+      ))}
+    </div>
+  )
 }
 
 /**

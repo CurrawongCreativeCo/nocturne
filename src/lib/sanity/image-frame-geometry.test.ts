@@ -1,10 +1,17 @@
+import { readFileSync } from 'node:fs'
+import { resolve as resolvePath } from 'node:path'
+
 import { describe, expect, it } from 'vitest'
 
+import { aspectValue, IMAGE_ARCH_RATIOS } from './image-design-options'
 import {
   FRAMING_RESOLVERS,
   PROFILE_DRAWN_PX,
   PROFILE_FRAME_INSET_PCT,
+  CORNER_PX,
+  appearanceCorner,
   isFramingKey,
+  wholeNoteFor,
 } from './image-frame-geometry'
 import {
   PROFILE_BORDERS,
@@ -84,5 +91,195 @@ describe('isFramingKey', () => {
     expect(isFramingKey('linkListProfile')).toBe(true)
     expect(isFramingKey('toString')).toBe(false)
     expect(isFramingKey(undefined)).toBe(false)
+  })
+})
+
+describe('galleryTile (task 177)', () => {
+  const { designPath, resolve } = FRAMING_RESOLVERS.galleryTile
+  const shapeOf = (variant: string, imageDesign?: Record<string, unknown>) =>
+    resolve({ variant, imageDesign })
+
+  it('finds the section two segments up: images[_key]', () => {
+    expect(designPath).toEqual({ drop: 2 })
+  })
+
+  it('cuts Grid and Slider tiles 4:3 with the card corner when nothing is chosen', () => {
+    for (const variant of ['grid', 'slider']) {
+      expect(shapeOf(variant)).toEqual([
+        { label: 'Gallery tile', aspect: 4 / 3, corner: 'card', insetPct: 0, drawnPx: 640 },
+      ])
+    }
+  })
+
+  it('takes the shape the tile draws: Circle 1:1, Arch 4:5 or its ratio, Rounded corners', () => {
+    expect(shapeOf('grid', { appearance: 'circle' })[0]).toMatchObject({
+      aspect: 1,
+      corner: 'circle',
+    })
+    expect(shapeOf('grid', { appearance: 'arch' })[0]).toMatchObject({
+      aspect: 4 / 5,
+      corner: 'arch',
+    })
+    expect(shapeOf('grid', { appearance: 'arch', archRatio: '2/3' })[0]).toMatchObject({
+      aspect: 2 / 3,
+      corner: 'arch',
+    })
+    expect(shapeOf('grid', { appearance: 'rounded' })[0]).toMatchObject({ corner: 'rounded' })
+    // A saved Framed section keeps Standard's card corner; a frame never changes the shape.
+    expect(shapeOf('grid', { appearance: 'framed', frame: 'offset-border' })[0]).toMatchObject({
+      aspect: 4 / 3,
+      corner: 'card',
+    })
+    expect(shapeOf('grid', { appearance: 'circle', frameStyle: 'offset-border' })[0]).toEqual(
+      shapeOf('grid', { appearance: 'circle' })[0],
+    )
+  })
+
+  it('offers nothing on Masonry, which keeps each photo’s own shape', () => {
+    expect(shapeOf('masonry', { appearance: 'circle' })).toEqual([])
+  })
+})
+
+describe('eventImage (task 177)', () => {
+  it('previews both masks the site draws: the Featured card’s top corners, and all four elsewhere', () => {
+    const { designPath, resolve } = FRAMING_RESOLVERS.eventImage
+    expect(designPath).toEqual({ drop: 1 })
+    expect(resolve(undefined)).toEqual([
+      { label: 'Featured card', aspect: 16 / 9, corner: 'cardTop', insetPct: 0, drawnPx: 768 },
+      {
+        label: 'Event page, and a Featured picture with depth',
+        aspect: 16 / 9,
+        corner: 'card',
+        insetPct: 0,
+        drawnPx: 768,
+      },
+    ])
+  })
+
+  it('uses the card corner the site draws: --radius-card, 1rem (16px)', () => {
+    const tokens = readFileSync(
+      resolvePath(process.cwd(), 'src/styles/tokens.generated.css'),
+      'utf8',
+    )
+    expect(tokens).toContain('--radius-card: 1rem;')
+    expect(CORNER_PX.card).toBe(16)
+  })
+})
+
+describe('appearanceCorner', () => {
+  it('is the one corner map for the clip, the outline and the editor', () => {
+    expect(appearanceCorner('standard')).toBe('card')
+    expect(appearanceCorner('framed')).toBe('card')
+    expect(appearanceCorner('square')).toBe('none')
+    expect(appearanceCorner('rounded')).toBe('rounded')
+    expect(appearanceCorner('circle')).toBe('circle')
+    expect(appearanceCorner('arch')).toBe('arch')
+  })
+})
+
+describe('heroImage (task 177)', () => {
+  const { designPath, resolve } = FRAMING_RESOLVERS.heroImage
+  it('finds the section one segment up, and has a shape only in Split', () => {
+    expect(designPath).toEqual({ drop: 1 })
+    expect(resolve({ variant: 'split' })[0]).toMatchObject({ aspect: 4 / 3, corner: 'card' })
+    for (const variant of ['overlay', 'full-bleed', 'editorial', undefined]) {
+      expect(resolve({ variant })).toEqual([])
+    }
+    expect(wholeNoteFor(FRAMING_RESOLVERS.heroImage, { variant: 'overlay' })?.saved).toMatch(
+      /covers the section/,
+    )
+  })
+
+  it('takes the older Image shape, and the Image design over it', () => {
+    expect(resolve({ variant: 'split', imageShape: 'circle' })[0]).toMatchObject({
+      aspect: 1,
+      corner: 'circle',
+    })
+    expect(
+      resolve({ variant: 'split', imageShape: 'circle', imageDesign: { appearance: 'arch' } })[0],
+    ).toMatchObject({ aspect: 4 / 5, corner: 'arch' })
+  })
+})
+
+describe('Image + text pictures (task 177)', () => {
+  it('reads the section three segments up from the slot block, one up from the older field', () => {
+    expect(FRAMING_RESOLVERS.mediaTextImage.designPath).toEqual({ drop: 3 })
+    expect(FRAMING_RESOLVERS.mediaTextLegacyImage.designPath).toEqual({ drop: 1 })
+  })
+
+  it('is 4:3 side by side, 16:9 stacked, and has no fixed shape as the background', () => {
+    const { resolve } = FRAMING_RESOLVERS.mediaTextImage
+    expect(resolve({ variant: 'side' })[0]).toMatchObject({ aspect: 4 / 3 })
+    expect(resolve({})[0]).toMatchObject({ aspect: 4 / 3 })
+    expect(resolve({ variant: 'stacked' })[0]).toMatchObject({ aspect: 16 / 9 })
+    expect(resolve({ variant: 'overlay' })).toEqual([])
+    expect(resolve({ variant: 'side', imageDesign: { appearance: 'circle' } })[0]).toMatchObject({
+      aspect: 1,
+      corner: 'circle',
+    })
+  })
+})
+
+describe('videoPoster (task 177, QA-052)', () => {
+  const { designPath, resolve } = FRAMING_RESOLVERS.videoPoster
+  it('is the frame’s Shape before play for YouTube and Vimeo, 16:9 when unset', () => {
+    expect(designPath).toEqual({ drop: 1 })
+    expect(resolve({ variant: 'embed' })[0]).toMatchObject({ aspect: 16 / 9, corner: 'card' })
+    expect(resolve({ variant: 'embed', source: 'vimeo', aspectRatio: '4:3' })[0]).toMatchObject({
+      aspect: 4 / 3,
+    })
+    expect(resolve({ aspectRatio: '1:1' })[0]?.aspect).toBe(1)
+    expect(resolve({ aspectRatio: '21:9' })[0]?.aspect).toBe(21 / 9)
+  })
+
+  it('has no fixed shape for an uploaded video or Ambient, and says why', () => {
+    expect(resolve({ variant: 'embed', source: 'upload' })).toEqual([])
+    expect(resolve({ variant: 'ambient' })).toEqual([])
+    expect(wholeNoteFor(FRAMING_RESOLVERS.videoPoster, { source: 'upload' })?.unsaved).toMatch(
+      /player shows its poster whole/,
+    )
+    expect(wholeNoteFor(FRAMING_RESOLVERS.videoPoster, { variant: 'ambient' })?.unsaved).toMatch(
+      /covers the section/,
+    )
+  })
+})
+
+describe('teamPortrait (task 177)', () => {
+  it('previews the card the portrait is drawn in, and each shape a Team section can give it', () => {
+    const shapes = FRAMING_RESOLVERS.teamPortrait.resolve(undefined)
+    expect(FRAMING_RESOLVERS.teamPortrait.designPath).toEqual({ drop: 1 })
+    // The main preview is first and the places that are always square follow; then the section's shapes as outlines.
+    expect(shapes.map((shape) => [shape.label, shape.aspect, shape.corner])).toEqual([
+      ['Team member page', 1, 'card'],
+      ['Team grid and slider card', 1, 'cardTop'],
+      ['Team list', 1, 'card'],
+      ['Team card in a Rounded section', 1, 'rounded'],
+      ['Team card in a Circle section', 1, 'circle'],
+      ['Team card in an Arch section, 4:5', 4 / 5, 'arch'],
+      ['Team card in an Arch section, 3:4', 3 / 4, 'arch'],
+      ['Team card in an Arch section, 2:3', 2 / 3, 'arch'],
+    ])
+  })
+
+  it('offers an Arch outline for every ratio the Arch shape can take', () => {
+    const arches = FRAMING_RESOLVERS.teamPortrait
+      .resolve(undefined)
+      .filter((shape) => shape.corner === 'arch')
+    expect(arches.map((shape) => shape.aspect)).toEqual(IMAGE_ARCH_RATIOS.map(aspectValue))
+  })
+})
+
+describe('testimonialAvatar (task 177)', () => {
+  const { designPath, resolve } = FRAMING_RESOLVERS.testimonialAvatar
+  it('reads the section’s Avatar design three segments up: a 48px circle by default', () => {
+    expect(designPath).toEqual({ drop: 3, field: 'avatarDesign' })
+    expect(resolve(undefined)).toEqual([
+      { label: 'Avatar', aspect: 1, corner: 'circle', insetPct: 0, drawnPx: 48 },
+    ])
+  })
+
+  it('follows the chosen size and ring', () => {
+    expect(resolve({ size: 'large' })[0]?.drawnPx).toBe(64)
+    expect(resolve({ ring: 'line' })[0]?.ring).toBeDefined()
   })
 })

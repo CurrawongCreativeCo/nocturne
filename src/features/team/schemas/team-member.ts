@@ -2,7 +2,8 @@ import { UserIcon } from '@sanity/icons/User'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { hasLocations, hasServices, hasTeamProfiles } from '@/config/profile'
-import { imageField } from '@/lib/sanity/schema/image-field'
+import { imageField, imageOptions } from '@/lib/sanity/schema/image-field'
+import { framing } from '@/lib/sanity/schema/image-framing-option'
 
 import { telHref } from '../utils/phone'
 import { MEMBER_SLUG_PATTERN, slugifyMember } from '../utils/slug'
@@ -46,6 +47,8 @@ export const teamMember = defineType({
       minWidth: 800,
       description: 'A head-and-shoulders photo works best. Alt text is required.',
       validation: (rule) => rule.required(),
+      // "Adjust picture" (task 177): square on the member's page, the team cards and the list.
+      options: { ...imageOptions, ...framing('teamPortrait') },
     }),
     defineField({
       name: 'shortBio',

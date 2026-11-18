@@ -9,6 +9,7 @@ import { defaultAppearance, imageDesign, imageDesignField } from './image-design
 type Callback = (context: unknown) => boolean
 interface FieldLike {
   name: string
+  title?: string
   fieldset?: string
   hidden?: Callback
   options?: {
@@ -53,19 +54,31 @@ describe('imageDesign', () => {
     }
   })
 
-  it('shows the Frame choices only for the Framed appearance', () => {
-    for (const name of ['frame']) {
-      expect(hidden(name, { appearance: 'framed' })).toBe(false)
-      for (const appearance of [undefined, 'standard', 'rounded', 'circle', 'arch']) {
-        expect(hidden(name, { appearance })).toBe(true)
-      }
+  it('shows Frame for every shape and keeps the older frame field hidden (task 177)', () => {
+    for (const appearance of [undefined, 'standard', 'rounded', 'circle', 'arch', 'framed']) {
+      expect(hidden('frameStyle', { appearance })).toBe(false)
+      expect(hidden('frame', { appearance })).toBe(true)
     }
   })
 
   it('asks for an approved frame only when the custom frame is chosen', () => {
     expect(hidden('customFrame', { appearance: 'framed', frame: 'custom' })).toBe(false)
     expect(hidden('customFrame', { appearance: 'framed', frame: 'thin-line' })).toBe(true)
+    // An older frame left on another shape is ignored; Frame counts on any shape.
     expect(hidden('customFrame', { appearance: 'circle', frame: 'custom' })).toBe(true)
+    expect(hidden('customFrame', { appearance: 'circle', frameStyle: 'custom' })).toBe(false)
+  })
+
+  it('offers Arch ratio for Arch only, and Allow frame overlap only when the frame reaches outside', () => {
+    expect(field('archRatio').fieldset).toBe('more')
+    expect(hidden('archRatio', { appearance: 'arch' })).toBe(false)
+    expect(hidden('archRatio', { appearance: 'circle' })).toBe(true)
+    expect(field('frameOverlap').fieldset).toBe('more')
+    expect(field('frameOverlap').title).toBe('Allow frame overlap')
+    expect(hidden('frameOverlap', { frameStyle: 'offset-border' })).toBe(false)
+    expect(hidden('frameOverlap', { frameStyle: 'thin-line' })).toBe(true)
+    expect(hidden('frameOverlap', { frameStyle: 'corner-brackets', frameInset: 0 })).toBe(false)
+    expect(hidden('frameOverlap', {})).toBe(true)
   })
 
   it('keeps the exact values in a collapsed fieldset, shown only to the effects that use them', () => {
@@ -93,6 +106,7 @@ describe('imageDesign', () => {
       expect(hidden(name, { appearance: 'framed' })).toBe(false)
       expect(hidden(name, { appearance: 'framed', frame: 'none' })).toBe(true)
       expect(hidden(name, { appearance: 'arch', frame: 'thin-line' })).toBe(true)
+      expect(hidden(name, { appearance: 'arch', frameStyle: 'thin-line' })).toBe(false)
     }
   })
 })

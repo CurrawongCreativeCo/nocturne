@@ -1,7 +1,8 @@
 import { ImageIcon } from '@sanity/icons/Image'
 import { defineField, defineType, type PreviewValue } from 'sanity'
 
-import { imageField } from '@/lib/sanity/schema/image-field'
+import { imageField, imageOptions } from '@/lib/sanity/schema/image-field'
+import { framing } from '@/lib/sanity/schema/image-framing-option'
 
 import { slotImageCapabilities } from './slot-image-capabilities'
 
@@ -18,7 +19,13 @@ export const slotImage = defineType({
   options: { designCapabilities: slotImageCapabilities },
   fields: [
     defineField({
-      ...imageField({ name: 'image', aspect: '4:3', minWidth: 1600 }),
+      ...imageField({
+        name: 'image',
+        aspect: '4:3',
+        minWidth: 1600,
+        // "Adjust picture" (task 177): the Image + text section's shape (the block is allowed only there).
+        options: { ...imageOptions, ...framing('mediaTextImage') },
+      }),
       validation: (rule) => rule.required(),
     }),
   ],

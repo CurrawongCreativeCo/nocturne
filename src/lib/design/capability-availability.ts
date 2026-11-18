@@ -342,13 +342,12 @@ export function evidenceProblems(
     }
     // The probe must set the field the entry names (or one inside it), or the harness would prove one
     // field while the contract marks another.
+    // A patch key names an array member by its index only, so a member of one type (`media[slotImage].image`,
+    // whose existence the manifest has just confirmed) is compared as `media[].image`.
+    const named = entry.field.replace(/\[[A-Za-z][A-Za-z0-9]*\]/g, '[]')
     for (const key of Object.keys(entry.probe)) {
       const probed = manifestPathOfPatchKey(key)
-      if (
-        probed !== entry.field &&
-        !probed.startsWith(`${entry.field}.`) &&
-        !probed.startsWith(`${entry.field}[`)
-      ) {
+      if (probed !== named && !probed.startsWith(`${named}.`) && !probed.startsWith(`${named}[`)) {
         problem(
           `its probe sets ${probed}, which isn't ${entry.field} or inside it.`,
           'Probe the field the entry names, or name the field the probe sets.',

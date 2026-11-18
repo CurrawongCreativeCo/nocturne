@@ -146,7 +146,8 @@ test.describe('with touch', () => {
 for (const scheme of SCHEMES) {
   test(`has no accessibility violations, ${scheme}`, async ({ page }) => {
     await openPreview(page)
-    const holder = page.locator(`[data-framing-scheme="${scheme}"]`)
+    // The first block (the placements block at the end of the page has the same attribute).
+    const holder = page.locator(`[data-framing-scheme="${scheme}"]`).first()
     await holder.scrollIntoViewIfNeeded()
     const results = await new AxeBuilder({ page })
       .include(`[data-framing-scheme="${scheme}"]`)
@@ -166,6 +167,98 @@ for (const scheme of SCHEMES) {
     }
   })
 }
+
+test.describe('Focus mode on Text over media', () => {
+  const focusExample = (page: Page, scheme: string) => example(page, scheme, 'overlay-focus')
+  const values = (page: Page, scheme: string) =>
+    focusExample(page, scheme).locator('[data-framing-values]')
+
+  async function openFocus(page: Page, scheme: string) {
+    const holder = focusExample(page, scheme)
+    await holder.scrollIntoViewIfNeeded()
+    await holder.getByRole('button', { name: 'Focus', exact: true }).click()
+    const dialog = page.getByRole('dialog', { name: 'Focus' })
+    await expect(dialog).toBeVisible()
+    return dialog
+  }
+
+  test('offers Focus, not Adjust picture, and starts centred with the crop saved', async ({
+    page,
+  }) => {
+    await openPreview(page)
+    const holder = focusExample(page, 'light')
+    await holder.scrollIntoViewIfNeeded()
+    await expect(holder.getByRole('button', { name: 'Adjust picture' })).toHaveCount(0)
+    await expect(holder.getByText('Centred')).toBeVisible()
+    await expect(values(page, 'light')).toContainText('"crop"')
+    await expect(values(page, 'light')).not.toContainText('"hotspot"')
+  })
+
+  test('shows the phone, tablet and desktop frames and moves all three with the point', async ({
+    page,
+  }) => {
+    test.skip(test.info().project.name === 'mobile', 'Pointer positions are measured on desktop')
+    await openPreview(page)
+    const dialog = await openFocus(page, 'light')
+    await expect(dialog.locator('[data-focus-frame]')).toHaveText([
+      /Phone, 390px wide/,
+      /Tablet, 768px wide/,
+      /Desktop, 1440px wide/,
+    ])
+    const positions = () =>
+      dialog
+        .locator('[data-focus-frame] img')
+        .evaluateAll((images) => images.map((img) => (img as HTMLElement).style.objectPosition))
+    expect(await positions()).toEqual(['', '', ''])
+    // A quarter across and down the picture as the page serves it.
+    const stage = dialog.locator('[data-focus-stage]')
+    const box = await stage.boundingBox()
+    if (!box) throw new Error('No stage')
+    await page.mouse.click(box.x + box.width * 0.25, box.y + box.height * 0.25)
+    await expect.poll(positions).toEqual(['25% 25%', '25% 25%', '25% 25%'])
+    await expect(dialog.getByText(/Focus 25% across, 25% down/)).toBeVisible()
+  })
+
+  test('moves with the keyboard, applies only a hotspot and Reset removes only that', async ({
+    page,
+  }) => {
+    await openPreview(page)
+    const holder = focusExample(page, 'light')
+    const dialog = await openFocus(page, 'light')
+    await dialog.getByRole('button', { name: 'Move focus right' }).click()
+    await dialog.locator('[data-focus-stage]').focus()
+    await page.keyboard.press('ArrowDown')
+    await expect(dialog.getByText(/Focus 52% across, 52% down/)).toBeVisible()
+    await dialog.getByRole('button', { name: 'Apply' }).click()
+    await expect(dialog).toBeHidden()
+    // The hotspot is in the picture's own coordinates: the crop's 10% margin and 80% span.
+    await expect(values(page, 'light')).toContainText('"hotspot":{"_type":"sanity.imageHotspot"')
+    await expect(values(page, 'light')).toContainText('"x":0.516,"y":0.516')
+    await expect(values(page, 'light')).toContainText('"crop":{"top":0.1')
+    await expect(holder.getByText('Focus set')).toBeVisible()
+    // Reset, after asking: the hotspot goes and the crop stays.
+    await holder.getByRole('button', { name: 'Reset picture focus' }).click()
+    await expect(holder.getByRole('alert')).toHaveText('Remove the saved focus?')
+    await holder.getByRole('button', { name: 'Remove' }).click()
+    await expect(values(page, 'light')).not.toContainText('"hotspot"')
+    await expect(values(page, 'light')).toContainText('"crop":{"top":0.1')
+    await expect(holder.getByText('Centred')).toBeVisible()
+  })
+
+  for (const scheme of SCHEMES) {
+    test(`has no accessibility violations, ${scheme}`, async ({ page }) => {
+      await openPreview(page)
+      const dialog = await openFocus(page, scheme)
+      const results = await new AxeBuilder({ page })
+        .include('[role="dialog"]')
+        .withTags(WCAG)
+        .analyze()
+      expect(results.violations).toEqual([])
+      await dialog.getByRole('button', { name: 'Cancel' }).click()
+      await expect(dialog).toBeHidden()
+    })
+  }
+})
 
 test.describe('on the Link list', () => {
   test.skip(({ isMobile }) => isMobile, 'Desktop only')
@@ -209,5 +302,93 @@ test.describe('on the Link list', () => {
     await cards.getByRole('button', { name: 'Cancel' }).click()
     const glass = await openDialog(page, 'light', 'thumbnail-glass')
     await expect(glass.getByText('Also shown as: Tallest row')).toBeVisible()
+  })
+})
+
+test.describe('on Gallery photos and the event image (task 177)', () => {
+  test.skip(({ isMobile }) => isMobile, 'Desktop only')
+
+  const ratioOf = async (dialog: Locator) => {
+    const box = await dialog.locator('[data-picture-shape]').boundingBox()
+    if (!box) throw new Error('No shape')
+    return box.width / box.height
+  }
+  const storedRatio = async (holder: Locator) => {
+    const { crop } = JSON.parse(
+      (await holder.locator('[data-framing-values]').textContent()) ?? '{}',
+    ) as { crop?: { top: number; bottom: number; left: number; right: number } }
+    if (!crop) throw new Error('No crop saved')
+    // The sample picture is 1600 x 1200.
+    return ((1 - crop.left - crop.right) * 1600) / ((1 - crop.top - crop.bottom) * 1200)
+  }
+
+  test('each opens in the shape its placement draws', async ({ page }) => {
+    await openPreview(page)
+    for (const [id, ratio] of [
+      ['gallery-tile', 4 / 3],
+      ['gallery-arch', 2 / 3],
+      ['gallery-circle', 1],
+      ['event-image', 16 / 9],
+    ] as const) {
+      const dialog = await openDialog(page, 'light', id)
+      expect(await ratioOf(dialog), id).toBeCloseTo(ratio, 1)
+      // The event image is drawn with two masks: the Featured card's is the stage, the other an outline.
+      if (id === 'event-image') {
+        await expect(
+          dialog.getByText('Also shown as: Event page, and a Featured picture with depth'),
+        ).toBeVisible()
+      }
+      await dialog.getByRole('button', { name: 'Cancel' }).click()
+      await expect(dialog).toBeHidden()
+    }
+  })
+
+  test('keys move and zoom a tile; Apply saves a crop at the tile’s ratio; Reset removes both values', async ({
+    page,
+  }) => {
+    await openPreview(page)
+    const holder = example(page, 'light', 'gallery-tile')
+    const dialog = await openDialog(page, 'light', 'gallery-tile')
+    await dialog.locator('[data-picture-stage]').focus()
+    for (const key of ['+', '+', '+', 'ArrowLeft', 'ArrowUp']) await page.keyboard.press(key)
+    await dialog.getByRole('button', { name: 'Apply' }).click()
+    await expect(dialog).toBeHidden()
+    await expect(holder.locator('[data-framing-values]')).toContainText('"hotspot"')
+    expect(await storedRatio(holder)).toBeCloseTo(4 / 3, 2)
+
+    // Reset goes back to inheriting the automatic fit: both values are removed, nothing centred is saved.
+    await holder.getByRole('button', { name: 'Reset picture positioning' }).click()
+    await holder.getByRole('button', { name: 'Remove' }).click()
+    await expect(holder.getByText('Automatic fit')).toBeVisible()
+    await expect(holder.locator('[data-framing-values]')).toHaveText('{}')
+  })
+
+  test('Reset inside the dialog, then Apply, removes a saved positioning too', async ({ page }) => {
+    await openPreview(page)
+    const holder = example(page, 'light', 'gallery-circle')
+    await expect(holder.locator('[data-framing-values]')).toContainText('"crop"')
+    const dialog = await openDialog(page, 'light', 'gallery-circle')
+    await dialog.getByRole('button', { name: 'Reset' }).click()
+    await dialog.getByRole('button', { name: 'Apply' }).click()
+    await expect(holder.locator('[data-framing-values]')).toHaveText('{}')
+  })
+
+  test('Masonry says why there is nothing to adjust, and keeps what is saved', async ({ page }) => {
+    await openPreview(page)
+    const holder = example(page, 'light', 'gallery-masonry')
+    await holder.scrollIntoViewIfNeeded()
+    await expect(holder.getByRole('button', { name: 'Adjust picture' })).toHaveCount(0)
+    await expect(holder.getByText(/^Masonry shows each photo at its own proportions/)).toBeVisible()
+    await expect(holder.locator('[data-framing-values]')).toContainText('"crop"')
+  })
+
+  test('Cancel after a change asks first, and Discard keeps the saved values', async ({ page }) => {
+    await openPreview(page)
+    const holder = example(page, 'light', 'gallery-arch')
+    const dialog = await openDialog(page, 'light', 'gallery-arch')
+    await dialog.getByRole('slider', { name: 'Zoom' }).fill('120')
+    await dialog.getByRole('button', { name: 'Cancel' }).click()
+    await dialog.getByRole('button', { name: 'Discard' }).click()
+    await expect(holder.locator('[data-framing-values]')).toHaveText('{}')
   })
 })
