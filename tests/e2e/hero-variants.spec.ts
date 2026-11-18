@@ -132,12 +132,15 @@ async function splitBoxes(page: Page, id: string) {
       position: css.objectPosition,
     }
   })
+  const src = await section
+    .locator('img')
+    .evaluate((img) => (img as HTMLImageElement).currentSrc || (img as HTMLImageElement).src)
   const grid = await section.locator('h1').evaluate((h1) => {
     const columns = getComputedStyle(h1.closest('[class*="grid"]') ?? h1).gridTemplateColumns
     const [first = 0, second = 0] = columns.split(' ').map(parseFloat)
     return [first, second] as const
   })
-  return { image, text, style, grid }
+  return { image, text, style, grid, src }
 }
 
 test.describe('split options', () => {
@@ -178,10 +181,26 @@ test.describe('split options', () => {
     expect(arch.image.height).toBeGreaterThan(arch.image.width)
   })
 
-  test('keeps the hotspot in view through object-position', async ({ page }) => {
-    const { style } = await splitBoxes(page, 'hero-split-hotspot')
-    expect(style.position).toBe('20% 80%')
+  test('keeps the hotspot in view: the CDN serves the area around it, at the picture’s 4:3', async ({
+    page,
+  }) => {
+    // The fixture's 1200 x 630 picture has a hotspot at the lower left (x .2, y .8). "Adjust picture" (task 177) serves
+    // the area the editor shows: the largest 4:3 cut of the upload (840 x 630) that keeps the hotspot's centre, held
+    // inside the picture (so from its left edge), at the width the layout asks for and the height that ratio gives.
+    const hotspot = await splitBoxes(page, 'hero-split-hotspot')
+    expect(hotspot.image.width / hotspot.image.height).toBeCloseTo(4 / 3, 1)
+    const served = new URL(hotspot.src).searchParams
+    expect(served.get('rect')).toBe('0,0,840,630')
+    expect(Number(served.get('w')) / Number(served.get('h'))).toBeCloseTo(4 / 3, 2)
+    expect(served.get('fit')).toBe('crop')
+    // The CDN has cut it, so CSS leaves the picture centred in its box.
+    expect(hotspot.style.position).toBe('50% 50%')
+
+    // The control, with no hotspot or crop, is what it was: no rect, the upload's centre cut by the CDN to its own
+    // ratio, centred by CSS.
     const plain = await splitBoxes(page, 'hero-split-right')
+    const unset = new URL(plain.src).searchParams
+    expect(unset.get('rect')).toBeNull()
     expect(plain.style.position).toBe('50% 50%')
   })
 })
