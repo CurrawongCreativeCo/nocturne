@@ -3778,6 +3778,15 @@ documents.push({
       members: ['dev', 'ann'].map((m) => ref(`teamMember-${m}`)),
     },
     {
+      _key: 'frame-p-team-arch',
+      _type: 'team',
+      variant: 'grid',
+      title: 'Placement team arch',
+      selection: 'picked',
+      imageDesign: imageDesign({ appearance: 'arch', archRatio: '2/3' }),
+      members: ['dev', 'ann'].map((m) => ref(`teamMember-${m}`)),
+    },
+    {
       _key: 'frame-p-quotes',
       _type: 'testimonials',
       variant: 'grid',

@@ -3,6 +3,7 @@ import { resolve as resolvePath } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
+import { aspectValue, IMAGE_ARCH_RATIOS } from './image-design-options'
 import {
   FRAMING_RESOLVERS,
   PROFILE_DRAWN_PX,
@@ -244,14 +245,27 @@ describe('videoPoster (task 177, QA-052)', () => {
 })
 
 describe('teamPortrait (task 177)', () => {
-  it('previews one square framing in every place the portrait is drawn', () => {
+  it('previews the card the portrait is drawn in, and each shape a Team section can give it', () => {
     const shapes = FRAMING_RESOLVERS.teamPortrait.resolve(undefined)
     expect(FRAMING_RESOLVERS.teamPortrait.designPath).toEqual({ drop: 1 })
+    // The main preview is first and the places that are always square follow; then the section's shapes as outlines.
     expect(shapes.map((shape) => [shape.label, shape.aspect, shape.corner])).toEqual([
       ['Team member page', 1, 'card'],
       ['Team grid and slider card', 1, 'cardTop'],
       ['Team list', 1, 'card'],
+      ['Team card in a Rounded section', 1, 'rounded'],
+      ['Team card in a Circle section', 1, 'circle'],
+      ['Team card in an Arch section, 4:5', 4 / 5, 'arch'],
+      ['Team card in an Arch section, 3:4', 3 / 4, 'arch'],
+      ['Team card in an Arch section, 2:3', 2 / 3, 'arch'],
     ])
+  })
+
+  it('offers an Arch outline for every ratio the Arch shape can take', () => {
+    const arches = FRAMING_RESOLVERS.teamPortrait
+      .resolve(undefined)
+      .filter((shape) => shape.corner === 'arch')
+    expect(arches.map((shape) => shape.aspect)).toEqual(IMAGE_ARCH_RATIOS.map(aspectValue))
   })
 })
 

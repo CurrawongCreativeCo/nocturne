@@ -87,6 +87,35 @@ test('Team portrait: square, and only the member with a stored crop is served th
   expect(other.ratio).toBeCloseTo(1, 2)
 })
 
+test('Team portrait in an Arch 2:3 card: a narrower cut of the same crop, at 2:3, in an arch', async ({
+  page,
+}) => {
+  const scope = section(page, 'Placement team arch')
+  // The stored crop spans x 60-732, y 63-567; the 2:3 cut of it that keeps the hotspot (x 396) inside it is 336 wide.
+  // The square card serves the whole 504 square instead (AT_1_1): the arch shows less of the sides, as the editor says.
+  const adjusted = await served(scope, 'Portrait of Dev Patel')
+  expect([adjusted.rect, adjusted.ratio.toFixed(2)]).toEqual(['228,63,336,504', (2 / 3).toFixed(2)])
+  // The CDN is asked for the same ratio it is drawn at, so it cuts nothing more.
+  const asked = await scope.locator('img[alt="Portrait of Dev Patel"]').evaluate((node) => {
+    const img = node as HTMLImageElement
+    const query = new URL(img.currentSrc || img.src).searchParams
+    return Number(query.get('w')) / Number(query.get('h'))
+  })
+  expect(asked).toBeCloseTo(2 / 3, 2)
+  // An arch: a half-height radius on top, square corners below.
+  const corners = await scope.locator('img[alt="Portrait of Dev Patel"]').evaluate((node) => {
+    const clip = (node.closest('[data-framed-image]') ?? node) as HTMLElement
+    const style = getComputedStyle(clip)
+    return [parseFloat(style.borderTopLeftRadius), parseFloat(style.borderBottomLeftRadius)]
+  })
+  expect(corners[0]).toBeGreaterThan(100)
+  expect(corners[1]).toBe(0)
+  // A portrait with nothing stored keeps today's URL: the square cut, which the 2:3 box then centres.
+  const plain = await served(scope, 'Portrait of Ann Lee')
+  expect(plain.rect).toBe('285,0,630,630')
+  expect(plain.ratio).toBeCloseTo(2 / 3, 2)
+})
+
 test('Testimonials avatar: a circle, 1:1, served as the stored area', async ({ page }) => {
   const scope = section(page, 'Placement testimonials')
   const avatar = await served(scope, 'Avatar')

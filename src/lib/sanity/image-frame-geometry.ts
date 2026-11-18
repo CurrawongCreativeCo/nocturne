@@ -1,6 +1,8 @@
 import {
   appearanceFromHeroShape,
   aspectValue,
+  IMAGE_ARCH_RATIO_TITLES,
+  IMAGE_ARCH_RATIOS,
   resolveImageDesign,
   type ImageAppearance,
   type ImageDesignInput,
@@ -390,15 +392,21 @@ const videoPoster: FramingResolver = {
   },
 }
 
+/** A Team card's picture when the section's Image design shapes it: the card's width less 24px each side (team-card.tsx `px-6`). */
+const TEAM_SHAPED_PX = 336
+
 /**
- * A team member's portrait (task 177): one field on the member document, drawn square everywhere, so one
- * framing serves all of them, previewed together:
+ * A team member's portrait (task 177): one field on the member document, so one stored crop and hotspot serve
+ * every place it is drawn, previewed together:
  * - the member's own page: all four card corners (team-member-page.tsx, 800 x 800);
- * - Team grid and slider cards: the portrait fills the top of a card that clips it, so only the top
- *   corners round (team-card.tsx, 600 x 600); a section whose Image design is Circle or Arch cuts it to
- *   that shape around the same hotspot;
- * - the Team list: a small rounded square (ProfileImage, `rounded-card`).
- * Every one is requested at its own square size, so the CDN cuts exactly this editor's area.
+ * - Team grid and slider cards: the portrait fills the top of a card that clips it, so only the top corners round
+ *   (team-card.tsx, 600 x 600): the main preview;
+ * - the Team list: a small rounded square (ProfileImage, `rounded-card`);
+ * - a Team section whose Image design is Rounded, Circle or Arch sits the portrait inside its card in that shape
+ *   (Rounded and Circle square, Arch at its chosen ratio: 4:5 unless the section says 3:4 or 2:3). The portrait is
+ *   on the member, not the section, so the editor shows each as a labelled outline: an Arch is a narrower cut of the
+ *   same area, kept inside the stored crop around the hotspot, which is what the CDN is asked for.
+ * Each is requested at its own ratio, so the CDN cuts exactly the area the editor shows for it.
  */
 const teamPortrait: FramingResolver = {
   designPath: { drop: 1 },
@@ -406,6 +414,27 @@ const teamPortrait: FramingResolver = {
     { label: 'Team member page', aspect: 1, corner: 'card', insetPct: 0, drawnPx: 384 },
     { label: 'Team grid and slider card', aspect: 1, corner: 'cardTop', insetPct: 0, drawnPx: 384 },
     { label: 'Team list', aspect: 1, corner: 'card', insetPct: 0, drawnPx: 128 },
+    {
+      label: 'Team card in a Rounded section',
+      aspect: 1,
+      corner: 'rounded',
+      insetPct: 0,
+      drawnPx: TEAM_SHAPED_PX,
+    },
+    {
+      label: 'Team card in a Circle section',
+      aspect: 1,
+      corner: 'circle',
+      insetPct: 0,
+      drawnPx: TEAM_SHAPED_PX,
+    },
+    ...IMAGE_ARCH_RATIOS.map((ratio) => ({
+      label: `Team card in an Arch section, ${IMAGE_ARCH_RATIO_TITLES[ratio]}`,
+      aspect: aspectValue(ratio),
+      corner: 'arch' as const,
+      insetPct: 0,
+      drawnPx: TEAM_SHAPED_PX,
+    })),
   ],
 }
 
