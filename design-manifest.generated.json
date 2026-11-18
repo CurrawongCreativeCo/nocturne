@@ -5747,7 +5747,7 @@
               "part": "picture",
               "closingTask": 177,
               "fields": [
-                "media[].image"
+                "media[slotImage].image"
               ],
               "availability": {
                 "side": "verified",
@@ -5781,7 +5781,7 @@
           "evidence": [
             {
               "id": "mediaText.framing.picture",
-              "field": "media[].image",
+              "field": "media[slotImage].image",
               "resolvers": [
                 "@/lib/sanity/image-framing#isFramed",
                 "@/lib/sanity/image-framing#visibleArea",

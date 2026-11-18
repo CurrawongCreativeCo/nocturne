@@ -1184,7 +1184,7 @@ export const EVIDENCE: readonly Evidence[] = [
     scope: 'section',
     part: 'picture',
     layouts: ['side', 'stacked'],
-    field: 'media[].image',
+    field: 'media[slotImage].image',
     resolvers: [
       { module: '@/lib/sanity/image-framing', export: 'isFramed' },
       { module: '@/lib/sanity/image-framing', export: 'visibleArea' },
