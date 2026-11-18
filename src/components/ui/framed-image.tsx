@@ -133,7 +133,8 @@ export function FramedImage({
         image={image}
         alt={alt}
         width={width}
-        height={height}
+        // At a placement the height follows the ratio of the area served, or the CDN would cut it again.
+        height={placement && width ? undefined : height}
         placement={placement}
         sizes={sizes}
         preload={preload}
