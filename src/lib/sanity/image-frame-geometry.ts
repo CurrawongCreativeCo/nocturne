@@ -7,6 +7,7 @@ import {
   type ImageAppearance,
   type ImageDesignInput,
 } from './image-design-options'
+import { FOCUS_FRAMES, type FocusFrame } from './image-focus'
 import type { Placement } from './image-framing'
 import { thumbnailShapes } from './link-thumbnail-framing'
 import {
@@ -98,6 +99,19 @@ export interface FramingResolver {
    * one note, or one per design (a placement whose reason depends on the section's settings).
    */
   wholeNote?: WholeNote | ((design: unknown) => WholeNote)
+  /**
+   * A picture drawn as a covering background has no fixed shape to place a crop in: where the design says so, the
+   * editor offers Focus mode instead of "Adjust picture" (task 177), which sets only the hotspot and previews it in
+   * these frames. Shapes and a focus are exclusive: `resolve` returns none then.
+   */
+  focus?: (design: unknown) => FocusPlan | undefined
+}
+
+/** How a covering background is previewed in Focus mode, and what the editor tells the person. */
+export interface FocusPlan {
+  frames: readonly FocusFrame[]
+  /** What this placement is: "Text over media background". */
+  label: string
 }
 
 /** The note a resolver gives for this design, if any. */
@@ -330,11 +344,23 @@ function mediaTextShapes(design: unknown): FrameShape[] {
     : [sectionPicture('Image + text picture', section?.imageDesign, '4/3', 640)]
 }
 
+/**
+ * Text over media draws the picture as the section's background, covering it under the text: no fixed shape, so
+ * only the hotspot applies, as the background's `object-position` (Focus mode). Side and Stacked keep their shapes.
+ */
+function mediaTextFocus(design: unknown): FocusPlan | undefined {
+  const section = design as StoredMediaTextSection | null | undefined
+  return section?.variant === 'overlay'
+    ? { frames: FOCUS_FRAMES, label: 'Text over media background' }
+    : undefined
+}
+
 /** Image + text's media slot picture (`slotImage`, allowed only there): the section is three segments up. */
 const mediaTextImage: FramingResolver = {
   designPath: { drop: 3 },
   wholeNote: BACKGROUND_NOTE,
   resolve: mediaTextShapes,
+  focus: mediaTextFocus,
 }
 
 /** Image + text's older picture field, kept for sections saved before the media slot: on the section itself. */
@@ -342,6 +368,7 @@ const mediaTextLegacyImage: FramingResolver = {
   designPath: { drop: 1 },
   wholeNote: BACKGROUND_NOTE,
   resolve: mediaTextShapes,
+  focus: mediaTextFocus,
 }
 
 interface StoredVideoSection {

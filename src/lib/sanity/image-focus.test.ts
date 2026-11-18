@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
-import { hotspotObjectPosition } from './image-focus'
+import {
+  hotspotObjectPosition,
+  coverPosition,
+  focusOf,
+  hotspotFromFocus,
+  stepFocus,
+  FOCUS_FRAMES,
+} from './image-focus'
 
 const spot = (x: number, y: number) => ({
   _type: 'sanity.imageHotspot' as const,
@@ -67,5 +74,91 @@ describe('hotspotObjectPosition within a served area', () => {
   it('stays undefined without a hotspot, so the picture is centred', () => {
     const area = { left: 0, top: 0, width: 100, height: 100 }
     expect(hotspotObjectPosition({}, { asset, area })).toBeUndefined()
+  })
+})
+
+describe('Focus mode (task 177)', () => {
+  const crop = {
+    _type: 'sanity.imageCrop' as const,
+    left: 0.1,
+    right: 0.1,
+    top: 0.2,
+    bottom: 0,
+  }
+  const hotspot = {
+    _type: 'sanity.imageHotspot' as const,
+    x: 0.3,
+    y: 0.6,
+    width: 0.3,
+    height: 0.3,
+  }
+
+  it('is the hotspot as a point on the picture the CDN serves, cut to its crop', () => {
+    expect(focusOf({ hotspot })).toEqual({ x: 0.3, y: 0.6 })
+    // 10% off each side: x .3 is a quarter in; 20% off the top: y .6 is half way down what is left.
+    expect(focusOf({ crop, hotspot })?.x).toBeCloseTo(0.25, 6)
+    expect(focusOf({ crop, hotspot })?.y).toBeCloseTo(0.5, 6)
+    expect(focusOf({ crop })).toBeUndefined()
+    expect(focusOf(null)).toBeUndefined()
+  })
+
+  it('writes the hotspot the focus came from: the maths are inverse, and the size is kept', () => {
+    const stored = { crop, hotspot }
+    expect(hotspotFromFocus(stored, { x: 0.25, y: 0.5 })).toEqual({
+      x: 0.3,
+      y: 0.6,
+      width: 0.3,
+      height: 0.3,
+    })
+    // No hotspot yet: a default size, as the position is all a background reads.
+    expect(hotspotFromFocus({ crop }, { x: 0.5, y: 0.5 })).toEqual({
+      x: 0.5,
+      y: 0.6,
+      width: 0.3,
+      height: 0.3,
+    })
+    // Anywhere on the picture, and the page reads it back as the same percentage.
+    for (const point of [
+      { x: 0, y: 0 },
+      { x: 1, y: 1 },
+      { x: 0.333, y: 0.777 },
+    ]) {
+      const written = hotspotFromFocus({ crop }, point)
+      const back = focusOf({ crop, hotspot: { _type: 'sanity.imageHotspot', ...written } })
+      expect(back?.x).toBeCloseTo(point.x, 3)
+      expect(back?.y).toBeCloseTo(point.y, 3)
+    }
+    expect(hotspotFromFocus({}, { x: 3, y: -2 })).toMatchObject({ x: 1, y: 0 })
+  })
+
+  it('gives a covering background the hotspot’s position, and centres it with none', () => {
+    expect(coverPosition({ crop, hotspot })).toBe('25% 50%')
+    expect(coverPosition({ crop })).toBeUndefined()
+    expect(coverPosition(undefined)).toBeUndefined()
+    // It is the same answer hotspotObjectPosition gives for what it uses.
+    expect(coverPosition({ hotspot })).toBe(hotspotObjectPosition({ hotspot }))
+  })
+
+  it('decides by the placement: an area in a shape, a focus on a background, only a hotspot counts there', async () => {
+    const { framingMode } = await import('./image-framing')
+    expect(framingMode({ crop }, 'shape')).toBe('area')
+    expect(framingMode({ hotspot }, 'shape')).toBe('area')
+    expect(framingMode({}, 'shape')).toBe('none')
+    expect(framingMode({ hotspot }, 'cover')).toBe('focus')
+    expect(framingMode({ crop }, 'cover')).toBe('none')
+    expect(framingMode(null, 'cover')).toBe('none')
+  })
+
+  it('steps a little, a lot with Shift, and stays on the picture', () => {
+    expect(stepFocus({ x: 0.5, y: 0.5 }, 'right')).toEqual({ x: 0.52, y: 0.5 })
+    expect(stepFocus({ x: 0.5, y: 0.5 }, 'up', true)).toEqual({ x: 0.5, y: 0.4 })
+    expect(stepFocus({ x: 0.99, y: 0.01 }, 'right', true)).toEqual({ x: 1, y: 0.01 })
+    expect(stepFocus({ x: 0.01, y: 0.01 }, 'up')).toEqual({ x: 0.01, y: 0 })
+  })
+
+  it('previews a phone, a tablet and a desktop, narrowest first', () => {
+    expect(FOCUS_FRAMES.map((frame) => frame.label)).toEqual(['Phone', 'Tablet', 'Desktop'])
+    const aspects = FOCUS_FRAMES.map((frame) => frame.aspect)
+    expect(aspects).toEqual([...aspects].sort((a, b) => a - b))
   })
 })

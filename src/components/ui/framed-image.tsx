@@ -12,7 +12,7 @@ import {
 } from '@/lib/sanity/image-design-options'
 import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
 import { appearanceCorner, type FrameCorner } from '@/lib/sanity/image-frame-geometry'
-import { isFramed } from '@/lib/sanity/image-framing'
+import { framingMode } from '@/lib/sanity/image-framing'
 import type { SanityImageData } from '@/types/sanity'
 
 import { ImageFrame, ShapeOutline } from './image-frames'
@@ -118,12 +118,18 @@ export function FramedImage({
   const shapeClass = CORNER_CLASS[appearanceCorner(shape)]
   // The editor's area, served at the drawn ratio: the CDN cuts it, so nothing is left to position.
   const boxRatio = ratio ?? (motion || frame || clip ? '4/3' : undefined)
+  const mode = framingMode(stegaClean(image), 'shape')
   const placement =
-    framing && boxRatio && isFramed(stegaClean(image))
-      ? { aspect: aspectValue(boxRatio) }
-      : undefined
+    framing && boxRatio && mode === 'area' ? { aspect: aspectValue(boxRatio) } : undefined
+  // With "Adjust picture" on, nothing stored is a centred cut, and a stored framing is the CDN's cut, so nothing
+  // is left to position; a picture that doesn't use it keeps positioning by its hotspot.
+  const position = framing
+    ? placement || mode === 'none'
+      ? undefined
+      : hotspotObjectPosition(image)
+    : hotspotObjectPosition(image)
   const style = {
-    objectPosition: placement ? undefined : hotspotObjectPosition(image),
+    objectPosition: position,
     ...depth?.style,
   }
 
