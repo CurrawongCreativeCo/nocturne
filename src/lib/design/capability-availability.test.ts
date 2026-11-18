@@ -546,6 +546,57 @@ describe('baseline integrity against the base commit (AT5)', () => {
     expect(changeRowProblems([admit()])).toEqual([])
   })
 
+  it('fails a gap that changed owner without a reviewed transfer row, and passes one with it', () => {
+    const base = baselineOf()
+    // The edge gap was owned by one task on the base commit and by another in this checkout.
+    const owned = (task: number): CapabilityBaseline => ({
+      ...base,
+      required: base.required.map((entry) =>
+        entry.capability === 'edge' ? { ...entry, closingTask: task } : entry,
+      ),
+    })
+    const transfer = (over: Partial<BaselineChange> = {}): BaselineChange =>
+      admit({ kind: 'transfer', from: 151, closingTask: 178, ...over })
+    const unowned = check(owned(151), owned(178))
+    expect(unowned).toEqual([
+      'fixtureCards: edge (required, section) on open was owned by task 151 on the base commit and is owned by task 178 now, and no transfer row covers it.',
+    ])
+    // The same owner on both sides needs nothing.
+    expect(check(owned(151), owned(151))).toEqual([])
+    expect(check(owned(151), owned(178), { changes: [transfer()] })).toEqual([])
+    // A row for another old task, new task, layout or component doesn't cover it.
+    for (const other of [
+      transfer({ from: 152 }),
+      transfer({ closingTask: 179 }),
+      transfer({ layouts: ['boxed'] }),
+      transfer({ component: 'other' }),
+      // An admit row is not a transfer.
+      admit({ closingTask: 178 }),
+    ]) {
+      expect(check(owned(151), owned(178), { changes: [other] })).toHaveLength(1)
+    }
+  })
+
+  it('checks a transfer row is complete, and that it matches the baseline it explains', () => {
+    const head = baselineOf()
+    const row = (over: Partial<BaselineChange> = {}): BaselineChange =>
+      admit({ kind: 'transfer', from: 150, closingTask: 151, ...over })
+    expect(changeRowProblems([row()])).toEqual([])
+    // It names both tasks, and they differ; only a transfer names an old task.
+    expect(changeRowProblems([row({ from: undefined })])).toHaveLength(1)
+    expect(changeRowProblems([row({ closingTask: undefined })])).toHaveLength(1)
+    expect(changeRowProblems([row({ from: 151 })])).toHaveLength(1)
+    expect(changeRowProblems([admit({ from: 150 })])).toHaveLength(1)
+    // It must describe a pair the baseline lists, with the task the baseline gives it.
+    const stale = (changes: BaselineChange[]) =>
+      staleChangeProblems(head, availabilityOf(), changes).map((problem) => problem.message)
+    expect(stale([row()])).toEqual([])
+    expect(stale([row({ closingTask: 152 })])).toEqual([
+      'fixtureCards: edge (section) on open: the transfer row says task 152, the baseline says task 151.',
+    ])
+    expect(stale([row({ capability: 'glass', layouts: ['extra'] })])).toHaveLength(1)
+  })
+
   it('passes a gap that evidence closed, and fails one that is only gone from the file', () => {
     const base = baselineOf()
     // Verified now: glass on open has a passing case.

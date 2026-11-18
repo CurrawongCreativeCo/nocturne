@@ -14,7 +14,9 @@ export const postCardCapabilities = declareCapabilities({
   depth: { policy: 'required', scope: 'card' },
   icon: NOT_APPLICABLE.noIcon,
   action: { policy: 'required', scope: 'card' },
-  framing: { policy: 'required', scope: 'card' },
+  // The main image's framing is Task 178's: the card (16:9) and the post page (its own proportions) need one framing
+  // each. Pending until then, with today's crop behaviour on both unchanged (capability-baseline-changes.ts).
+  framing: { policy: 'required', scope: 'card', closingTask: 178 },
   pictureDepth: {
     policy: 'conditional',
     scope: 'card',

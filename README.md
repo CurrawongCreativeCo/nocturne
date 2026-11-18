@@ -2583,7 +2583,8 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | ------------ | ---------------- | ------------------- |
 | 157          | 1                | 0                   |
 | 159          | 3                | 8                   |
-| 177          | 2                | 0                   |
+| 177          | 1                | 0                   |
+| 178          | 1                | 0                   |
 | 213          | 7                | 0                   |
 | 276          | 2                | 3                   |
 | 280          | 18               | 0                   |
@@ -5969,13 +5970,15 @@ a team member's portrait and an event's picture. An evidence entry can name that
 schema `type` and a fixture `id`): `field` and the probe's keys are then relative to the document, the harness reads the document
 through the page's own query with the probe applied, and the claim is that the stored value reaches the target from the document,
 as it does on the site. Team's grid, slider and list portraits, Events' Featured picture and a member's own page are verified this
-way. `servicePage` (the service image) and `blogPostCards` (Task 178) stay Pending in `capability-baseline.json`, with their
-tasks, and are not relabelled not applicable.
+way. Two gaps stay Pending in `capability-baseline.json`, and neither is relabelled not applicable: `blogPostCards` (the Blog
+main image) moved to Task 178 by a reviewed `transfer` row (`capability-baseline-changes.ts`, owner, 18 November 2026), because the card and
+the post page need one framing each and today's crop behaviour on both is unchanged; and `servicePage` (the service image), which is
+**on request** and still belongs to Task 177 in the baseline, so Task 177 is not claimed to have no remaining gaps.
 
 **Focus mode (covering backgrounds).** Image + text's Text over media, the Hero's Full background and Image with panel, and every
 section's Background image cover their section, so there is no fixed shape to place a crop in and it is not drawn through `FramedImage`. The picture field offers **Focus** in place of
 Adjust picture (`FramingResolver.focus`, which `mediaTextImage` and `mediaTextLegacyImage` return only for Text over media, `heroImage`
-only for those two Hero layouts, and `sectionBackground` for Fill the section and Cover the screen; Image + text's Side and Stacked
+for every Hero layout the renderer draws as Full background (Full background, Image with panel, and a layout never set, empty or unknown), and `sectionBackground` for Fill the section and Cover the screen; Image + text's Side and Stacked
 and the Hero's Split keep their shapes, and Show the whole picture and Actual size, which Position places, say so and keep what is
 saved). The dialog shows the whole picture as the page serves it (cut to its saved crop) with a focus
 point you click, drag or move with the arrow keys (Shift for further) or four buttons, and previews it in indicative phone,
