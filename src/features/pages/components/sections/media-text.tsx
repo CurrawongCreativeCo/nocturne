@@ -152,8 +152,6 @@ export function MediaText({ data, isFirst = false }: SectionProps<'mediaText'>) 
             plan={undefined}
             isFirst={isFirst}
             className="object-cover opacity-40"
-            // Focus mode (task 177): the picture covers the section, so only its hotspot applies.
-            focus
           />
         }
       >

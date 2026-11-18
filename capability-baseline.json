@@ -96,27 +96,11 @@
       "closingTask": 159
     },
     {
-      "component": "team",
-      "capability": "framing",
-      "scope": "card",
-      "part": "portrait",
-      "layouts": ["grid", "slider", "list"],
-      "closingTask": 177
-    },
-    {
       "component": "linkList",
       "capability": "glass",
       "scope": "card",
       "layouts": ["stacked"],
       "closingTask": 159
-    },
-    {
-      "component": "events",
-      "capability": "framing",
-      "scope": "card",
-      "part": "picture",
-      "layouts": ["featured"],
-      "closingTask": 177
     },
     {
       "component": "eventDetailsCard",
@@ -266,45 +250,14 @@
       "closingTask": 280
     },
     {
-      "component": "teamMemberPage",
-      "capability": "framing",
-      "scope": "section",
-      "layouts": [null],
-      "closingTask": 177
-    },
-    {
       "component": "blogPostCards",
       "capability": "framing",
       "scope": "card",
       "layouts": [null],
-      "closingTask": 177
+      "closingTask": 178
     }
   ],
   "conditional": [
-    {
-      "component": "hero",
-      "capability": "framing",
-      "scope": "section",
-      "part": "background",
-      "layouts": ["overlay", "full-bleed"],
-      "closingTask": 177
-    },
-    {
-      "component": "richText",
-      "capability": "framing",
-      "scope": "section",
-      "part": "background",
-      "layouts": [null],
-      "closingTask": 177
-    },
-    {
-      "component": "mediaText",
-      "capability": "framing",
-      "scope": "section",
-      "part": "background",
-      "layouts": ["side", "stacked"],
-      "closingTask": 177
-    },
     {
       "component": "featuresGrid",
       "capability": "surface",
@@ -328,34 +281,10 @@
     },
     {
       "component": "featuresGrid",
-      "capability": "framing",
-      "scope": "section",
-      "part": "background",
-      "layouts": [null],
-      "closingTask": 177
-    },
-    {
-      "component": "featuresGrid",
       "capability": "glass",
       "scope": "card",
       "layouts": [null],
       "closingTask": 159
-    },
-    {
-      "component": "logoCloud",
-      "capability": "framing",
-      "scope": "section",
-      "part": "background",
-      "layouts": ["grid", "marquee"],
-      "closingTask": 177
-    },
-    {
-      "component": "testimonials",
-      "capability": "framing",
-      "scope": "section",
-      "part": "background",
-      "layouts": ["grid", "slider"],
-      "closingTask": 177
     },
     {
       "component": "testimonials",
@@ -365,59 +294,11 @@
       "closingTask": 159
     },
     {
-      "component": "faq",
-      "capability": "framing",
-      "scope": "section",
-      "part": "background",
-      "layouts": [null],
-      "closingTask": 177
-    },
-    {
-      "component": "ctaBanner",
-      "capability": "framing",
-      "scope": "section",
-      "part": "background",
-      "layouts": [null],
-      "closingTask": 177
-    },
-    {
-      "component": "formSection",
-      "capability": "framing",
-      "scope": "section",
-      "part": "background",
-      "layouts": [null],
-      "closingTask": 177
-    },
-    {
-      "component": "pricingTable",
-      "capability": "framing",
-      "scope": "section",
-      "part": "background",
-      "layouts": [null],
-      "closingTask": 177
-    },
-    {
       "component": "pricingTable",
       "capability": "glass",
       "scope": "card",
       "layouts": [null],
       "closingTask": 159
-    },
-    {
-      "component": "newsletterSignup",
-      "capability": "framing",
-      "scope": "section",
-      "part": "background",
-      "layouts": [null],
-      "closingTask": 177
-    },
-    {
-      "component": "stats",
-      "capability": "framing",
-      "scope": "section",
-      "part": "background",
-      "layouts": ["inline", "cards"],
-      "closingTask": 177
     },
     {
       "component": "stats",
@@ -427,22 +308,6 @@
       "closingTask": 159
     },
     {
-      "component": "gallery",
-      "capability": "framing",
-      "scope": "section",
-      "part": "background",
-      "layouts": ["grid", "masonry", "slider"],
-      "closingTask": 177
-    },
-    {
-      "component": "location",
-      "capability": "framing",
-      "scope": "section",
-      "part": "background",
-      "layouts": [null],
-      "closingTask": 177
-    },
-    {
       "component": "location",
       "capability": "glass",
       "scope": "card",
@@ -451,58 +316,10 @@
     },
     {
       "component": "team",
-      "capability": "framing",
-      "scope": "section",
-      "part": "background",
-      "layouts": ["grid", "slider", "list"],
-      "closingTask": 177
-    },
-    {
-      "component": "team",
       "capability": "glass",
       "scope": "card",
       "layouts": ["grid", "slider", "list"],
       "closingTask": 159
-    },
-    {
-      "component": "video",
-      "capability": "framing",
-      "scope": "section",
-      "part": "background",
-      "layouts": ["embed", "ambient"],
-      "closingTask": 177
-    },
-    {
-      "component": "process",
-      "capability": "framing",
-      "scope": "section",
-      "part": "background",
-      "layouts": ["vertical", "alternating"],
-      "closingTask": 177
-    },
-    {
-      "component": "embed",
-      "capability": "framing",
-      "scope": "section",
-      "part": "background",
-      "layouts": [null],
-      "closingTask": 177
-    },
-    {
-      "component": "linkList",
-      "capability": "framing",
-      "scope": "section",
-      "part": "background",
-      "layouts": ["stacked", "cards", "editorial", "compact"],
-      "closingTask": 177
-    },
-    {
-      "component": "events",
-      "capability": "framing",
-      "scope": "section",
-      "part": "background",
-      "layouts": ["list", "agenda", "featured"],
-      "closingTask": 177
     },
     {
       "component": "events",

@@ -1,6 +1,7 @@
 import { blogSettings } from '@/features/blog/schemas/blog-settings'
 import { post } from '@/features/blog/schemas/post'
 import { postCardCapabilities } from '@/features/blog/schemas/post-card-capabilities'
+import { event } from '@/features/events/schemas/event'
 import { eventDetailsCardCapabilities } from '@/features/events/schemas/event-details-card-capabilities'
 import { sectionTypes } from '@/features/pages/schemas/sections'
 import { slotImage } from '@/features/pages/schemas/slot-image'
@@ -204,12 +205,19 @@ const VIEW_SCHEMAS: readonly SchemaField[] = [
 ]
 
 /** The schema each component is edited through: a section's or block's own type, or a view's. */
+/**
+ * Documents a section draws content from, whose fields an evidence entry may probe (`CapabilityEvidence.document`): a
+ * team member's portrait, an event's picture. They are not contract components, only schemas to check the field in.
+ */
+const DOCUMENT_SCHEMAS = [teamMember, event] as unknown as readonly SchemaField[]
+
 export const COMPONENT_SCHEMAS: ReadonlyMap<string, SchemaField> = new Map([
   ...DESIGN_COMPONENTS.flatMap((component) => {
     const type = SCHEMA_TYPES.get(component.id)
     return type ? [[component.id, type] as const] : []
   }),
   ...VIEW_SCHEMAS.map((type) => [type.name, type] as const),
+  ...DOCUMENT_SCHEMAS.map((type) => [type.name, type] as const),
 ])
 
 export const gate = schemaGate(COMPONENT_SCHEMAS, lookupType)

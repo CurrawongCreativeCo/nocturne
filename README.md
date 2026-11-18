@@ -2539,26 +2539,26 @@ The tables below are generated from the declarations and the evidence by `npm ru
 
 | Component                                | Surface | Text | Header | Mark | Depth | Icon | Action | Framing | Pic. depth | Overlay | Glass | Divider | Edge | Motion | Slots |
 | ---------------------------------------- | ------- | ---- | ------ | ---- | ----- | ---- | ------ | ------- | ---------- | ------- | ----- | ------- | ---- | ------ | ----- |
-| Hero (`hero`), 4 layouts                 | –       | R…   | R…     | R✓   | –     | –    | C✓     | R◐*     | R✓*        | R…*     | R✓*   | R✓      | R✓   | R✓     | R◐    |
-| Rich text (`richText`)                   | –       | –    | –      | R✓   | –     | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
-| Image + text (`mediaText`), 3 layouts    | –       | –    | R✓     | R✓   | –     | –    | C✓     | R◐*     | R✓*        | R✓*     | R✓    | R✓      | R✓   | R✓     | R✓    |
-| Features grid (`featuresGrid`)           | C…      | R…   | R✓     | R✓   | C…    | R✓   | C…     | C…      | –          | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
-| Logo strip (`logoCloud`), 2 layouts      | –       | –    | R✓     | R✓   | –     | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
-| Testimonials (`testimonials`), 2 layouts | R✓      | R✓   | R✓     | R✓   | R✓    | –    | –      | R◐      | R✓         | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
-| FAQ (`faq`)                              | R✓      | R✓   | R✓     | R✓   | C✓    | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
-| Call to action banner (`ctaBanner`)      | R…      | –    | R✓     | R✓   | R✓    | –    | C✓     | C…      | –          | R✓      | R…    | R✓      | R✓   | R✓     | –     |
-| Form (`formSection`)                     | R✓      | –    | R✓     | R✓   | R✓    | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
-| Pricing table (`pricingTable`)           | R✓      | R✓   | R✓     | R✓   | R✓    | C✓   | –      | C…      | –          | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
-| Newsletter signup (`newsletterSignup`)   | R✓      | –    | R✓     | R✓   | R✓    | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
-| Stats (`stats`), 2 layouts               | R✓*     | R✓*  | R✓     | R✓*  | C✓*   | –    | –      | C…      | –          | R✓      | R◐*   | R✓      | R✓   | R✓     | –     |
-| Gallery (`gallery`), 3 layouts           | –       | –    | R✓     | R✓   | –     | –    | –      | R◐*     | R✓         | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
-| Location (`location`)                    | R✓      | R✓   | R✓     | R✓   | R✓    | R✓   | –      | C…      | C✓         | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
-| Team (`team`), 3 layouts                 | R✓      | R✓   | R✓     | R✓   | R✓    | –    | R✓     | R…      | R✓         | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
-| Video (`video`), 2 layouts               | –       | –    | R✓     | –    | –     | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
-| Process (`process`), 2 layouts           | –       | R✓   | R✓     | R✓   | –     | R✓   | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
-| Embed (`embed`)                          | R✓      | –    | R✓     | –    | R✓    | –    | –      | C…      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
-| Link list (`linkList`), 4 layouts        | R✓*     | R✓   | R✓     | R✓   | R✓*   | R✓*  | R✓*    | R◐*     | R✓         | R✓      | R…*   | R✓      | R✓   | R✓     | –     |
-| Events (`events`), 3 layouts             | R✓*     | R✓   | R✓     | R✓*  | R✓*   | –    | R✓*    | R…*     | C✓*        | R✓      | R◐*   | R✓      | R✓   | R✓     | –     |
+| Hero (`hero`), 4 layouts                 | –       | R…   | R…     | R✓   | –     | –    | C✓     | R✓*     | R✓*        | R…*     | R✓*   | R✓      | R✓   | R✓     | R◐    |
+| Rich text (`richText`)                   | –       | –    | –      | R✓   | –     | –    | –      | C✓      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Image + text (`mediaText`), 3 layouts    | –       | –    | R✓     | R✓   | –     | –    | C✓     | R✓*     | R✓*        | R✓*     | R✓    | R✓      | R✓   | R✓     | R✓    |
+| Features grid (`featuresGrid`)           | C…      | R…   | R✓     | R✓   | C…    | R✓   | C…     | C✓      | –          | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
+| Logo strip (`logoCloud`), 2 layouts      | –       | –    | R✓     | R✓   | –     | –    | –      | C✓      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Testimonials (`testimonials`), 2 layouts | R✓      | R✓   | R✓     | R✓   | R✓    | –    | –      | R✓      | R✓         | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
+| FAQ (`faq`)                              | R✓      | R✓   | R✓     | R✓   | C✓    | –    | –      | C✓      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Call to action banner (`ctaBanner`)      | R…      | –    | R✓     | R✓   | R✓    | –    | C✓     | C✓      | –          | R✓      | R…    | R✓      | R✓   | R✓     | –     |
+| Form (`formSection`)                     | R✓      | –    | R✓     | R✓   | R✓    | –    | –      | C✓      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Pricing table (`pricingTable`)           | R✓      | R✓   | R✓     | R✓   | R✓    | C✓   | –      | C✓      | –          | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
+| Newsletter signup (`newsletterSignup`)   | R✓      | –    | R✓     | R✓   | R✓    | –    | –      | C✓      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Stats (`stats`), 2 layouts               | R✓*     | R✓*  | R✓     | R✓*  | C✓*   | –    | –      | C✓      | –          | R✓      | R◐*   | R✓      | R✓   | R✓     | –     |
+| Gallery (`gallery`), 3 layouts           | –       | –    | R✓     | R✓   | –     | –    | –      | R✓*     | R✓         | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Location (`location`)                    | R✓      | R✓   | R✓     | R✓   | R✓    | R✓   | –      | C✓      | C✓         | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
+| Team (`team`), 3 layouts                 | R✓      | R✓   | R✓     | R✓   | R✓    | –    | R✓     | R✓      | R✓         | R✓      | R◐    | R✓      | R✓   | R✓     | –     |
+| Video (`video`), 2 layouts               | –       | –    | R✓     | –    | –     | –    | –      | C✓      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Process (`process`), 2 layouts           | –       | R✓   | R✓     | R✓   | –     | R✓   | –      | C✓      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Embed (`embed`)                          | R✓      | –    | R✓     | –    | R✓    | –    | –      | C✓      | –          | R✓      | R✓    | R✓      | R✓   | R✓     | –     |
+| Link list (`linkList`), 4 layouts        | R✓*     | R✓   | R✓     | R✓   | R✓*   | R✓*  | R✓*    | R✓*     | R✓         | R✓      | R…*   | R✓      | R✓   | R✓     | –     |
+| Events (`events`), 3 layouts             | R✓*     | R✓   | R✓     | R✓*  | R✓*   | –    | R✓*    | R✓*     | C✓*        | R✓      | R◐*   | R✓      | R✓   | R✓     | –     |
 | Statistics bar (`statsBar`)              | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Badges (`badgeRow`)                      | –       | –    | –      | –    | –     | R✓   | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Logos (`logoRow`)                        | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
@@ -2569,13 +2569,13 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | Service page (`servicePage`)             | –       | R…   | –      | –    | –     | –    | –      | R…      | –          | –       | –     | R…      | –    | –      | –     |
 | Search results (`searchResults`)         | –       | R…   | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Site footer (`siteFooter`)               | –       | –    | –      | –    | –     | R✓   | –      | –       | –          | –       | –     | R✓      | –    | –      | –     |
-| Team member page (`teamMemberPage`)      | –       | –    | –      | –    | –     | R✓   | –      | R…      | –          | –       | –     | R✓      | –    | –      | –     |
+| Team member page (`teamMemberPage`)      | –       | –    | –      | –    | –     | R✓   | –      | R✓      | –          | –       | –     | R✓      | –    | –      | –     |
 | Blog post cards (`blogPostCards`)        | R✓      | R✓   | –      | R✓   | R✓    | –    | R✓     | R…      | C✓         | –       | C…    | –       | –    | –      | –     |
 
 | Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
 | -------------------------------------------------------- | -------- | --------------- | ------- |
-| Required                                                 | 279      | 0               | 36      |
-| Conditional                                              | 13       | 0               | 31      |
+| Required                                                 | 282      | 0               | 33      |
+| Conditional                                              | 33       | 0               | 11      |
 
 A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
 
@@ -2583,12 +2583,13 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | ------------ | ---------------- | ------------------- |
 | 157          | 1                | 0                   |
 | 159          | 3                | 8                   |
-| 177          | 5                | 20                  |
+| 177          | 1                | 0                   |
+| 178          | 1                | 0                   |
 | 213          | 7                | 0                   |
 | 276          | 2                | 3                   |
 | 280          | 18               | 0                   |
 
-**Evidence.** 307 capability entries, 571 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
+**Evidence.** 334 capability entries, 618 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
 **Capabilities and their owners**
 
@@ -5941,39 +5942,45 @@ shape is previewed in the editor; _on request_ when it is cropped but nobody has
 _not suitable_ when cropping would remove content or the picture is not drawn in a shape. A field moves to "offered" with a
 resolver in `FRAMING_RESOLVERS` and `framing('…')` on the field.
 
-| Picture                                                       | Status              | Notes                                                                                                  |
-| ------------------------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------ |
-| Link list profile picture and link thumbnails                 | Offered             | Task 174                                                                                               |
-| Gallery photos (Grid and Slider tile)                         | Offered             | Masonry has no fixed tile: reviewed not applicable (a saved crop still applies)                        |
-| Event image (Featured card, event page)                       | Offered             | Two masks: top corners only in Featured, all four on the page or with a depth                          |
-| Hero picture (Split layout)                                   | Offered             | Shape from Image design, 4:3                                                                           |
-| Image + text picture (Side and Stacked; the Slot image block) | Offered             | Side 4:3, Stacked 16:9; the older picture field too. Text over media has Focus mode (below)            |
-| Video section poster                                          | Offered             | Follows the frame's ratio (16:9, 4:3, 1:1, 21:9). Ambient and uploaded videos have no poster to adjust |
-| Team member portrait                                          | Offered             | One square framing, previewed on the member page, the grid and slider cards, and the list              |
-| Testimonial avatar                                            | Offered             | Circle at the section's Avatar size                                                                    |
-| Blog post main image                                          | Task 178            | The card and the post page draw it at different ratios, so one framing cannot serve both               |
-| Hero backgrounds and other section backgrounds                | Task 177, last step | Focus mode, as Image + text's Text over media has it: the hotspot only, at phone, tablet and desktop   |
-| Service image                                                 | On request          | Drawn 16:9 beside the summary                                                                          |
-| Place (location) image                                        | On request          | Drawn 16:9 on its own page                                                                             |
-| Blog author photo                                             | On request          | A 1:1 photo under each post                                                                            |
-| Hero small picture (Editorial)                                | On request          | A small 1:1 picture beside the heading                                                                 |
-| Video slot block poster                                       | On request          | 16:9, shown before the video plays                                                                     |
-| Panel text picture                                            | On request          | An optional picture in a panel                                                                         |
-| Site logo, browser icon, default social share image           | Not suitable        | Shown whole or generated at fixed sizes elsewhere; the share image is cropped by each platform         |
-| Custom frame picture                                          | Not suitable        | Outline artwork on a transparent background: cropping would cut the frame                              |
-| Process and Features grid icons, Logo strip logos             | Not suitable        | Marks and logos are never cropped                                                                      |
-| Location section map image                                    | Not suitable        | An exported map: its edges are content                                                                 |
+| Picture                                                                                   | Status       | Notes                                                                                                  |
+| ----------------------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------ |
+| Link list profile picture and link thumbnails                                             | Offered      | Task 174                                                                                               |
+| Gallery photos (Grid and Slider tile)                                                     | Offered      | Masonry has no fixed tile: reviewed not applicable (a saved crop still applies)                        |
+| Event image (Featured card, event page)                                                   | Offered      | Two masks: top corners only in Featured, all four on the page or with a depth                          |
+| Hero picture (Split layout)                                                               | Offered      | Shape from Image design, 4:3                                                                           |
+| Image + text picture (Side and Stacked; the Slot image block)                             | Offered      | Side 4:3, Stacked 16:9; the older picture field too. Text over media has Focus mode (below)            |
+| Video section poster                                                                      | Offered      | Follows the frame's ratio (16:9, 4:3, 1:1, 21:9). Ambient and uploaded videos have no poster to adjust |
+| Team member portrait                                                                      | Offered      | One square framing, previewed on the member page, the grid and slider cards, and the list              |
+| Testimonial avatar                                                                        | Offered      | Circle at the section's Avatar size                                                                    |
+| Blog post main image                                                                      | Task 178     | The card and the post page draw it at different ratios, so one framing cannot serve both               |
+| Hero backgrounds (Full background, Image with panel) and every section's Background image | Offered      | Focus mode (below): the hotspot only, at phone, tablet and desktop                                     |
+| Service image                                                                             | On request   | Drawn 16:9 beside the summary                                                                          |
+| Place (location) image                                                                    | On request   | Drawn 16:9 on its own page                                                                             |
+| Blog author photo                                                                         | On request   | A 1:1 photo under each post                                                                            |
+| Hero small picture (Editorial)                                                            | On request   | A small 1:1 picture beside the heading                                                                 |
+| Video slot block poster                                                                   | On request   | 16:9, shown before the video plays                                                                     |
+| Panel text picture                                                                        | On request   | An optional picture in a panel                                                                         |
+| Site logo, browser icon, default social share image                                       | Not suitable | Shown whole or generated at fixed sizes elsewhere; the share image is cropped by each platform         |
+| Custom frame picture                                                                      | Not suitable | Outline artwork on a transparent background: cropping would cut the frame                              |
+| Process and Features grid icons, Logo strip logos                                         | Not suitable | Marks and logos are never cropped                                                                      |
+| Location section map image                                                                | Not suitable | An exported map: its edges are content                                                                 |
 
-**Evidence still pending (in `capability-baseline.json`, task 177).** The contract's harness renders a section from its own
-fields. The Events section's Featured picture and the Team section's portraits are drawn from _reference documents_ (an event, a
-team member), whose crop is stored on that document, so the harness has no field of the section to probe. Both stay Pending, not
-"not applicable": the placements are built and measured by `tests/e2e/event-image-framing.spec.ts` and the placement specs, and the
-pairs close when the harness can probe a referenced document's field.
+**Reference-document evidence (task 177).** Some pictures are a field of a document a section draws from, not of the section:
+a team member's portrait and an event's picture. An evidence entry can name that document (`CapabilityEvidence.document`: its
+schema `type` and a fixture `id`): `field` and the probe's keys are then relative to the document, the harness reads the document
+through the page's own query with the probe applied, and the claim is that the stored value reaches the target from the document,
+as it does on the site. Team's grid, slider and list portraits, Events' Featured picture and a member's own page are verified this
+way. Two gaps stay Pending in `capability-baseline.json`, and neither is relabelled not applicable: `blogPostCards` (the Blog
+main image) moved to Task 178 by a reviewed `transfer` row (`capability-baseline-changes.ts`, owner, 18 November 2026), because the card and
+the post page need one framing each and today's crop behaviour on both is unchanged; and `servicePage` (the service image), which is
+**on request** and still belongs to Task 177 in the baseline, so Task 177 is not claimed to have no remaining gaps.
 
-**Focus mode (Image + text, Text over media).** In Text over media the picture covers the section under the text, so there
-is no fixed shape to place a crop in and it is not drawn through `FramedImage`. Its picture field offers **Focus** in place of
-Adjust picture (`FramingResolver.focus`, which `mediaTextImage` and `mediaTextLegacyImage` return only for that layout; Side and
-Stacked keep their shapes). The dialog shows the whole picture as the page serves it (cut to its saved crop) with a focus
+**Focus mode (covering backgrounds).** Image + text's Text over media, the Hero's Full background and Image with panel, and every
+section's Background image cover their section, so there is no fixed shape to place a crop in and it is not drawn through `FramedImage`. The picture field offers **Focus** in place of
+Adjust picture (`FramingResolver.focus`, which `mediaTextImage` and `mediaTextLegacyImage` return only for Text over media, `heroImage`
+for every Hero layout the renderer draws as Full background (Full background, Image with panel, and a layout never set, empty or unknown), and `sectionBackground` for Fill the section and Cover the screen; Image + text's Side and Stacked
+and the Hero's Split keep their shapes, and Show the whole picture and Actual size, which Position places, say so and keep what is
+saved). The dialog shows the whole picture as the page serves it (cut to its saved crop) with a focus
 point you click, drag or move with the arrow keys (Shift for further) or four buttons, and previews it in indicative phone,
 tablet and desktop frames (`FOCUS_FRAMES`: 390, 768 and 1440 px wide; the section's height follows its text). Apply writes the
 field's `hotspot` and nothing else (the size of a hotspot already saved is kept); Reset, in the dialog or under the field
@@ -5982,8 +5989,9 @@ switching the layout never changes what is stored: Side and Stacked read the sam
 The page positions the background with `coverPosition` (CSS `object-position`, measured on the cropped picture), which is the
 answer the dialog's frames use, and a crop alone still trims it through the image URL as it always did. `framingMode`
 (`lib/sanity/image-framing.ts`) is the one decision both paths ask: `area` in a fixed shape, `focus` on a background, only a
-hotspot counting there. The primitives are `FocusPictureDialog`, `FocusPictureStage` and `FocusFrames`
-(`features/studio/components/picture-framing`); the remaining Hero and section backgrounds adopt them with their own frames.
+hotspot counting there. The Hero's picture positions through `HeroBackground` in every way it can move (still, the section's Parallax
+or Float, a part entrance), and every other section through the shared `SectionBackground`. The primitives are `FocusPictureDialog`,
+`FocusPictureStage` and `FocusFrames` (`features/studio/components/picture-framing`).
 
 **What it changes.** Sanity's own `crop` and `hotspot` on that image field, and nothing else. The crop box is the visible area (zoom and position); the hotspot is set to the crop box's centre and size. Both live on the field in the document, never on the asset, so the same photo used elsewhere keeps its own framing. `SanityImage` already passes both to `@sanity/image-url`, so there is no new rendering path, no canvas, no new asset and no public JavaScript.
 

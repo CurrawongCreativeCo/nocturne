@@ -3820,6 +3820,83 @@ documents.push({
 })
 
 /**
+ * Focus mode on the covering backgrounds (task 177; tests/e2e/picture-framing-backgrounds.spec.ts): the Hero's Full
+ * background and Image with panel, each way the picture can move, and the Background image every section can have,
+ * in the sizes the hotspot decides (Fill) and the one Position decides (Show the whole picture). FOCUSED is a crop of
+ * 10% off each side and a hotspot at x .3, y .7: a position of 25% 70% on the picture the CDN serves.
+ */
+documents.push({
+  _id: 'page-picture-framing-backgrounds',
+  _type: 'page',
+  title: 'Picture framing, backgrounds',
+  slug: { _type: 'slug', current: 'picture-framing-backgrounds' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    {
+      _key: 'frame-bg-intro',
+      _type: 'richText',
+      body: [block(['Backgrounds'], { style: 'h1' })],
+    },
+    galleryHero('frame-bg-overlay', {
+      variant: 'overlay',
+      title: 'Background hero full',
+      ctas: [],
+      backgroundImage: focusedPicture('Hero background'),
+    }),
+    galleryHero('frame-bg-fullbleed-parallax', {
+      variant: 'full-bleed',
+      title: 'Background hero parallax',
+      ctas: [],
+      backgroundImage: focusedPicture('Hero background'),
+      style: { _type: 'sectionStyle', motion: 'parallax' },
+    }),
+    galleryHero('frame-bg-float', {
+      variant: 'overlay',
+      title: 'Background hero float',
+      ctas: [],
+      backgroundImage: focusedPicture('Hero background'),
+      style: { _type: 'sectionStyle', motion: 'float' },
+    }),
+    galleryHero('frame-bg-centred', {
+      variant: 'overlay',
+      title: 'Background hero centred',
+      ctas: [],
+      backgroundImage: { ...image('Hero background'), crop: FOCUSED.crop },
+    }),
+    {
+      _key: 'frame-bg-fill',
+      _type: 'richText',
+      body: [block(['Background section fill'], { style: 'h2' })],
+      style: { _type: 'sectionStyle', image: focusedPicture('') },
+    },
+    {
+      _key: 'frame-bg-screen',
+      _type: 'richText',
+      body: [block(['Background section screen'], { style: 'h2' })],
+      style: { _type: 'sectionStyle', imageSize: 'screen', image: focusedPicture('') },
+    },
+    {
+      _key: 'frame-bg-contain',
+      _type: 'richText',
+      body: [block(['Background section whole'], { style: 'h2' })],
+      style: {
+        _type: 'sectionStyle',
+        imageSize: 'contain',
+        imageVertical: 'top',
+        imageHorizontal: 'left',
+        image: focusedPicture(''),
+      },
+    },
+    {
+      _key: 'frame-bg-none',
+      _type: 'richText',
+      body: [block(['Background section centred'], { style: 'h2' })],
+      style: { _type: 'sectionStyle', image: { ...image(''), crop: FOCUSED.crop } },
+    },
+  ],
+})
+
+/**
  * Picture depth on the Gallery (tests/e2e/picture-depth-gallery.spec.ts): grids and sliders of six pictures with
  * nothing chosen and at each depth level, and a section of a transparent picture and a cropped one.
  */

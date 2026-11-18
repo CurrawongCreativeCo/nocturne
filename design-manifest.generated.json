@@ -3326,16 +3326,18 @@
                 "reachable": true
               },
               "closingTask": 177,
-              "fields": [],
+              "fields": [
+                "backgroundImage"
+              ],
               "availability": {
-                "overlay": "pending",
+                "overlay": "verified",
                 "split": {
                   "notApplicable": "Its picture sits beside the text: see the picture part"
                 },
                 "editorial": {
                   "notApplicable": "Has no background picture"
                 },
-                "full-bleed": "pending"
+                "full-bleed": "verified"
               }
             }
           ],
@@ -3352,6 +3354,58 @@
               "target": "[data-framed-image]",
               "cases": [
                 "hero.framing.picture@split"
+              ]
+            },
+            {
+              "id": "hero.framing.background",
+              "field": "backgroundImage",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/features/pages/components/sections/hero/hero-background.tsx",
+              "target": "section img",
+              "cases": [
+                "hero.framing.background@overlay",
+                "hero.framing.background@full-bleed"
+              ]
+            },
+            {
+              "id": "hero.framing.background.parallax",
+              "field": "backgroundImage",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/features/pages/components/sections/hero/hero-background.tsx",
+              "target": "section img",
+              "cases": [
+                "hero.framing.background.parallax@overlay",
+                "hero.framing.background.parallax@full-bleed"
+              ]
+            },
+            {
+              "id": "hero.framing.background.float",
+              "field": "backgroundImage",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/features/pages/components/sections/hero/hero-background.tsx",
+              "target": "section img",
+              "cases": [
+                "hero.framing.background.float@overlay",
+                "hero.framing.background.float@full-bleed"
+              ]
+            },
+            {
+              "id": "hero.framing.background.entrance",
+              "field": "backgroundImage",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/features/pages/components/sections/hero/hero-background.tsx",
+              "target": "section img",
+              "cases": [
+                "hero.framing.background.entrance@overlay",
+                "hero.framing.background.entrance@full-bleed"
               ]
             }
           ]
@@ -3713,11 +3767,26 @@
                 "reachable": true
               },
               "closingTask": 177,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "style.image"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "richText.background.section",
+              "field": "style.image",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-image]",
+              "cases": [
+                "richText.background.section"
+              ]
+            }
+          ]
         },
         "pictureDepth": {
           "notApplicable": "Has no framed picture"
@@ -5768,10 +5837,12 @@
                 "reachable": true
               },
               "closingTask": 177,
-              "fields": [],
+              "fields": [
+                "style.image"
+              ],
               "availability": {
-                "side": "pending",
-                "stacked": "pending",
+                "side": "verified",
+                "stacked": "verified",
                 "overlay": {
                   "notApplicable": "Its media is the background; the shared picture isn’t offered"
                 }
@@ -5779,6 +5850,19 @@
             }
           ],
           "evidence": [
+            {
+              "id": "mediaText.background.section",
+              "field": "style.image",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-image]",
+              "cases": [
+                "mediaText.background.section@side",
+                "mediaText.background.section@stacked"
+              ]
+            },
             {
               "id": "mediaText.framing.picture",
               "field": "media[slotImage].image",
@@ -7508,11 +7592,26 @@
                 "reachable": true
               },
               "closingTask": 177,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "style.image"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "featuresGrid.background.section",
+              "field": "style.image",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-image]",
+              "cases": [
+                "featuresGrid.background.section"
+              ]
+            }
+          ]
         },
         "pictureDepth": {
           "notApplicable": "Its icons and pictures are drawn whole, with no frame"
@@ -8717,14 +8816,30 @@
                 "reachable": true
               },
               "closingTask": 177,
-              "fields": [],
+              "fields": [
+                "style.image"
+              ],
               "availability": {
-                "grid": "pending",
-                "marquee": "pending"
+                "grid": "verified",
+                "marquee": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "logoCloud.background.section",
+              "field": "style.image",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-image]",
+              "cases": [
+                "logoCloud.background.section@grid",
+                "logoCloud.background.section@marquee"
+              ]
+            }
+          ]
         },
         "pictureDepth": {
           "notApplicable": "Logos (147)"
@@ -11190,14 +11305,29 @@
                 "reachable": true
               },
               "closingTask": 177,
-              "fields": [],
+              "fields": [
+                "style.image"
+              ],
               "availability": {
-                "grid": "pending",
-                "slider": "pending"
+                "grid": "verified",
+                "slider": "verified"
               }
             }
           ],
           "evidence": [
+            {
+              "id": "testimonials.background.section",
+              "field": "style.image",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-image]",
+              "cases": [
+                "testimonials.background.section@grid",
+                "testimonials.background.section@slider"
+              ]
+            },
             {
               "id": "testimonials.framing.avatar",
               "field": "items[].avatar",
@@ -13050,11 +13180,26 @@
                 "reachable": true
               },
               "closingTask": 177,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "style.image"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "faq.background.section",
+              "field": "style.image",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-image]",
+              "cases": [
+                "faq.background.section"
+              ]
+            }
+          ]
         },
         "pictureDepth": {
           "notApplicable": "Has no framed picture"
@@ -14534,11 +14679,26 @@
                 "reachable": true
               },
               "closingTask": 177,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "style.image"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "ctaBanner.background.section",
+              "field": "style.image",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-image]",
+              "cases": [
+                "ctaBanner.background.section"
+              ]
+            }
+          ]
         },
         "pictureDepth": {
           "notApplicable": "Has no framed picture"
@@ -15915,11 +16075,26 @@
                 "reachable": true
               },
               "closingTask": 177,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "style.image"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "formSection.background.section",
+              "field": "style.image",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-image]",
+              "cases": [
+                "formSection.background.section"
+              ]
+            }
+          ]
         },
         "pictureDepth": {
           "notApplicable": "Has no framed picture"
@@ -19343,11 +19518,26 @@
                 "reachable": true
               },
               "closingTask": 177,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "style.image"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "pricingTable.background.section",
+              "field": "style.image",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-image]",
+              "cases": [
+                "pricingTable.background.section"
+              ]
+            }
+          ]
         },
         "pictureDepth": {
           "notApplicable": "Has no framed picture"
@@ -20758,11 +20948,26 @@
                 "reachable": true
               },
               "closingTask": 177,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "style.image"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "newsletterSignup.background.section",
+              "field": "style.image",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-image]",
+              "cases": [
+                "newsletterSignup.background.section"
+              ]
+            }
+          ]
         },
         "pictureDepth": {
           "notApplicable": "Has no framed picture"
@@ -22587,14 +22792,30 @@
                 "reachable": true
               },
               "closingTask": 177,
-              "fields": [],
+              "fields": [
+                "style.image"
+              ],
               "availability": {
-                "inline": "pending",
-                "cards": "pending"
+                "inline": "verified",
+                "cards": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "stats.background.section",
+              "field": "style.image",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-image]",
+              "cases": [
+                "stats.background.section@inline",
+                "stats.background.section@cards"
+              ]
+            }
+          ]
         },
         "pictureDepth": {
           "notApplicable": "Has no framed picture"
@@ -24200,11 +24421,13 @@
                 "reachable": true
               },
               "closingTask": 177,
-              "fields": [],
+              "fields": [
+                "style.image"
+              ],
               "availability": {
-                "grid": "pending",
-                "masonry": "pending",
-                "slider": "pending"
+                "grid": "verified",
+                "masonry": "verified",
+                "slider": "verified"
               }
             }
           ],
@@ -24221,6 +24444,20 @@
               "cases": [
                 "gallery.framing.tile@grid",
                 "gallery.framing.tile@slider"
+              ]
+            },
+            {
+              "id": "gallery.background.section",
+              "field": "style.image",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-image]",
+              "cases": [
+                "gallery.background.section@grid",
+                "gallery.background.section@masonry",
+                "gallery.background.section@slider"
               ]
             }
           ]
@@ -26523,11 +26760,26 @@
                 "reachable": true
               },
               "closingTask": 177,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "style.image"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "location.background.section",
+              "field": "style.image",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-image]",
+              "cases": [
+                "location.background.section"
+              ]
+            }
+          ]
         },
         "pictureDepth": {
           "policies": [
@@ -29152,9 +29404,9 @@
               "closingTask": 177,
               "fields": [],
               "availability": {
-                "grid": "pending",
-                "slider": "pending",
-                "list": "pending"
+                "grid": "verified",
+                "slider": "verified",
+                "list": "verified"
               }
             },
             {
@@ -29168,15 +29420,60 @@
                 "reachable": true
               },
               "closingTask": 177,
-              "fields": [],
+              "fields": [
+                "style.image"
+              ],
               "availability": {
-                "grid": "pending",
-                "slider": "pending",
-                "list": "pending"
+                "grid": "verified",
+                "slider": "verified",
+                "list": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "team.framing.portrait",
+              "field": "portrait",
+              "document": "teamMember",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode",
+                "@/lib/sanity/image#urlFor"
+              ],
+              "render": "src/features/pages/components/sections/team/team-card.tsx",
+              "target": "section img",
+              "cases": [
+                "team.framing.portrait@grid",
+                "team.framing.portrait@slider"
+              ]
+            },
+            {
+              "id": "team.framing.portrait.list",
+              "field": "portrait",
+              "document": "teamMember",
+              "resolvers": [
+                "@/lib/sanity/image#urlFor"
+              ],
+              "render": "src/components/ui/profile-image.tsx",
+              "target": "section img",
+              "cases": [
+                "team.framing.portrait.list@list"
+              ]
+            },
+            {
+              "id": "team.background.section",
+              "field": "style.image",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-image]",
+              "cases": [
+                "team.background.section@grid",
+                "team.background.section@slider",
+                "team.background.section@list"
+              ]
+            }
+          ]
         },
         "pictureDepth": {
           "policies": [
@@ -30459,14 +30756,30 @@
                 "reachable": true
               },
               "closingTask": 177,
-              "fields": [],
+              "fields": [
+                "style.image"
+              ],
               "availability": {
-                "embed": "pending",
-                "ambient": "pending"
+                "embed": "verified",
+                "ambient": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "video.background.section",
+              "field": "style.image",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-image]",
+              "cases": [
+                "video.background.section@embed",
+                "video.background.section@ambient"
+              ]
+            }
+          ]
         },
         "pictureDepth": {
           "notApplicable": "Has no framed picture"
@@ -32445,14 +32758,30 @@
                 "reachable": true
               },
               "closingTask": 177,
-              "fields": [],
+              "fields": [
+                "style.image"
+              ],
               "availability": {
-                "vertical": "pending",
-                "alternating": "pending"
+                "vertical": "verified",
+                "alternating": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "process.background.section",
+              "field": "style.image",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-image]",
+              "cases": [
+                "process.background.section@vertical",
+                "process.background.section@alternating"
+              ]
+            }
+          ]
         },
         "pictureDepth": {
           "notApplicable": "Has no framed picture"
@@ -33889,11 +34218,26 @@
                 "reachable": true
               },
               "closingTask": 177,
-              "fields": [],
-              "availability": "pending"
+              "fields": [
+                "style.image"
+              ],
+              "availability": "verified"
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "embed.background.section",
+              "field": "style.image",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-image]",
+              "cases": [
+                "embed.background.section"
+              ]
+            }
+          ]
         },
         "pictureDepth": {
           "notApplicable": "Has no framed picture"
@@ -40492,16 +40836,33 @@
                 "reachable": true
               },
               "closingTask": 177,
-              "fields": [],
+              "fields": [
+                "style.image"
+              ],
               "availability": {
-                "stacked": "pending",
-                "cards": "pending",
-                "editorial": "pending",
-                "compact": "pending"
+                "stacked": "verified",
+                "cards": "verified",
+                "editorial": "verified",
+                "compact": "verified"
               }
             }
           ],
           "evidence": [
+            {
+              "id": "linkList.background.section",
+              "field": "style.image",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-image]",
+              "cases": [
+                "linkList.background.section@stacked",
+                "linkList.background.section@cards",
+                "linkList.background.section@editorial",
+                "linkList.background.section@compact"
+              ]
+            },
             {
               "id": "linkList.framing.profile",
               "field": "profile.image",
@@ -42867,7 +43228,7 @@
                 "agenda": {
                   "notApplicable": "Draws no event picture"
                 },
-                "featured": "pending"
+                "featured": "verified"
               }
             },
             {
@@ -42881,15 +43242,45 @@
                 "reachable": true
               },
               "closingTask": 177,
-              "fields": [],
+              "fields": [
+                "style.image"
+              ],
               "availability": {
-                "list": "pending",
-                "agenda": "pending",
-                "featured": "pending"
+                "list": "verified",
+                "agenda": "verified",
+                "featured": "verified"
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "events.framing.picture",
+              "field": "image",
+              "document": "event",
+              "resolvers": [
+                "@/lib/sanity/image#urlFor"
+              ],
+              "render": "src/features/pages/components/sections/events/featured.tsx",
+              "target": "section img",
+              "cases": [
+                "events.framing.picture@featured"
+              ]
+            },
+            {
+              "id": "events.background.section",
+              "field": "style.image",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode"
+              ],
+              "render": "src/components/ui/section-background.tsx",
+              "target": "[data-section-image]",
+              "cases": [
+                "events.background.section@list",
+                "events.background.section@agenda",
+                "events.background.section@featured"
+              ]
+            }
+          ]
         },
         "pictureDepth": {
           "policies": [
@@ -43160,6 +43551,7 @@
         "path": "image",
         "kind": "image",
         "required": null,
+        "capability": "framing",
         "clientEditable": false
       },
       {
@@ -45557,7 +45949,7 @@
               {
                 "policy": "required",
                 "scope": "card",
-                "closingTask": 177,
+                "closingTask": 178,
                 "fields": [],
                 "availability": "pending"
               }
@@ -46056,11 +46448,26 @@
                 "policy": "required",
                 "scope": "section",
                 "closingTask": 177,
-                "fields": [],
-                "availability": "pending"
+                "fields": [
+                  "member.portrait"
+                ],
+                "availability": "verified"
               }
             ],
-            "evidence": []
+            "evidence": [
+              {
+                "id": "teamMemberPage.framing.portrait",
+                "field": "member.portrait",
+                "resolvers": [
+                  "@/lib/sanity/image#urlFor"
+                ],
+                "render": "src/features/team/components/team-member-page.tsx",
+                "target": "article img",
+                "cases": [
+                  "teamMemberPage.framing.portrait"
+                ]
+              }
+            ]
           },
           "pictureDepth": {
             "notApplicable": "Not in the page’s planned design, which is icons, framing and dividers (build plan)"

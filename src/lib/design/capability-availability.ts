@@ -51,6 +51,9 @@ export const casesOf = (entry: Evidence): (string | null)[] =>
 
 const stateOf = (entry: Evidence) => applyPatch(applyPatch({}, entry.base), entry.probe)
 
+/** The schema an entry's field is in: the document's when the probe changes a document the section draws from. */
+const schemaOf = (entry: Evidence) => entry.document?.type ?? entry.component
+
 export interface AvailabilityCell {
   capability: CapabilityId
   scope: Scope | null
@@ -97,7 +100,7 @@ function shortfall(
   results: CaseResults | undefined,
   capability?: CapabilityId,
 ): string | undefined {
-  const field = gate.field(entry.component, entry.field)
+  const field = gate.field(schemaOf(entry), entry.field)
   if ('missing' in field) return field.missing
   if (capability && field.marker.capability !== capability) {
     return `${entry.field} isn't marked as ${capability}`
@@ -106,7 +109,12 @@ function shortfall(
   if (role && field.marker.role !== role) {
     return `${entry.field} isn't stamped for the ${role} role${field.marker.role ? ` (it is ${field.marker.role})` : ''}`
   }
-  const offered = gate.offered(entry.component, layout, entry.field, stateOf(entry))
+  const offered = gate.offered(
+    schemaOf(entry),
+    entry.document ? null : layout,
+    entry.field,
+    entry.document ? applyPatch({}, entry.probe) : stateOf(entry),
+  )
   if (!offered.offered) return offered.reason
   const result = results?.get(caseId(entry, layout))
   if (results && result !== 'changed') {
@@ -332,7 +340,7 @@ export function evidenceProblems(
       )
       continue
     }
-    const field = gate.field(entry.component, entry.field)
+    const field = gate.field(schemaOf(entry), entry.field)
     if ('missing' in field) {
       problem(
         `its field doesn't exist (${field.missing}).`,
@@ -410,7 +418,12 @@ export function evidenceProblems(
       continue
     }
     for (const layout of casesOf(entry)) {
-      const offered = gate.offered(entry.component, layout, entry.field, stateOf(entry))
+      const offered = gate.offered(
+        schemaOf(entry),
+        entry.document ? null : layout,
+        entry.field,
+        entry.document ? applyPatch({}, entry.probe) : stateOf(entry),
+      )
       if (!offered.offered) {
         problem(
           `the schema doesn't offer ${entry.field}${layout ? ` on ${layout}` : ''} (${offered.reason}).`,
@@ -715,6 +728,18 @@ export function changeRowProblems(changes: readonly BaselineChange[]): ContractP
         'A downgrade closes nothing: drop the task.',
       )
     }
+    if (row.kind === 'transfer' && (row.from === undefined || row.closingTask === undefined)) {
+      problem(
+        `${where}: a transfer names no old and new task.`,
+        'Name the task that owned the gap (`from`) and the one that owns it now (`closingTask`).',
+      )
+    }
+    if (row.kind === 'transfer' && row.from !== undefined && row.from === row.closingTask) {
+      problem(`${where}: a transfer names the same task twice.`, 'A transfer changes the owner.')
+    }
+    if (row.kind !== 'transfer' && row.from !== undefined) {
+      problem(`${where}: only a transfer names an old task.`, 'Drop `from`.')
+    }
   }
   return problems
 }
@@ -751,6 +776,22 @@ export function staleChangeProblems(
         } else if (row.closingTask !== undefined && row.closingTask !== hit.pair.closingTask) {
           stale(
             `${where}${on}: the admit row says task ${row.closingTask}, the baseline says task ${hit.pair.closingTask}.`,
+            'Make them agree.',
+          )
+        }
+      } else if (row.kind === 'transfer') {
+        const hit = [...listed.values()].find(
+          ({ pair, layout: listedLayout }) =>
+            listedLayout === layout && rowCovers(row, pair, layout),
+        )
+        if (!hit) {
+          stale(
+            `${where}${on}: a transfer row covers a gap the baseline doesn't list (it is closed, or never pending).`,
+            'Delete the row from capability-baseline-changes.ts.',
+          )
+        } else if (row.closingTask !== hit.pair.closingTask) {
+          stale(
+            `${where}${on}: the transfer row says task ${row.closingTask ?? 'none'}, the baseline says task ${hit.pair.closingTask}.`,
             'Make them agree.',
           )
         }
@@ -827,6 +868,28 @@ export function baselineIntegrityProblems({
       capability: pair.capability,
       message: `${describePair(pair, layout, policy)} is in the baseline now and wasn't on the base commit, and no admit row covers it.`,
       fix: 'A gap is never added by hand. Add evidence for it, or, if it genuinely cannot close in this task, add a reviewed admit row (src/lib/design/capability-baseline-changes.ts) with the reason and the task that closes it.',
+    })
+  }
+  for (const [key, was] of before) {
+    const now = after.get(key)
+    if (!now || !components.includes(now.pair.component)) continue
+    if (was.pair.closingTask === now.pair.closingTask) continue
+    if (
+      changes.some(
+        (row) =>
+          row.kind === 'transfer' &&
+          rowCovers(row, now.pair, now.layout) &&
+          row.from === was.pair.closingTask &&
+          row.closingTask === now.pair.closingTask,
+      )
+    ) {
+      continue
+    }
+    problems.push({
+      component: now.pair.component,
+      capability: now.pair.capability,
+      message: `${describePair(now.pair, now.layout, now.policy)} was owned by task ${was.pair.closingTask} on the base commit and is owned by task ${now.pair.closingTask} now, and no transfer row covers it.`,
+      fix: 'A gap changes owner by a decision. Add a reviewed transfer row (src/lib/design/capability-baseline-changes.ts) with the reason, the old task (`from`) and the new one (`closingTask`), or restore the task.',
     })
   }
   for (const [key, { pair, layout, policy }] of before) {

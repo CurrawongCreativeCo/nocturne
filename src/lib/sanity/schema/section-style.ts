@@ -105,7 +105,8 @@ import { fetchBrandColours } from './brand-colours'
 import { fetchBrandGradientState, gradientFieldWarning } from './brand-gradients'
 import { builtBy, builtOptions } from './capability-marker'
 import { faintLayerWarning, uncheckedSceneNote } from './edge-visibility-validation'
-import { imageField } from './image-field'
+import { imageField, imageOptions } from './image-field'
+import { framing } from './image-framing-option'
 import { presetField } from './preset-field'
 import {
   alignmentHidden,
@@ -510,6 +511,8 @@ export const sectionStyle = defineType({
       requireAlt: false,
       minWidth: 2000,
       orientation: 'landscape',
+      // Focus mode (task 177): the picture covers the section, so only its hotspot applies.
+      options: { ...imageOptions, ...framing('sectionBackground') },
       // The hero has its own Image.
       hidden: backgroundImageHidden,
       validation: (rule) =>

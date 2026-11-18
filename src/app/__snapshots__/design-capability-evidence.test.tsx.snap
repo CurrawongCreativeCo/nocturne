@@ -53,6 +53,12 @@ exports[`design capability evidence > blogPostCards.text.card.title: the probe c
 
 exports[`design capability evidence > ctaBanner.action.item: the probe changes the registered target 1`] = `[]`;
 
+exports[`design capability evidence > ctaBanner.background.section: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
 exports[`design capability evidence > ctaBanner.depth.card: the probe changes the registered target 1`] = `
 [
   "<div class="rounded-panel px-8 py-section-compact shadow-(--card-depth,0_0_#0000) text-ink sm:px-16 text-center" data-tone="accent">",
@@ -96,6 +102,12 @@ exports[`design capability evidence > ctaBanner.motion.section: the probe change
 exports[`design capability evidence > ctaBanner.overlay.section: the probe changes the registered target 1`] = `
 [
   "f501d402d038b60f (452 characters)",
+]
+`;
+
+exports[`design capability evidence > embed.background.section: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
 ]
 `;
 
@@ -166,6 +178,24 @@ exports[`design capability evidence > events.action.card@list: the probe changes
 ]
 `;
 
+exports[`design capability evidence > events.background.section@agenda: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
+exports[`design capability evidence > events.background.section@featured: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
+exports[`design capability evidence > events.background.section@list: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
 exports[`design capability evidence > events.depth.card@featured: the probe changes the registered target 1`] = `
 [
   "<article class="relative flex flex-col overflow-hidden rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line">",
@@ -193,6 +223,12 @@ exports[`design capability evidence > events.edge.section@featured: the probe ch
 exports[`design capability evidence > events.edge.section@list: the probe changes the registered target 1`] = `
 [
   "<body>",
+]
+`;
+
+exports[`design capability evidence > events.framing.picture@featured: the probe changes the registered target 1`] = `
+[
+  "4fac81e7e02716e1 (231 characters)",
 ]
 `;
 
@@ -406,6 +442,12 @@ exports[`design capability evidence > events.text.card.title@list: the probe cha
 ]
 `;
 
+exports[`design capability evidence > faq.background.section: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
 exports[`design capability evidence > faq.depth.card.cards: the probe changes the registered target 1`] = `
 [
   "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line">",
@@ -496,6 +538,12 @@ exports[`design capability evidence > faq.text.card.divided.title: the probe cha
 ]
 `;
 
+exports[`design capability evidence > featuresGrid.background.section: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
 exports[`design capability evidence > featuresGrid.divider.section: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > featuresGrid.edge.section: the probe changes the registered target 1`] = `
@@ -548,6 +596,12 @@ exports[`design capability evidence > featuresGrid.overlay.section: the probe ch
 ]
 `;
 
+exports[`design capability evidence > formSection.background.section: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
 exports[`design capability evidence > formSection.depth.card: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > formSection.divider.section: the probe changes the registered target 1`] = `[]`;
@@ -597,6 +651,24 @@ exports[`design capability evidence > formSection.overlay.section: the probe cha
 `;
 
 exports[`design capability evidence > formSection.surface.card: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > gallery.background.section@grid: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
+exports[`design capability evidence > gallery.background.section@masonry: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
+exports[`design capability evidence > gallery.background.section@slider: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
 
 exports[`design capability evidence > gallery.divider.section@grid: the probe changes the registered target 1`] = `[]`;
 
@@ -835,6 +907,54 @@ exports[`design capability evidence > hero.edge.section@split: the probe changes
 ]
 `;
 
+exports[`design capability evidence > hero.framing.background.entrance@full-b…: the probe changes the registered target 1`] = `
+[
+  "167296ef366cde09 (154 characters)",
+]
+`;
+
+exports[`design capability evidence > hero.framing.background.entrance@overlay: the probe changes the registered target 1`] = `
+[
+  "dab8fa3a678b7e41 (165 characters)",
+]
+`;
+
+exports[`design capability evidence > hero.framing.background.float@full-bleed: the probe changes the registered target 1`] = `
+[
+  "167296ef366cde09 (154 characters)",
+]
+`;
+
+exports[`design capability evidence > hero.framing.background.float@overlay: the probe changes the registered target 1`] = `
+[
+  "dab8fa3a678b7e41 (165 characters)",
+]
+`;
+
+exports[`design capability evidence > hero.framing.background.parallax@full-b…: the probe changes the registered target 1`] = `
+[
+  "167296ef366cde09 (154 characters)",
+]
+`;
+
+exports[`design capability evidence > hero.framing.background.parallax@overlay: the probe changes the registered target 1`] = `
+[
+  "dab8fa3a678b7e41 (165 characters)",
+]
+`;
+
+exports[`design capability evidence > hero.framing.background@full-bleed: the probe changes the registered target 1`] = `
+[
+  "60eb34a470469263 (160 characters)",
+]
+`;
+
+exports[`design capability evidence > hero.framing.background@overlay: the probe changes the registered target 1`] = `
+[
+  "1f6e8fabb686135d (171 characters)",
+]
+`;
+
 exports[`design capability evidence > hero.framing.picture@split: the probe changes the registered target 1`] = `
 [
   "58c272795a44476b (731 characters)",
@@ -944,6 +1064,30 @@ exports[`design capability evidence > linkList.action.item@stacked: the probe ch
 [
   "376ea83169d0a2e5 (1252 characters)",
   "71fe2c96ebb168ea (1252 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.background.section@cards: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.background.section@compact: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.background.section@editorial: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
+exports[`design capability evidence > linkList.background.section@stacked: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
 ]
 `;
 
@@ -1524,6 +1668,12 @@ exports[`design capability evidence > linkList.text.item.label@stacked: the prob
 ]
 `;
 
+exports[`design capability evidence > location.background.section: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
 exports[`design capability evidence > location.depth.card.cards: the probe changes the registered target 1`] = `
 [
   "<div class="rounded-card bg-surface-alt p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line border-t-4 border-accent">",
@@ -1638,6 +1788,18 @@ exports[`design capability evidence > location.text.card.picture.title: the prob
 ]
 `;
 
+exports[`design capability evidence > logoCloud.background.section@grid: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
+exports[`design capability evidence > logoCloud.background.section@marquee: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
 exports[`design capability evidence > logoCloud.divider.section@grid: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > logoCloud.divider.section@marquee: the probe changes the registered target 1`] = `[]`;
@@ -1735,6 +1897,18 @@ exports[`design capability evidence > mediaText.action.item@overlay: the probe c
 exports[`design capability evidence > mediaText.action.item@side: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > mediaText.action.item@stacked: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > mediaText.background.section@side: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
+exports[`design capability evidence > mediaText.background.section@stacked: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
 
 exports[`design capability evidence > mediaText.divider.section@overlay: the probe changes the registered target 1`] = `[]`;
 
@@ -1910,6 +2084,12 @@ exports[`design capability evidence > mediaText.slots.supporting@side: the probe
 
 exports[`design capability evidence > mediaText.slots.supporting@stacked: the probe changes the registered target 1`] = `[]`;
 
+exports[`design capability evidence > newsletterSignup.background.section: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
 exports[`design capability evidence > newsletterSignup.depth.card: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > newsletterSignup.divider.section: the probe changes the registered target 1`] = `[]`;
@@ -1959,6 +2139,12 @@ exports[`design capability evidence > newsletterSignup.overlay.section: the prob
 `;
 
 exports[`design capability evidence > newsletterSignup.surface.card: the probe changes the registered target 1`] = `[]`;
+
+exports[`design capability evidence > pricingTable.background.section: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
 
 exports[`design capability evidence > pricingTable.depth.card: the probe changes the registered target 1`] = `
 [
@@ -2110,6 +2296,18 @@ exports[`design capability evidence > pricingTable.text.item.title: the probe ch
 ]
 `;
 
+exports[`design capability evidence > process.background.section@alternating: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
+exports[`design capability evidence > process.background.section@vertical: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
 exports[`design capability evidence > process.divider.section@alternating: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > process.divider.section@vertical: the probe changes the registered target 1`] = `[]`;
@@ -2258,6 +2456,12 @@ exports[`design capability evidence > process.text.card.title@vertical: the prob
 ]
 `;
 
+exports[`design capability evidence > richText.background.section: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
 exports[`design capability evidence > richText.divider.section: the probe changes the registered target 1`] = `[]`;
 
 exports[`design capability evidence > richText.edge.section: the probe changes the registered target 1`] = `
@@ -2299,6 +2503,18 @@ exports[`design capability evidence > slotImage.framing.item: the probe changes 
   "e61791b66c9b17de (243 characters)",
   "56bb4cba03cb04c1 (246 characters)",
   "eadb6639ea7fedfa (196 characters)",
+]
+`;
+
+exports[`design capability evidence > stats.background.section@cards: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
+exports[`design capability evidence > stats.background.section@inline: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
 ]
 `;
 
@@ -2438,6 +2654,24 @@ exports[`design capability evidence > team.action.card@list: the probe changes t
 
 exports[`design capability evidence > team.action.card@slider: the probe changes the registered target 1`] = `[]`;
 
+exports[`design capability evidence > team.background.section@grid: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
+exports[`design capability evidence > team.background.section@list: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
+exports[`design capability evidence > team.background.section@slider: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
 exports[`design capability evidence > team.depth.card@grid: the probe changes the registered target 1`] = `
 [
   "<div class="relative rounded-card bg-surface shadow-(--card-depth,var(--shadow-card)) ring-1 ring-line flex h-full w-full flex-col overflow-hidden">",
@@ -2485,6 +2719,31 @@ exports[`design capability evidence > team.edge.section@slider: the probe change
 [
   "<body>",
   "<div class="mx-auto w-full max-w-content" data-reveal="" style="opacity:0;transform:translateY(24px)">",
+]
+`;
+
+exports[`design capability evidence > team.framing.portrait.list@list: the probe changes the registered target 1`] = `
+[
+  "4766dfd5e5945707 (248 characters)",
+  "4766dfd5e5945707 (248 characters)",
+  "4766dfd5e5945707 (248 characters)",
+  "9ea9623bd554e978 (249 characters)",
+]
+`;
+
+exports[`design capability evidence > team.framing.portrait@grid: the probe changes the registered target 1`] = `
+[
+  "8b04d0658261d5db (231 characters)",
+  "8b04d0658261d5db (231 characters)",
+  "8b04d0658261d5db (231 characters)",
+  "cc9c3b6fc032c24e (232 characters)",
+]
+`;
+
+exports[`design capability evidence > team.framing.portrait@slider: the probe changes the registered target 1`] = `
+[
+  "cc9c3b6fc032c24e (232 characters)",
+  "8b04d0658261d5db (231 characters)",
 ]
 `;
 
@@ -2737,10 +2996,28 @@ exports[`design capability evidence > team.text.card.title@slider: the probe cha
 
 exports[`design capability evidence > teamMemberPage.divider.section: the probe changes the registered target 1`] = `[]`;
 
+exports[`design capability evidence > teamMemberPage.framing.portrait: the probe changes the registered target 1`] = `
+[
+  "b0f440d7abad6280 (267 characters)",
+]
+`;
+
 exports[`design capability evidence > teamMemberPage.icon.section: the probe changes the registered target 1`] = `
 [
   "<a aria-label="Ann Lee on LinkedIn" class="inline-flex items-center justify-center transition-colors duration-(--duration-fast) motion-reduce:transition-none size-11 rounded-full bg-surface hover:bg-surface-alt ring-1 ring-inset ring-line text-ink shadow-card" href="https://www.linkedin.com/in/ann-lee-example" rel="noopener">",
   "<a aria-label="Ann Lee on Instagram" class="inline-flex items-center justify-center transition-colors duration-(--duration-fast) motion-reduce:transition-none size-11 rounded-full bg-surface hover:bg-surface-alt ring-1 ring-inset ring-line text-ink shadow-card" href="https://www.instagram.com/ann-lee-example" rel="noopener">",
+]
+`;
+
+exports[`design capability evidence > testimonials.background.section@grid: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
+exports[`design capability evidence > testimonials.background.section@slider: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
 ]
 `;
 
@@ -2944,6 +3221,18 @@ exports[`design capability evidence > testimonials.text.card.quote@grid: the pro
 exports[`design capability evidence > testimonials.text.card.quote@slider: the probe changes the registered target 1`] = `
 [
   "<blockquote class="flex-1 text-lead text-pretty text-ink [&>p+p]:mt-[0.75em]" data-text-role="quote">",
+]
+`;
+
+exports[`design capability evidence > video.background.section@ambient: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
+]
+`;
+
+exports[`design capability evidence > video.background.section@embed: the probe changes the registered target 1`] = `
+[
+  "3adc2a148b6c1119 (217 characters)",
 ]
 `;
 

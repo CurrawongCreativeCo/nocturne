@@ -10,6 +10,9 @@ import type { CapabilityId, Scope, TaskNumber, TextRole } from './capabilities'
  *   applies; a gap it can't close in its own task is admitted with the task that will close it.
  * - `downgrade`: a pair leaves the baseline without being verified, because the policy now says Not
  *   applicable. The reason says why the component never needed it.
+ * - `transfer`: a pair stays pending, and the task that closes it changes (`from` to `closingTask`). A
+ *   different owner is a decision, so it is recorded and reviewed like the others: a baseline whose
+ *   `closingTask` differs from the base commit's without a row here fails.
  *
  * A pair that leaves because it became Verified needs no row: evidence is what verifies it. CI compares
  * the baseline with the one on the base commit (`npm run design-capabilities -- --against-file`), and
@@ -17,7 +20,7 @@ import type { CapabilityId, Scope, TaskNumber, TextRole } from './capabilities'
  * a row is deleted when its gap closes.
  */
 export interface BaselineChange {
-  kind: 'admit' | 'downgrade'
+  kind: 'admit' | 'downgrade' | 'transfer'
   component: string
   capability: CapabilityId
   scope: Scope
@@ -31,8 +34,10 @@ export interface BaselineChange {
   reviewer: string
   /** When the reviewer approved it (YYYY-MM-DD). */
   reviewed: string
-  /** `admit` only: the task that closes the gap. It must match the baseline's. */
+  /** `admit` and `transfer`: the task that closes the gap. It must match the baseline's. */
   closingTask?: TaskNumber
+  /** `transfer` only: the task that owned the gap on the base commit. */
+  from?: TaskNumber
 }
 
 /**
@@ -66,18 +71,6 @@ const viewText = (
 export const BASELINE_CHANGES: readonly BaselineChange[] = [
   // Task 158 declares the site footer and the team member page as views. Each gap below is a capability
   // another task owns, admitted when the view enters the contract. Owner decision, 8 November 2026.
-  {
-    kind: 'admit',
-    component: 'teamMemberPage',
-    capability: 'framing',
-    scope: 'section',
-    layouts: [null],
-    reason:
-      'The portrait is cropped to a fixed square. Framing it is task 177’s, which gives the page a design to store the frame in.',
-    reviewer: 'owner',
-    reviewed: '2026-11-08',
-    closingTask: 177,
-  },
   {
     ...VIEW_ROW,
     component: 'eventDetailsCard',
@@ -160,5 +153,19 @@ export const BASELINE_CHANGES: readonly BaselineChange[] = [
       'Fixed-tile framing does not apply: Masonry keeps each picture’s own proportions, so there is no fixed tile to reposition it within. A crop saved on the picture still applies there.',
     reviewer: 'CurrawongCreativeCo',
     reviewed: '2026-11-18',
+  },
+  // Task 177 hands the Blog main image to Task 178. Owner decision, 18 November 2026.
+  {
+    kind: 'transfer',
+    component: 'blogPostCards',
+    capability: 'framing',
+    scope: 'card',
+    layouts: [null],
+    reason:
+      'The post card draws the main image at 16:9 and the post page draws it at its own proportions, so one framing cannot serve both. Placement-specific framing is Task 178’s; the current crop behaviour on both is unchanged and the gap stays Pending.',
+    reviewer: 'CurrawongCreativeCo',
+    reviewed: '2026-11-18',
+    from: 177,
+    closingTask: 178,
   },
 ]
