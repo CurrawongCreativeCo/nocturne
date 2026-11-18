@@ -52,14 +52,6 @@
     },
     {
       "component": "hero",
-      "capability": "framing",
-      "scope": "section",
-      "part": "picture",
-      "layouts": ["split"],
-      "closingTask": 177
-    },
-    {
-      "component": "hero",
       "capability": "overlay",
       "scope": "section",
       "layouts": ["overlay", "full-bleed"],
@@ -88,14 +80,6 @@
       "role": "body",
       "layouts": [null],
       "closingTask": 276
-    },
-    {
-      "component": "testimonials",
-      "capability": "framing",
-      "scope": "card",
-      "part": "avatar",
-      "layouts": ["grid", "slider"],
-      "closingTask": 177
     },
     {
       "component": "ctaBanner",
@@ -132,13 +116,6 @@
       "scope": "card",
       "part": "picture",
       "layouts": ["featured"],
-      "closingTask": 177
-    },
-    {
-      "component": "slotImage",
-      "capability": "framing",
-      "scope": "item",
-      "layouts": [null],
       "closingTask": 177
     },
     {

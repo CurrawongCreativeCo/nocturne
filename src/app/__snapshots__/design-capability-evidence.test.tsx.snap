@@ -835,6 +835,12 @@ exports[`design capability evidence > hero.edge.section@split: the probe changes
 ]
 `;
 
+exports[`design capability evidence > hero.framing.picture@split: the probe changes the registered target 1`] = `
+[
+  "58c272795a44476b (731 characters)",
+]
+`;
+
 exports[`design capability evidence > hero.glass.section@editorial: the probe changes the registered target 1`] = `
 [
   "<div class="mx-auto w-full max-w-content grid items-end gap-12 lg:gap-20">",
@@ -1754,6 +1760,18 @@ exports[`design capability evidence > mediaText.edge.section@stacked: the probe 
 ]
 `;
 
+exports[`design capability evidence > mediaText.framing.picture@side: the probe changes the registered target 1`] = `
+[
+  "4008490c03edfa1d (701 characters)",
+]
+`;
+
+exports[`design capability evidence > mediaText.framing.picture@stacked: the probe changes the registered target 1`] = `
+[
+  "079c879a75b4ba95 (701 characters)",
+]
+`;
+
 exports[`design capability evidence > mediaText.glass.section@overlay: the probe changes the registered target 1`] = `
 [
   "<div class="mx-auto w-full max-w-content" data-reveal="" style="opacity:0;transform:translateY(24px)">",
@@ -2276,6 +2294,14 @@ exports[`design capability evidence > siteFooter.icon.section: the probe changes
 ]
 `;
 
+exports[`design capability evidence > slotImage.framing.item: the probe changes the registered target 1`] = `
+[
+  "e61791b66c9b17de (243 characters)",
+  "56bb4cba03cb04c1 (246 characters)",
+  "eadb6639ea7fedfa (196 characters)",
+]
+`;
+
 exports[`design capability evidence > stats.depth.card@cards: the probe changes the registered target 1`] = `
 [
   "<li class="rounded-card border-t-4 border-accent bg-surface-alt p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line text-center">",
@@ -2549,19 +2575,19 @@ exports[`design capability evidence > team.mark.section@slider: the probe change
 
 exports[`design capability evidence > team.motion.section@grid: the probe changes the registered target 1`] = `
 [
-  "2db2259c29848162 (3208 characters)",
+  "9bf7f1ab906eca13 (3209 characters)",
 ]
 `;
 
 exports[`design capability evidence > team.motion.section@list: the probe changes the registered target 1`] = `
 [
-  "f77267dfe3f746fa (3375 characters)",
+  "3ceb43058722b08a (3376 characters)",
 ]
 `;
 
 exports[`design capability evidence > team.motion.section@slider: the probe changes the registered target 1`] = `
 [
-  "bd7d05c5c24587a7 (2805 characters)",
+  "e42a2ea09eea6f3d (2806 characters)",
   "194d073417972434 (61 characters)",
 ]
 `;
@@ -2589,13 +2615,13 @@ exports[`design capability evidence > team.pictureDepth.card@grid: the probe cha
   "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
   "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
   "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
-  "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
+  "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=144,63,504,504&w=600&h=600&fit=crop&auto=format">",
 ]
 `;
 
 exports[`design capability evidence > team.pictureDepth.card@slider: the probe changes the registered target 1`] = `
 [
-  "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
+  "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=144,63,504,504&w=600&h=600&fit=crop&auto=format">",
   "<img alt="" class="w-full object-cover aspect-square" src="https://cdn.sanity.io/images/e2etest1/production/0123456789abcdef0123456789abcdef01234567-1200x630.png?rect=285,0,630,630&w=600&h=600&fit=crop&auto=format">",
 ]
 `;
@@ -2744,6 +2770,18 @@ exports[`design capability evidence > testimonials.edge.section@slider: the prob
 [
   "<body>",
   "<div class="mx-auto w-full max-w-content" data-reveal="" style="opacity:0;transform:translateY(24px)">",
+]
+`;
+
+exports[`design capability evidence > testimonials.framing.avatar@grid: the probe changes the registered target 1`] = `
+[
+  "78a7acba0a617a37 (305 characters)",
+]
+`;
+
+exports[`design capability evidence > testimonials.framing.avatar@slider: the probe changes the registered target 1`] = `
+[
+  "78a7acba0a617a37 (305 characters)",
 ]
 `;
 

@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
-import { chooseMedia, drawnSplitLayout, splitLayout, videoHasSource } from './split-layout'
+import { FRAMING_RESOLVERS } from '@/lib/sanity/image-frame-geometry'
+
+import {
+  SPLIT_LAYOUTS,
+  chooseMedia,
+  drawnSplitLayout,
+  splitLayout,
+  videoHasSource,
+} from './split-layout'
 
 describe('splitLayout', () => {
   it('is side by side when unset, as before layouts existed', () => {
@@ -62,5 +70,17 @@ describe('videoHasSource', () => {
     expect(videoHasSource({ source: 'vimeo' })).toBe(false)
     expect(videoHasSource({ source: 'upload', url: 'https://youtu.be/x' })).toBe(false)
     expect(videoHasSource({ source: 'upload', fileUrl: 'https://cdn/x.mp4' })).toBe(true)
+  })
+})
+
+describe('Adjust picture reads the stored layouts as this module does (task 177)', () => {
+  it('reads the stored layouts as split-layout.ts does', () => {
+    const { resolve } = FRAMING_RESOLVERS.mediaTextImage
+    for (const variant of [...SPLIT_LAYOUTS, 'unknown-later-layout', undefined]) {
+      const layout = splitLayout(variant)
+      const shapes = resolve({ variant })
+      if (layout === 'overlay') expect(shapes).toEqual([])
+      else expect(shapes[0]?.aspect).toBe(layout === 'stacked' ? 16 / 9 : 4 / 3)
+    }
   })
 })

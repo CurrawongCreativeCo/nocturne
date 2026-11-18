@@ -109,6 +109,13 @@ export function aspectClass(value: string | null | undefined): string {
   return (ASPECT_RATIOS.find((ratio) => ratio.value === value) ?? ASPECT_RATIOS[0]).className
 }
 
+/** The frame's ratio as a number (width over height) for a stored value; unset or unknown is 16:9. */
+export function aspectNumber(value: string | null | undefined): number {
+  const { value: ratio } = ASPECT_RATIOS.find((each) => each.value === value) ?? ASPECT_RATIOS[0]
+  const [width = 16, height = 9] = ratio.split(':').map(Number)
+  return width / height
+}
+
 /** "2.4 MB" for the over-5-MB warning. */
 export function formatMegabytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`

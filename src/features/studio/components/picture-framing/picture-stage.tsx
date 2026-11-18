@@ -6,12 +6,13 @@ import type { FrameShape } from '@/lib/sanity/image-frame-geometry'
 import type { AssetSize, FramingContext, FramingState } from '@/lib/sanity/image-framing'
 
 import {
-  alsoShownOutline,
+  alsoShownLayout,
   cornerRadius,
   pictureStyle,
   shapeBox,
   shapeBoxStyle,
   STAGE_INSTRUCTIONS,
+  type PendingFraming,
 } from './shape-style'
 import { useStageGestures } from './use-stage-gestures'
 
@@ -27,6 +28,8 @@ export interface PictureStageProps {
   previewUrl: string
   lqip?: string
   state: FramingState
+  /** What Apply would store now: the other shapes are drawn from it, as their renderers draw them. */
+  pending?: PendingFraming
   context: FramingContext
   onChange: (next: FramingState) => void
   onReset: () => void
@@ -46,6 +49,7 @@ export function PictureStage({
   previewUrl,
   lqip,
   state,
+  pending,
   context,
   onChange,
   onReset,
@@ -65,8 +69,10 @@ export function PictureStage({
     stageRef,
   })
 
-  const box = shapeBox(main.aspect, main.insetPct)
-  const boxStyle = shapeBoxStyle(main.aspect, main.insetPct)
+  // The main shape is as large as keeps every other shape's outline on the stage.
+  const alsoShown = alsoShownLayout({ asset: size, main, state, pending, others })
+  const box = shapeBox(main.aspect, main.insetPct, alsoShown.sharePct)
+  const boxStyle = shapeBoxStyle(main.aspect, main.insetPct, alsoShown.sharePct)
   const radius = cornerRadius(main)
   const picture: CSSProperties = {
     ...pictureStyle(size, main.aspect, state),
@@ -165,31 +171,29 @@ export function PictureStage({
             }}
           />
         ) : null}
-        {others.map((other) => {
-          const outline = alsoShownOutline(main, other)
+        {others.map((other, index) => {
+          const outline = alsoShown.outlines[index]
+          if (!outline) return null
+          const { area } = outline
           return (
             <div
               key={other.label}
               aria-hidden="true"
               data-picture-also=""
+              data-picture-also-area={`${area.left},${area.top},${area.width},${area.height}`}
               style={{
-                ...boxStyle,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                position: 'absolute',
+                left: `${outline.left}%`,
+                top: `${outline.top}%`,
+                width: `${outline.width}%`,
+                height: `${outline.height}%`,
+                borderRadius: cornerRadius(other),
+                border: '1px dashed var(--card-bg-color)',
+                boxShadow: '0 0 0 1px var(--card-fg-color)',
+                boxSizing: 'border-box',
                 pointerEvents: 'none',
               }}
-            >
-              <div
-                style={{
-                  width: `${outline.width}%`,
-                  height: `${outline.height}%`,
-                  borderRadius: cornerRadius(other),
-                  border: '1px dashed var(--card-bg-color)',
-                  boxShadow: '0 0 0 1px var(--card-fg-color)',
-                }}
-              />
-            </div>
+            />
           )
         })}
       </div>

@@ -5,12 +5,14 @@ import { SanityImage } from '@/components/ui/sanity-image'
 import {
   PROVIDER_NAMES,
   aspectClass,
+  aspectNumber,
   embedUrl,
   parseVideoUrl,
   watchUrl,
 } from '@/features/pages/utils/video-source'
 import { urlFor } from '@/lib/sanity/image'
 import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
+import { isFramed } from '@/lib/sanity/image-framing'
 
 import { LazyFacade } from '../lazy-facade'
 
@@ -54,14 +56,20 @@ export function VideoFrame({
 }: Props) {
   const source = stegaClean(storedSource) ?? 'youtube'
   const frameClass = `${FRAME} ${aspectClass(stegaClean(aspectRatio))}`
+  // "Adjust picture" (task 177): a poster with a stored crop or hotspot is served as exactly the area the
+  // editor shows, at the frame's ratio; one with neither keeps today's URL and CSS position.
+  const placement = isFramed(stegaClean(poster))
+    ? { aspect: aspectNumber(stegaClean(aspectRatio)) }
+    : undefined
   const image = (
     <SanityImage
       image={poster}
       fill
+      placement={placement}
       preload={preload}
       sizes={sizes}
       className="object-cover"
-      style={{ objectPosition: hotspotObjectPosition(poster) }}
+      style={{ objectPosition: placement ? undefined : hotspotObjectPosition(poster) }}
     />
   )
 

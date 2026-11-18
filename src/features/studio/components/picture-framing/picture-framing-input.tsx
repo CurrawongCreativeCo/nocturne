@@ -3,11 +3,13 @@ import { Stack } from '@sanity/ui'
 import { useEffect, useMemo, useState } from 'react'
 import { useClient, useFormValue, type ObjectInputProps, type Path } from 'sanity'
 
-import { FRAMING_RESOLVERS } from '@/lib/sanity/image-frame-geometry'
-import { assetSizeFromId } from '@/lib/sanity/image-framing'
+import { FRAMING_RESOLVERS, wholeNoteFor } from '@/lib/sanity/image-frame-geometry'
+import { assetSizeFromId, type Crop } from '@/lib/sanity/image-framing'
 import { framingKeyOf } from '@/lib/sanity/schema/image-framing-option'
 
 import type { PictureSource } from './adjust-picture-dialog'
+import type { FocusSource } from './focus-picture-dialog'
+import { PictureFocus } from './picture-focus'
 import { PictureFraming } from './picture-framing'
 
 const API_VERSION = '2025-01-01'
@@ -77,6 +79,8 @@ export function PictureFramingInput(props: ObjectInputProps) {
     () => resolver?.resolve(design, frameUrl, path) ?? [],
     [resolver, design, frameUrl, path],
   )
+  // A picture that covers its background has Focus mode, not a shape to adjust.
+  const focusPlan = useMemo(() => resolver?.focus?.(design), [resolver, design])
 
   const client = useClient({ apiVersion: API_VERSION })
   const assetId = (value as { asset?: { _ref?: string } } | undefined)?.asset?._ref
@@ -96,6 +100,40 @@ export function PictureFramingInput(props: ObjectInputProps) {
     return { size, previewUrl, lqip }
   }, [assetId, client, lqip])
 
+  // Focus mode previews the picture as the page serves it: cut to the stored crop, never the hotspot.
+  const crop = (value as { crop?: Partial<Crop> | null } | undefined)?.crop
+  const focusSource = useMemo<FocusSource | undefined>(() => {
+    const size = assetSizeFromId(assetId)
+    if (!assetId || !size) return undefined
+    const { projectId, dataset } = client.config()
+    if (!projectId || !dataset) return undefined
+    const width = 1 - (crop?.left ?? 0) - (crop?.right ?? 0)
+    const height = 1 - (crop?.top ?? 0) - (crop?.bottom ?? 0)
+    if (width <= 0 || height <= 0) return undefined
+    const previewUrl = createImageUrlBuilder({ projectId, dataset })
+      .image({ asset: { _ref: assetId }, ...(crop ? { crop } : {}) })
+      .width(PREVIEW_WIDTH)
+      .fit('max')
+      .auto('format')
+      .url()
+    return { previewUrl, aspect: (size.width * width) / (size.height * height), lqip }
+  }, [assetId, client, lqip, crop])
+
+  if (focusPlan) {
+    return (
+      <Stack gap={3}>
+        {props.renderDefault(props)}
+        <PictureFocus
+          value={value}
+          plan={focusPlan}
+          source={focusSource}
+          readOnly={Boolean(readOnly)}
+          onChange={onChange}
+        />
+      </Stack>
+    )
+  }
+
   return (
     <Stack gap={3}>
       {props.renderDefault(props)}
@@ -105,7 +143,7 @@ export function PictureFramingInput(props: ObjectInputProps) {
         source={source}
         readOnly={Boolean(readOnly)}
         onChange={onChange}
-        wholeNote={resolver?.wholeNote}
+        wholeNote={wholeNoteFor(resolver, design)}
       />
     </Stack>
   )

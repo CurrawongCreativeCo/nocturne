@@ -579,6 +579,7 @@
               "path": "image",
               "kind": "image",
               "required": true,
+              "capability": "framing",
               "clientEditable": true
             },
             {
@@ -1613,6 +1614,7 @@
           "path": "backgroundImage",
           "kind": "image",
           "required": null,
+          "capability": "framing",
           "clientEditable": true
         },
         {
@@ -3297,12 +3299,14 @@
               "scope": "section",
               "part": "picture",
               "closingTask": 177,
-              "fields": [],
+              "fields": [
+                "backgroundImage"
+              ],
               "availability": {
                 "overlay": {
                   "notApplicable": "Its picture is the background: see the background part"
                 },
-                "split": "pending",
+                "split": "verified",
                 "editorial": {
                   "notApplicable": "Its small picture isn’t on task 177’s list; the split one is"
                 },
@@ -3335,7 +3339,22 @@
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "hero.framing.picture",
+              "field": "backgroundImage",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode",
+                "@/lib/sanity/image-framing#visibleArea",
+                "@/lib/sanity/image#urlFor"
+              ],
+              "render": "src/features/pages/components/sections/hero/hero-picture.tsx",
+              "target": "[data-framed-image]",
+              "cases": [
+                "hero.framing.picture@split"
+              ]
+            }
+          ]
         },
         "pictureDepth": {
           "policies": [
@@ -4132,6 +4151,7 @@
           "path": "media[slotImage].image",
           "kind": "image",
           "required": true,
+          "capability": "framing",
           "clientEditable": true
         },
         {
@@ -4321,6 +4341,7 @@
           "path": "image",
           "kind": "image",
           "required": null,
+          "capability": "framing",
           "clientEditable": true
         },
         {
@@ -5721,6 +5742,22 @@
         "framing": {
           "policies": [
             {
+              "policy": "required",
+              "scope": "section",
+              "part": "picture",
+              "closingTask": 177,
+              "fields": [
+                "media[slotImage].image"
+              ],
+              "availability": {
+                "side": "verified",
+                "stacked": "verified",
+                "overlay": {
+                  "notApplicable": "Its media is the background: see the background part"
+                }
+              }
+            },
+            {
               "policy": "conditional",
               "scope": "section",
               "part": "background",
@@ -5741,7 +5778,23 @@
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "mediaText.framing.picture",
+              "field": "media[slotImage].image",
+              "resolvers": [
+                "@/lib/sanity/image-framing#framingMode",
+                "@/lib/sanity/image-framing#visibleArea",
+                "@/lib/sanity/image#urlFor"
+              ],
+              "render": "src/features/pages/components/sections/media-text.tsx",
+              "target": "[data-framed-image]",
+              "cases": [
+                "mediaText.framing.picture@side",
+                "mediaText.framing.picture@stacked"
+              ]
+            }
+          ]
         },
         "pictureDepth": {
           "policies": [
@@ -8937,6 +8990,7 @@
           "path": "items[].avatar",
           "kind": "image",
           "required": null,
+          "capability": "framing",
           "clientEditable": true
         },
         {
@@ -11117,10 +11171,12 @@
               "scope": "card",
               "part": "avatar",
               "closingTask": 177,
-              "fields": [],
+              "fields": [
+                "items[].avatar"
+              ],
               "availability": {
-                "grid": "pending",
-                "slider": "pending"
+                "grid": "verified",
+                "slider": "verified"
               }
             },
             {
@@ -11141,7 +11197,21 @@
               }
             }
           ],
-          "evidence": []
+          "evidence": [
+            {
+              "id": "testimonials.framing.avatar",
+              "field": "items[].avatar",
+              "resolvers": [
+                "@/lib/sanity/image#urlFor"
+              ],
+              "render": "src/features/pages/components/sections/testimonials/quote-card.tsx",
+              "target": "[data-profile-image]",
+              "cases": [
+                "testimonials.framing.avatar@grid",
+                "testimonials.framing.avatar@slider"
+              ]
+            }
+          ]
         },
         "pictureDepth": {
           "policies": [
@@ -29427,6 +29497,7 @@
           "path": "poster",
           "kind": "image",
           "required": true,
+          "capability": "framing",
           "clientEditable": true
         },
         {
@@ -45200,11 +45271,26 @@
                 "policy": "required",
                 "scope": "item",
                 "closingTask": 177,
-                "fields": [],
-                "availability": "pending"
+                "fields": [
+                  "image"
+                ],
+                "availability": "verified"
               }
             ],
-            "evidence": []
+            "evidence": [
+              {
+                "id": "slotImage.framing.item",
+                "field": "image",
+                "resolvers": [
+                  "@/lib/sanity/image-framing#framingMode"
+                ],
+                "render": "src/features/pages/slots/render-slot.tsx",
+                "target": "img",
+                "cases": [
+                  "slotImage.framing.item"
+                ]
+              }
+            ]
           },
           "pictureDepth": {
             "notApplicable": "Framed by its host’s Image design (147 adopts it on Image + text)"

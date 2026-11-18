@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
+import { FRAMING_RESOLVERS } from '@/lib/sanity/image-frame-geometry'
+
 import {
+  ASPECT_RATIOS,
   ambientSizeProblem,
   aspectClass,
+  aspectNumber,
   embedUrl,
   formatMegabytes,
   parseVideoUrl,
@@ -127,5 +131,19 @@ describe('ambientSizeProblem', () => {
     expect(ambientSizeProblem(5 * 1024 * 1024)).toBeUndefined()
     expect(ambientSizeProblem(undefined)).toBeUndefined()
     expect(ambientSizeProblem(null)).toBeUndefined()
+  })
+})
+
+describe('the poster’s Adjust picture shape follows the frame’s Shape (task 177)', () => {
+  it('has the same ratio as the frame for every Shape, and 16:9 when unset', () => {
+    for (const { value } of ASPECT_RATIOS) {
+      const [shape] = FRAMING_RESOLVERS.videoPoster.resolve({
+        variant: 'embed',
+        aspectRatio: value,
+      })
+      expect(shape?.aspect, value).toBeCloseTo(aspectNumber(value), 9)
+    }
+    expect(aspectNumber(undefined)).toBeCloseTo(16 / 9, 9)
+    expect(FRAMING_RESOLVERS.videoPoster.resolve({})[0]?.aspect).toBeCloseTo(16 / 9, 9)
   })
 })

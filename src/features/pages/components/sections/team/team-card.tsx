@@ -192,6 +192,7 @@ export function TeamCard({
           sizes="(min-width: 1024px) 384px, (min-width: 640px) 50vw, 100vw"
           preload={eager}
           aspect="1/1"
+          framing
         />
       </div>
       <div className="flex flex-1 flex-col p-6">

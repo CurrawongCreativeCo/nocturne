@@ -3721,6 +3721,105 @@ documents.push({
 })
 
 /**
+ * "Adjust picture" on the other placements (task 177; tests/e2e/picture-framing-placements.spec.ts): the Hero
+ * Split picture, Image + text (Side and Stacked), the Video poster, a Team portrait and a Testimonials avatar, each
+ * with the crop and hotspot the editor stores (Team's is Dev Patel's portrait), and a sibling with nothing stored
+ * that must keep today's URL.
+ */
+const adjusted = (alt) => ({ ...image(alt), ...ADJUSTED_TILE })
+/** A crop of 10% off each side and a hotspot at x .3, y .7: a background position of 25% 70% (tests/e2e/picture-framing-placements.spec.ts). */
+export const FOCUSED = {
+  crop: { _type: 'sanity.imageCrop', top: 0, bottom: 0, left: 0.1, right: 0.1 },
+  hotspot: { _type: 'sanity.imageHotspot', x: 0.3, y: 0.7, width: 0.3, height: 0.3 },
+}
+const focusedPicture = (alt) => ({ ...image(alt), ...FOCUSED })
+documents.push({
+  _id: 'page-picture-framing-placements',
+  _type: 'page',
+  title: 'Picture framing, placements',
+  slug: { _type: 'slug', current: 'picture-framing-placements' },
+  seo: { _type: 'seo', noIndex: true },
+  pageBuilder: [
+    galleryHero('frame-p-hero', {
+      variant: 'split',
+      title: 'Placement hero adjusted',
+      ctas: [],
+      backgroundImage: adjusted('Hero picture'),
+    }),
+    galleryHero('frame-p-hero-plain', {
+      variant: 'split',
+      title: 'Placement hero plain',
+      ctas: [],
+    }),
+    galleryMediaText('frame-p-side', 'Placement side adjusted', {
+      variant: 'side',
+      imagePosition: 'left',
+      media: [{ ...slotImageItem('frame-p-side'), image: adjusted('Picture') }],
+    }),
+    galleryMediaText('frame-p-side-plain', 'Placement side plain', {
+      variant: 'side',
+      media: [slotImageItem('frame-p-side-plain')],
+    }),
+    galleryMediaText('frame-p-stacked', 'Placement stacked adjusted', {
+      variant: 'stacked',
+      media: [{ ...slotImageItem('frame-p-stacked'), image: adjusted('Picture') }],
+    }),
+    galleryMediaText('frame-p-legacy', 'Placement older picture adjusted', {
+      variant: 'side',
+      image: adjusted('Picture'),
+    }),
+    // Text over media (Focus mode): the picture is the background, so only the hotspot applies. The same stored values
+    // in Side show them as the editor's area, which is what switching layouts does.
+    galleryMediaText('frame-p-overlay', 'Placement overlay focused', {
+      variant: 'overlay',
+      media: [{ ...slotImageItem('frame-p-overlay'), image: focusedPicture('Picture') }],
+    }),
+    galleryMediaText('frame-p-overlay-plain', 'Placement overlay centred', {
+      variant: 'overlay',
+      media: [slotImageItem('frame-p-overlay-plain')],
+    }),
+    galleryMediaText('frame-p-overlay-side', 'Placement overlay switched to side', {
+      variant: 'side',
+      media: [{ ...slotImageItem('frame-p-overlay-side'), image: focusedPicture('Picture') }],
+    }),
+    videoSection('frame-p-video', {
+      variant: 'embed',
+      title: 'Placement video adjusted',
+      source: 'youtube',
+      url: VIDEO_URL.youtube,
+      poster: adjusted('Poster'),
+    }),
+    {
+      _key: 'frame-p-team',
+      _type: 'team',
+      variant: 'grid',
+      title: 'Placement team',
+      selection: 'picked',
+      members: ['dev', 'ann'].map((m) => ref(`teamMember-${m}`)),
+    },
+    {
+      _key: 'frame-p-team-arch',
+      _type: 'team',
+      variant: 'grid',
+      title: 'Placement team arch',
+      selection: 'picked',
+      imageDesign: imageDesign({ appearance: 'arch', archRatio: '2/3' }),
+      members: ['dev', 'ann'].map((m) => ref(`teamMember-${m}`)),
+    },
+    {
+      _key: 'frame-p-quotes',
+      _type: 'testimonials',
+      variant: 'grid',
+      title: 'Placement testimonials',
+      items: [
+        { ...sliderQuotes('frame-p-quotes')[0], _key: 'frame-p-q1', avatar: adjusted('Avatar') },
+        { ...sliderQuotes('frame-p-quotes')[1], _key: 'frame-p-q2' },
+      ],
+    },
+  ],
+})
+
+/**
  * Picture depth on the Gallery (tests/e2e/picture-depth-gallery.spec.ts): grids and sliders of six pictures with
  * nothing chosen and at each depth level, and a section of a transparent picture and a cropped one.
  */
@@ -4337,6 +4436,8 @@ documents.push(
   // Dev's links are text, for a client who prefers them.
   teamMember('dev', 'Dev Patel', 'Paralegal', {
     ...memberSlug('dev-patel'),
+    // The one portrait with a stored crop (tests/e2e/picture-framing-placements.spec.ts).
+    portrait: { ...image('Portrait of Dev Patel'), ...ADJUSTED_TILE },
     socialDisplay: 'text',
     socialLinks: [
       {
