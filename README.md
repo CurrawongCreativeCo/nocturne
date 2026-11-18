@@ -2563,7 +2563,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 | Badges (`badgeRow`)                      | –       | –    | –      | –    | –     | R✓   | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Logos (`logoRow`)                        | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Launch date (`launchDate`)               | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
-| Image (`slotImage`)                      | –       | –    | –      | –    | –     | –    | –      | R…      | –          | –       | –     | –       | –    | –      | –     |
+| Image (`slotImage`)                      | –       | –    | –      | –    | –     | –    | –      | R✓      | –          | –       | –     | –       | –    | –      | –     |
 | Video (`slotVideo`)                      | –       | –    | –      | –    | –     | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Event details card (`eventDetailsCard`)  | R…      | R…   | –      | R…   | R…    | –    | –      | –       | –          | –       | –     | –       | –    | –      | –     |
 | Service page (`servicePage`)             | –       | R…   | –      | –    | –     | –    | –      | R…      | –          | –       | –     | R…      | –    | –      | –     |
@@ -2574,7 +2574,7 @@ The tables below are generated from the declarations and the evidence by `npm ru
 
 | Pairs (component, capability, scope, part and text role) | Verified | Partly verified | Pending |
 | -------------------------------------------------------- | -------- | --------------- | ------- |
-| Required                                                 | 278      | 0               | 37      |
+| Required                                                 | 279      | 0               | 36      |
 | Conditional                                              | 13       | 0               | 31      |
 
 A text role counts as a pair of its own, so one passing role never verifies another. Every Required or Conditional pair that is not verified is in `capability-baseline.json`, with the task that closes it. It only shrinks.
@@ -2583,12 +2583,12 @@ A text role counts as a pair of its own, so one passing role never verifies anot
 | ------------ | ---------------- | ------------------- |
 | 157          | 1                | 0                   |
 | 159          | 3                | 8                   |
-| 177          | 6                | 20                  |
+| 177          | 5                | 20                  |
 | 213          | 7                | 0                   |
 | 276          | 2                | 3                   |
 | 280          | 18               | 0                   |
 
-**Evidence.** 306 capability entries, 570 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
+**Evidence.** 307 capability entries, 571 cases (an entry's layouts are one case each). Each case renders the component with the field unset and then probed (a section through `SectionRenderer`; a slot block inside every host the registry allows it in, and all must pass; a listing or a view through its own drawer, `VIEW_DRAWERS`), and must change (or draw) the registered target, also with the claimed resolvers disconnected. The 4 content source entries are verified by tests written for each source, which the check requires to exist.
 
 **Capabilities and their owners**
 
@@ -5947,12 +5947,12 @@ resolver in `FRAMING_RESOLVERS` and `framing('…')` on the field.
 | Gallery photos (Grid and Slider tile)                         | Offered             | Masonry has no fixed tile: reviewed not applicable (a saved crop still applies)                        |
 | Event image (Featured card, event page)                       | Offered             | Two masks: top corners only in Featured, all four on the page or with a depth                          |
 | Hero picture (Split layout)                                   | Offered             | Shape from Image design, 4:3                                                                           |
-| Image + text picture (Side and Stacked; the Slot image block) | Offered             | Side 4:3, Stacked 16:9; the older picture field too. Text over media draws it as the background        |
+| Image + text picture (Side and Stacked; the Slot image block) | Offered             | Side 4:3, Stacked 16:9; the older picture field too. Text over media has Focus mode (below)            |
 | Video section poster                                          | Offered             | Follows the frame's ratio (16:9, 4:3, 1:1, 21:9). Ambient and uploaded videos have no poster to adjust |
 | Team member portrait                                          | Offered             | One square framing, previewed on the member page, the grid and slider cards, and the list              |
 | Testimonial avatar                                            | Offered             | Circle at the section's Avatar size                                                                    |
 | Blog post main image                                          | Task 178            | The card and the post page draw it at different ratios, so one framing cannot serve both               |
-| Hero and Image + text backgrounds, other section backgrounds  | Task 177, last step | Focus mode: the hotspot only, at phone, tablet and desktop, as CSS `object-position`                   |
+| Hero backgrounds and other section backgrounds                | Task 177, last step | Focus mode, as Image + text's Text over media has it: the hotspot only, at phone, tablet and desktop   |
 | Service image                                                 | On request          | Drawn 16:9 beside the summary                                                                          |
 | Place (location) image                                        | On request          | Drawn 16:9 on its own page                                                                             |
 | Blog author photo                                             | On request          | A 1:1 photo under each post                                                                            |
@@ -5969,6 +5969,21 @@ fields. The Events section's Featured picture and the Team section's portraits a
 team member), whose crop is stored on that document, so the harness has no field of the section to probe. Both stay Pending, not
 "not applicable": the placements are built and measured by `tests/e2e/event-image-framing.spec.ts` and the placement specs, and the
 pairs close when the harness can probe a referenced document's field.
+
+**Focus mode (Image + text, Text over media).** In Text over media the picture covers the section under the text, so there
+is no fixed shape to place a crop in and it is not drawn through `FramedImage`. Its picture field offers **Focus** in place of
+Adjust picture (`FramingResolver.focus`, which `mediaTextImage` and `mediaTextLegacyImage` return only for that layout; Side and
+Stacked keep their shapes). The dialog shows the whole picture as the page serves it (cut to its saved crop) with a focus
+point you click, drag or move with the arrow keys (Shift for further) or four buttons, and previews it in indicative phone,
+tablet and desktop frames (`FOCUS_FRAMES`: 390, 768 and 1440 px wide; the section's height follows its text). Apply writes the
+field's `hotspot` and nothing else (the size of a hotspot already saved is kept); Reset, in the dialog or under the field
+(after "Remove the saved focus?"), removes only the hotspot. The crop, the picture and the alt text are never touched, and
+switching the layout never changes what is stored: Side and Stacked read the same hotspot as the centre of the area they serve.
+The page positions the background with `coverPosition` (CSS `object-position`, measured on the cropped picture), which is the
+answer the dialog's frames use, and a crop alone still trims it through the image URL as it always did. `framingMode`
+(`lib/sanity/image-framing.ts`) is the one decision both paths ask: `area` in a fixed shape, `focus` on a background, only a
+hotspot counting there. The primitives are `FocusPictureDialog`, `FocusPictureStage` and `FocusFrames`
+(`features/studio/components/picture-framing`); the remaining Hero and section backgrounds adopt them with their own frames.
 
 **What it changes.** Sanity's own `crop` and `hotspot` on that image field, and nothing else. The crop box is the visible area (zoom and position); the hotspot is set to the crop box's centre and size. Both live on the field in the document, never on the asset, so the same photo used elsewhere keeps its own framing. `SanityImage` already passes both to `@sanity/image-url`, so there is no new rendering path, no canvas, no new asset and no public JavaScript.
 

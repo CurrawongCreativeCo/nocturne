@@ -70,6 +70,34 @@ test('Image + text: Side is 4:3 and Stacked 16:9, for the slot picture and the o
   expect(plain.rect).toBeNull()
 })
 
+test('Image + text, Text over media: the hotspot positions the covering background, measured on the cropped picture', async ({
+  page,
+}) => {
+  // Focus mode: a crop of 10% off each side and a hotspot at x .3, y .7. The CDN serves the cropped picture, so the
+  // hotspot sits a quarter of the way across it (x .3 is .2 in from the crop's edge, of its .8 span), 70% down.
+  const focused = await served(section(page, 'Placement overlay focused'), 'Picture')
+  expect(focused.objectPosition).toBe('25% 70%')
+  // The crop still applies as it always has: it is in the URL the CDN is asked for.
+  expect(focused.rect).not.toBeNull()
+  // No hotspot, no position: the background is centred.
+  const centred = await served(section(page, 'Placement overlay centred'), 'Picture')
+  expect(centred.objectPosition).toBe('')
+  // It covers the section: it is not in a fixed shape.
+  await expect(
+    section(page, 'Placement overlay focused').locator('[data-framed-image]'),
+  ).toHaveCount(0)
+})
+
+test('the same stored values in Side are the editor’s area, so switching layouts loses nothing', async ({
+  page,
+}) => {
+  const side = await served(section(page, 'Placement overlay switched to side'), 'Picture')
+  // A fixed 4:3 shape: the CDN cuts the area around the hotspot inside the crop, and CSS leaves it centred.
+  expect(side.ratio).toBeCloseTo(4 / 3, 2)
+  expect(side.rect).toBe('120,0,840,630')
+  expect(side.objectPosition).toBe('')
+})
+
 test('Video poster: the area the editor shows, at the frame’s 16:9', async ({ page }) => {
   const poster = await served(section(page, 'Placement video adjusted'), 'Poster')
   expect([poster.rect, poster.ratio.toFixed(2)]).toEqual([AT_16_9, (16 / 9).toFixed(2)])

@@ -11,6 +11,7 @@ import {
 } from '@/lib/sanity/image-frame-geometry'
 import type { Crop, Hotspot } from '@/lib/sanity/image-framing'
 
+import { PictureFocus } from '../components/picture-framing/picture-focus'
 import { PictureFraming } from '../components/picture-framing/picture-framing'
 
 /** A landscape picture with a clear centre, so a drag or zoom is easy to see. */
@@ -73,6 +74,8 @@ const GALLERY_CIRCLE = GALLERY.resolve({
 // Masonry keeps each photo's own shape: no editor, and a saved adjustment is kept.
 const GALLERY_MASONRY = GALLERY.resolve({ variant: 'masonry' })
 const EVENT_IMAGE = FRAMING_RESOLVERS.eventImage.resolve(undefined)
+// Image + text's Text over media picture covers the section: Focus mode, not a shape (task 177).
+const OVERLAY_FOCUS = FRAMING_RESOLVERS.mediaTextImage.focus?.({ variant: 'overlay' })
 
 /** A saved adjustment, to show Logo, uncropped keeping it. */
 const SAVED: Partial<Value> = {
@@ -127,6 +130,41 @@ function Example({
             setValue((current) => apply(current, patches))
           }}
           wholeNote={wholeNote}
+        />
+        <Text size={0} muted data-framing-values="">
+          {JSON.stringify({ crop: value.crop, hotspot: value.hotspot })}
+        </Text>
+      </Stack>
+    </Card>
+  )
+}
+
+/**
+ * Focus mode in memory: Text over media's background, with a crop saved (as Side or Stacked would have it) and no
+ * hotspot. Apply and Reset change only the hotspot shown below; the crop stays.
+ */
+function FocusExample({ id, title }: { id: string; title: string }) {
+  const [value, setValue] = useState<Value>({
+    asset: { _ref: 'image-sample-1600x1200-svg' },
+    crop: { top: 0.1, bottom: 0.1, left: 0.1, right: 0.1 },
+  })
+  if (!OVERLAY_FOCUS) return null
+  // The sample cut to that crop is what the page serves, so its ratio is the picture's less the crop.
+  const width = 1 - (value.crop?.left ?? 0) - (value.crop?.right ?? 0)
+  const height = 1 - (value.crop?.top ?? 0) - (value.crop?.bottom ?? 0)
+  return (
+    <Card padding={4} radius={3} border data-framing-example={id}>
+      <Stack gap={3}>
+        <Text size={1} weight="semibold">
+          {title}
+        </Text>
+        <PictureFocus
+          value={value}
+          plan={OVERLAY_FOCUS}
+          source={{ previewUrl: SAMPLE, aspect: (1600 * width) / (1200 * height) }}
+          onChange={(patches) => {
+            setValue((current) => apply(current, patches))
+          }}
         />
         <Text size={0} muted data-framing-values="">
           {JSON.stringify({ crop: value.crop, hotspot: value.hotspot })}
@@ -207,6 +245,7 @@ export function PlacementFramingExamples() {
         title="Event image: Featured card and event page (16:9)"
         shapes={EVENT_IMAGE}
       />
+      <FocusExample id="overlay-focus" title="Image + text, Text over media: Focus" />
     </Stack>
   )
 }

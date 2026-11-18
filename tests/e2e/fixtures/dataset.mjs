@@ -3727,6 +3727,12 @@ documents.push({
  * that must keep today's URL.
  */
 const adjusted = (alt) => ({ ...image(alt), ...ADJUSTED_TILE })
+/** A crop of 10% off each side and a hotspot at x .3, y .7: a background position of 25% 70% (tests/e2e/picture-framing-placements.spec.ts). */
+export const FOCUSED = {
+  crop: { _type: 'sanity.imageCrop', top: 0, bottom: 0, left: 0.1, right: 0.1 },
+  hotspot: { _type: 'sanity.imageHotspot', x: 0.3, y: 0.7, width: 0.3, height: 0.3 },
+}
+const focusedPicture = (alt) => ({ ...image(alt), ...FOCUSED })
 documents.push({
   _id: 'page-picture-framing-placements',
   _type: 'page',
@@ -3761,6 +3767,20 @@ documents.push({
     galleryMediaText('frame-p-legacy', 'Placement older picture adjusted', {
       variant: 'side',
       image: adjusted('Picture'),
+    }),
+    // Text over media (Focus mode): the picture is the background, so only the hotspot applies. The same stored values
+    // in Side show them as the editor's area, which is what switching layouts does.
+    galleryMediaText('frame-p-overlay', 'Placement overlay focused', {
+      variant: 'overlay',
+      media: [{ ...slotImageItem('frame-p-overlay'), image: focusedPicture('Picture') }],
+    }),
+    galleryMediaText('frame-p-overlay-plain', 'Placement overlay centred', {
+      variant: 'overlay',
+      media: [slotImageItem('frame-p-overlay-plain')],
+    }),
+    galleryMediaText('frame-p-overlay-side', 'Placement overlay switched to side', {
+      variant: 'side',
+      media: [{ ...slotImageItem('frame-p-overlay-side'), image: focusedPicture('Picture') }],
     }),
     videoSection('frame-p-video', {
       variant: 'embed',

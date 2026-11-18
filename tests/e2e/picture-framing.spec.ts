@@ -168,6 +168,98 @@ for (const scheme of SCHEMES) {
   })
 }
 
+test.describe('Focus mode on Text over media', () => {
+  const focusExample = (page: Page, scheme: string) => example(page, scheme, 'overlay-focus')
+  const values = (page: Page, scheme: string) =>
+    focusExample(page, scheme).locator('[data-framing-values]')
+
+  async function openFocus(page: Page, scheme: string) {
+    const holder = focusExample(page, scheme)
+    await holder.scrollIntoViewIfNeeded()
+    await holder.getByRole('button', { name: 'Focus', exact: true }).click()
+    const dialog = page.getByRole('dialog', { name: 'Focus' })
+    await expect(dialog).toBeVisible()
+    return dialog
+  }
+
+  test('offers Focus, not Adjust picture, and starts centred with the crop saved', async ({
+    page,
+  }) => {
+    await openPreview(page)
+    const holder = focusExample(page, 'light')
+    await holder.scrollIntoViewIfNeeded()
+    await expect(holder.getByRole('button', { name: 'Adjust picture' })).toHaveCount(0)
+    await expect(holder.getByText('Centred')).toBeVisible()
+    await expect(values(page, 'light')).toContainText('"crop"')
+    await expect(values(page, 'light')).not.toContainText('"hotspot"')
+  })
+
+  test('shows the phone, tablet and desktop frames and moves all three with the point', async ({
+    page,
+  }) => {
+    test.skip(test.info().project.name === 'mobile', 'Pointer positions are measured on desktop')
+    await openPreview(page)
+    const dialog = await openFocus(page, 'light')
+    await expect(dialog.locator('[data-focus-frame]')).toHaveText([
+      /Phone, 390px wide/,
+      /Tablet, 768px wide/,
+      /Desktop, 1440px wide/,
+    ])
+    const positions = () =>
+      dialog
+        .locator('[data-focus-frame] img')
+        .evaluateAll((images) => images.map((img) => (img as HTMLElement).style.objectPosition))
+    expect(await positions()).toEqual(['', '', ''])
+    // A quarter across and down the picture as the page serves it.
+    const stage = dialog.locator('[data-focus-stage]')
+    const box = await stage.boundingBox()
+    if (!box) throw new Error('No stage')
+    await page.mouse.click(box.x + box.width * 0.25, box.y + box.height * 0.25)
+    await expect.poll(positions).toEqual(['25% 25%', '25% 25%', '25% 25%'])
+    await expect(dialog.getByText(/Focus 25% across, 25% down/)).toBeVisible()
+  })
+
+  test('moves with the keyboard, applies only a hotspot and Reset removes only that', async ({
+    page,
+  }) => {
+    await openPreview(page)
+    const holder = focusExample(page, 'light')
+    const dialog = await openFocus(page, 'light')
+    await dialog.getByRole('button', { name: 'Move focus right' }).click()
+    await dialog.locator('[data-focus-stage]').focus()
+    await page.keyboard.press('ArrowDown')
+    await expect(dialog.getByText(/Focus 52% across, 52% down/)).toBeVisible()
+    await dialog.getByRole('button', { name: 'Apply' }).click()
+    await expect(dialog).toBeHidden()
+    // The hotspot is in the picture's own coordinates: the crop's 10% margin and 80% span.
+    await expect(values(page, 'light')).toContainText('"hotspot":{"_type":"sanity.imageHotspot"')
+    await expect(values(page, 'light')).toContainText('"x":0.516,"y":0.516')
+    await expect(values(page, 'light')).toContainText('"crop":{"top":0.1')
+    await expect(holder.getByText('Focus set')).toBeVisible()
+    // Reset, after asking: the hotspot goes and the crop stays.
+    await holder.getByRole('button', { name: 'Reset picture focus' }).click()
+    await expect(holder.getByRole('alert')).toHaveText('Remove the saved focus?')
+    await holder.getByRole('button', { name: 'Remove' }).click()
+    await expect(values(page, 'light')).not.toContainText('"hotspot"')
+    await expect(values(page, 'light')).toContainText('"crop":{"top":0.1')
+    await expect(holder.getByText('Centred')).toBeVisible()
+  })
+
+  for (const scheme of SCHEMES) {
+    test(`has no accessibility violations, ${scheme}`, async ({ page }) => {
+      await openPreview(page)
+      const dialog = await openFocus(page, scheme)
+      const results = await new AxeBuilder({ page })
+        .include('[role="dialog"]')
+        .withTags(WCAG)
+        .analyze()
+      expect(results.violations).toEqual([])
+      await dialog.getByRole('button', { name: 'Cancel' }).click()
+      await expect(dialog).toBeHidden()
+    })
+  }
+})
+
 test.describe('on the Link list', () => {
   test.skip(({ isMobile }) => isMobile, 'Desktop only')
 
