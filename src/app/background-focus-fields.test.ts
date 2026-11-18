@@ -46,6 +46,29 @@ describe('the Hero’s picture field', () => {
     // The design is the section itself, one segment up from the field.
     expect(resolver.designPath).toEqual({ drop: 1 })
   })
+
+  it('follows the renderer’s fallback: a layout never set, null, empty or unknown is Full background, so Focus', () => {
+    // hero/index.tsx draws Split and Editorial as themselves and every other value as Full background.
+    const resolver = FRAMING_RESOLVERS.heroImage
+    for (const design of [
+      undefined,
+      null,
+      {},
+      { variant: undefined },
+      { variant: null },
+      { variant: '' },
+      { variant: 'not-a-layout' },
+      { variant: 'Split' },
+    ]) {
+      expect(resolver.focus?.(design)?.label, JSON.stringify(design)).toBe('Hero background')
+      expect(resolver.resolve(design), JSON.stringify(design)).toEqual([])
+    }
+    // Split keeps its shape and Editorial offers neither.
+    expect(resolver.focus?.({ variant: 'split' })).toBeUndefined()
+    expect(resolver.resolve({ variant: 'split' })).toHaveLength(1)
+    expect(resolver.focus?.({ variant: 'editorial' })).toBeUndefined()
+    expect(resolver.resolve({ variant: 'editorial' })).toEqual([])
+  })
 })
 
 describe('the shared section Background image', () => {

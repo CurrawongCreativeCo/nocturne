@@ -312,12 +312,14 @@ interface StoredHeroSection {
 const heroImage: FramingResolver = {
   designPath: { drop: 1 },
   wholeNote: BACKGROUND_NOTE,
-  // Full background and Image with panel cover the section behind the text: Focus mode, not a shape.
+  // Full background and Image with panel cover the section behind the text: Focus mode, not a shape. The renderer
+  // (hero/index.tsx, which a shared module may not import; a test keeps the two in step) draws Split and Editorial as
+  // themselves and anything else, a layout never set, empty or one this deployment doesn't know, as Full background.
   focus: (design) => {
     const variant = (design as StoredHeroSection | null | undefined)?.variant
-    return variant === 'overlay' || variant === 'full-bleed'
-      ? { frames: FOCUS_FRAMES, label: 'Hero background' }
-      : undefined
+    return variant === 'split' || variant === 'editorial'
+      ? undefined
+      : { frames: FOCUS_FRAMES, label: 'Hero background' }
   },
   resolve: (design) => {
     const section = design as StoredHeroSection | null | undefined

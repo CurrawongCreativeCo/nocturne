@@ -2,6 +2,7 @@ import { createElement, type ComponentType } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { parseHtml } from '@/lib/design/capability-harness'
+import { FRAMING_RESOLVERS } from '@/lib/sanity/image-frame-geometry'
 
 import {
   fixturePictureId,
@@ -128,6 +129,60 @@ describe.each(['overlay', 'full-bleed'])('Hero, %s: Focus mode', (layout) => {
     expect(float.html).toContain('-inset-5')
     expect(still.html).not.toContain('parallax-factor')
     expect(still.html).not.toContain('-inset-5')
+  })
+})
+
+/**
+ * The Studio offers Focus on the Hero's picture exactly where the renderer draws it as a covering background
+ * (FRAMING_RESOLVERS.heroImage, which a shared module may not draw from hero/index.tsx, so this keeps the two in step):
+ * Split and Editorial draw themselves, and a layout never set, null, empty or unknown renders Full background.
+ */
+describe('Hero layout defaults: the editor and the renderer agree', () => {
+  const DEFAULTS: [string, string | null | undefined][] = [
+    ['never set', undefined],
+    ['null', null],
+    ['empty', ''],
+    ['one this deployment does not know', 'not-a-layout'],
+  ]
+
+  it.each(DEFAULTS)(
+    '%s renders Full background, positioned by the hotspot, and is offered Focus',
+    async (_name, variant) => {
+      const seed = await gallerySeed('hero', 'overlay')
+      const raw = {
+        ...seed,
+        variant,
+        backgroundImage: await picture({ crop: CROP, hotspot: HOTSPOT }),
+        partMotion: null,
+      } as RawSection
+      const drawn = read(
+        await renderSections(await projectSections([raw]), { belowHeading: true }),
+        'section img',
+      )
+      expect(drawn.position).toBe('25% 70%')
+      expect(FRAMING_RESOLVERS.heroImage.focus?.({ variant })?.label).toBe('Hero background')
+    },
+  )
+
+  it('Split draws its picture as a shape, not a covering background, and is not offered Focus', async () => {
+    const split = await drawHero('split', { crop: CROP, hotspot: HOTSPOT })
+    expect(split.position).toBe('')
+    expect(FRAMING_RESOLVERS.heroImage.focus?.({ variant: 'split' })).toBeUndefined()
+    expect(FRAMING_RESOLVERS.heroImage.resolve({ variant: 'split' })).toHaveLength(1)
+  })
+
+  it('Editorial does not draw the background picture, and is offered neither', async () => {
+    const seed = await gallerySeed('hero', 'editorial')
+    const raw = {
+      ...seed,
+      variant: 'editorial',
+      backgroundImage: await picture({ crop: CROP, hotspot: HOTSPOT }),
+      secondaryImage: null,
+    } as RawSection
+    const html = await renderSections(await projectSections([raw]), { belowHeading: true })
+    expect(parseHtml(html).querySelector('section img')).toBeNull()
+    expect(FRAMING_RESOLVERS.heroImage.focus?.({ variant: 'editorial' })).toBeUndefined()
+    expect(FRAMING_RESOLVERS.heroImage.resolve({ variant: 'editorial' })).toEqual([])
   })
 })
 
