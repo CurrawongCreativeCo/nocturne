@@ -5,6 +5,8 @@ import { TRAVEL_MAX, TRAVEL_MIN, SCALE_MAX, SCALE_MIN } from '@/components/motio
 import {
   FRAME_INSET,
   IMAGE_APPEARANCES,
+  IMAGE_ARCH_RATIOS,
+  IMAGE_ARCH_RATIO_TITLES,
   IMAGE_APPEARANCE_TITLES,
   IMAGE_DIRECTIONS,
   IMAGE_DIRECTION_TITLES,
@@ -15,8 +17,8 @@ import {
   IMAGE_MOTIONS,
   IMAGE_MOTION_TITLES,
   appearanceFromHeroShape,
+  chosenFrame,
   imageDesignUses,
-  showsFrame,
   type ImageAppearance,
   type ImageDesignShape,
 } from '../image-design-options'
@@ -35,9 +37,14 @@ import { validateVisible } from './validate-visible'
  * The shared `imageDesign` object: how a section's picture looks and moves (README, "Image design").
  * Three pictures to choose from, then a collapsed "Advanced: image" for the exact values:
  *
- *   Appearance  Standard, Rounded, Circle, Arch or Framed (Square corners where a section already had it)
+ *   Appearance  Standard, Rounded, Circle or Arch (Square corners where a section already had it; the
+ *               older Framed only where it is stored)
  *   Motion      None, Subtle parallax or Medium parallax; the exact values are Custom, in Advanced
- *   Frame       None, Simple line, a built-in frame or an approved custom one; only for Framed
+ *   Frame       None, Simple line, a built-in frame or an approved custom one, on any shape (task 177)
+ *
+ * Shape and frame are separate choices: changing one keeps the other and every picture's position.
+ * The frame is `frameStyle`. The older `frame` stays stored and counts only beside the older Framed
+ * appearance (`chosenFrame`), so content saved before keeps its look.
  *
  * FramedImage (components/ui/framed-image.tsx) draws it. Add it with `imageDesignField()` only where
  * the effect makes sense (a section's main pictures), never on logos, icons or small avatars. Agency
@@ -48,6 +55,7 @@ import { validateVisible } from './validate-visible'
 interface Section {
   _type?: string
   imageShape?: string
+  imageDesign?: ImageDesignShape
 }
 
 const sectionOf = ({ document, path }: PresetOptionsContext): Section | undefined =>
@@ -74,6 +82,11 @@ const hiddenUnless =
     return !applies(imageDesignUses(design), design)
   }
 
+/** The first Arch ratio choice: it unsets the field (4:5). */
+export const ARCH_DEFAULT_CHOICE = 'Use default (4:5)'
+/** Allow frame overlap's clear button: it unsets the field, so the layout keeps the frame's room. */
+export const OVERLAP_DEFAULT_CHOICE = 'Use default (keep room)'
+
 const radio = <T extends string>(values: readonly T[], titles: Record<T, string>) => ({
   list: values.map((value) => ({ title: titles[value], value })),
   layout: 'radio' as const,
@@ -91,7 +104,8 @@ export const imageDesign = defineType({
     {
       name: 'more',
       title: 'Advanced: image',
-      description: 'Fine-tune the chosen motion and frame. Only the options they use are shown.',
+      description:
+        'Fine-tune the chosen motion, arch and frame. Only the options they use are shown.',
       options: { collapsible: true, collapsed: true },
     },
   ],
@@ -100,7 +114,7 @@ export const imageDesign = defineType({
       ...presetField({
         name: 'appearance',
         title: 'Image shape',
-        description: 'How the picture is cut. Framed adds a decorative frame that stays still.',
+        description: 'How the picture is cut. A frame is chosen separately, below.',
         required: false,
         options: IMAGE_APPEARANCES.map((value) => ({
           value,
@@ -111,15 +125,19 @@ export const imageDesign = defineType({
             square: 'Sharp corners.',
             circle: 'Always square, cut to a circle.',
             arch: 'A tall picture with a rounded top.',
-            framed: 'A decorative frame over the picture.',
+            framed:
+              'Older choice: Standard corners with its frame. Choose a shape and a frame instead.',
           }[value],
           thumbnail: imageAppearanceThumbnails[value],
         })),
         // Square corners are offered where a section already had them, and they stay visible if stored.
+        // Framed is no longer offered: shape and frame are separate. It stays visible where it is stored.
         visibleOptions: (context) =>
-          IMAGE_APPEARANCES.filter(
-            (value) => value !== 'square' || defaultAppearance(context) === 'square',
-          ),
+          IMAGE_APPEARANCES.filter((value) => {
+            if (value === 'square') return defaultAppearance(context) === 'square'
+            if (value === 'framed') return sectionOf(context)?.imageDesign?.appearance === 'framed'
+            return true
+          }),
         defaultValue: defaultAppearance,
       }),
       // Left empty until an editor chooses, so each section keeps its own look.
@@ -148,16 +166,33 @@ export const imageDesign = defineType({
     },
     {
       ...presetField({
-        name: 'frame',
+        name: 'frameStyle',
         title: 'Frame',
-        description: 'Drawn over the picture and kept still while the picture moves behind it.',
+        description:
+          'Drawn around the picture and kept still while the picture moves behind it. Changing it keeps the shape and every picture’s position.',
         required: false,
         options: IMAGE_FRAMES.map((value) => ({
           value,
           title: IMAGE_FRAME_TITLES[value],
           thumbnail: imageFrameThumbnails[value],
         })),
-        hidden: ({ parent }) => !showsFrame(designOf(parent).appearance ?? undefined),
+        // Empty, it shows what is drawn: the older Framed's own frame, otherwise none.
+        defaultValue: (context) => chosenFrame(sectionOf(context)?.imageDesign),
+      }),
+      initialValue: undefined,
+    },
+    {
+      // The older frame: stored, read only beside the older Framed appearance (`chosenFrame`).
+      ...presetField({
+        name: 'frame',
+        title: 'Frame (older)',
+        required: false,
+        options: IMAGE_FRAMES.map((value) => ({
+          value,
+          title: IMAGE_FRAME_TITLES[value],
+          thumbnail: imageFrameThumbnails[value],
+        })),
+        hidden: () => true,
         defaultValue: () => 'thin-line',
       }),
       initialValue: undefined,
@@ -169,15 +204,10 @@ export const imageDesign = defineType({
       to: [{ type: 'frame' }],
       options: { disableNew: true },
       description: 'Frames are added by the agency, under Design > Image frames.',
-      hidden: ({ parent }) => {
-        const design = designOf(parent)
-        return !showsFrame(design.appearance ?? undefined) || design.frame !== 'custom'
-      },
+      hidden: ({ parent }) => chosenFrame(designOf(parent)) !== 'custom',
       validation: (rule) =>
         rule.custom((value, { parent }) =>
-          designOf(parent).frame === 'custom' &&
-          showsFrame(designOf(parent).appearance ?? undefined) &&
-          !value
+          chosenFrame(designOf(parent)) === 'custom' && !value
             ? 'Choose an approved frame, or a different frame style'
             : true,
         ),
@@ -218,6 +248,19 @@ export const imageDesign = defineType({
       validation: (rule) => rule.min(SCALE_MIN).max(SCALE_MAX),
     }),
     defineField({
+      name: 'archRatio',
+      title: 'Arch ratio',
+      type: 'string',
+      fieldset: 'more',
+      description: 'Width to height.',
+      // The first choice clears the field, so the arch goes back to 4:5 without storing a value of its own.
+      options: {
+        ...radio(IMAGE_ARCH_RATIOS, IMAGE_ARCH_RATIO_TITLES),
+        inheritable: ARCH_DEFAULT_CHOICE,
+      },
+      hidden: hiddenUnless((uses) => uses.archRatio),
+    }),
+    defineField({
       name: 'frameColour',
       title: 'Frame colour',
       type: 'string',
@@ -234,6 +277,17 @@ export const imageDesign = defineType({
       description: `How far the frame sits in from the picture’s edge, as a percentage (${FRAME_INSET.min} to ${FRAME_INSET.max}). For the offset border, how far it sticks out.`,
       hidden: hiddenUnless((uses) => uses.frameInset),
       validation: (rule) => rule.min(FRAME_INSET.min).max(FRAME_INSET.max),
+    }),
+    defineField({
+      name: 'frameOverlap',
+      title: 'Allow frame overlap',
+      type: 'boolean',
+      fieldset: 'more',
+      description:
+        'Off: the layout keeps room for the part of the frame outside the picture, so it never runs into the space around it. On: the frame may overlap the gap or whatever is next to the picture.',
+      // A switch stores false when turned off; the button removes the value, so the default (keep room) applies.
+      options: { clearable: OVERLAP_DEFAULT_CHOICE },
+      hidden: hiddenUnless((uses) => uses.frameOverlap),
     }),
   ].map(validateVisible),
 })

@@ -6,9 +6,12 @@ import {
   FRAMING_RESOLVERS,
   type FrameShape,
   type FrameShapes,
+  type WholeNote,
+  wholeNoteFor,
 } from '@/lib/sanity/image-frame-geometry'
 import type { Crop, Hotspot } from '@/lib/sanity/image-framing'
 
+import { PictureFocus } from '../components/picture-framing/picture-focus'
 import { PictureFraming } from '../components/picture-framing/picture-framing'
 
 /** A landscape picture with a clear centre, so a drag or zoom is easy to see. */
@@ -57,6 +60,23 @@ const LINK_THUMBNAIL_GLASS = THUMBNAIL.resolve(
   null,
   thumbnailPath,
 )
+// Gallery photos and the event image (task 177), from the same resolvers.
+const GALLERY = FRAMING_RESOLVERS.galleryTile
+const GALLERY_TILE = GALLERY.resolve({ variant: 'grid' })
+const GALLERY_ARCH = GALLERY.resolve({
+  variant: 'grid',
+  imageDesign: { appearance: 'arch', archRatio: '2/3', frameStyle: 'offset-border' },
+})
+const GALLERY_CIRCLE = GALLERY.resolve({
+  variant: 'slider',
+  imageDesign: { appearance: 'circle', frameStyle: 'double-line' },
+})
+// Masonry keeps each photo's own shape: no editor, and a saved adjustment is kept.
+const GALLERY_MASONRY = GALLERY.resolve({ variant: 'masonry' })
+const EVENT_IMAGE = FRAMING_RESOLVERS.eventImage.resolve(undefined)
+// Image + text's Text over media picture covers the section: Focus mode, not a shape (task 177).
+const OVERLAY_FOCUS = FRAMING_RESOLVERS.mediaTextImage.focus?.({ variant: 'overlay' })
+
 /** A saved adjustment, to show Logo, uncropped keeping it. */
 const SAVED: Partial<Value> = {
   crop: { top: 0.1, bottom: 0.1, left: 0.1, right: 0.1 },
@@ -84,11 +104,13 @@ function Example({
   title,
   shapes,
   initial,
+  wholeNote,
 }: {
   id: string
   title: string
   shapes: FrameShape[]
   initial?: Partial<Value>
+  wholeNote?: WholeNote
 }) {
   const [value, setValue] = useState<Value>({
     asset: { _ref: 'image-sample-1600x1200-svg' },
@@ -104,6 +126,42 @@ function Example({
           value={value}
           shapes={shapes}
           source={{ size: { width: 1600, height: 1200 }, previewUrl: SAMPLE }}
+          onChange={(patches) => {
+            setValue((current) => apply(current, patches))
+          }}
+          wholeNote={wholeNote}
+        />
+        <Text size={0} muted data-framing-values="">
+          {JSON.stringify({ crop: value.crop, hotspot: value.hotspot })}
+        </Text>
+      </Stack>
+    </Card>
+  )
+}
+
+/**
+ * Focus mode in memory: Text over media's background, with a crop saved (as Side or Stacked would have it) and no
+ * hotspot. Apply and Reset change only the hotspot shown below; the crop stays.
+ */
+function FocusExample({ id, title }: { id: string; title: string }) {
+  const [value, setValue] = useState<Value>({
+    asset: { _ref: 'image-sample-1600x1200-svg' },
+    crop: { top: 0.1, bottom: 0.1, left: 0.1, right: 0.1 },
+  })
+  if (!OVERLAY_FOCUS) return null
+  // The sample cut to that crop is what the page serves, so its ratio is the picture's less the crop.
+  const width = 1 - (value.crop?.left ?? 0) - (value.crop?.right ?? 0)
+  const height = 1 - (value.crop?.top ?? 0) - (value.crop?.bottom ?? 0)
+  return (
+    <Card padding={4} radius={3} border data-framing-example={id}>
+      <Stack gap={3}>
+        <Text size={1} weight="semibold">
+          {title}
+        </Text>
+        <PictureFocus
+          value={value}
+          plan={OVERLAY_FOCUS}
+          source={{ previewUrl: SAMPLE, aspect: (1600 * width) / (1200 * height) }}
           onChange={(patches) => {
             setValue((current) => apply(current, patches))
           }}
@@ -147,6 +205,47 @@ export function PictureFramingExamples() {
         title="Link thumbnail: Glass rows"
         shapes={LINK_THUMBNAIL_GLASS}
       />
+    </Stack>
+  )
+}
+
+/**
+ * Task 177's placements (Gallery photos and the event image), from the resolvers the Studio uses. Drawn in a
+ * block of their own at the end of the page, so nothing above them (the screenshot baselines of the other
+ * examples) moves.
+ */
+export function PlacementFramingExamples() {
+  return (
+    <Stack gap={4} data-framing-examples="placements">
+      <Example
+        id="gallery-tile"
+        title="Gallery photo: Grid, nothing chosen (4:3)"
+        shapes={GALLERY_TILE}
+      />
+      <Example
+        id="gallery-arch"
+        title="Gallery photo: Arch 2:3 with an offset border"
+        shapes={GALLERY_ARCH}
+      />
+      <Example
+        id="gallery-circle"
+        title="Gallery photo: Slider, Circle with a double line"
+        shapes={GALLERY_CIRCLE}
+        initial={SAVED}
+      />
+      <Example
+        id="gallery-masonry"
+        title="Gallery photo: Masonry"
+        shapes={GALLERY_MASONRY}
+        initial={SAVED}
+        wholeNote={wholeNoteFor(GALLERY, { variant: 'masonry' })}
+      />
+      <Example
+        id="event-image"
+        title="Event image: Featured card and event page (16:9)"
+        shapes={EVENT_IMAGE}
+      />
+      <FocusExample id="overlay-focus" title="Image + text, Text over media: Focus" />
     </Stack>
   )
 }

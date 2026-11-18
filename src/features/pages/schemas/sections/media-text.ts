@@ -10,7 +10,8 @@ import { accessField } from '@/lib/sanity/schema/access-field'
 import { headerDesignField } from '@/lib/sanity/schema/card-design-fields'
 import { headingField, legacyTitleField } from '@/lib/sanity/schema/heading-text'
 import { imageDesignField } from '@/lib/sanity/schema/image-design'
-import { imageField } from '@/lib/sanity/schema/image-field'
+import { imageField, imageOptions } from '@/lib/sanity/schema/image-field'
+import { framing } from '@/lib/sanity/schema/image-framing-option'
 import { lengthWarning } from '@/lib/sanity/schema/length-guidance'
 import { presetsOption } from '@/lib/sanity/schema/preset-field'
 import { matchPreset } from '@/lib/sanity/schema/preset-match'
@@ -215,6 +216,7 @@ export const mediaText = defineType({
         title: 'Image',
         description: 'Shown until Media above has a picture or a video.',
         requireAlt: true,
+        options: { ...imageOptions, ...framing('mediaTextLegacyImage') },
         hidden: ({ parent, currentUser }) =>
           Boolean((parent as { media?: unknown[] } | undefined)?.media?.length) ||
           (!(parent as { image?: { asset?: unknown } } | undefined)?.image?.asset &&

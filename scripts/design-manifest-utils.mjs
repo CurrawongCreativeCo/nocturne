@@ -146,6 +146,19 @@ function describe(field, path, topField, schemaValue, required, context, depth) 
       const node = memberNode(schemaValue, typeName)
       const memberNamed = context.types.get(typeName)
       const memberFields = member.fields ?? memberNamed?.fields
+      // A member that is itself a capability (a framed photo in a list of photos) has a row of its own,
+      // as lib/design/schema-capabilities reads it, beside the rows for its fields.
+      const memberCapability = member.options?.capability
+      if (memberCapability && memberFields) {
+        rows.push({
+          path: memberPath,
+          kind: typeName,
+          ...constraints(member, { requiredBySchema: false }),
+          capability: memberCapability,
+          clientEditable: row.clientEditable,
+          ...(design ? { design: true } : {}),
+        })
+      }
       // Only a named type can hold itself; inline objects are all `object`, so they never stop a walk.
       if (memberFields && !(memberNamed && context.stack.includes(typeName))) {
         const attributes = attributesOf(node, context.namedAttributes)

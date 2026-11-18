@@ -75,6 +75,37 @@ describe('SanityImage with a placement', () => {
     expect(query.get('rect')).toBe('1600,500,1000,1000')
   })
 
+  it('derives the missing side from the area served, so the CDN does not cut it again', () => {
+    // A 1200 × 630 upload with a hotspot near the left, drawn in a 4:3 box that is given only its width (as the
+    // hero, Image + text and the gallery tiles are): the area is 840 × 630, so 640 wide is 480 high, not the
+    // upload's 336, which would make the CDN cut a 1.9:1 strip out of the 4:3 area.
+    const image = picture(1200, 630, { hotspot: { x: 0.2, y: 0.8, width: 0.2, height: 0.2 } })
+    const html = renderToStaticMarkup(
+      <SanityImage image={image} alt="" width={640} placement={{ aspect: 4 / 3 }} sizes="640px" />,
+    )
+    const query = params(html)
+    expect(query.get('rect')).toBe('0,0,840,630')
+    expect([query.get('w'), query.get('h')]).toEqual(['640', '480'])
+    // Given only its height, the width follows the same ratio.
+    const tall = params(
+      renderToStaticMarkup(
+        <SanityImage
+          image={image}
+          alt=""
+          height={480}
+          placement={{ aspect: 4 / 3 }}
+          sizes="640px"
+        />,
+      ),
+    )
+    expect([tall.get('w'), tall.get('h')]).toEqual(['640', '480'])
+    // With no placement the upload's own ratio still decides, as before.
+    const plain = params(
+      renderToStaticMarkup(<SanityImage image={image} alt="" width={640} sizes="640px" />),
+    )
+    expect([plain.get('w'), plain.get('h'), plain.get('rect')]).toEqual(['640', '336', null])
+  })
+
   it('serves a featured Image-focused card as 16:9 and the others as 4:3', () => {
     const large = { layout: 'cards', thumbnailSize: 'large' }
     const featured = params(draw(picture(3000, 2000), { ...large, featured: true }))

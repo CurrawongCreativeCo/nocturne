@@ -55,18 +55,22 @@ export function SanityImage({
   // No blur on a picture that may be transparent: it would stay visible behind the transparent parts.
   const lqip = blurPlaceholder(asset._id, asset.metadata)
 
-  // When only one side is given, derive the other from the asset's aspect ratio.
-  const w = fill
-    ? undefined
-    : (width ?? (height && dims ? Math.round((height * dims.width) / dims.height) : dims?.width))
-  const h = fill
-    ? undefined
-    : (height ?? (w && dims ? Math.round((w * dims.height) / dims.width) : dims?.height))
-
+  // The area served at a placement (task 177), or nothing: then the whole upload's crop and hotspot apply.
   const area =
     placement && dims
       ? visibleArea(placement, { asset: dims, crop: clean.crop, hotspot: clean.hotspot })
       : null
+  // When only one side is given, derive the other from the aspect ratio of what is served: the area at a
+  // placement, else the asset's own. (An area cut to a different ratio would be cropped again by the CDN.)
+  const served = area ?? dims
+  const w = fill
+    ? undefined
+    : (width ??
+      (height && served ? Math.round((height * served.width) / served.height) : dims?.width))
+  const h = fill
+    ? undefined
+    : (height ?? (w && served ? Math.round((w * served.height) / served.width) : dims?.height))
+
   const builder = area
     ? urlFor({ asset: source.asset }).rect(area.left, area.top, area.width, area.height)
     : whole

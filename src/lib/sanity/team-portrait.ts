@@ -1,4 +1,4 @@
-import { imageAppearance, movesPicture } from './image-design-options'
+import { chosenFrame, imageAppearance, movesPicture } from './image-design-options'
 
 /**
  * Which picture design a Team section's portraits use, in one place so the Studio's controls and the
@@ -16,6 +16,7 @@ interface StoredImageDesign {
   appearance?: unknown
   motion?: unknown
   frame?: unknown
+  frameStyle?: unknown
 }
 
 /**
@@ -25,21 +26,23 @@ interface StoredImageDesign {
  *
  * - empty, `{}`, or an object of nulls (a query's projection of nothing);
  * - neutral: Standard, Framed with no frame, and motion None draw what the default draws;
- * - an inactive leftover: a frame, its colour or inset on anything but Framed, or Custom, travel,
+ * - an inactive leftover: an older `frame`, its colour or inset on anything but Framed (a Frame set
+ *   on any shape counts, task 177), or Custom, travel,
  *   direction or scale on anything but a moving picture (`custom: false` is Studio's initial value
  *   and stays after every choice is cleared). The site ignores these (`resolveImageDesign`).
  *
- * Effective: Rounded, Square corners, Circle or Arch; Framed with a frame (a preset, an approved one,
- * or none chosen, which draws the Simple line); Subtle or Medium parallax. An unknown value counts as
+ * Effective: Rounded, Square corners, Circle or Arch; any frame `chosenFrame` draws (Frame on any
+ * shape, or the older Framed with a preset, an approved one, or none chosen, which draws the Simple
+ * line); Subtle or Medium parallax. An unknown value counts as
  * none, as the site treats it.
  */
 export function hasImageDesign(design: unknown): boolean {
   if (!design || typeof design !== 'object') return false
-  const { appearance: stored, motion, frame } = design as StoredImageDesign
+  const { appearance: stored, motion } = design as StoredImageDesign
   const appearance = imageAppearance(typeof stored === 'string' ? stored : undefined)
   if (movesPicture(typeof motion === 'string' ? motion : undefined)) return true
-  if (appearance === 'framed') return frame !== 'none'
-  return appearance !== undefined && appearance !== 'standard'
+  if (chosenFrame(design) !== 'none') return true
+  return appearance !== undefined && appearance !== 'standard' && appearance !== 'framed'
 }
 
 export interface TeamPortraitControls {

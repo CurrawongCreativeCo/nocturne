@@ -27,6 +27,7 @@ import {
 
 import { describeChange } from './describe-change'
 import { PictureStage } from './picture-stage'
+import type { PendingFraming } from './shape-style'
 
 /** The preview the editor works on: the CDN at about 1200 px, never the original upload. */
 export interface PictureSource {
@@ -123,6 +124,15 @@ export function AdjustPictureDialog({
   const soft = isSoft(size, main.aspect, draft.state.zoom, main.drawnPx)
   const zoomPercent = Math.round(draft.state.zoom * 100)
   const canZoom = context.maxZoom > 1
+
+  // What Apply would store now, which the other shapes are drawn from: nothing for the automatic fit, the stored
+  // values while nothing has changed (a crop saved elsewhere is not re-derived from the editor's window), else the edit.
+  const pending = useMemo<PendingFraming | undefined>(() => {
+    if (draft.auto) return undefined
+    if (!dirty) return { crop: stored.crop, hotspot: stored.hotspot }
+    const { crop, hotspot } = toCrop({ asset: size, aspect: main.aspect, ...draft.state })
+    return { crop, hotspot }
+  }, [draft, dirty, stored.crop, stored.hotspot, size, main.aspect])
 
   const move = (next: FramingState) => {
     setDraft({ state: next, auto: false })
@@ -235,6 +245,7 @@ export function AdjustPictureDialog({
               previewUrl={source.previewUrl}
               lqip={source.lqip}
               state={draft.state}
+              pending={pending}
               context={context}
               onChange={move}
               onReset={reset}

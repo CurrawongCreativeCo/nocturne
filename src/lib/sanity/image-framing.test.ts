@@ -1,6 +1,7 @@
 import { createImageUrlBuilder } from '@sanity/image-url'
 import { describe, expect, it } from 'vitest'
 
+import { FRAMING_RESOLVERS } from './image-frame-geometry'
 import {
   assetSizeFromId,
   boxAt,
@@ -356,5 +357,38 @@ describe('isFramed', () => {
     expect(isFramed({})).toBe(false)
     expect(isFramed({ crop: { left: 0 } })).toBe(true)
     expect(isFramed({ hotspot: { x: 0.5 } })).toBe(true)
+  })
+})
+
+describe('the event image (task 177): what the Featured card and event page ask for is what the editor shows', () => {
+  const asset = { width: 3000, height: 2000 }
+  const [shape] = FRAMING_RESOLVERS.eventImage.resolve(undefined)
+  const eventUrl = (stored?: object) =>
+    builder
+      .image({ asset: { _ref: idOf(asset) }, ...stored })
+      .width(1200)
+      .height(675)
+      .fit('crop')
+      .url()
+  const rectIn = (url: string): Rect => {
+    const [left = 0, top = 0, width = 0, height = 0] = (
+      /[?&]rect=(\d+),(\d+),(\d+),(\d+)/.exec(url) ?? []
+    )
+      .slice(1)
+      .map(Number)
+    return { left, top, width, height }
+  }
+
+  it('is the 16:9 both renderers request (1200 x 675)', () => {
+    expect(shape?.aspect).toBeCloseTo(1200 / 675, 9)
+  })
+
+  it('cuts the editor’s area when adjusted, and today’s centred cut when nothing is stored', () => {
+    if (!shape) throw new Error('no event shape')
+    const stored = toCrop({ asset, aspect: shape.aspect, ...state(1.6, 0.3, 0.4) })
+    const adjusted = visibleArea(shape, { asset, ...stored })
+    if (!adjusted) throw new Error('no area')
+    expectRectClose(rectIn(eventUrl(stored)), adjusted)
+    expectRectClose(rectIn(eventUrl()), defaultArea(shape, asset))
   })
 })

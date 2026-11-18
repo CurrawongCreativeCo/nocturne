@@ -121,6 +121,7 @@ const BUTTON = {
 } as const
 
 const CROPPED = { _type: 'sanity.imageCrop', top: 0.2, bottom: 0.2, left: 0.2, right: 0.2 }
+const HOTSPOT = { _type: 'sanity.imageHotspot', x: 0.2, y: 0.8, width: 0.2, height: 0.2 }
 
 // ---------------------------------------------------------------------------------------------------
 // The shared section style, drawn by SectionFrame
@@ -502,6 +503,22 @@ const slotBlockEvidence: CapabilityEvidence[] = [
     change: 'content',
     base: { badges: [{ _key: 'b1', _type: 'badge', label: 'Locally owned' }] },
     probe: { 'badges.0.icon': 'star' },
+  },
+  // The picture block (task 177), in every host layout. Beside the text, in a fixed shape, a stored hotspot makes the CDN
+  // serve the area "Adjust picture" shows; under the text, covering the section, it positions the background
+  // (Focus mode). Both ask `framingMode` which applies, so one claim holds in all three layouts.
+  {
+    id: 'slotImage.framing.item',
+    component: 'slotImage',
+    capability: 'framing',
+    scope: 'item',
+    field: 'image',
+    resolvers: [{ module: '@/lib/sanity/image-framing', export: 'framingMode' }],
+    render: 'src/features/pages/slots/render-slot.tsx',
+    target: 'img',
+    change: 'content',
+    base: { image: PICTURE },
+    probe: { 'image.hotspot': HOTSPOT },
   },
   {
     // The container around the icon: absent until the block's Icons box chooses a shape.
@@ -1083,6 +1100,27 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { backgroundImage: PICTURE, imageDesign: { appearance: 'framed' } },
     probe: { 'pictureDepthDesign.shadow': 'floating' },
   },
+  // "Adjust picture" on Split's picture (task 177): served as the editor's area (`visibleArea`) at its ratio,
+  // through the URL builder (`urlFor`).
+  {
+    id: 'hero.framing.picture',
+    component: 'hero',
+    capability: 'framing',
+    scope: 'section',
+    part: 'picture',
+    layouts: ['split'],
+    field: 'backgroundImage',
+    resolvers: [
+      { module: '@/lib/sanity/image-framing', export: 'framingMode' },
+      { module: '@/lib/sanity/image-framing', export: 'visibleArea' },
+      { module: '@/lib/sanity/image', export: 'urlFor' },
+    ],
+    render: 'src/features/pages/components/sections/hero/hero-picture.tsx',
+    target: '[data-framed-image]',
+    change: 'content',
+    base: { backgroundImage: PICTURE, imageDesign: { appearance: 'framed' } },
+    probe: { 'backgroundImage.crop': CROPPED },
+  },
   // The hero's divider (task 151): `divider` is drawn under the title by HeroText, in every layout, once
   // the hero has a title and a description or buttons. The gallery's first Split hero has only a title, so
   // the base gives every layout the same description.
@@ -1153,6 +1191,27 @@ export const EVIDENCE: readonly Evidence[] = [
     change: 'attributes',
     base: { media: SLOT_IMAGE, imageDesign: { appearance: 'framed' } },
     probe: { 'pictureDepthDesign.shadow': 'floating' },
+  },
+  // "Adjust picture" on the section's picture (task 177): the slot's image is drawn by FramedImage, which serves
+  // the editor's area (`visibleArea`) at the picture's ratio through the URL builder (`urlFor`).
+  {
+    id: 'mediaText.framing.picture',
+    component: 'mediaText',
+    capability: 'framing',
+    scope: 'section',
+    part: 'picture',
+    layouts: ['side', 'stacked'],
+    field: 'media[slotImage].image',
+    resolvers: [
+      { module: '@/lib/sanity/image-framing', export: 'framingMode' },
+      { module: '@/lib/sanity/image-framing', export: 'visibleArea' },
+      { module: '@/lib/sanity/image', export: 'urlFor' },
+    ],
+    render: 'src/features/pages/components/sections/media-text.tsx',
+    target: '[data-framed-image]',
+    change: 'content',
+    base: { media: SLOT_IMAGE, imageDesign: { appearance: 'framed' } },
+    probe: { 'media.0.image.crop': CROPPED },
   },
   {
     id: 'mediaText.slots.media',
@@ -1282,6 +1341,29 @@ export const EVIDENCE: readonly Evidence[] = [
       })),
     },
     probe: { 'pictureDepthDesign.shadow': 'floating' },
+  },
+  // "Adjust picture" on the avatar (task 177): ProfileImage asks the CDN for the avatar's square with its
+  // stored crop and hotspot (`urlFor`), as the editor shows it.
+  {
+    id: 'testimonials.framing.avatar',
+    component: 'testimonials',
+    capability: 'framing',
+    scope: 'card',
+    part: 'avatar',
+    layouts: TESTIMONIAL_LAYOUTS,
+    field: 'items[].avatar',
+    resolvers: [{ module: '@/lib/sanity/image', export: 'urlFor' }],
+    render: 'src/features/pages/components/sections/testimonials/quote-card.tsx',
+    target: '[data-profile-image]',
+    change: 'content',
+    base: {
+      ...TESTIMONIAL_CONTENT,
+      items: (TESTIMONIAL_CONTENT.items as Record<string, unknown>[]).map((item) => ({
+        ...item,
+        avatar: PICTURE,
+      })),
+    },
+    probe: { 'items.0.avatar.crop': CROPPED },
   },
   {
     id: 'testimonials.depth.card',
@@ -1677,6 +1759,34 @@ export const EVIDENCE: readonly Evidence[] = [
     change: 'attributes',
     base: { eyebrow: 'Our work', intro: 'An intro.' },
     probe: { 'pictureDepthDesign.shadow': 'floating' },
+  },
+  // "Adjust picture" on a Grid or Slider tile (task 177): a framed photo is served as exactly the area the
+  // editor shows (`visibleArea`, through SanityImage's placement), at the tile's ratio; the URL builder
+  // (`urlFor`) carries that rect, as it carried a stored crop before.
+  {
+    id: 'gallery.framing.tile',
+    component: 'gallery',
+    capability: 'framing',
+    scope: 'card',
+    part: 'tile',
+    layouts: ['grid', 'slider'],
+    field: 'images[]',
+    resolvers: [
+      { module: '@/lib/sanity/image-framing', export: 'visibleArea' },
+      { module: '@/lib/sanity/image', export: 'urlFor' },
+    ],
+    render: 'src/features/pages/components/sections/gallery/shared.tsx',
+    target: '[data-framed-image]',
+    change: 'content',
+    base: {
+      eyebrow: 'Our work',
+      intro: 'An intro.',
+      images: [
+        { ...PICTURE, _key: 'tile-1' },
+        { ...PICTURE, _key: 'tile-2' },
+      ],
+    },
+    probe: { 'images.0.crop': CROPPED },
   },
   ...frameEvidence('gallery', {
     mark: ['grid', 'masonry', 'slider'],

@@ -147,4 +147,18 @@ export const BASELINE_CHANGES: readonly BaselineChange[] = [
     ['title', 'meta', 'body'],
     'The results’ text is styled in the component. Task 280 gives the view text roles.',
   ),
+  // Task 177: Gallery's fixed-tile framing on Masonry only. Grid and Slider are verified by evidence, and the
+  // section's background Focus mode (a conditional pair) is unchanged. Approved by the owner on 18 November 2026.
+  {
+    kind: 'downgrade',
+    component: 'gallery',
+    capability: 'framing',
+    scope: 'card',
+    part: 'tile',
+    layouts: ['masonry'],
+    reason:
+      'Fixed-tile framing does not apply: Masonry keeps each picture’s own proportions, so there is no fixed tile to reposition it within. A crop saved on the picture still applies there.',
+    reviewer: 'CurrawongCreativeCo',
+    reviewed: '2026-11-18',
+  },
 ]

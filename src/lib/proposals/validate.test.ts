@@ -311,6 +311,58 @@ describe('rejection reasons', () => {
     expect(media([{ _key: 's', _type: 'statsBar', items: [] }])).toEqual(['slot-block-not-allowed'])
   })
 
+  it('accepts framing on an Image + text picture in every layout, and a layout switch beside it', () => {
+    const SPLIT = 'pageBuilder[_key=="split1"]'
+    const picture = {
+      _type: 'image',
+      asset: { _type: 'reference', _ref: 'image-a' },
+      crop: { _type: 'sanity.imageCrop', top: 0.1, bottom: 0.1, left: 0.1, right: 0.1 },
+    }
+    const withPicture = (variant: string) => ({
+      ...deps,
+      documents: {
+        ...deps.documents,
+        'page-home': {
+          _id: 'page-home',
+          _type: 'page',
+          _rev: 'rev-home-1',
+          pageBuilder: [
+            {
+              _key: 'split1',
+              _type: 'mediaText',
+              variant,
+              media: [{ _key: 'a', _type: 'slotImage', image: picture }],
+            },
+          ],
+        },
+      },
+    })
+    // A proposal sets the slot's block whole, picture, crop and hotspot together.
+    const focused = {
+      _key: 'a',
+      _type: 'slotImage',
+      image: {
+        ...picture,
+        hotspot: { _type: 'sanity.imageHotspot', x: 0.3, y: 0.5, width: 0.3, height: 0.3 },
+      },
+    }
+    const patches = [{ set: { [`${SPLIT}.media`]: [focused] } }]
+    // The picture's hotspot (Focus mode under the text, the shape's area beside it) is judged by the block, which is
+    // proved in every layout the section has.
+    for (const variant of ['side', 'stacked', 'overlay']) {
+      expect(codes(validateProposal(proposal(patches), withPicture(variant)))).toEqual([])
+    }
+    // Switching the layout in the same proposal changes nothing about what is stored on the picture.
+    expect(
+      codes(
+        validateProposal(
+          proposal([{ set: { [`${SPLIT}.variant`]: 'overlay' } }, ...patches]),
+          withPicture('side'),
+        ),
+      ),
+    ).toEqual([])
+  })
+
   it('slot-block-not-allowed: an item with no type', () => {
     expect(reasonFor([{ set: { [`${HERO}.supporting`]: [{ _key: 'x' }] } }])).toEqual([
       'slot-block-not-allowed',

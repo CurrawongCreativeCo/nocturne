@@ -107,6 +107,7 @@ export function Thumbnail({
           design={design}
           depth={depth}
           clip
+          framing
           aspect="4/3"
           sizes={sizes}
           loading={loading}
