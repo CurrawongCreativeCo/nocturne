@@ -46,28 +46,32 @@ const DIMENSIONS = { width: 1200, height: 630 }
 const CROP = { _type: 'sanity.imageCrop', top: 0.1, bottom: 0.1, left: 0.05, right: 0.39 }
 const HOTSPOT = { _type: 'sanity.imageHotspot', x: 0.33, y: 0.5, width: 0.56, height: 0.8 }
 
-const portrait = (framing: object = {}) =>
+const portrait = (framing: object = {}, size = DIMENSIONS) =>
   ({
     alt: 'Alex',
     asset: {
-      _id: 'image-abc-1200x630-jpg',
-      metadata: { lqip: null, hasAlpha: false, dimensions: DIMENSIONS },
+      _id: `image-abc-${size.width}x${size.height}-jpg`,
+      metadata: { lqip: null, hasAlpha: false, dimensions: size },
     },
     ...framing,
   }) as unknown as SanityImageData
 
-const member = (framing: object = {}) =>
+const member = (framing: object = {}, size = DIMENSIONS) =>
   ({
     _id: 'm1',
     name: 'Alex',
     slug: 'alex',
     role: 'Designer',
-    portrait: portrait(framing),
+    portrait: portrait(framing, size),
   }) as unknown as Member
 
-const draw = (design: object | undefined, framing: object = { crop: CROP, hotspot: HOTSPOT }) => {
+const draw = (
+  design: object | undefined,
+  framing: object = { crop: CROP, hotspot: HOTSPOT },
+  size = DIMENSIONS,
+) => {
   const html = renderToStaticMarkup(
-    <TeamCard member={member(framing)} headingLevel="h2" design={design as never} />,
+    <TeamCard member={member(framing, size)} headingLevel="h2" design={design as never} />,
   )
   const img = /<img[^>]*src="([^"]+)"[^>]*>/.exec(html)
   const url = new URL((img?.[1] ?? '').replaceAll('&amp;', '&'))
@@ -144,5 +148,86 @@ describe('a Team card serves the area the editor shows for its shape', () => {
       height,
     }
     expect(rectOf(shown)).toBe(rectOf(preview('Team card in an Arch section, 2:3', {}).area))
+  })
+})
+
+describe('the editor’s outlines for a Team card are what the card serves (a 640 x 800 portrait)', () => {
+  const size = { width: 640, height: 800 }
+  const ARCHES = [
+    ['4/5', 'Team card in an Arch section, 4:5'],
+    ['3/4', 'Team card in an Arch section, 3:4'],
+    ['2/3', 'Team card in an Arch section, 2:3'],
+  ] as const
+  const shapes = FRAMING_RESOLVERS.teamPortrait.resolve(undefined)
+  const shapeOf = (label: string) => {
+    const shape = shapes.find((each) => each.label === label)
+    if (!shape) throw new Error(`No preview called "${label}"`)
+    return shape
+  }
+  const [main] = shapes
+  if (!main) throw new Error('No main preview')
+
+  /**
+   * The area the editor's outline for a shape shows (the Studio feature, which this one may not import, draws it
+   * from this same `visibleArea`; its own test pins the pixels listed below), for the framing it would store.
+   */
+  const outlineArea = (label: string, pending: { crop?: object; hotspot?: object } | undefined) =>
+    visibleArea(shapeOf(label), { asset: size, ...(pending as object) })
+
+  // The URL builder leaves `rect` out when the area is the whole picture.
+  const rectOfQuery = (query: URLSearchParams) =>
+    (query.get('rect') ?? `0,0,${size.width},${size.height}`).split(',').map(Number)
+  const asRect = (
+    area: { left: number; top: number; width: number; height: number } | null | undefined,
+  ) => (area ? [area.left, area.top, area.width, area.height] : undefined)
+
+  it.each(ARCHES)(
+    'a centred hotspot and no crop, Arch %s: the whole picture, not the square',
+    (ratio, label) => {
+      const framing = {
+        hotspot: { _type: 'sanity.imageHotspot', x: 0.5, y: 0.5, width: 0.5, height: 0.5 },
+      }
+      const { query } = draw({ appearance: 'arch', archRatio: ratio }, framing, size)
+      // The card serves it, and the editor's outline is that same area.
+      expect(rectOfQuery(query)).toEqual(asRect(outlineArea(label, framing)))
+      // At the width it asks for and the height of the area it is served, so the CDN cuts nothing more.
+      const [, , width = 0, height = 0] = rectOfQuery(query)
+      expect([query.get('w'), query.get('h')]).toEqual([
+        '600',
+        String(Math.round((600 * height) / width)),
+      ])
+      // At 4:5 that is the picture's whole 640 x 800: taller than the 640 x 640 square the main preview shows.
+      if (ratio === '4/5') expect(rectOfQuery(query)).toEqual([0, 0, 640, 800])
+    },
+  )
+
+  it.each(ARCHES)(
+    'a tall saved crop, Arch %s: cut from the crop, as the outline shows',
+    (ratio, label) => {
+      const framing = {
+        crop: { _type: 'sanity.imageCrop', left: 0.1, right: 0.1, top: 0, bottom: 0 },
+      }
+      const { query } = draw({ appearance: 'arch', archRatio: ratio }, framing, size)
+      expect(rectOfQuery(query)).toEqual(asRect(outlineArea(label, framing)))
+      // The pixels the editor's outline test pins for the same crop.
+      if (ratio === '4/5') expect(rectOfQuery(query)).toEqual([64, 80, 512, 640])
+      if (ratio === '2/3') expect(rectOfQuery(query)).toEqual([64, 16, 512, 768])
+      // Never wider than the crop (512), and taller than the 512 x 512 square cut of it.
+      const [left = 0, , width = 0, height = 0] = rectOfQuery(query)
+      expect(left).toBeGreaterThanOrEqual(64)
+      expect(width).toBe(512)
+      expect(height).toBeGreaterThan(512)
+    },
+  )
+
+  it('nothing stored: the square the card always asked for, centred in the arch', () => {
+    const { query } = draw({ appearance: 'arch', archRatio: '4/5' }, {}, size)
+    expect([query.get('w'), query.get('h')]).toEqual(['600', '600'])
+    const [left = 0, top = 0, width = 0, height = 0] = rectOfQuery(query)
+    // The served square is 640 x 640 from the centre; the 4:5 box shows its middle 512 x 640.
+    const shown = { left: left + Math.round((width - 512) / 2), top, width: 512, height }
+    expect(asRect(shown)).toEqual(
+      asRect(outlineArea('Team card in an Arch section, 4:5', undefined)),
+    )
   })
 })

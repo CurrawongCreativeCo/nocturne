@@ -458,6 +458,8 @@ const teamPortrait: FramingResolver = {
     ...IMAGE_ARCH_RATIOS.map((ratio) => ({
       label: `Team card in an Arch section, ${IMAGE_ARCH_RATIO_TITLES[ratio]}`,
       aspect: aspectValue(ratio),
+      // With nothing stored the card asks the CDN for a square (600 x 600) and the arch's box centres it.
+      defaultAspect: 1,
       corner: 'arch' as const,
       insetPct: 0,
       drawnPx: TEAM_SHAPED_PX,
