@@ -1009,6 +1009,22 @@ export const EVIDENCE: readonly Evidence[] = [
     base: {},
     probe: { 'navigation.footerDividerDesign': { _type: 'decorativeDivider', style: 'line' } },
   },
+  // "Adjust picture" on a service's picture (task 177): the page draws it 16:9 at 1200 x 675, and the stored crop and
+  // hotspot reach it through the URL builder, which serves the editor's area. The sharing metadata and the structured
+  // data read the same field through the same builder (services/api/service.ts, service-json-ld.tsx).
+  {
+    id: 'servicePage.framing.picture',
+    component: 'servicePage',
+    capability: 'framing',
+    scope: 'section',
+    field: 'service.image',
+    resolvers: [{ module: '@/lib/sanity/image', export: 'urlFor' }],
+    render: 'src/features/services/components/service-picture.tsx',
+    target: 'img',
+    change: 'content',
+    base: {},
+    probe: { 'service.image.hotspot': HOTSPOT },
+  },
   // "Adjust picture" on a member's own page (task 177): the portrait is drawn square at 800 px, so the stored crop
   // and hotspot reach it through the URL builder.
   {

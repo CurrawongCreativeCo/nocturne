@@ -46183,11 +46183,26 @@
                 "policy": "required",
                 "scope": "section",
                 "closingTask": 177,
-                "fields": [],
-                "availability": "pending"
+                "fields": [
+                  "service.image"
+                ],
+                "availability": "verified"
               }
             ],
-            "evidence": []
+            "evidence": [
+              {
+                "id": "servicePage.framing.picture",
+                "field": "service.image",
+                "resolvers": [
+                  "@/lib/sanity/image#urlFor"
+                ],
+                "render": "src/features/services/components/service-picture.tsx",
+                "target": "img",
+                "cases": [
+                  "servicePage.framing.picture"
+                ]
+              }
+            ]
           },
           "pictureDepth": {
             "notApplicable": "Draws no shadow or glow on its picture"

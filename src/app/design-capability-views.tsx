@@ -7,11 +7,14 @@ import {
   fixtureDocuments,
   projectFragment,
 } from '@/features/pages/components/section-renderer.fixtures'
+import { ServicePicture } from '@/features/services/components/service-picture'
 import { footerDividerFields, footerSocialFields } from '@/features/site/api/queries'
 import { FooterView } from '@/features/site/components/footer-view'
 import { teamMemberFields, teamPageSettingsFields } from '@/features/team/api/team-member-fields'
 import { TeamMemberPage } from '@/features/team/components/team-member-page'
 import { renderToHtml } from '@/lib/design/capability-harness'
+import { imageFields } from '@/lib/sanity/fragments'
+import type { SanityImageData } from '@/types/sanity'
 
 /**
  * How the evidence harness draws a listing or a view (task 275 correction; README, "Design capability
@@ -84,6 +87,19 @@ export const VIEW_DRAWERS: Readonly<Record<string, ViewDrawer>> = {
         business: state.business,
       } as unknown as Parameters<typeof FooterView>[0]['settings']
       return renderToHtml(createElement(FooterView, { settings, year: 2026, today: '2026-11-08' }))
+    },
+  },
+  servicePage: {
+    // A service with a picture, read as the service query reads it (`image { imageFields }`) and drawn by the
+    // component the page draws it with (the sharing metadata asks the same URL builder for the same field).
+    seed: async () => ({ service: await fixture('service-emergency-plumbing') }),
+    draw: async (state) => {
+      const { image } = (await projectFragment(`image { ${imageFields} }`, {
+        ...(state.service as Record<string, unknown>),
+        _id: 'capability-probe-service',
+        _type: 'service',
+      })) as { image: SanityImageData }
+      return renderToHtml(createElement(ServicePicture, { image }))
     },
   },
   teamMemberPage: {

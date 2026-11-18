@@ -213,13 +213,6 @@
     },
     {
       "component": "servicePage",
-      "capability": "framing",
-      "scope": "section",
-      "layouts": [null],
-      "closingTask": 177
-    },
-    {
-      "component": "servicePage",
       "capability": "divider",
       "scope": "section",
       "layouts": [null],

@@ -111,14 +111,6 @@ export const BASELINE_CHANGES: readonly BaselineChange[] = [
     ['heading', 'intro', 'price', 'title', 'body', 'label', 'description'],
     'The page’s text is styled in the component. Task 280 gives the view text roles.',
   ),
-  {
-    ...VIEW_ROW,
-    component: 'servicePage',
-    capability: 'framing',
-    scope: 'section',
-    reason: 'The page’s picture has a fixed 16:9 crop, with no Adjust picture yet.',
-    closingTask: 177,
-  },
   // The divider moved from task 151 to task 280 (11 November 2026): the page separates its groups with plain
   // border-t rules and has no document to store a divider in, so where it lives is decided with the view's design.
   // Reviewed row for the moved pair, recorded under the owner's GitHub identity on 17 November 2026.

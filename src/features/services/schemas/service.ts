@@ -2,7 +2,8 @@ import { CaseIcon } from '@sanity/icons/Case'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
 import { hasLocations } from '@/config/profile'
-import { imageField } from '@/lib/sanity/schema/image-field'
+import { imageField, imageOptions } from '@/lib/sanity/schema/image-field'
+import { framing } from '@/lib/sanity/schema/image-framing-option'
 
 import { SERVICE_SLUG_PATTERN, slugifyService } from '../utils/slug'
 
@@ -55,7 +56,10 @@ export const service = defineType({
       name: 'image',
       aspect: '16:9',
       minWidth: 1200,
-      description: 'Shown beside the summary and when the page is shared. Alt text is required.',
+      // "Adjust picture" (task 177): the page's 16:9 and the share image's 1200 x 630 are cuts of one framing.
+      options: { ...imageOptions, ...framing('serviceImage') },
+      description:
+        'Shown beside the summary and when the page is shared. Use Adjust picture to keep the subject in view in both. Alt text is required.',
       validation: (rule) => rule.required(),
     }),
     defineField({

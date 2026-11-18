@@ -6,12 +6,12 @@ import type { ReactNode } from 'react'
 import { CtaLink } from '@/components/ui/cta-link'
 import { PlainText } from '@/components/ui/plain-text'
 import { RichText } from '@/components/ui/rich-text'
-import { SanityImage } from '@/components/ui/sanity-image'
 import { locationPath, postPath, slugToPath, teamPath } from '@/config/paths'
 import { hasTeamProfiles } from '@/config/profile'
 import { getDraftFetchMode, type FetchMode } from '@/lib/sanity/live'
 
 import { ServiceJsonLd } from './service-json-ld'
+import { ServicePicture } from './service-picture'
 import { getService } from '../api/service'
 import { formatServicePrice } from '../utils/price'
 import { serviceQuestions, type ServiceQuestion } from '../utils/questions'
@@ -78,14 +78,7 @@ export async function ServiceView({
               </div>
             )}
           </header>
-          <SanityImage
-            image={service.image}
-            width={1200}
-            height={675}
-            preload
-            sizes="(min-width: 768px) 50vw, 100vw"
-            className="aspect-video w-full rounded-card object-cover"
-          />
+          <ServicePicture image={service.image} />
         </div>
 
         {service.body && service.body.length > 0 && (
