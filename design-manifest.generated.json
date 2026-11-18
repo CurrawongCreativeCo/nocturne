@@ -3344,7 +3344,7 @@
               "id": "hero.framing.picture",
               "field": "backgroundImage",
               "resolvers": [
-                "@/lib/sanity/image-framing#isFramed",
+                "@/lib/sanity/image-framing#framingMode",
                 "@/lib/sanity/image-framing#visibleArea",
                 "@/lib/sanity/image#urlFor"
               ],
@@ -5783,7 +5783,7 @@
               "id": "mediaText.framing.picture",
               "field": "media[slotImage].image",
               "resolvers": [
-                "@/lib/sanity/image-framing#isFramed",
+                "@/lib/sanity/image-framing#framingMode",
                 "@/lib/sanity/image-framing#visibleArea",
                 "@/lib/sanity/image#urlFor"
               ],
@@ -45271,11 +45271,26 @@
                 "policy": "required",
                 "scope": "item",
                 "closingTask": 177,
-                "fields": [],
-                "availability": "pending"
+                "fields": [
+                  "image"
+                ],
+                "availability": "verified"
               }
             ],
-            "evidence": []
+            "evidence": [
+              {
+                "id": "slotImage.framing.item",
+                "field": "image",
+                "resolvers": [
+                  "@/lib/sanity/image-framing#framingMode"
+                ],
+                "render": "src/features/pages/slots/render-slot.tsx",
+                "target": "img",
+                "cases": [
+                  "slotImage.framing.item"
+                ]
+              }
+            ]
           },
           "pictureDepth": {
             "notApplicable": "Framed by its host’s Image design (147 adopts it on Image + text)"

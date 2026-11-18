@@ -2294,6 +2294,14 @@ exports[`design capability evidence > siteFooter.icon.section: the probe changes
 ]
 `;
 
+exports[`design capability evidence > slotImage.framing.item: the probe changes the registered target 1`] = `
+[
+  "e61791b66c9b17de (243 characters)",
+  "56bb4cba03cb04c1 (246 characters)",
+  "eadb6639ea7fedfa (196 characters)",
+]
+`;
+
 exports[`design capability evidence > stats.depth.card@cards: the probe changes the registered target 1`] = `
 [
   "<li class="rounded-card border-t-4 border-accent bg-surface-alt p-8 shadow-(--card-depth,0_0_#0000) ring-1 ring-line text-center">",

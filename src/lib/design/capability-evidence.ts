@@ -121,6 +121,7 @@ const BUTTON = {
 } as const
 
 const CROPPED = { _type: 'sanity.imageCrop', top: 0.2, bottom: 0.2, left: 0.2, right: 0.2 }
+const HOTSPOT = { _type: 'sanity.imageHotspot', x: 0.2, y: 0.8, width: 0.2, height: 0.2 }
 
 // ---------------------------------------------------------------------------------------------------
 // The shared section style, drawn by SectionFrame
@@ -502,6 +503,22 @@ const slotBlockEvidence: CapabilityEvidence[] = [
     change: 'content',
     base: { badges: [{ _key: 'b1', _type: 'badge', label: 'Locally owned' }] },
     probe: { 'badges.0.icon': 'star' },
+  },
+  // The picture block (task 177), in every host layout. Beside the text, in a fixed shape, a stored hotspot makes the CDN
+  // serve the area "Adjust picture" shows; under the text, covering the section, it positions the background
+  // (Focus mode). Both ask `framingMode` which applies, so one claim holds in all three layouts.
+  {
+    id: 'slotImage.framing.item',
+    component: 'slotImage',
+    capability: 'framing',
+    scope: 'item',
+    field: 'image',
+    resolvers: [{ module: '@/lib/sanity/image-framing', export: 'framingMode' }],
+    render: 'src/features/pages/slots/render-slot.tsx',
+    target: 'img',
+    change: 'content',
+    base: { image: PICTURE },
+    probe: { 'image.hotspot': HOTSPOT },
   },
   {
     // The container around the icon: absent until the block's Icons box chooses a shape.
@@ -1094,7 +1111,7 @@ export const EVIDENCE: readonly Evidence[] = [
     layouts: ['split'],
     field: 'backgroundImage',
     resolvers: [
-      { module: '@/lib/sanity/image-framing', export: 'isFramed' },
+      { module: '@/lib/sanity/image-framing', export: 'framingMode' },
       { module: '@/lib/sanity/image-framing', export: 'visibleArea' },
       { module: '@/lib/sanity/image', export: 'urlFor' },
     ],
@@ -1186,7 +1203,7 @@ export const EVIDENCE: readonly Evidence[] = [
     layouts: ['side', 'stacked'],
     field: 'media[slotImage].image',
     resolvers: [
-      { module: '@/lib/sanity/image-framing', export: 'isFramed' },
+      { module: '@/lib/sanity/image-framing', export: 'framingMode' },
       { module: '@/lib/sanity/image-framing', export: 'visibleArea' },
       { module: '@/lib/sanity/image', export: 'urlFor' },
     ],

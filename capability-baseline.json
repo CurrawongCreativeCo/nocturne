@@ -119,13 +119,6 @@
       "closingTask": 177
     },
     {
-      "component": "slotImage",
-      "capability": "framing",
-      "scope": "item",
-      "layouts": [null],
-      "closingTask": 177
-    },
-    {
       "component": "eventDetailsCard",
       "capability": "surface",
       "scope": "card",

@@ -605,7 +605,7 @@ exports[`the design capability contract > siteFooter: reports what it offers tod
 exports[`the design capability contract > slotImage: reports what it offers today 1`] = `
 {
   "capabilities": [
-    "framing required item: pending (177)",
+    "framing required item: verified",
   ],
   "sources": [],
 }
