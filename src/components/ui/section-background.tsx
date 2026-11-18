@@ -1,6 +1,6 @@
 import { SanityImage } from '@/components/ui/sanity-image'
 import { urlFor } from '@/lib/sanity/image'
-import { hotspotObjectPosition } from '@/lib/sanity/image-focus'
+import { coverPosition } from '@/lib/sanity/image-focus'
 import {
   overlayGradientCss,
   resolveOverlayGradient,
@@ -202,7 +202,8 @@ function BackgroundPicture({
       sizes="100vw"
       className={placement.size === 'contain' ? 'object-contain' : 'object-cover'}
       style={{
-        objectPosition: placement.position ?? hotspotObjectPosition(image),
+        // Fill the section and Cover the screen: the hotspot decides (Focus mode); the others are placed by Position.
+        objectPosition: placement.position ?? coverPosition(image),
       }}
     />
   )

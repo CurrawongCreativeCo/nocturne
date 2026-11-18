@@ -312,6 +312,13 @@ interface StoredHeroSection {
 const heroImage: FramingResolver = {
   designPath: { drop: 1 },
   wholeNote: BACKGROUND_NOTE,
+  // Full background and Image with panel cover the section behind the text: Focus mode, not a shape.
+  focus: (design) => {
+    const variant = (design as StoredHeroSection | null | undefined)?.variant
+    return variant === 'overlay' || variant === 'full-bleed'
+      ? { frames: FOCUS_FRAMES, label: 'Hero background' }
+      : undefined
+  },
   resolve: (design) => {
     const section = design as StoredHeroSection | null | undefined
     if (section?.variant !== 'split') return []
@@ -484,6 +491,38 @@ const testimonialAvatar: FramingResolver = {
   },
 }
 
+interface StoredSectionStyle {
+  imageSize?: string | null
+}
+
+/**
+ * A section's Background image (task 177), on the section style every section shares. Fill the section and Cover
+ * the screen draw it covering their box, so only the hotspot applies, as `object-position` (Focus mode). Show the
+ * whole picture and Actual size are placed by the Position setting (and Repeat tiles it), which the hotspot doesn't
+ * move, so the field says so and keeps what is saved. The field is in the style object, one segment up.
+ */
+const sectionBackground: FramingResolver = {
+  designPath: { drop: 1 },
+  wholeNote: (design) => {
+    const size = (design as StoredSectionStyle | null | undefined)?.imageSize
+    const placed =
+      size === 'contain'
+        ? 'Show the whole picture is placed by Position'
+        : 'Actual size is placed by Position and Repeat'
+    return {
+      saved: `${placed}, so a focus isn’t used here. The saved focus is kept and applies again with Fill the section or Cover the screen.`,
+      unsaved: `${placed}, so there’s no focus to set here. Choose Fill the section or Cover the screen to set one.`,
+    }
+  },
+  focus: (design) => {
+    const size = (design as StoredSectionStyle | null | undefined)?.imageSize
+    return size === 'contain' || size === 'actual'
+      ? undefined
+      : { frames: FOCUS_FRAMES, label: 'Section background' }
+  },
+  resolve: () => [],
+}
+
 /** Registry keys, set on an image field with `framing('…')` (lib/sanity/schema/image-framing-option.ts). */
 export const FRAMING_RESOLVERS = {
   linkListProfile,
@@ -496,6 +535,7 @@ export const FRAMING_RESOLVERS = {
   videoPoster,
   teamPortrait,
   testimonialAvatar,
+  sectionBackground,
   // new-framing: resolver
 } satisfies Record<string, FramingResolver>
 

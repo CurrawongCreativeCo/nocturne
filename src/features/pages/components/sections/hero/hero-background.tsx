@@ -3,7 +3,7 @@ import { MotionDiv } from '@/components/motion/motion-elements'
 import { ParallaxImage } from '@/components/motion/parallax-image'
 import { partEnterProps, type PartPlan } from '@/components/motion/part-motion'
 import { SanityImage } from '@/components/ui/sanity-image'
-import { coverPosition, hotspotObjectPosition } from '@/lib/sanity/image-focus'
+import { coverPosition } from '@/lib/sanity/image-focus'
 import type { SanityImageData } from '@/types/sanity'
 
 import { backgroundImageClass } from './background-class'
@@ -19,20 +19,15 @@ export function HeroBackground({
   plan,
   isFirst,
   className,
-  focus = false,
 }: {
   image: SanityImageData | null | undefined
   plan: PartPlan | undefined
   isFirst: boolean
   /** Classes for the <img>, e.g. `object-cover opacity-40`. */
   className: string
-  /**
-   * Position the picture by Focus mode (task 177; `coverPosition`, which the editor's Focus dialog previews). The
-   * other backgrounds position by the hotspot through `hotspotObjectPosition`: the same value, until they adopt it.
-   */
-  focus?: boolean
 }) {
-  const position = focus ? coverPosition(image) : hotspotObjectPosition(image)
+  // Every background this draws covers its section, so only the hotspot applies: Focus mode (task 177).
+  const position = coverPosition(image)
   if (plan?.kind === 'parallax') {
     return (
       <ParallaxImage
