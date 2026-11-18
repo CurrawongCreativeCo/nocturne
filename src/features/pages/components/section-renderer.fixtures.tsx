@@ -66,10 +66,19 @@ const query = parse(
 )
 
 /** The sections as the page query returns them: references resolved, images expanded. */
-export async function projectSections(raw: readonly RawSection[]): Promise<PageSection[]> {
+export async function projectSections(
+  raw: readonly RawSection[],
+  /** Fixture documents to read changed, by `_id`: what a section draws from a document it refers to (a member, an event). */
+  changed: readonly Record<string, unknown>[] = [],
+): Promise<PageSection[]> {
   const { documents } = await loadDataset()
+  const ids = new Set(changed.map((doc) => doc._id))
   const value = await evaluate(query, {
-    dataset: [...documents, { _id: PROBE_ID, _type: 'page', pageBuilder: raw }],
+    dataset: [
+      ...documents.filter((doc) => !ids.has(doc._id)),
+      ...changed,
+      { _id: PROBE_ID, _type: 'page', pageBuilder: raw },
+    ],
     params: { members: true },
     timestamp: new Date(),
   })

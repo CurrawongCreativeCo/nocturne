@@ -39,6 +39,14 @@ interface EvidenceBase {
   resolvers: readonly { module: string; export: string }[]
   /** The file or folder that draws the target, checked to exist. */
   render: string
+  /**
+   * A section draws some content from documents it refers to (a team member's portrait, an event's picture). Naming
+   * one here makes the probe a change to that fixture document, not to the section: `field` and the probe's keys are
+   * relative to the document (`portrait`, `image.hotspot`) and the schema the field is checked in is `type`'s. Both
+   * renders read the document through the same query the page uses, so the claim is that the stored value reaches the
+   * target from the document, as it does on the site. `base` still sets the section.
+   */
+  document?: { type: string; id: string }
   /** Stored values both renders start from. `$picture` stands for the fixtures' picture. */
   base?: Patch
   /** What the probe sets on top of `base`. */
@@ -128,7 +136,7 @@ const HOTSPOT = { _type: 'sanity.imageHotspot', x: 0.2, y: 0.8, width: 0.2, heig
 
 const SECTION_CONTAINER = 'section > :last-child'
 
-type FrameCapability = 'overlay' | 'glass' | 'edge' | 'motion' | 'mark'
+type FrameCapability = 'overlay' | 'glass' | 'edge' | 'motion' | 'mark' | 'background'
 
 const FRAME: Record<FrameCapability, Omit<CapabilityEvidence, 'id' | 'component' | 'layouts'>> = {
   // A mark draws nothing until it is chosen, so the claim is that the probe draws it, from SectionFrame, on
@@ -156,6 +164,21 @@ const FRAME: Record<FrameCapability, Omit<CapabilityEvidence, 'id' | 'component'
     change: 'content',
     base: { 'style.image': PICTURE },
     probe: { 'style.overlay': 'strong' },
+  },
+  // The section's Background image (task 177): Fill the section and Cover the screen draw it covering the section,
+  // so only the hotspot applies, as the picture's `object-position` (Focus mode). `framingMode` is the one
+  // decision the editor's Focus dialog and this renderer both ask.
+  background: {
+    capability: 'framing',
+    scope: 'section',
+    part: 'background',
+    field: 'style.image',
+    resolvers: [{ module: '@/lib/sanity/image-framing', export: 'framingMode' }],
+    render: 'src/components/ui/section-background.tsx',
+    target: '[data-section-image]',
+    change: 'content',
+    base: { 'style.image': PICTURE },
+    probe: { 'style.image.hotspot': HOTSPOT },
   },
   glass: {
     capability: 'glass',
@@ -986,6 +1009,21 @@ export const EVIDENCE: readonly Evidence[] = [
     base: {},
     probe: { 'navigation.footerDividerDesign': { _type: 'decorativeDivider', style: 'line' } },
   },
+  // "Adjust picture" on a member's own page (task 177): the portrait is drawn square at 800 px, so the stored crop
+  // and hotspot reach it through the URL builder.
+  {
+    id: 'teamMemberPage.framing.portrait',
+    component: 'teamMemberPage',
+    capability: 'framing',
+    scope: 'section',
+    field: 'member.portrait',
+    resolvers: [{ module: '@/lib/sanity/image', export: 'urlFor' }],
+    render: 'src/features/team/components/team-member-page.tsx',
+    target: 'article img',
+    change: 'content',
+    base: {},
+    probe: { 'member.portrait.hotspot': HOTSPOT },
+  },
   // A member's divider (task 151): `settings.dividerDesign` (Team page settings) is drawn between the
   // member's summary and their biography, once there is a biography to separate it from.
   {
@@ -1121,6 +1159,35 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { backgroundImage: PICTURE, imageDesign: { appearance: 'framed' } },
     probe: { 'backgroundImage.crop': CROPPED },
   },
+  // "Focus" on the covering backgrounds (task 177): Full background and Image with panel draw `backgroundImage`
+  // behind the text, so only its hotspot applies, as `object-position`. Each way the picture can move is its own
+  // path to the same field: still, the section's Parallax, its Float, and a part entrance on the picture.
+  ...(
+    [
+      ['', 'still', {}],
+      ['.parallax', 'under the section’s Parallax', { 'style.motion': 'parallax' }],
+      ['.float', 'under the section’s Float', { 'style.motion': 'float' }],
+      [
+        '.entrance',
+        'with an entrance on the picture',
+        { partMotion: { _type: 'object', enabled: true, backgroundPreset: 'fade' } },
+      ],
+    ] as const
+  ).map(([id, , motion]): CapabilityEvidence => ({
+    id: `hero.framing.background${id}`,
+    component: 'hero',
+    capability: 'framing',
+    scope: 'section',
+    part: 'background',
+    layouts: ['overlay', 'full-bleed'],
+    field: 'backgroundImage',
+    resolvers: [{ module: '@/lib/sanity/image-framing', export: 'framingMode' }],
+    render: 'src/features/pages/components/sections/hero/hero-background.tsx',
+    target: 'section img',
+    change: 'content',
+    base: { backgroundImage: PICTURE, ...motion },
+    probe: { 'backgroundImage.hotspot': HOTSPOT },
+  })),
   // The hero's divider (task 151): `divider` is drawn under the title by HeroText, in every layout, once
   // the hero has a title and a description or buttons. The gallery's first Split hero has only a title, so
   // the base gives every layout the same description.
@@ -1171,6 +1238,7 @@ export const EVIDENCE: readonly Evidence[] = [
   ...frameEvidence('mediaText', {
     mark: ['side', 'stacked', 'overlay'],
     overlay: ['side', 'stacked'],
+    background: ['side', 'stacked'],
     glass: ['side', 'stacked', 'overlay'],
     edge: ['side', 'stacked', 'overlay'],
     motion: ['side', 'stacked', 'overlay'],
@@ -1303,6 +1371,7 @@ export const EVIDENCE: readonly Evidence[] = [
   },
   ...frameEvidence('testimonials', {
     overlay: ['grid', 'slider'],
+    background: ['grid', 'slider'],
     glass: ['grid', 'slider'],
     edge: ['grid', 'slider'],
     motion: ['grid', 'slider'],
@@ -1501,6 +1570,7 @@ export const EVIDENCE: readonly Evidence[] = [
   ...frameEvidence('richText', {
     mark: true,
     overlay: true,
+    background: true,
     glass: true,
     edge: true,
     motion: true,
@@ -1525,6 +1595,7 @@ export const EVIDENCE: readonly Evidence[] = [
   ...frameEvidence('featuresGrid', {
     mark: true,
     overlay: true,
+    background: true,
     glass: true,
     edge: true,
     motion: true,
@@ -1543,6 +1614,7 @@ export const EVIDENCE: readonly Evidence[] = [
   ...frameEvidence('logoCloud', {
     mark: ['grid', 'marquee'],
     overlay: ['grid', 'marquee'],
+    background: ['grid', 'marquee'],
     glass: ['grid', 'marquee'],
     edge: ['grid', 'marquee'],
     motion: ['grid', 'marquee'],
@@ -1570,7 +1642,14 @@ export const EVIDENCE: readonly Evidence[] = [
     roles: ['title', 'body'],
     depth: true,
   }),
-  ...frameEvidence('faq', { mark: true, overlay: true, glass: true, edge: true, motion: true }),
+  ...frameEvidence('faq', {
+    mark: true,
+    overlay: true,
+    background: true,
+    glass: true,
+    edge: true,
+    motion: true,
+  }),
   // The CTA banner draws its own card, so the shared Panel isn't offered: its glass is pending.
   ...cardFamilyEvidence({
     component: 'ctaBanner',
@@ -1596,7 +1675,13 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Ready?', text: 'An intro.' },
     probe: { 'cardDesign.shadow': 'floating' },
   },
-  ...frameEvidence('ctaBanner', { mark: true, overlay: true, edge: true, motion: true }),
+  ...frameEvidence('ctaBanner', {
+    mark: true,
+    overlay: true,
+    background: true,
+    edge: true,
+    motion: true,
+  }),
   ...cardFamilyEvidence({
     component: 'formSection',
     parts: ['header'],
@@ -1616,6 +1701,7 @@ export const EVIDENCE: readonly Evidence[] = [
   ...frameEvidence('formSection', {
     mark: true,
     overlay: true,
+    background: true,
     glass: true,
     edge: true,
     motion: true,
@@ -1669,6 +1755,7 @@ export const EVIDENCE: readonly Evidence[] = [
   ...frameEvidence('pricingTable', {
     mark: true,
     overlay: true,
+    background: true,
     glass: true,
     edge: true,
     motion: true,
@@ -1692,6 +1779,7 @@ export const EVIDENCE: readonly Evidence[] = [
   ...frameEvidence('newsletterSignup', {
     mark: true,
     overlay: true,
+    background: true,
     glass: true,
     edge: true,
     motion: true,
@@ -1713,6 +1801,7 @@ export const EVIDENCE: readonly Evidence[] = [
   ...frameEvidence('stats', {
     mark: ['inline', 'cards'],
     overlay: ['inline', 'cards'],
+    background: ['inline', 'cards'],
     glass: ['inline', 'cards'],
     edge: ['inline', 'cards'],
     motion: ['inline', 'cards'],
@@ -1791,6 +1880,7 @@ export const EVIDENCE: readonly Evidence[] = [
   ...frameEvidence('gallery', {
     mark: ['grid', 'masonry', 'slider'],
     overlay: ['grid', 'masonry', 'slider'],
+    background: ['grid', 'masonry', 'slider'],
     glass: ['grid', 'masonry', 'slider'],
     edge: ['grid', 'masonry', 'slider'],
     motion: ['grid', 'masonry', 'slider'],
@@ -1842,6 +1932,7 @@ export const EVIDENCE: readonly Evidence[] = [
   ...frameEvidence('location', {
     mark: true,
     overlay: true,
+    background: true,
     glass: true,
     edge: true,
     motion: true,
@@ -1911,9 +2002,51 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'Our people', text: 'An intro.' },
     probe: { 'cardDesign.actionStyle': 'arrow' },
   },
+  // "Adjust picture" on a team member's portrait (task 177). The portrait is a field on the member document, so
+  // the probe changes the fixture member the section refers to, and the section draws it through the page's own
+  // query. Grid and slider cards serve the area the editor shows (`framingMode`: FramedImage's placement); the
+  // list's portrait is drawn at its own square size, so the stored crop and hotspot reach it through the URL builder.
+  {
+    id: 'team.framing.portrait',
+    component: 'team',
+    capability: 'framing',
+    scope: 'card',
+    part: 'portrait',
+    layouts: ['grid', 'slider'],
+    field: 'portrait',
+    document: { type: 'teamMember', id: 'teamMember-ann' },
+    // A hotspot reaches a square card both through the placement (`framingMode`) and, cut at the card's own size,
+    // through the URL builder (`urlFor`): the claim is the whole path, so both are cut together.
+    resolvers: [
+      { module: '@/lib/sanity/image-framing', export: 'framingMode' },
+      { module: '@/lib/sanity/image', export: 'urlFor' },
+    ],
+    render: 'src/features/pages/components/sections/team/team-card.tsx',
+    // Every member's portrait is an <img>; only Ann's (the member the probe changes) changes.
+    target: 'section img',
+    change: 'content',
+    probe: { 'portrait.hotspot': HOTSPOT },
+  },
+  {
+    id: 'team.framing.portrait.list',
+    component: 'team',
+    capability: 'framing',
+    scope: 'card',
+    part: 'portrait',
+    layouts: ['list'],
+    field: 'portrait',
+    document: { type: 'teamMember', id: 'teamMember-ann' },
+    resolvers: [{ module: '@/lib/sanity/image', export: 'urlFor' }],
+    render: 'src/components/ui/profile-image.tsx',
+    // Every member's portrait is an <img>; only Ann's (the member the probe changes) changes.
+    target: 'section img',
+    change: 'content',
+    probe: { 'portrait.hotspot': HOTSPOT },
+  },
   ...frameEvidence('team', {
     mark: ['grid', 'slider', 'list'],
     overlay: ['grid', 'slider', 'list'],
+    background: ['grid', 'slider', 'list'],
     glass: ['grid', 'slider', 'list'],
     edge: ['grid', 'slider', 'list'],
     motion: ['grid', 'slider', 'list'],
@@ -1931,6 +2064,7 @@ export const EVIDENCE: readonly Evidence[] = [
   }),
   ...frameEvidence('video', {
     overlay: ['embed', 'ambient'],
+    background: ['embed', 'ambient'],
     glass: ['embed', 'ambient'],
     edge: ['embed', 'ambient'],
     motion: ['embed', 'ambient'],
@@ -1973,6 +2107,7 @@ export const EVIDENCE: readonly Evidence[] = [
   ...frameEvidence('process', {
     mark: ['vertical', 'alternating'],
     overlay: ['vertical', 'alternating'],
+    background: ['vertical', 'alternating'],
     glass: ['vertical', 'alternating'],
     edge: ['vertical', 'alternating'],
     motion: ['vertical', 'alternating'],
@@ -1993,7 +2128,13 @@ export const EVIDENCE: readonly Evidence[] = [
     target: 'div.flex.flex-col.items-center.justify-center.rounded-card',
     change: 'attributes',
   }),
-  ...frameEvidence('embed', { overlay: true, glass: true, edge: true, motion: true }),
+  ...frameEvidence('embed', {
+    overlay: true,
+    background: true,
+    glass: true,
+    edge: true,
+    motion: true,
+  }),
   ...cardFamilyEvidence({
     component: 'events',
     layouts: ['list', 'agenda', 'featured'],
@@ -2046,9 +2187,27 @@ export const EVIDENCE: readonly Evidence[] = [
     base: { eyebrow: 'What’s on', text: 'An intro.' },
     probe: { 'cardDesign.actionStyle': 'arrow' },
   })),
+  // "Adjust picture" on an event's picture (task 177): Featured draws the picture of the event the query returns, at
+  // 16:9, and the stored crop and hotspot reach it through the URL builder. The probe changes the fixture event.
+  {
+    id: 'events.framing.picture',
+    component: 'events',
+    capability: 'framing',
+    scope: 'card',
+    part: 'picture',
+    layouts: ['featured'],
+    field: 'image',
+    document: { type: 'event', id: 'event-hand-building-workshop' },
+    resolvers: [{ module: '@/lib/sanity/image', export: 'urlFor' }],
+    render: 'src/features/pages/components/sections/events/featured.tsx',
+    target: 'section img',
+    change: 'content',
+    probe: { 'image.hotspot': HOTSPOT },
+  },
   ...frameEvidence('events', {
     mark: ['list', 'agenda', 'featured'],
     overlay: ['list', 'agenda', 'featured'],
+    background: ['list', 'agenda', 'featured'],
     glass: ['list', 'agenda', 'featured'],
     edge: ['list', 'agenda', 'featured'],
     motion: ['list', 'agenda', 'featured'],
@@ -2095,6 +2254,7 @@ export const EVIDENCE: readonly Evidence[] = [
   ...frameEvidence('linkList', {
     mark: ['stacked', 'cards', 'editorial', 'compact'],
     overlay: ALL_LINK_LIST,
+    background: ALL_LINK_LIST,
     edge: ALL_LINK_LIST,
     motion: ALL_LINK_LIST,
   }),

@@ -61,6 +61,8 @@ export interface ManifestPolicy {
 export interface ManifestEvidence {
   id: string
   field: string
+  /** The document type `field` is on, when the probe changes a document the section draws from (a member, an event). */
+  document?: string
   /** Each `module#export` the renderer reaches the target through. */
   resolvers: readonly string[]
   render: string
@@ -103,6 +105,7 @@ function evidenceFor(
     .map((entry) => ({
       id: entry.id,
       field: entry.field,
+      ...(entry.document ? { document: entry.document.type } : {}),
       resolvers: entry.resolvers.map((resolver) => `${resolver.module}#${resolver.export}`),
       render: entry.render,
       target: entry.target,
@@ -188,7 +191,9 @@ export function componentContract(
                   entry.component === component.id &&
                   entry.capability === capability &&
                   entry.scope === applicable.scope &&
-                  (entry.part ?? '') === (applicable.part ?? ''),
+                  (entry.part ?? '') === (applicable.part ?? '') &&
+                  // A field of a document the section draws from isn't one a change to the section can set.
+                  !entry.document,
               )
               .map((entry) => entry.field),
           ),

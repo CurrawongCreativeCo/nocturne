@@ -14,6 +14,7 @@ import {
   renderSections,
   stableOutput,
   type RawSection,
+  fixtureDocuments,
 } from '@/features/pages/components/section-renderer.fixtures'
 import type { TextRole } from '@/lib/design/capabilities'
 import { capabilityAvailability, caseId, casesOf } from '@/lib/design/capability-availability'
@@ -195,9 +196,9 @@ const ROOT = join(import.meta.dirname, '..', '..')
 const unsetFor = (probe: Patch): Patch =>
   Object.fromEntries(Object.keys(probe).map((path) => [path, null]))
 
-async function draw(raw: RawSection) {
+async function draw(raw: RawSection, changed: readonly Record<string, unknown>[] = []) {
   // Not the first section, so nothing is held back for the page's <h1> or its first paint.
-  return renderSections(await projectSections([raw]), { belowHeading: true })
+  return renderSections(await projectSections([raw], changed), { belowHeading: true })
 }
 
 /**
@@ -234,6 +235,30 @@ async function renderingsOf(
   const component = components.find((candidate) => candidate.id === entry.component)
   const picture = await fixturePictureId()
   if (!component) throw new Error(`${entry.component} isn't a component the contract covers.`)
+  if (component.kind === 'section' && entry.document) {
+    // The probe changes a document the section draws from (a member, an event): the page query reads it through the
+    // reference, as the site does, from the fixture documents with this one's copy swapped in.
+    const { id } = entry.document
+    const original = (await fixtureDocuments()).find((doc) => doc._id === id)
+    if (!original)
+      throw new Error(`${entry.id} names a fixture document that doesn't exist: ${id}.`)
+    const section = withPicture(
+      applyPatch(await gallerySeed(entry.component, layout), entry.base),
+      picture,
+    )
+    const unsetDoc = withPicture(
+      applyPatch(structuredClone(original), unsetFor(entry.probe)),
+      picture,
+    )
+    const probedDoc = withPicture(applyPatch(unsetDoc, entry.probe), picture)
+    return [
+      {
+        label: layout ?? entry.component,
+        unset: () => draw(section, [unsetDoc]),
+        probed: () => draw(section, [probedDoc]),
+      },
+    ]
+  }
   if (component.kind === 'section') {
     const seed = await gallerySeed(entry.component, layout)
     const states = twoStates(seed, entry, picture)

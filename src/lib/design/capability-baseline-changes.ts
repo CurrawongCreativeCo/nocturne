@@ -67,18 +67,6 @@ export const BASELINE_CHANGES: readonly BaselineChange[] = [
   // Task 158 declares the site footer and the team member page as views. Each gap below is a capability
   // another task owns, admitted when the view enters the contract. Owner decision, 8 November 2026.
   {
-    kind: 'admit',
-    component: 'teamMemberPage',
-    capability: 'framing',
-    scope: 'section',
-    layouts: [null],
-    reason:
-      'The portrait is cropped to a fixed square. Framing it is task 177’s, which gives the page a design to store the frame in.',
-    reviewer: 'owner',
-    reviewed: '2026-11-08',
-    closingTask: 177,
-  },
-  {
     ...VIEW_ROW,
     component: 'eventDetailsCard',
     capability: 'surface',

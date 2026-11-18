@@ -51,6 +51,9 @@ export const casesOf = (entry: Evidence): (string | null)[] =>
 
 const stateOf = (entry: Evidence) => applyPatch(applyPatch({}, entry.base), entry.probe)
 
+/** The schema an entry's field is in: the document's when the probe changes a document the section draws from. */
+const schemaOf = (entry: Evidence) => entry.document?.type ?? entry.component
+
 export interface AvailabilityCell {
   capability: CapabilityId
   scope: Scope | null
@@ -97,7 +100,7 @@ function shortfall(
   results: CaseResults | undefined,
   capability?: CapabilityId,
 ): string | undefined {
-  const field = gate.field(entry.component, entry.field)
+  const field = gate.field(schemaOf(entry), entry.field)
   if ('missing' in field) return field.missing
   if (capability && field.marker.capability !== capability) {
     return `${entry.field} isn't marked as ${capability}`
@@ -106,7 +109,12 @@ function shortfall(
   if (role && field.marker.role !== role) {
     return `${entry.field} isn't stamped for the ${role} role${field.marker.role ? ` (it is ${field.marker.role})` : ''}`
   }
-  const offered = gate.offered(entry.component, layout, entry.field, stateOf(entry))
+  const offered = gate.offered(
+    schemaOf(entry),
+    entry.document ? null : layout,
+    entry.field,
+    entry.document ? applyPatch({}, entry.probe) : stateOf(entry),
+  )
   if (!offered.offered) return offered.reason
   const result = results?.get(caseId(entry, layout))
   if (results && result !== 'changed') {
@@ -332,7 +340,7 @@ export function evidenceProblems(
       )
       continue
     }
-    const field = gate.field(entry.component, entry.field)
+    const field = gate.field(schemaOf(entry), entry.field)
     if ('missing' in field) {
       problem(
         `its field doesn't exist (${field.missing}).`,
@@ -410,7 +418,12 @@ export function evidenceProblems(
       continue
     }
     for (const layout of casesOf(entry)) {
-      const offered = gate.offered(entry.component, layout, entry.field, stateOf(entry))
+      const offered = gate.offered(
+        schemaOf(entry),
+        entry.document ? null : layout,
+        entry.field,
+        entry.document ? applyPatch({}, entry.probe) : stateOf(entry),
+      )
       if (!offered.offered) {
         problem(
           `the schema doesn't offer ${entry.field}${layout ? ` on ${layout}` : ''} (${offered.reason}).`,
