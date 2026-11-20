@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
 import type { SectionStyleInput } from '@/components/ui/section-style'
-import { edgeVisibility } from '@/lib/color/edge-visibility'
 import { colorHex } from '@/config/tokens.generated'
+import { edgeVisibility } from '@/lib/color/edge-visibility'
 
 import { edgeLayerColourFieldHidden, staleLayerColourFieldMessage } from './section-form'
 
