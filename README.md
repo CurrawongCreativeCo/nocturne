@@ -4984,15 +4984,27 @@ the sticky header above them, Classic's colours unchanged beside them, and the f
 specs also run in WebKit locally with `npx playwright test -c playwright.webkit.config.ts` (Playwright's WebKit build, not
 Safari or an iPhone).
 
-**Authored edges (composable section edges, Task 1).** A section can also store `composedEdge`: one contour, up to three
+**Authored edges (composable section edges, Tasks 1 and 2).** A section can also store `composedEdge`: one contour, up to three
 paint layers, a width and alignment, a centre icon or picture and a shadow, described in
-[the section edge contract](docs/nocturne/composable-section-edges.md). Studio does not show it yet (Task 2 adds the
-editor). A composition that can render replaces the saved shape; one that can't leaves the saved shape's output exactly
+[the section edge contract](docs/nocturne/composable-section-edges.md). Task 2 adds the one **Section edge editor** (below). A composition that can render replaces the saved shape; one that can't leaves the saved shape's output exactly
 as it was. **Shadow depth** (blur, distance, opacity), a layer's **vertical offset** and the generated shapes' **Layer
 spacing** (stored as `edgeDepth`: `shallow`, `standard`, `deep`, shown as Close, Standard, Wide) are separate settings.
 Tests: `composed-section-edge.test.tsx` (the resolver, the saved-data query, both output modes, precedence and fallback),
 `section-edge-css.test.tsx` (forced colours, no mask) and `tests/e2e/section-edge-authored.spec.ts`
 (`/edge-composed-authored`, at 1440 and 390 px).
+
+**Section edge editor (Task 2).** Agency staff see it as **Custom section edge** in a section's Design tab (clients never
+reach that tab). _Start from the starting design_ gives a rolling cut with a soft tint on its own contour, a gradient
+line and a gentle shadow; Basics (transition or rule, height, artwork width and alignment), Contour, Paint layers,
+Centre and Shadow depth follow, then Site designs. Contour points can be dragged, moved with the arrow keys (Shift for 5%)
+or typed, and the editor only writes compositions the page draws. Undo steps back through the editor's own changes;
+Reset returns to the starting design and Remove clears the field. The preview and the Studio warnings use the same
+resolver as the page (`resolveSectionEdge`), so they describe the edge that draws. A stored edge that cannot draw is
+listed with its fix, and the page keeps the saved shape. **Site designs are independent copies** kept in Brand colours
+(`designSettings.edgeDesigns`, agency only, drafts until Brand colours is published): saving copies the section's edge in,
+applying copies a design into a section, and later edits to either never reach the other. Tests:
+`composed-edge-editor.test.ts`, `edge-designs.test.ts`, `composed-edge-warnings.test.ts` and the component tests in
+`features/studio/components/section-edge/` (including `walkthrough.test.tsx`).
 
 ### Paragraphs in plain text
 

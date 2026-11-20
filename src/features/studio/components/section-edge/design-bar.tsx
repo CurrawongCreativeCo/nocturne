@@ -99,7 +99,12 @@ export function DesignBar({
           <select
             id={`${id}-apply`}
             value={chosen}
-            disabled={readOnly === true || busy || !designs?.length}
+            // Not disabled when empty: focusing it is how a design saved elsewhere since loading turns up.
+            disabled={readOnly === true || busy}
+            onFocus={() => {
+              // Another section may have saved a design since this one loaded.
+              void reload()
+            }}
             onChange={(event) => {
               setChosen(event.currentTarget.value)
             }}

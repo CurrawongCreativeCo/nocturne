@@ -11,8 +11,7 @@ Each card keeps its **original acceptance criteria verbatim** (from the producti
 
 ## Card 1 — Composable section edges, Task 1: unified model and renderer
 
-- **Parent:** Task 151 (section dividers). **Status to import:** `doing` (draft PR #236, awaiting the owner’s Task 1
-  review). **Contract:** [composable-section-edges.md](./composable-section-edges.md).
+- **Parent:** Task 151 (section dividers). **Status to import:** `done` (PR #236 merged 20 November, `e9b78d0`). **Contract:** [composable-section-edges.md](./composable-section-edges.md).
 
 **Original acceptance criteria**
 
@@ -46,7 +45,7 @@ Each card keeps its **original acceptance criteria verbatim** (from the producti
 
 ## Card 2 — Composable section edges, Task 2: Studio editing and reusable site designs
 
-- **Depends on:** Card 1 merged after the owner's review. **Status to import:** `todo`.
+- **Depends on:** Card 1 (merged). **Status to import:** `doing` (draft PR, `feat/composed-edge-task-2`).
 
 **Original acceptance criteria**
 
@@ -68,7 +67,11 @@ Each card keeps its **original acceptance criteria verbatim** (from the producti
 - A real Studio check of hidden-field validation **before** enabling import or editing: verify whether an out-of-range
   saved value can block publish without a visible fix. Task 1 made every rule on the hidden field a warning; Task 2
   decides the levels once the controls are visible, and must not re-introduce an error the editor cannot reach.
-- Decide copy versus linked behaviour before implementing saved designs.
+- Decided: saved designs are independent copies (`designSettings.edgeDesigns`, agency only). Applying copies the settings
+  into the section with fresh keys; later edits to either never reach the other.
+- Done in the draft: the Section edge editor with a starting design, Basics, Contour, Layers, Centre, Shadow; warnings read
+  `resolveSectionEdge`; undo, reset, keyboard and number entry for contours; a walkthrough test of build → save → apply →
+  customise. Still to observe: the same walkthrough, hidden-field validation and a legacy saved edge in a real signed-in Studio.
 
 ## Card 3 — Composable section edges, Task 3: end-to-end verification and release readiness
 
