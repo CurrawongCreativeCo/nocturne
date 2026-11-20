@@ -5002,7 +5002,7 @@ Reset returns to the starting design and Remove clears the field. The preview an
 resolver as the page (`resolveSectionEdge`), so they describe the edge that draws. A stored edge that cannot draw is
 listed with its fix, and the page keeps the saved shape. **Site designs are independent copies** kept in Brand colours
 (`designSettings.edgeDesigns`, agency only, drafts until Brand colours is published): saving copies the section's edge in,
-applying copies a design into a section, and later edits to either never reach the other. Tests:
+applying copies a design into a section, **Rename** changes only its name (checked against the stored list, so a duplicate from another editor is caught), and later edits to either never reach the other. Tests:
 `composed-edge-editor.test.ts`, `edge-designs.test.ts`, `composed-edge-warnings.test.ts` and the component tests in
 `features/studio/components/section-edge/` (including `walkthrough.test.tsx`).
 

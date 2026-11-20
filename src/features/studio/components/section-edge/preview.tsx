@@ -1,6 +1,9 @@
+import { useId } from 'react'
+
 import { closeToBottom, closeToTop } from '@/components/ui/section-edges'
 import { colorHex } from '@/config/tokens.generated'
 import { resolveComposedEdge, type ResolvedComposedEdge } from '@/lib/sanity/composed-edge'
+import { asProjected } from '@/lib/sanity/composed-edge-editor'
 
 const HEIGHT = { small: 90, medium: 130, large: 170 } as const
 /** Room above the band for the upper section's colour. */
@@ -22,7 +25,7 @@ const hex = (role: string) => ROLE_HEX[role] ?? colorHex.accent
  * site's. Decorative: the controls beside it say the same things in words.
  */
 export function EdgePreview({ value }: { value: unknown }) {
-  const edge = resolveComposedEdge(value)
+  const edge = resolveComposedEdge(asProjected(value))
   if (!edge) {
     return (
       <div
@@ -65,6 +68,10 @@ export function EdgePreview({ value }: { value: unknown }) {
 }
 
 function PreviewSvg({ edge, height }: { edge: ResolvedComposedEdge; height: number }) {
+  // Every definition id carries this instance's id, so two previews on one page never share or shadow one.
+  const uid = useId()
+  const ref = (name: string) => `${uid}-${name}`
+  const url = (name: string) => `url(#${ref(name)})`
   const { start, end } = edge.span
   const mid = edge.centre?.x
   const gap = edge.centre ? edge.centre.gap / 2 : 0
@@ -73,7 +80,7 @@ function PreviewSvg({ edge, height }: { edge: ResolvedComposedEdge; height: numb
   const total = 1 + ABOVE
   const planes = (placement: string) => edge.layers.filter((layer) => layer.placement === placement)
   const paintOf = (layer: ResolvedComposedEdge['layers'][number], index: number) =>
-    layer.paint.kind === 'gradient' ? `url(#g${String(index)})` : hex(layer.paint.colour)
+    layer.paint.kind === 'gradient' ? url(`g${String(index)}`) : hex(layer.paint.colour)
   const layerPath = (layer: ResolvedComposedEdge['layers'][number], index: number) =>
     layer.placement === 'stroke' ? (
       <path
@@ -106,7 +113,7 @@ function PreviewSvg({ edge, height }: { edge: ResolvedComposedEdge; height: numb
       style={{ display: 'block', borderRadius: 4, overflow: 'hidden' }}
     >
       <defs>
-        <clipPath id="span" clipPathUnits="userSpaceOnUse">
+        <clipPath id={ref('span')} clipPathUnits="userSpaceOnUse">
           {mid === undefined ? (
             <rect x={start} y={top} width={end - start} height={total} />
           ) : (
@@ -116,12 +123,12 @@ function PreviewSvg({ edge, height }: { edge: ResolvedComposedEdge; height: numb
             </>
           )}
         </clipPath>
-        <clipPath id="upper" clipPathUnits="userSpaceOnUse">
+        <clipPath id={ref('upper')} clipPathUnits="userSpaceOnUse">
           <path d={closeToTop(edge.cut)} />
           <rect x="0" y={top} width="1" height={ABOVE} />
         </clipPath>
         <filter
-          id="shade"
+          id={ref('shade')}
           filterUnits="userSpaceOnUse"
           x="0"
           y="-1"
@@ -147,7 +154,7 @@ function PreviewSvg({ edge, height }: { edge: ResolvedComposedEdge; height: numb
           layer.paint.kind === 'gradient' ? (
             <linearGradient
               key={layer.key}
-              id={`g${String(i)}`}
+              id={ref(`g${String(i)}`)}
               gradientUnits="userSpaceOnUse"
               x1={start}
               x2={end}
@@ -172,18 +179,18 @@ function PreviewSvg({ edge, height }: { edge: ResolvedComposedEdge; height: numb
       {/* The section below, and what paints under the cut. */}
       <rect x="0" y={top} width="1" height={total} fill={colorHex.surfaceAlt} />
       {!rule && (
-        <g clipPath="url(#span)">
+        <g clipPath={url('span')}>
           {planes('below').map((layer) => layerPath(layer, index(layer)))}
         </g>
       )}
-      {!rule && edge.shadow && <path d={closeToTop(edge.cut)} filter="url(#shade)" />}
+      {!rule && edge.shadow && <path d={closeToTop(edge.cut)} filter={url('shade')} />}
       {/* The upper section, cut along the contour, with its tints inside it. */}
       {!rule ? (
         <>
           <path d={closeToTop(edge.cut)} fill={colorHex.surface} />
           <rect x="0" y={top} width="1" height={ABOVE} fill={colorHex.surface} />
-          <g clipPath="url(#upper)">
-            <g clipPath="url(#span)">
+          <g clipPath={url('upper')}>
+            <g clipPath={url('span')}>
               {planes('above').map((layer) => layerPath(layer, index(layer)))}
             </g>
           </g>
@@ -191,11 +198,11 @@ function PreviewSvg({ edge, height }: { edge: ResolvedComposedEdge; height: numb
       ) : (
         <>
           <rect x="0" y={top} width="1" height={ABOVE + 1} fill={colorHex.surface} />
-          <g clipPath="url(#span)">{edge.layers.map((layer) => layerPath(layer, index(layer)))}</g>
+          <g clipPath={url('span')}>{edge.layers.map((layer) => layerPath(layer, index(layer)))}</g>
         </>
       )}
       {!rule && (
-        <g clipPath="url(#span)">
+        <g clipPath={url('span')}>
           {planes('stroke').map((layer) => layerPath(layer, index(layer)))}
         </g>
       )}

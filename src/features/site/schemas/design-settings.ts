@@ -427,7 +427,9 @@ export const designSettings = defineType({
             defineField({
               name: 'name',
               type: 'string',
-              validation: (rule) => rule.required().max(60),
+              // Warnings only: the field is hidden, so an error here could not be fixed where it is shown.
+              // The editor refuses an empty, long or duplicate name when saving or renaming.
+              validation: (rule) => rule.required().max(60).warning(),
             }),
             defineField({ name: 'edge', type: 'object', fields: composedEdgeFields }),
           ],

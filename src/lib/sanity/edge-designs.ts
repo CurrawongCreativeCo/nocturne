@@ -67,7 +67,7 @@ export async function fetchEdgeDesigns(client: DesignClient): Promise<EdgeDesign
 /** The name as saved, or why it cannot be used. */
 export function checkDesignName(
   name: string,
-  existing: readonly EdgeDesign[],
+  existing: readonly { _key: string; name: string }[],
   exceptKey?: string,
 ): string {
   const trimmed = name.trim().replace(/\s+/g, ' ')
@@ -82,6 +82,20 @@ export function checkDesignName(
       `A design called “${clash.name}” already exists. Choose another name.`,
     )
   return trimmed
+}
+
+/**
+ * Every name in the stored list as it is now, drafts first, including designs the picker would not offer (one that
+ * no longer draws still owns its name). Read at the moment of saving or renaming: the dropdown's list is a cache,
+ * and another editor may have added a design since it loaded.
+ */
+async function storedNames(client: DesignClient): Promise<{ _key: string; name: string }[]> {
+  const list = await client.fetch<unknown>(LIST)
+  if (!Array.isArray(list)) return []
+  return (list as unknown[]).filter(
+    (item): item is { _key: string; name: string } =>
+      isRecord(item) && typeof item._key === 'string' && typeof item.name === 'string',
+  )
 }
 
 /** Make sure the draft of Design settings exists (copied from the published one), then run `change` on it. */
@@ -105,18 +119,36 @@ export async function saveEdgeDesign(
   client: DesignClient,
   name: string,
   edge: EdgeValue,
-  existing: readonly EdgeDesign[],
 ): Promise<EdgeDesign> {
   if (edgeProblems(edge).length > 0)
     throw new EdgeDesignError('Fix the problems in this edge before saving it as a design.')
   const design: EdgeDesign = {
     _key: newKey(),
     _type: 'edgeDesign',
-    name: checkDesignName(name, existing),
+    name: checkDesignName(name, await storedNames(client)),
     edge: copyEdge(edge),
   }
   await onDraft(client, (patch) => patch.insert('after', 'edgeDesigns[-1]', [design]))
   return design
+}
+
+/**
+ * Rename a design. Only its name changes: the key, the settings and every section copy made from it stay as they
+ * are (a section keeps no reference to the design). The name is checked against the list as stored now.
+ */
+export async function renameEdgeDesign(
+  client: DesignClient,
+  key: string,
+  name: string,
+): Promise<string> {
+  const stored = await storedNames(client)
+  if (!stored.some((design) => design._key === key))
+    throw new EdgeDesignError(
+      'That design is no longer in the list. Reload the designs and try again.',
+    )
+  const next = checkDesignName(name, stored, key)
+  await onDraft(client, (patch) => patch.set({ [`edgeDesigns[_key=="${key}"].name`]: next }))
+  return next
 }
 
 export async function deleteEdgeDesign(client: DesignClient, key: string): Promise<void> {

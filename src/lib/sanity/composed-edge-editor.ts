@@ -3,7 +3,9 @@ import {
   COMPOSED_EDGE_MAX_LAYERS,
   COMPOSED_EDGE_MAX_POINTS,
   COMPOSED_EDGE_PLACEMENTS,
+  COMPOSED_EDGE_GAP_TOLERANCE,
   COMPOSED_EDGE_POINT_GAP,
+  gapAllowed,
   resolveComposedEdge,
 } from './composed-edge'
 
@@ -201,7 +203,7 @@ function lineAt(points: EdgePoint[], x: number): number {
 export function cannotAddPoint(contour: EdgeContour): string | undefined {
   if (contour.points.length >= COMPOSED_EDGE_MAX_POINTS)
     return `A contour has at most ${String(COMPOSED_EDGE_MAX_POINTS)} points.`
-  return widestGap(contour.points).width < COMPOSED_EDGE_POINT_GAP * 2
+  return widestGap(contour.points).width < COMPOSED_EDGE_POINT_GAP * 2 - COMPOSED_EDGE_GAP_TOLERANCE
     ? 'There is no room: points must stay at least 4% apart.'
     : undefined
 }
@@ -322,7 +324,7 @@ function contourProblems(value: unknown, control: string, label: string): EdgePr
       return fix(`${at} has no position.`)
     if (!(p.x >= 0 && p.x <= 100 && p.y >= 0 && p.y <= 100))
       return fix(`${at} is outside the band (0 to 100).`)
-    if (lastX !== undefined && p.x - lastX < COMPOSED_EDGE_POINT_GAP)
+    if (lastX !== undefined && !gapAllowed(lastX, p.x))
       return fix(`${at} is closer than ${String(COMPOSED_EDGE_POINT_GAP)}% to the one before it.`)
     if (typeof p._key === 'string') {
       if (keys.has(p._key)) return fix(`${at} repeats another point’s key.`)
@@ -409,3 +411,19 @@ export function describeEdge(value: EdgeValue): string {
 
 /** Whether the composition draws, by the same resolver the page uses. */
 export const edgeDraws = (value: unknown): boolean => resolveComposedEdge(value) !== undefined
+
+/**
+ * The value as the page reads it. Studio stores a centre picture as `image.asset._ref`; the page's query projects
+ * the asset to `_id`, which is what `resolveComposedEdge` reads. The preview resolves this projection, so a real
+ * selected picture opens the gap, and a missing or malformed reference (no usable id) closes it, as on the page.
+ */
+export function asProjected(value: unknown): unknown {
+  if (typeof value !== 'object' || value === null) return value
+  const edge = value as { centre?: { image?: { asset?: { _id?: unknown; _ref?: unknown } } } }
+  const asset = edge.centre?.image?.asset
+  if (!asset || asset._id !== undefined || typeof asset._ref !== 'string') return value
+  return {
+    ...edge,
+    centre: { ...edge.centre, image: { ...edge.centre?.image, asset: { _id: asset._ref } } },
+  }
+}

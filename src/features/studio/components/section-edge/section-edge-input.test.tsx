@@ -209,3 +209,69 @@ describe('a stored edge that cannot draw', () => {
     )
   })
 })
+
+/** The previews on the page, found by their accessible name. */
+const previews = () => screen.queryAllByRole('img', { name: /Preview of the edge/ })
+/** The dashed marker for a centre opening (the only span inside a preview). */
+const centreMarker = () => previews()[0]?.getElementsByTagName('span')[0] ?? null
+
+describe('the preview', () => {
+  const REF = 'image-0123456789abcdef0123456789abcdef01234567-640x480-jpg'
+  const withImage = (asset: unknown) => ({
+    ...startingEdge(),
+    centre: { kind: 'image', gap: 30, image: { _type: 'image', asset } },
+  })
+
+  it('opens the gap for a real selected picture (Studio’s _ref) and closes it for an unavailable one', () => {
+    const { unmount } = render(
+      <ThemeProvider theme={theme}>
+        <div data-testid="a">
+          <SectionEdgeInput {...propsFor(withImage({ _type: 'reference', _ref: REF }))} />
+        </div>
+      </ThemeProvider>,
+    )
+    expect(centreMarker()).toBeTruthy()
+    unmount()
+    render(
+      <ThemeProvider theme={theme}>
+        <SectionEdgeInput {...propsFor(withImage({ _type: 'reference', _ref: 'missing' }))} />
+      </ThemeProvider>,
+    )
+    expect(previews()).toHaveLength(1)
+    expect(centreMarker()).toBeNull()
+  })
+
+  it('gives each preview its own definition ids, so two on a page draw independently', () => {
+    render(
+      <ThemeProvider theme={theme}>
+        <SectionEdgeInput {...propsFor(startingEdge())} />
+        <SectionEdgeInput {...propsFor(startingEdge())} />
+      </ThemeProvider>,
+    )
+    const ids = previews().flatMap((preview) =>
+      [...preview.querySelectorAll('[id]')].map((el) => el.id),
+    )
+    expect(ids.length).toBeGreaterThan(6)
+    expect(new Set(ids).size).toBe(ids.length)
+    // Every reference points at an id that exists in its own preview.
+    for (const preview of previews()) {
+      const own = new Set([...preview.querySelectorAll('[id]')].map((el) => el.id))
+      const used = [...preview.innerHTML.matchAll(/url\(#([^)]+)\)/g)].map((m) => m[1] ?? '')
+      expect(used.length).toBeGreaterThan(0)
+      for (const id of used) expect(own.has(id)).toBe(true)
+    }
+  })
+})
+
+function propsFor(value: unknown): ObjectInputProps {
+  return {
+    value,
+    onChange: vi.fn(),
+    readOnly: false,
+    members: [],
+    renderInput: () => null,
+    renderField: () => null,
+    renderItem: () => null,
+    renderPreview: () => null,
+  } as unknown as ObjectInputProps
+}

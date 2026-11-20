@@ -8,6 +8,7 @@ import {
   applyEdgeDesign,
   deleteEdgeDesign,
   fetchEdgeDesigns,
+  renameEdgeDesign,
   saveEdgeDesign,
   type DesignClient,
 } from '@/lib/sanity/edge-designs'
@@ -36,6 +37,7 @@ export function DesignBar({
   const [chosen, setChosen] = useState('')
   const [status, setStatus] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null)
   const [busy, setBusy] = useState(false)
+  const [renaming, setRenaming] = useState<string | null>(null)
 
   const unreadable = 'Saved designs could not be read. Try again in a moment.'
   useEffect(() => {
@@ -107,6 +109,7 @@ export function DesignBar({
             }}
             onChange={(event) => {
               setChosen(event.currentTarget.value)
+              setRenaming(null)
             }}
             style={{ padding: 6, fontSize: 13, minWidth: 180 }}
           >
@@ -142,6 +145,18 @@ export function DesignBar({
           <Button
             type="button"
             mode="bleed"
+            fontSize={1}
+            padding={2}
+            text="Rename design"
+            aria-label={selected ? `Rename the design ${selected.name}` : 'Rename design'}
+            disabled={readOnly === true || busy || !selected}
+            onClick={() => {
+              setRenaming(selected?.name ?? '')
+            }}
+          />
+          <Button
+            type="button"
+            mode="bleed"
             tone="critical"
             fontSize={1}
             padding={2}
@@ -161,6 +176,52 @@ export function DesignBar({
           />
         </Flex>
       </Stack>
+      {selected && renaming !== null && (
+        <Stack gap={2} data-edge-control="rename">
+          <label htmlFor={`${id}-rename`} style={{ fontSize: 13, fontWeight: 500 }}>
+            New name for “{selected.name}”
+          </label>
+          <Flex gap={2} wrap="wrap">
+            <div style={{ flex: 1, minWidth: 180 }}>
+              <TextInput
+                id={`${id}-rename`}
+                value={renaming}
+                disabled={busy}
+                onChange={(event) => {
+                  setRenaming(event.currentTarget.value)
+                }}
+              />
+            </div>
+            <Button
+              type="button"
+              mode="ghost"
+              fontSize={1}
+              padding={2}
+              text="Save new name"
+              disabled={busy || !renaming.trim()}
+              onClick={() => {
+                const key = selected._key
+                void run(async () => {
+                  const next = await renameEdgeDesign(client, key, renaming)
+                  setRenaming(null)
+                  await reload()
+                  return `Renamed to “${next}”. Sections that used it are unchanged.`
+                })
+              }}
+            />
+            <Button
+              type="button"
+              mode="bleed"
+              fontSize={1}
+              padding={2}
+              text="Cancel"
+              onClick={() => {
+                setRenaming(null)
+              }}
+            />
+          </Flex>
+        </Stack>
+      )}
       <Stack gap={2}>
         <label htmlFor={`${id}-name`} style={{ fontSize: 13, fontWeight: 500 }}>
           Save this edge as a new design
@@ -186,7 +247,7 @@ export function DesignBar({
             disabled={readOnly === true || busy || problems > 0 || !name.trim()}
             onClick={() => {
               void run(async () => {
-                const saved = await saveEdgeDesign(client, name, value, designs ?? [])
+                const saved = await saveEdgeDesign(client, name, value)
                 setName('')
                 await reload()
                 setChosen(saved._key)

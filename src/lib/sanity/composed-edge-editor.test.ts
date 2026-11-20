@@ -11,6 +11,7 @@ import {
   copyEdge,
   describeEdge,
   edgeProblems,
+  asProjected,
   movePoint,
   moveLayer,
   removeLayer,
@@ -303,5 +304,73 @@ describe('describeEdge', () => {
         centre: { kind: 'icon' },
       }),
     ).toBe('Rule · Small · 0 layers · centre icon')
+  })
+})
+
+describe('the 4% gap at floating-point boundaries', () => {
+  const edge = (a: number, b: number): EdgeValue => ({
+    ...base(),
+    contour: {
+      interpolation: 'smooth',
+      points: [
+        { _key: 'p0', _type: 'contourPoint', x: 0, y: 50 },
+        { _key: 'p1', _type: 'contourPoint', x: a, y: 50 },
+        { _key: 'p2', _type: 'contourPoint', x: b, y: 50 },
+        { _key: 'p3', _type: 'contourPoint', x: 100, y: 50 },
+      ],
+    },
+  })
+
+  it('treats 8.2 - 4.2 (3.999999999999999) as the allowed 4%, in the resolver and the editor', () => {
+    expect(8.2 - 4.2).toBeLessThan(4)
+    const value = edge(4.2, 8.2)
+    expect(edgeProblems(value)).toEqual([])
+    expect(resolveComposedEdge(value)).toBeDefined()
+  })
+
+  it('the exact edit: moving the point at 9.2 to 8.2 reaches the minimum gap and still draws', () => {
+    const start = edge(4.2, 9.2)
+    const moved = { ...start, contour: movePoint(start.contour, 2, 8.2, 50) }
+    expect(moved.contour.points[2]?.x).toBe(8.2)
+    expect(edgeProblems(moved)).toEqual([])
+    expect(resolveComposedEdge(moved)).toBeDefined()
+    // And one step further is held at the minimum, not accepted.
+    const past = { ...start, contour: movePoint(start.contour, 2, 7, 50) }
+    expect(past.contour.points[2]?.x).toBe(8.2)
+  })
+
+  it('still refuses a gap that is really too small', () => {
+    const value = edge(4.2, 8.1)
+    expect(edgeProblems(value).map((p) => p.control)).toContain('contour')
+    expect(resolveComposedEdge(value)).toBeUndefined()
+  })
+})
+
+describe('a centre picture as Studio stores it', () => {
+  const image = (asset: unknown) => ({
+    ...base(),
+    centre: { kind: 'image', gap: 20, image: { _type: 'image', asset } },
+  })
+  const REF = 'image-0123456789abcdef0123456789abcdef01234567-640x480-jpg'
+
+  it('is not readable by the resolver until projected (_ref to _id), then it opens the gap', () => {
+    const stored = image({ _type: 'reference', _ref: REF })
+    expect(resolveComposedEdge(stored)?.centre).toBeUndefined()
+    const shown = resolveComposedEdge(asProjected(stored))
+    expect(shown?.centre).toMatchObject({ kind: 'image', gap: 0.2 })
+  })
+
+  it('closes the gap for a reference that is not a usable image id', () => {
+    expect(resolveComposedEdge(asProjected(image({ _ref: 'missing' })))?.centre).toBeUndefined()
+    expect(
+      resolveComposedEdge(asProjected(image({ _ref: 'file-abc-pdf' })))?.centre,
+    ).toBeUndefined()
+    expect(resolveComposedEdge(asProjected(image(undefined)))?.centre).toBeUndefined()
+  })
+
+  it('leaves an already projected value and non-objects alone', () => {
+    const projected = image({ _id: REF })
+    expect(asProjected(projected)).toBe(projected)
+    expect(asProjected(undefined)).toBeUndefined()
   })
 })
