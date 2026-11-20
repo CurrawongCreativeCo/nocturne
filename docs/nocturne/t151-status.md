@@ -45,7 +45,7 @@ designs as data. Contract: [composable-section-edges.md](./composable-section-ed
 acceptance criteria: [composable-edges-plan-entries.md](./composable-edges-plan-entries.md) (**not yet imported** into
 the live plan, which needs a signed-in session).
 
-- **Task 1: in review.** Branch `feat/composed-edge-task-1` from `e6730c2`, draft PR. It is hidden from Studio, and
+- **Task 1: in review.** Branch `feat/composed-edge-task-1` from `e6730c2`, draft PR #236. It is hidden from Studio, and
   saved edges keep their output (the parity snapshots are unchanged). The full gate, Playwright and Lighthouse run in
   the PR's CI. Not checked in Task 1: real Safari, a signed-in Studio, Presentation preview.
 - **Task 2: not started.** It waits for the owner's Task 1 review. It owns the warnings for the active edge and the real

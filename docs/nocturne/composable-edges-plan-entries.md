@@ -11,7 +11,7 @@ Each card keeps its **original acceptance criteria verbatim** (from the producti
 
 ## Card 1 — Composable section edges, Task 1: unified model and renderer
 
-- **Parent:** Task 151 (section dividers). **Status to import:** `doing` (draft PR open, awaiting the owner's Task 1
+- **Parent:** Task 151 (section dividers). **Status to import:** `doing` (draft PR #236, awaiting the owner’s Task 1
   review). **Contract:** [composable-section-edges.md](./composable-section-edges.md).
 
 **Original acceptance criteria**
