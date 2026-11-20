@@ -408,6 +408,79 @@ describe('a composed edge’s parts: hidden without mask support and in forced c
     // Without mask support, today's rule hides them exactly as before.
     expect(matched(NO_MASK)).toEqual(today)
   })
+
+  // An authored edge (composable section edges, Task 1): its decoration has attributes of its own.
+  const FORCED_AUTHORED = rulesInside(/^@media \(forced-colors: active\)/).filter((selector) =>
+    selector.includes('data-composed-edge'),
+  )
+  const points = (pairs: [number, number][]) => ({
+    points: pairs.map(([x, y], index) => ({ _key: `p${String(index)}`, x, y })),
+  })
+  const AUTHORED = {
+    version: 1,
+    mode: 'transition',
+    contour: points([
+      [0, 60],
+      [50, 30],
+      [100, 70],
+    ]),
+    layers: [
+      { _key: 'tint', placement: 'above', offsetY: -20, opacity: 40, paint: { colour: 'accent' } },
+      {
+        _key: 'under',
+        placement: 'below',
+        offsetY: 15,
+        opacity: 40,
+        paint: { colour: 'highlight' },
+      },
+      { _key: 'line', placement: 'stroke', paint: { kind: 'gradient' } },
+    ],
+    centre: { kind: 'icon', icon: 'sun' },
+    shadow: { blur: 6, distance: 10, opacity: 40 },
+  }
+  const decoration = () =>
+    new Set(
+      document.querySelectorAll(
+        '[data-composed-edge-artwork], [data-composed-edge-shadow], [data-composed-edge-centre]',
+      ),
+    )
+
+  it('hides an authored rule’s artwork and every shadow and centre in forced colours', () => {
+    expect(FORCED_AUTHORED).toEqual([
+      '[data-composed-edge-rule] > [data-composed-edge-artwork]',
+      '[data-composed-edge-shadow]',
+      '[data-composed-edge-centre]',
+    ])
+  })
+
+  it('reaches every decoration of an authored transition and rule in forced colours, and never a section', () => {
+    mount([
+      richText('a', { composedEdge: AUTHORED }),
+      richText('b'),
+      richText('c', { composedEdge: { ...AUTHORED, mode: 'rule' } }),
+      richText('d'),
+    ])
+    // The transition's below, above and line artwork, its shadow and centre; the rule's artwork and centre.
+    const all = decoration()
+    expect(all.size).toBe(7)
+    const hidden = matched([...FORCED, ...FORCED_AUTHORED])
+    for (const element of all) expect(hidden.has(element)).toBe(true)
+    for (const element of document.querySelectorAll('section, [data-section-edge-frame]'))
+      expect(hidden.has(element)).toBe(false)
+  })
+
+  it('hides a transition’s decoration without a mask, and keeps a rule’s, which needs none', () => {
+    mount([
+      richText('a', { composedEdge: AUTHORED }),
+      richText('b'),
+      richText('c', { composedEdge: { ...AUTHORED, mode: 'rule' } }),
+    ])
+    const noMask = matched(NO_MASK)
+    for (const element of decoration()) {
+      const inRule = Boolean(element.closest('[data-composed-edge-rule]'))
+      expect(noMask.has(element), element.outerHTML.slice(0, 80)).toBe(!inRule)
+    }
+  })
 })
 
 describe('a composed edge’s parts in its frame take the tone of the section below (task 151, Slice 2)', () => {

@@ -6782,6 +6782,56 @@ documents.push({
  * an edge above a flat section, an edge above a picture, an edge above a members-only section, an
  * edge on a shared section and an edge on the last section, which the footer takes.
  */
+/** The contour points of an authored edge, as stored (x and y from 0 to 100). */
+const contourOf = (pairs) => ({
+  interpolation: 'linear',
+  points: pairs.map(([x, y], index) => ({ _type: 'contourPoint', _key: `p${index}`, x, y })),
+})
+/** The authored composition on /edge-composed-authored; its numbers are repeated in the spec. */
+const AUTHORED_EDGE = {
+  version: 1,
+  mode: 'transition',
+  height: 'large',
+  width: 80,
+  align: 'center',
+  contour: contourOf([
+    [0, 70],
+    [30, 30],
+    [60, 75],
+    [100, 40],
+  ]),
+  layers: [
+    {
+      _type: 'edgePaintLayer',
+      _key: 'tint',
+      placement: 'above',
+      contour: contourOf([
+        [0, 30],
+        [50, 55],
+        [100, 20],
+      ]),
+      opacity: 45,
+      paint: { kind: 'solid', colour: 'accent' },
+    },
+    {
+      _type: 'edgePaintLayer',
+      _key: 'underlay',
+      placement: 'below',
+      offsetY: 15,
+      opacity: 35,
+      paint: { kind: 'solid', colour: 'highlight' },
+    },
+    {
+      _type: 'edgePaintLayer',
+      _key: 'line',
+      placement: 'stroke',
+      strokeWidth: 6,
+      paint: { kind: 'gradient', from: 'accent', to: 'accent-2' },
+    },
+  ],
+  centre: { kind: 'icon', icon: 'sun', gap: 20 },
+  shadow: { blur: 4, distance: 10, opacity: 50 },
+}
 const edgeSection = (id, title, style) => ({
   _key: id,
   _type: 'richText',
@@ -7023,6 +7073,38 @@ documents.push(
         edge: 'contour',
         edgeLineColour: 'muted',
       }),
+    ],
+    _updatedAt: UPDATED,
+  },
+  {
+    // An authored composition (composable section edges, Task 1) through the real renderer, for
+    // section-edge-authored.spec.ts. Straight segments, so the spec can work out every line: layered
+    // contours, a gradient line, 80% width, a centre opening with an icon and a shadow, over a Surface
+    // section with a Decorative mark. The shape it also stores never draws: the composition wins.
+    _id: 'page-edge-composed-authored',
+    _type: 'page',
+    title: 'Authored edges',
+    slug: { _type: 'slug', current: 'edge-composed-authored' },
+    seo: { _type: 'seo', noIndex: true },
+    pageBuilder: [
+      edgeSection('ca-upper', 'An authored edge', {
+        tone: 'surface',
+        edge: 'wave',
+        mark: markStyle({ kind: 'icon', icon: 'heart', anchor: 'top-left', opacity: 12 }),
+        composedEdge: AUTHORED_EDGE,
+      }),
+      edgeSection('ca-lower', 'Below the authored edge', { tone: 'alt' }),
+      edgeSection('ca-rule', 'An authored rule', {
+        tone: 'inverse',
+        composedEdge: { ...AUTHORED_EDGE, mode: 'rule', shadow: undefined },
+      }),
+      edgeSection('ca-after-rule', 'After the rule, in the page’s flow', { tone: 'surface' }),
+      // A saved shape on a Surface section keeps today's see-through background (issue #205 is unchanged).
+      edgeSection('ca-legacy-surface', 'A saved wave on Surface', {
+        tone: 'surface',
+        edge: 'wave',
+      }),
+      edgeSection('ca-legacy-below', 'Below the saved wave', { tone: 'alt' }),
     ],
     _updatedAt: UPDATED,
   },
