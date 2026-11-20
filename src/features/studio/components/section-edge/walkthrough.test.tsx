@@ -15,44 +15,48 @@ import { SectionEdgeInput } from './section-edge-input'
 /** The site's saved designs, standing in for the Brand colours document: the fake client reads and writes it. */
 const store: { designs: EdgeDesign[]; writes: string[] } = { designs: [], writes: [] }
 
+// One client for the file, as Studio's useClient gives (a new one per render re-runs the design bar's load effect).
+const cache = vi.hoisted(() => ({ client: undefined as object | undefined }))
+
 vi.mock('sanity', async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
   MemberField: () => null,
-  useClient: () => ({
-    fetch: (query: string) =>
-      Promise.resolve(query.includes('coalesce') ? structuredClone(store.designs) : null),
-    transaction() {
-      const tx = {
-        createIfNotExists: (document: { _id: string }) => (store.writes.push(document._id), tx),
-        patch(id: string, build: (patch: unknown) => unknown) {
-          const patch = {
-            setIfMissing: () => patch,
-            insert: (_at: string, _selector: string, items: EdgeDesign[]) => {
-              store.designs.push(...structuredClone(items))
-              return patch
-            },
-            set: (values: Record<string, string>) => {
-              for (const [path, name] of Object.entries(values)) {
-                const key = /_key=="(.+)"\]/.exec(path)?.[1]
-                store.designs = store.designs.map((d) => (d._key === key ? { ...d, name } : d))
-              }
-              return patch
-            },
-            unset: ([path]: string[]) => {
-              const key = /_key=="(.+)"/.exec(path ?? '')?.[1]
-              store.designs = store.designs.filter((design) => design._key !== key)
-              return patch
-            },
-          }
-          store.writes.push(id)
-          build(patch)
-          return tx
-        },
-        commit: () => Promise.resolve(undefined),
-      }
-      return tx
-    },
-  }),
+  useClient: () =>
+    (cache.client ??= {
+      fetch: (query: string) =>
+        Promise.resolve(query.includes('coalesce') ? structuredClone(store.designs) : null),
+      transaction() {
+        const tx = {
+          createIfNotExists: (document: { _id: string }) => (store.writes.push(document._id), tx),
+          patch(id: string, build: (patch: unknown) => unknown) {
+            const patch = {
+              setIfMissing: () => patch,
+              insert: (_at: string, _selector: string, items: EdgeDesign[]) => {
+                store.designs.push(...structuredClone(items))
+                return patch
+              },
+              set: (values: Record<string, string>) => {
+                for (const [path, name] of Object.entries(values)) {
+                  const key = /_key=="(.+)"\]/.exec(path)?.[1]
+                  store.designs = store.designs.map((d) => (d._key === key ? { ...d, name } : d))
+                }
+                return patch
+              },
+              unset: ([path]: string[]) => {
+                const key = /_key=="(.+)"/.exec(path ?? '')?.[1]
+                store.designs = store.designs.filter((design) => design._key !== key)
+                return patch
+              },
+            }
+            store.writes.push(id)
+            build(patch)
+            return tx
+          },
+          commit: () => Promise.resolve(undefined),
+        }
+        return tx
+      },
+    }),
 }))
 
 Element.prototype.scrollIntoView = vi.fn()

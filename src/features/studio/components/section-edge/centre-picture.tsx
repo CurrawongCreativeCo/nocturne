@@ -27,7 +27,8 @@ export function CentrePicture({
 }: {
   centre: EdgeCentre
   readOnly?: boolean
-  onPick: (ref: string) => void
+  /** Attaches the picture to the edge as it is now; false when the editor has since moved on (not attached). */
+  onPick: (ref: string) => boolean
   onClear: () => void
 }) {
   const client = useClient({ apiVersion: '2025-01-01' })
@@ -50,8 +51,13 @@ export function CentrePicture({
     setState({ tone: 'busy', text: 'Uploading…' })
     try {
       const asset = await client.assets.upload('image', file, { filename: file.name })
-      onPick(asset._id)
-      setState({ tone: 'idle', text: `Added ${file.name}.` })
+      const attached = onPick(asset._id)
+      setState({
+        tone: 'idle',
+        text: attached
+          ? `Added ${file.name}.`
+          : 'The picture was uploaded but not added: the centre is no longer a picture.',
+      })
     } catch {
       setState({ tone: 'error', text: 'The picture could not be uploaded. Try again.' })
     }

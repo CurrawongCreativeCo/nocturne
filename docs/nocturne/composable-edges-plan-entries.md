@@ -91,6 +91,7 @@ Each card keeps its **original acceptance criteria verbatim** (from the producti
 **Added checks (20 November review)**
 
 - The complete Studio flow: save, reopen, reuse, preview and a scratch publish, observed.
+- **Presentation is pending.** It could not be checked in Task 2: the QA target (`r4kwvgkz`, Task 177's project) had no `SANITY_API_READ_TOKEN`, so the site's draft-mode route returned 500 and the preview never connected. Task 3 observes a section edge in Presentation (draft and published), and the picture centre, with a Viewer token on a disposable target.
 - Responsive, accessibility, legacy-site and performance evidence (bundle and rendering, measured on the page). Real
   Safari is checked here.
 

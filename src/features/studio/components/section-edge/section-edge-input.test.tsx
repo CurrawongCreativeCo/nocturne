@@ -11,14 +11,18 @@ import { edgeProblems, startingEdge, type EdgeValue } from '@/lib/sanity/compose
 
 import { SectionEdgeInput } from './section-edge-input'
 
+// One client for the file, as Studio's useClient gives (a new one per render re-runs the design bar's load effect).
+const cache = vi.hoisted(() => ({ client: undefined as object | undefined }))
+
 vi.mock('sanity', async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
-  useClient: () => ({
-    fetch: () => Promise.resolve([]),
-    transaction: () => {
-      throw new Error('no writes in this test')
-    },
-  }),
+  useClient: () =>
+    (cache.client ??= {
+      fetch: () => Promise.resolve([]),
+      transaction: () => {
+        throw new Error('no writes in this test')
+      },
+    }),
   MemberField: () => null,
 }))
 

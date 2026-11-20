@@ -1,5 +1,5 @@
 import { Button, Card, Flex, Stack, Text } from '@sanity/ui'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { set, unset, type ObjectInputProps } from 'sanity'
 
 import { BADGE_ICONS } from '@/lib/sanity/badge-icons'
@@ -42,6 +42,12 @@ export function SectionEdgeInput(props: ObjectInputProps) {
   const edge = hasValue && problems.length === 0 ? stored : undefined
   const history = useRef<(EdgeValue | undefined)[]>([])
   const [undoable, setUndoable] = useState(0)
+  // The newest value, for work that finishes later (a picture upload): its callback was made when the upload
+  // started, and must not write back the edge as it was then.
+  const latest = useRef({ stored, hasValue, edge })
+  useEffect(() => {
+    latest.current = { stored, hasValue, edge }
+  })
   // A problem names the control that fixes it. While the stored edge cannot draw, only Reset and Remove are
   // shown, so a control that is not on the page falls back to Reset, which always is.
   const focusTo = (control: string) => {
@@ -56,7 +62,8 @@ export function SectionEdgeInput(props: ObjectInputProps) {
   }
 
   const write = (next: EdgeValue | undefined) => {
-    history.current.push(hasValue ? stored : undefined)
+    const now = latest.current
+    history.current.push(now.hasValue ? (now.stored ?? undefined) : undefined)
     setUndoable(history.current.length)
     onChange(next ? set(next) : unset())
   }
@@ -324,12 +331,18 @@ export function SectionEdgeInput(props: ObjectInputProps) {
             centre={centre}
             readOnly={readOnly}
             onPick={(ref) => {
-              patch({
+              // Attach to the edge as it is now. If the editor has since left Picture or removed the edge, the
+              // choice stands and the upload is not attached.
+              const now = latest.current.edge
+              if (!now || now.centre?.kind !== 'image') return false
+              write({
+                ...now,
                 centre: {
-                  ...centre,
+                  ...now.centre,
                   image: { _type: 'image', asset: { _type: 'reference', _ref: ref } },
                 },
               })
+              return true
             }}
             onClear={() => {
               const { image: _image, ...rest } = centre
