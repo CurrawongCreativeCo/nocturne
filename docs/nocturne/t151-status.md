@@ -45,11 +45,10 @@ designs as data. Contract: [composable-section-edges.md](./composable-section-ed
 acceptance criteria: [composable-edges-plan-entries.md](./composable-edges-plan-entries.md) (**not yet imported** into
 the live plan, which needs a signed-in session).
 
-- **Task 1: in review.** Branch `feat/composed-edge-task-1` from `e6730c2`, draft PR #236. It is hidden from Studio, and
-  saved edges keep their output (the parity snapshots are unchanged). The full gate, Playwright and Lighthouse run in
-  the PR's CI. Not checked in Task 1: real Safari, a signed-in Studio, Presentation preview.
-- **Task 2: not started.** It waits for the owner's Task 1 review. It owns the warnings for the active edge and the real
-  Studio check of the hidden field's validation.
+- **Task 1: merged 20 Nov** (PR #236, merge commit `e9b78d0`, reviewed head `57a72fe`; saved edges keep their output).
+- **Task 2: in draft** on `feat/composed-edge-task-2` (from `e9b78d0`): the Section edge editor, warnings from the
+  active edge, independent named site designs. Not checked: a real signed-in Studio (no project credentials in the
+  session), Presentation preview, real Safari.
 - **Task 3: not started.**
 - **Blocker:** none in code. Importing the cards into the live plan is an owner action.
 

@@ -11,6 +11,11 @@ export const COMPOSED_EDGE_INTERPOLATIONS = ['linear', 'smooth'] as const
 export const COMPOSED_EDGE_MAX_POINTS = 7
 export const COMPOSED_EDGE_MAX_LAYERS = 3
 export const COMPOSED_EDGE_POINT_GAP = 4
+/** Floating-point slack when comparing a gap with the 4% minimum: 9.2 - 4.2 is 3.999999999999999, which is 4. */
+export const COMPOSED_EDGE_GAP_TOLERANCE = 1e-9
+/** Whether two neighbouring points are at least the minimum apart. */
+export const gapAllowed = (from: number, to: number) =>
+  to - from >= COMPOSED_EDGE_POINT_GAP - COMPOSED_EDGE_GAP_TOLERANCE
 
 type ColourRole = (typeof COMPOSED_EDGE_ROLES)[number]
 interface Point {
@@ -69,7 +74,7 @@ function readContour(value: unknown): Contour | undefined {
   for (const p of points) {
     if (!record(p) || !coordinate(p.x) || !coordinate(p.y)) return undefined
     const last = result.at(-1)
-    if (last && p.x - last.x < COMPOSED_EDGE_POINT_GAP) return undefined
+    if (last && !gapAllowed(last.x, p.x)) return undefined
     if (typeof p._key === 'string') {
       if (keys.has(p._key)) return undefined
       keys.add(p._key)

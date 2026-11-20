@@ -10,7 +10,7 @@ import {
   type MotionOption,
 } from '@/components/motion/presets'
 import { LAYERED_PRESETS, allowsLayerBelow, drawnLayerSlots } from '@/components/ui/edge-presets'
-import { resolveEdge, type SectionStyleInput } from '@/components/ui/section-style'
+import { resolveSectionEdge, type SectionStyleInput } from '@/components/ui/section-style'
 import { resolveEmbed } from '@/config/embed-providers'
 import type { FollowerInput, FollowerPresence } from '@/lib/color/edge-visibility'
 import { isMembersOnly } from '@/lib/sanity/access'
@@ -522,7 +522,10 @@ function inactiveLayerReason(
   slot: EdgeLayerSlot,
 ): string | undefined {
   if (!style) return undefined
-  const edge = resolveEdge(style)
+  // The edge that draws: a composition that renders wins, and then these saved colours belong to nothing.
+  const edge = resolveSectionEdge(style)
+  if (edge?.shape === 'composed')
+    return 'The custom section edge draws instead of the saved shape, so these colours are ignored.'
   if (!edge?.layered || !isGeneratedEdge(edge.shape))
     return 'These colours belong to Still water, Lagoon and Reef and are ignored by the shape chosen above.'
   const preset = LAYERED_PRESETS[edge.shape]

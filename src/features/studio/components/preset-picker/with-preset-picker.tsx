@@ -28,6 +28,7 @@ import { InheritableChoiceInput } from '../inheritable-choice-input'
 import { OverlayPreviewInput } from '../overlay-preview-input'
 import { PanelUsageInput } from '../panel-usage-input'
 import { PictureFramingInput } from '../picture-framing/picture-framing-input'
+import { SectionEdgeInput } from '../section-edge/section-edge-input'
 import { SliderInput } from '../slider-input'
 import { SlotInput } from '../slot-input'
 import { SpacingUsageInput } from '../spacing-usage-note'
@@ -35,7 +36,7 @@ import { SpacingUsageInput } from '../spacing-usage-note'
 /**
  * Wraps the Studio-wide input override (`form.components.input`): a string field with
  * `options.presetPicker` gets the picture picker, `options.iconPicker` the icon grid, `options.inheritable` the Inherit-first buttons, a boolean with `options.clearable` the switch with a clear button, an object type with `options.presets` gets the
- * preset bar above its fields, an object with `options.designSummary` the design summary and resets (a Link list link's Appearance, or any section, card or item design), an object with `options.layerOverridesReset` the section edge's "Reset all layer overrides" button, an image with `options.framing` gets "Adjust picture" under it, a string field with `options.gradientPicker` gets the gradient list, `options.headingGradientPicker` the heading highlight's gradient picker, an array with `options.slot` gets the one-item slot input, and everything else goes to `Fallback` (the role-aware input).
+ * preset bar above its fields, an object with `options.designSummary` the design summary and resets (a Link list link's Appearance, or any section, card or item design), an object with `options.edgeEditor` the Section edge editor, an object with `options.layerOverridesReset` the section edge's "Reset all layer overrides" button, an image with `options.framing` gets "Adjust picture" under it, a string field with `options.gradientPicker` gets the gradient list, `options.headingGradientPicker` the heading highlight's gradient picker, an array with `options.slot` gets the one-item slot input, and everything else goes to `Fallback` (the role-aware input).
  */
 export function withPresetPicker(Fallback: ComponentType<InputProps>) {
   return function PresetAwareInput(props: InputProps) {
@@ -57,6 +58,12 @@ export function withPresetPicker(Fallback: ComponentType<InputProps>) {
         ?.layerOverridesReset === true
     ) {
       return <EdgeLayerColoursInput {...props} />
+    }
+    if (
+      isObjectInputProps(props) &&
+      (props.schemaType.options as { edgeEditor?: boolean } | undefined)?.edgeEditor === true
+    ) {
+      return <SectionEdgeInput {...props} />
     }
     if (isObjectInputProps(props) && framingKeyOf(props.schemaType.options)) {
       return <PictureFramingInput {...props} />

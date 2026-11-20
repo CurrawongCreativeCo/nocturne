@@ -1,5 +1,5 @@
 import { ColorWheelIcon } from '@sanity/icons/ColorWheel'
-import { defineField, defineType, type StringRule } from 'sanity'
+import { defineArrayMember, defineField, defineType, type StringRule } from 'sanity'
 
 import { HEX_PATTERN } from '@/lib/color/oklch'
 import { resolveDesignTokens, type DesignOverrides } from '@/lib/color/resolve-design-tokens'
@@ -29,6 +29,7 @@ import {
 } from '@/lib/design/site-decision-options'
 import { SHADOW_DESCRIPTIONS, SHADOW_LEVELS, SHADOW_TITLES } from '@/lib/sanity/depth-options'
 import { hiddenFromClients } from '@/lib/sanity/roles'
+import { composedEdgeFields } from '@/lib/sanity/schema/composed-edge'
 import { presetField } from '@/lib/sanity/schema/preset-field'
 import {
   ButtonDepthFlatThumbnail,
@@ -410,6 +411,32 @@ export const designSettings = defineType({
             return warning ? warning.message : true
           })
           .warning(),
+    }),
+    defineField({
+      name: 'edgeDesigns',
+      title: 'Section edge designs',
+      description:
+        'Named copies of custom section edges, saved from the section edge editor. Applying one copies its settings into a section; the two are then independent. Managed in the section editor, not here.',
+      type: 'array',
+      hidden: true,
+      of: [
+        defineArrayMember({
+          name: 'edgeDesign',
+          type: 'object',
+          fields: [
+            defineField({
+              name: 'name',
+              type: 'string',
+              // Warnings only: the field is hidden, so an error here could not be fixed where it is shown.
+              // The editor refuses an empty, long or duplicate name when saving or renaming.
+              validation: (rule) => rule.required().max(60).warning(),
+            }),
+            defineField({ name: 'edge', type: 'object', fields: composedEdgeFields }),
+          ],
+          preview: { select: { title: 'name' } },
+        }),
+      ],
+      validation: (rule) => rule.max(40).warning(),
     }),
   ],
   preview: {

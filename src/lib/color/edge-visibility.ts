@@ -5,7 +5,7 @@ import {
   type LayeredSettings,
 } from '@/components/ui/edge-presets'
 import type { EdgePaint, ResolvedEdge } from '@/components/ui/section-edges'
-import { resolveEdge, type SectionStyleInput } from '@/components/ui/section-style'
+import { resolveSectionEdge, type SectionStyleInput } from '@/components/ui/section-style'
 import { GRADIENT_SLUG_PATTERN } from '@/lib/color/gradients'
 import {
   SECTION_EDGE_LAYER_ROLES,
@@ -405,8 +405,10 @@ export function edgeVisibility({
   hasOwnBackground = false,
   follower,
 }: EdgeVisibilityInput): EdgeVisibility {
-  const edge = resolveEdge(style)
-  if (!style || !edge?.layered || !isGeneratedEdge(edge.shape)) return NONE
+  // The edge that draws: a composition that renders wins over the saved shape, which is then not judged.
+  const edge = resolveSectionEdge(style)
+  if (!style || !edge || edge.shape === 'composed') return NONE
+  if (!edge.layered || !isGeneratedEdge(edge.shape)) return NONE
   const preset = LAYERED_PRESETS[edge.shape]
   const title = SECTION_EDGE_TITLES[edge.shape]
   const own = uncheckedReason(style, site, hasOwnBackground)
