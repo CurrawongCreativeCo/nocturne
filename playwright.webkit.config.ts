@@ -22,6 +22,7 @@ export default defineConfig({
         /rules-finish\.spec\.ts/,
         /section-edge-stability\.spec\.ts/,
         /section-edge-hairlines\.spec\.ts/,
+        /zz-control-shots\.spec\.ts/,
         /section-edges\.spec\.ts/,
       ],
       use: { ...devices['Desktop Safari'] },
