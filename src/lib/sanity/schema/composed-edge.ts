@@ -14,8 +14,18 @@ import {
 const choice = (name: string, title: string, choices: readonly string[]) =>
   defineField({ name, title, type: 'string', options: { list: [...choices] } })
 
+/**
+ * Warnings only while the field is hidden: an editor can neither see nor fix it, and the renderer holds each
+ * number to its range or falls back to the saved shape, so a stored value must never block publishing. Task 2
+ * decides the levels once the controls are visible.
+ */
 const numberField = (name: string, title: string, min: number, max: number) =>
-  defineField({ name, title, type: 'number', validation: (rule) => rule.min(min).max(max) })
+  defineField({
+    name,
+    title,
+    type: 'number',
+    validation: (rule) => rule.min(min).max(max).warning(),
+  })
 
 const contour = (title: string) =>
   defineField({
@@ -38,7 +48,7 @@ const contour = (title: string) =>
             ],
           }),
         ],
-        validation: (rule) => rule.min(2).max(COMPOSED_EDGE_MAX_POINTS),
+        validation: (rule) => rule.min(2).max(COMPOSED_EDGE_MAX_POINTS).warning(),
       }),
     ],
   })
@@ -87,7 +97,7 @@ export const composedEdgeField = defineField({
           ],
         }),
       ],
-      validation: (rule) => rule.max(COMPOSED_EDGE_MAX_LAYERS),
+      validation: (rule) => rule.max(COMPOSED_EDGE_MAX_LAYERS).warning(),
     }),
     defineField({
       name: 'centre',

@@ -130,7 +130,8 @@ function ComposedEdgeShadow({
           <feOffset in="softened" dy={shadow.distance} result="displaced" />
           <feFlood floodColor="var(--color-ink)" floodOpacity={shadow.opacity} result="shade" />
           <feComposite in="shade" in2="displaced" operator="in" />
-          {/* Cast only below the edge. Even a transparent upper section keeps the shadow off its content. */}
+          {/* Cut out of the section's own shape, so none falls inside its band. The blur also reaches above the
+              band's top, where the section above covers it (a composed Surface section is painted for this). */}
           <feComposite in2="SourceAlpha" operator="out" />
         </filter>
       </defs>

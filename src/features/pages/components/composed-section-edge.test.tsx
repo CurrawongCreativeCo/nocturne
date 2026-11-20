@@ -10,6 +10,7 @@ import { PAGE_QUERY } from '@/features/pages/api/queries'
 import { parseHtml, renderToHtml } from '@/lib/design/capability-harness'
 import { resolveComposedEdge } from '@/lib/sanity/composed-edge'
 import { composedEdgeField } from '@/lib/sanity/schema/composed-edge'
+import { sectionStyle } from '@/lib/sanity/schema/section-style'
 
 import type { PageSection } from '../types'
 import { SectionRenderer } from './section-renderer'
@@ -396,6 +397,112 @@ describe('composable section edges', () => {
       { ...richText('member', 'surface', 'Private', waves), access: 'members' },
     ])
     expect(restricted[0]).not.toHaveProperty('style')
+  })
+
+  describe('when no paint layer is left', () => {
+    const bare = { ...waves, layers: waves.layers.map((layer) => ({ ...layer, opacity: 0 })) }
+
+    it('drops the centre, and a transition still draws its cut, shadow and overlap', async () => {
+      expect(resolveComposedEdge(bare)).toMatchObject({
+        layers: [],
+        cut: resolveComposedEdge(waves)?.cut,
+      })
+      expect(resolveComposedEdge(bare)).not.toHaveProperty('centre')
+      for (const edge of [bare, { ...waves, layers: undefined }]) {
+        const doc = parseHtml(await scenes(edge))
+        expect(doc.querySelector('[data-section-edge-frame=composed]')).toBeTruthy()
+        expect(
+          doc.querySelector('[data-composed-edge-artwork], [data-composed-edge-centre]'),
+        ).toBeNull()
+        expect(doc.querySelector('[data-composed-edge-shadow]')).toBeTruthy()
+        expect(doc.querySelector('[data-edge-above] #lower')).toBeTruthy()
+      }
+    })
+
+    it('keeps a rule’s band as empty space, with nothing drawn in it', async () => {
+      const doc = parseHtml(await scenes({ ...bare, mode: 'rule' }))
+      expect(doc.querySelector('[data-composed-edge-rule]')).toBeTruthy()
+      expect(
+        doc.querySelector('[data-composed-edge-artwork], [data-composed-edge-centre]'),
+      ).toBeNull()
+    })
+  })
+
+  it('flattens a layer moved past the band’s edge against it, and never moves the cut or the shadow', () => {
+    const low = {
+      ...slant,
+      contour: contour([
+        [0, 80],
+        [100, 95],
+      ]),
+      shadow: { blur: 8, distance: 8, opacity: 30 },
+    }
+    const moved = (offsetY: number) =>
+      resolveComposedEdge({ ...low, layers: [{ _key: 'line', placement: 'stroke', offsetY }] })
+    expect(moved(30)?.layers[0]?.path).toBe('M0 1L1 1')
+    expect(moved(-30)?.layers[0]?.path).toBe('M0 0.5L1 0.65')
+    // Out of range is held to 30% of the band.
+    expect(moved(500)?.layers[0]?.path).toBe(moved(30)?.layers[0]?.path)
+    for (const offset of [-30, 0, 30, 500]) {
+      expect(moved(offset)?.cut).toBe('M0 0.8L1 0.95')
+      expect(moved(offset)?.shadow).toEqual({ blur: 0.08, distance: 0.08, opacity: 0.3 })
+    }
+  })
+
+  it('can never block publishing from the hidden field: every rule on it is a warning', () => {
+    // A rule that records the level each validation ends on.
+    const levels: string[] = []
+    const rule = new Proxy(
+      {},
+      {
+        get:
+          (_, method: string) =>
+          (..._args: unknown[]) => {
+            if (method === 'warning' || method === 'error' || method === 'info') levels.push(method)
+            return rule
+          },
+      },
+    )
+    let validations = 0
+    const visit = (field: { validation?: unknown; fields?: unknown[]; of?: unknown[] }) => {
+      if (typeof field.validation === 'function') {
+        validations += 1
+        const before = levels.length
+        ;(field.validation as (r: unknown) => unknown)(rule)
+        expect(levels.slice(before)).toEqual(['warning'])
+      }
+      for (const child of [...(field.fields ?? []), ...(field.of ?? [])])
+        visit(child as Parameters<typeof visit>[0])
+    }
+    visit(composedEdgeField)
+    expect(validations).toBeGreaterThan(10)
+  })
+
+  it('keeps shadow depth, vertical offset and layer spacing apart, with the saved spacing values kept', () => {
+    interface Field {
+      name: string
+      title?: string
+      fields?: Field[]
+      of?: Field[]
+      options?: { list?: { value: string; title: string }[] }
+    }
+    const fields = composedEdgeField.fields as unknown as Field[]
+    const shadow = fields.find((field) => field.name === 'shadow')
+    expect(shadow?.title).toBe('Shadow depth')
+    expect(shadow?.fields?.map((field) => field.name)).toEqual(['blur', 'distance', 'opacity'])
+    const layer = fields.find((field) => field.name === 'layers')?.of?.[0]
+    expect(layer?.fields?.find((field) => field.name === 'offsetY')?.title).toBe('Vertical offset')
+    const spacing = (sectionStyle.fields as unknown as Field[]).find(
+      (field) => field.name === 'edgeDepth',
+    )
+    expect(spacing?.title).toBe('Layer spacing')
+    expect(spacing?.options?.list?.map(({ value, title }) => `${value}:${title}`)).toEqual([
+      'shallow:Close',
+      'standard:Standard',
+      'deep:Wide',
+    ])
+    const titles = JSON.stringify(composedEdgeField) + JSON.stringify(spacing)
+    expect(titles).not.toMatch(/"title":"Depth"/)
   })
 
   describe('which edge a section draws through SectionRenderer', () => {

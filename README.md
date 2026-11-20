@@ -4824,7 +4824,7 @@ Diagonal, Wave, Curve, Arch, Layered wave, Tide, Contour, Still water, Lagoon, R
   is stored and in read-only mode. With the group cleared, every layer is exactly what it was before the group existed (a
   frozen test holds the unset output). Studio's field menu (the "…" beside a field) offers only Copy and Paste, so the
   warnings name these controls instead. **Layers a shape does not draw** (a second layer above on Still water, a
-  layer below on Lagoon, or on Still water with the switch off or at Shallow) keep what is stored, draw nothing for it, and
+  layer below on Lagoon, or on Still water with the switch off or at Close spacing) keep what is stored, draw nothing for it, and
   show it with a warning, on the field and on the group, naming the control that clears it; once cleared the field is hidden. Geometry is
   untouched: the cut and every layer's path are the same with and without these fields. **Deferred, not implemented:** Reef's
   hairline and its White veil colour (a hairline-only option), which wait for the hairline itself, a geometry change.
@@ -4965,7 +4965,7 @@ so a pass is evidence.
 
 Still water: `edge-layered.test.ts` (the Lab equivalence, every reachable combination through `resolveEdge`, the contract above,
 Flip, strength and palette, segment deviation, frozen checksums), `section-style.test.ts` (`resolveEdge`: Small, the custom
-bounds, Shallow without a layer below), the schema tests (which fields show, and each Studio warning or error), and
+bounds, Close spacing without a layer below), the schema tests (which fields show, and each Studio warning or error), and
 `tests/e2e/section-edge-layered.spec.ts` (`/edge-layered`): the layers' pixels, paint order over a mark, a gradient and a
 picture, clipping at the cut, the 3 px floor on a 40 px phone band, stored heights, the 390 px comparison with the Lab, the
 sticky header and the fallbacks. It runs in WebKit locally too.
@@ -4983,6 +4983,16 @@ section above and over the section below, Tide's 60% rule, the section below's t
 the sticky header above them, Classic's colours unchanged beside them, and the forced-colours and no-mask rules. The edge
 specs also run in WebKit locally with `npx playwright test -c playwright.webkit.config.ts` (Playwright's WebKit build, not
 Safari or an iPhone).
+
+**Authored edges (composable section edges, Task 1).** A section can also store `composedEdge`: one contour, up to three
+paint layers, a width and alignment, a centre icon or picture and a shadow, described in
+[the section edge contract](docs/nocturne/composable-section-edges.md). Studio does not show it yet (Task 2 adds the
+editor). A composition that can render replaces the saved shape; one that can't leaves the saved shape's output exactly
+as it was. **Shadow depth** (blur, distance, opacity), a layer's **vertical offset** and the generated shapes' **Layer
+spacing** (stored as `edgeDepth`: `shallow`, `standard`, `deep`, shown as Close, Standard, Wide) are separate settings.
+Tests: `composed-section-edge.test.tsx` (the resolver, the saved-data query, both output modes, precedence and fallback),
+`section-edge-css.test.tsx` (forced colours, no mask) and `tests/e2e/section-edge-authored.spec.ts`
+(`/edge-composed-authored`, at 1440 and 390 px).
 
 ### Paragraphs in plain text
 
