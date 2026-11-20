@@ -37,6 +37,22 @@ icon:
 
 Stored values, defaults and rendering are unchanged.
 
+## Composable section edges (approved 20 November 2026)
+
+One composable section-edge system beside the saved edges, in four tasks: **Task 1** model and renderer, **Task 2**
+Studio editing and reusable site designs, **Task 3** end-to-end verification and release readiness, then quick-start
+designs as data. Contract: [composable-section-edges.md](./composable-section-edges.md). Build Plan cards and their
+acceptance criteria: [composable-edges-plan-entries.md](./composable-edges-plan-entries.md) (**not yet imported** into
+the live plan, which needs a signed-in session).
+
+- **Task 1: in review.** Branch `feat/composed-edge-task-1` from `e6730c2`, draft PR #236. It is hidden from Studio, and
+  saved edges keep their output (the parity snapshots are unchanged). The full gate, Playwright and Lighthouse run in
+  the PR's CI. Not checked in Task 1: real Safari, a signed-in Studio, Presentation preview.
+- **Task 2: not started.** It waits for the owner's Task 1 review. It owns the warnings for the active edge and the real
+  Studio check of the hidden field's validation.
+- **Task 3: not started.**
+- **Blocker:** none in code. Importing the cards into the live plan is an owner action.
+
 ## Owner decisions in force
 
 - **Geometry and presets.** Classic stays frozen on its own code path. The parity snapshot must never change. Tide v2

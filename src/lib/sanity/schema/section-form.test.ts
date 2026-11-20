@@ -242,9 +242,9 @@ describe('the generated shapes’ Studio rules (task 151, Slice 3)', () => {
       expect(generatedCustomHeightMessage('mobile', 16, { parent: { edge } })).toBe(true)
   })
 
-  it('warns about a layer below saved at Shallow, which is not drawn, and says nothing else', () => {
+  it('warns about a layer below saved at Close, which is not drawn, and says nothing else', () => {
     expect(staleLayerBelowMessage(true, still({ edgeDepth: 'shallow' }))).toMatch(
-      /not drawn at Shallow/,
+      /not drawn at Close spacing/,
     )
     expect(staleLayerBelowMessage(true, still({ edgeDepth: 'standard' }))).toBe(true)
     expect(staleLayerBelowMessage(true, still())).toBe(true)
@@ -375,9 +375,9 @@ describe('every stale-value warning names the control that clears it (task 151)'
       expect(controlOf(name)).toBe('Use shape default')
   })
 
-  it('still offers Standard or Deep for a layer below saved at Shallow', () => {
+  it('still offers Standard or Wide for a layer below saved at Close', () => {
     expect(staleLayerBelowMessage(true, shape('still-water', { edgeDepth: 'shallow' }))).toMatch(
-      /Choose Standard or Deep to show it, or “Use shape default” to clear it\.$/,
+      /Choose Standard or Wide to show it, or “Use shape default” to clear it\.$/,
     )
   })
 })

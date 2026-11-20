@@ -7,6 +7,7 @@ import {
   type MotionContext,
 } from '@/components/motion/presets'
 import { GRADIENT_SLUG_PATTERN } from '@/lib/color/gradients'
+import { resolveComposedEdge, type ResolvedComposedEdge } from '@/lib/sanity/composed-edge'
 import type { MarkInput } from '@/lib/sanity/decorative-mark-options'
 import type { OverlayGradientInput } from '@/lib/sanity/overlay-gradient'
 import {
@@ -73,6 +74,7 @@ export type SectionOverlay = (typeof SECTION_OVERLAYS)[number]
 export type SectionImageSize = (typeof SECTION_IMAGE_SIZES)[number]
 export type SectionImageRepeat = (typeof SECTION_IMAGE_REPEATS)[number]
 export type SectionWash = (typeof SECTION_WASHES)[number]
+export type SectionEdge = ResolvedEdge | ResolvedComposedEdge
 
 /** A section's `style` as a query returns it: every field optional, possibly with edit markers. */
 export interface SectionStyleInput {
@@ -117,6 +119,7 @@ export interface SectionStyleInput {
   fillScreen?: boolean | null
   /** The shape of the bottom edge (section dividers); unset or 'none' for a straight one. */
   edge?: string | null
+  composedEdge?: unknown
   edgeHeight?: string | null
   edgeFlip?: boolean | null
   edgeAccent?: string | null
@@ -173,7 +176,7 @@ export interface ResolvedSectionStyle {
   /** How the picture is placed, sized and washed (see `resolveBackgroundImage`). */
   backgroundImage: ResolvedBackgroundImage
   /** The bottom edge; undefined for a straight one. */
-  edge: ResolvedEdge | undefined
+  edge: SectionEdge | undefined
   /** Which spacing choice the section uses, so the edge's padding maths can follow it. */
   spacing: SectionSpacing
   /** On the <section>: spacing and gutters. The tone is carried by `data-tone`. */
@@ -359,6 +362,21 @@ export function resolveEdge(style: SectionStyleInput | null | undefined): Resolv
   }
 }
 
+/** A valid, explicitly stored composition opts in. Old shapes remain the compatibility path. */
+export function resolveSectionEdge(
+  style: SectionStyleInput | null | undefined,
+): SectionEdge | undefined {
+  return resolveComposedEdge(stegaClean(style?.composedEdge)) ?? resolveEdge(style)
+}
+
+export function edgeHasCut(edge: SectionEdge | undefined): boolean {
+  return (
+    edge !== undefined &&
+    edge.shape !== 'elevated' &&
+    (edge.shape !== 'composed' || edge.mode === 'transition')
+  )
+}
+
 /**
  * A stored custom height for a generated shape, held to what Studio permits at that screen size. The clamp
  * lives here and nowhere else: today's shapes keep the whole 16 to 320 px range (customEdgeHeight).
@@ -498,7 +516,7 @@ export function resolveSectionStyle(
     image,
     overlay: pick(SECTION_OVERLAYS, style?.overlay) ?? defaultOverlayFor(tone),
     backgroundImage,
-    edge: resolveEdge(style),
+    edge: resolveSectionEdge(style),
     spacing: resolvedSpacing,
     // A full-width section runs edge to edge, so it keeps no gutters of its own.
     // The site header is sticky, so a linked-to section needs room above it.

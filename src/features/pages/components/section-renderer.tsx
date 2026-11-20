@@ -1,11 +1,7 @@
 import { Fragment, Suspense, type ComponentType, type CSSProperties, type ReactNode } from 'react'
 
-import {
-  edgeHeightIsCustom,
-  edgeHeightStyle,
-  type ResolvedEdge,
-} from '@/components/ui/section-edges'
-import { resolveEdge } from '@/components/ui/section-style'
+import { edgeHeightIsCustom, edgeHeightStyle } from '@/components/ui/section-edges'
+import { edgeHasCut, resolveSectionEdge, type SectionEdge } from '@/components/ui/section-style'
 import { isMembersOnly } from '@/lib/sanity/access'
 import { dataAttr } from '@/lib/sanity/data-attribute'
 
@@ -114,17 +110,17 @@ export const EDGE_Z_START = 39
 export const edgeFrameZ = (before: number) => Math.max(1, EDGE_Z_START - before)
 
 /**
- * The bottom edge a section draws, or undefined. A locked members-only section is a stub with no
- * style, so it has none: its edge appears once it is unlocked, and the page cannot pull the section
- * after it up under a cut it doesn't know about.
+ * The bottom edge that needs a frame. A rule stays inside the section. A locked members-only
+ * section has no style, so the page can't pull the next section up under a cut it hasn't loaded.
  */
 function edgeOf(
   section: PageSection | undefined,
   gate: SectionGate | undefined,
-): ResolvedEdge | undefined {
+): SectionEdge | undefined {
   if (!section) return undefined
   if (gate && isMembersOnly(section.access)) return undefined
-  return resolveEdge('style' in section ? section.style : undefined)
+  const edge = resolveSectionEdge('style' in section ? section.style : undefined)
+  return edge?.shape === 'composed' && edge.mode === 'rule' ? undefined : edge
 }
 
 /**
@@ -133,13 +129,13 @@ function edgeOf(
  * attributes go on the element that wraps the section, so draft mode's editable `div` carries them
  * too and Presentation shows the same result.
  */
-function followerProps(edge: ResolvedEdge | undefined): {
+function followerProps(edge: SectionEdge | undefined): {
   'data-edge-above'?: string
   'data-edge-above-custom'?: string
   style?: CSSProperties
 } {
-  // Elevated is a straight boundary: nothing is cut away, so the section below is not pulled up.
-  if (!edge || edge.shape === 'elevated') return {}
+  // A straight boundary keeps the next section in normal page flow.
+  if (!edge || !edgeHasCut(edge)) return {}
   return {
     'data-edge-above': '',
     'data-edge-above-custom': edgeHeightIsCustom(edge.height) ? '' : undefined,
@@ -183,14 +179,15 @@ export function SectionRenderer({
 
   // The footer follows the last section, so it takes the edge like a section would (a band of its colour).
   // An Elevated last section has no cut to match, so no band: its shadow falls on the footer itself.
-  const last = edgeOf(sections[sections.length - 1], gate)
-  const lastEdge = last?.shape === 'elevated' ? undefined : last
+  const edges = sections.map((section) => edgeOf(section, gate))
+  const last = edges.at(-1)
+  const lastEdge = last && edgeHasCut(last) ? last : undefined
   // How many edge frames sit above each section: its frame is that many steps below the first.
   const edgesAbove: number[] = []
   let edgeCount = 0
-  for (const section of sections) {
+  for (const edge of edges) {
     edgesAbove.push(edgeCount)
-    if (edgeOf(section, gate)) edgeCount += 1
+    if (edge) edgeCount += 1
   }
 
   const Wrapper = editable ? 'div' : Fragment
@@ -260,13 +257,11 @@ export function SectionRenderer({
 
         // The section above's edge, unless this one is a locked stub with no frame to pull up.
         const above =
-          index > 0 && !(gate && isMembersOnly(section.access))
-            ? edgeOf(sections[index - 1], gate)
-            : undefined
+          index > 0 && !(gate && isMembersOnly(section.access)) ? edges[index - 1] : undefined
         const follower = followerProps(above)
         // Each edge frame sits above every frame after it, so a later section's own cut (or plain
         // background) never paints over this one's. Capped so it stays below the sticky header.
-        const own = edgeOf(section, gate)
+        const own = edges[index]
         if (own)
           follower.style = {
             ...follower.style,

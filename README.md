@@ -4768,11 +4768,11 @@ Diagonal, Wave, Curve, Arch, Layered wave, Tide, Contour, Still water, Lagoon, R
   and stays visible with a warning naming the shape it belongs to and **Use shape default**; once cleared, the field is
   hidden. Choosing the owning shape again draws the kept value. In read-only mode every choice is disabled.
 - **Still water only**: one calm crest with a soft layer above it, and an optional layer below. **Crest position**
-  (Standard, Centred, Shifted), **Depth** (Shallow, Standard, Deep: how far the layers reach), **Layer strength** (Light,
+  (Standard, Centred, Shifted), **Layer spacing** (Close, Standard, Wide: how far the layers reach), **Layer strength** (Light,
   Standard, Strong), **Colours** (Tint: Primary; Ink: text over Primary; Highlight: Highlight over Secondary) and **Layer
-  below** (a second layer over the section below, in that section's colours). Layer below is not offered at Shallow, where
-  the layer is too thin to read; if one was saved before Shallow was chosen it is kept, not drawn, and the field says so.
-  Left empty, each is the shape's own default (Standard, Tint, no layer below). **Clearing:** Crest position, Depth, Layer
+  below** (a second layer over the section below, in that section's colours). Layer below is not offered at Close spacing, where
+  the layer is too thin to read. A previously saved value is kept, and the field says when it is ignored.
+  Left empty, each is the shape's own default (Standard, Tint, no layer below). **Clearing:** Crest position, Layer spacing, Layer
   strength and Colours each start with **Use shape default**, and Layer below has a **Use shape default** button beside its
   switch (its accessible name is "Layer below: Use shape default"); each unsets its own field and nothing else, a saved
   Layer below of false included (turning the switch off stores false; the button removes it). The button is disabled
@@ -4781,10 +4781,10 @@ Diagonal, Wave, Curve, Arch, Layered wave, Tide, Contour, Still water, Lagoon, R
 - **Lagoon and Reef only**: the two bolder layered shapes, each with **two layers above the cut** that trade places across
   the width (one rises with the crests, the other in the valleys), so each shows alone in places and the two overlap in
   others. Lagoon (the Leap Frog composition, corrected: no slivers, no pinch at the edges) has nothing below the cut; Reef
-  adds a layer below it, over the section that follows. Their crest position, depth and layer below are fixed (Standard
-  depth, one arrangement; Shallow with two upper layers is not offered), so Studio offers only **Flip**, **Layer strength**
+  adds a layer below it, over the section that follows. Their crest position, layer spacing and layer below are fixed (Standard
+  spacing and one arrangement), so Studio offers only **Flip**, **Layer strength**
   (Light, Standard, Strong) and **Colours** (Tint: Secondary with Ink, or Secondary with Primary for Reef; Ink: text colour
-  led; Highlight: Highlight led). A crest position, depth or layer-below switch saved under another shape is kept, not
+  led; Highlight: Highlight led). A crest position, layer spacing or layer-below switch saved under another shape is kept, not
   drawn, and the field says so, naming **Use shape default** to clear it. Reef has no hairline in this first pass.
 - **Elevated only**: a straight boundary that casts a soft shadow onto the section below, in place of a cut. One
   choice, **Shadow**: Soft (the default: 18 px deep, starting at 16% of the text colour) or Deep (28 px, 24%). It
@@ -4824,7 +4824,7 @@ Diagonal, Wave, Curve, Arch, Layered wave, Tide, Contour, Still water, Lagoon, R
   is stored and in read-only mode. With the group cleared, every layer is exactly what it was before the group existed (a
   frozen test holds the unset output). Studio's field menu (the "…" beside a field) offers only Copy and Paste, so the
   warnings name these controls instead. **Layers a shape does not draw** (a second layer above on Still water, a
-  layer below on Lagoon, or on Still water with the switch off or at Shallow) keep what is stored, draw nothing for it, and
+  layer below on Lagoon, or on Still water with the switch off or at Close spacing) keep what is stored, draw nothing for it, and
   show it with a warning, on the field and on the group, naming the control that clears it; once cleared the field is hidden. Geometry is
   untouched: the cut and every layer's path are the same with and without these fields. **Deferred, not implemented:** Reef's
   hairline and its White veil colour (a hairline-only option), which wait for the hairline itself, a geometry change.
@@ -4965,7 +4965,7 @@ so a pass is evidence.
 
 Still water: `edge-layered.test.ts` (the Lab equivalence, every reachable combination through `resolveEdge`, the contract above,
 Flip, strength and palette, segment deviation, frozen checksums), `section-style.test.ts` (`resolveEdge`: Small, the custom
-bounds, Shallow without a layer below), the schema tests (which fields show, and each Studio warning or error), and
+bounds, Close spacing without a layer below), the schema tests (which fields show, and each Studio warning or error), and
 `tests/e2e/section-edge-layered.spec.ts` (`/edge-layered`): the layers' pixels, paint order over a mark, a gradient and a
 picture, clipping at the cut, the 3 px floor on a 40 px phone band, stored heights, the 390 px comparison with the Lab, the
 sticky header and the fallbacks. It runs in WebKit locally too.
@@ -4983,6 +4983,16 @@ section above and over the section below, Tide's 60% rule, the section below's t
 the sticky header above them, Classic's colours unchanged beside them, and the forced-colours and no-mask rules. The edge
 specs also run in WebKit locally with `npx playwright test -c playwright.webkit.config.ts` (Playwright's WebKit build, not
 Safari or an iPhone).
+
+**Authored edges (composable section edges, Task 1).** A section can also store `composedEdge`: one contour, up to three
+paint layers, a width and alignment, a centre icon or picture and a shadow, described in
+[the section edge contract](docs/nocturne/composable-section-edges.md). Studio does not show it yet (Task 2 adds the
+editor). A composition that can render replaces the saved shape; one that can't leaves the saved shape's output exactly
+as it was. **Shadow depth** (blur, distance, opacity), a layer's **vertical offset** and the generated shapes' **Layer
+spacing** (stored as `edgeDepth`: `shallow`, `standard`, `deep`, shown as Close, Standard, Wide) are separate settings.
+Tests: `composed-section-edge.test.tsx` (the resolver, the saved-data query, both output modes, precedence and fallback),
+`section-edge-css.test.tsx` (forced colours, no mask) and `tests/e2e/section-edge-authored.spec.ts`
+(`/edge-composed-authored`, at 1440 and 390 px).
 
 ### Paragraphs in plain text
 

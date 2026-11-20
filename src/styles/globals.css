@@ -433,6 +433,12 @@
   z-index: var(--edge-z, 1);
 }
 
+/* The page's Surface tone is normally transparent. Paint it under a composed cut so the neighbour
+ * shows only through the area cut away, even when the section has no picture or gradient. */
+[data-section-edge-frame='composed'] > section[data-tone='surface'] {
+  background-color: var(--color-surface);
+}
+
 /*
  * Elevated (task 151, Slice 6): a straight boundary and a shadow. It has its own attribute, so the cut's rules
  * (the mask, the bottom padding, the follower's pull-up, the footer band) do not apply to it. It takes the same
@@ -462,16 +468,44 @@
   );
 }
 
-[data-section-edge-frame] > section[data-spacing='compact'] {
+[data-section-edge-frame] > section[data-spacing='compact'],
+section[data-composed-edge-rule][data-spacing='compact'] {
   padding-bottom: calc(var(--spacing-section-compact) + var(--edge-h));
 }
 
-[data-section-edge-frame] > section[data-spacing='default'] {
+[data-section-edge-frame] > section[data-spacing='default'],
+section[data-composed-edge-rule][data-spacing='default'] {
   padding-bottom: calc(var(--spacing-section) + var(--edge-h));
 }
 
-[data-section-edge-frame] > section[data-spacing='spacious'] {
+[data-section-edge-frame] > section[data-spacing='spacious'],
+section[data-composed-edge-rule][data-spacing='spacious'] {
   padding-bottom: calc(var(--spacing-section-spacious) + var(--edge-h));
+}
+
+[data-composed-edge-centre] {
+  position: absolute;
+  bottom: var(--edge-centre-bottom);
+  display: grid;
+  place-items: center;
+  transform: translate(-50%, 50%);
+  color: var(--color-ink);
+  pointer-events: none;
+}
+
+[data-composed-edge-rule] > [data-composed-edge-centre] {
+  --centre-inset: min(1rem, var(--edge-h) * 0.5);
+  bottom: clamp(
+    var(--centre-inset),
+    var(--edge-centre-bottom),
+    calc(var(--edge-h) - var(--centre-inset))
+  );
+}
+
+[data-composed-edge-centre] > :is(svg, img) {
+  max-width: min(100%, 2rem, var(--edge-h));
+  max-height: var(--edge-h);
+  object-fit: contain;
 }
 
 /*
@@ -576,18 +610,26 @@ main:has(div:not(:empty) + [data-edge-backdrop]) ~ [data-site-chrome] footer {
     display: none;
   }
 
-  /* A composed edge's parts too, wherever they are drawn: its over parts are inside the section. */
+  /* The tints inside the upper section need the same fallback as the parts outside its mask. */
   [data-edge-part] {
+    display: none;
+  }
+
+  [data-section-edge-frame='composed'] [data-composed-edge-centre] {
     display: none;
   }
 }
 
 /*
- * A composed edge's parts are decoration whose meaning is colour, so forced colours hide them; the cut still
- * shows the boundary. Only [data-edge-part]: today's back wave and accent line keep their behaviour (task 151).
+ * A composed edge's parts, and an authored edge's artwork, shadow and centre, are decoration whose meaning is
+ * colour, so forced colours hide them; the cut still shows the boundary. Today's back wave and accent line
+ * (data-edge-layer) keep their behaviour (task 151).
  */
 @media (forced-colors: active) {
-  [data-edge-part] {
+  [data-edge-part],
+  [data-composed-edge-rule] > [data-composed-edge-artwork],
+  [data-composed-edge-shadow],
+  [data-composed-edge-centre] {
     display: none;
   }
 }
@@ -601,14 +643,14 @@ main:has(div:not(:empty) + [data-edge-backdrop]) ~ [data-site-chrome] footer {
 body:has([data-minimal-page]:not([style*='display: none']))
   main
   > div:not([data-edge-backdrop]):not(:has(~ :is(section, div):not([data-edge-backdrop])))
-  > [data-section-elevated]
-  > [data-edge-shadow],
+  > :is([data-section-elevated], [data-section-edge-frame='composed'])
+  > :is([data-edge-shadow], [data-composed-edge-shadow]),
 body:has([data-minimal-page]:not([style*='display: none']))
   main
   > [data-sanity]
   > div:not([data-edge-backdrop]):not(:has(~ div:not([data-edge-backdrop])))
-  > [data-section-elevated]
-  > [data-edge-shadow] {
+  > :is([data-section-elevated], [data-section-edge-frame='composed'])
+  > :is([data-edge-shadow], [data-composed-edge-shadow]) {
   display: none;
 }
 

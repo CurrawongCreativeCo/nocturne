@@ -130,7 +130,7 @@ const STRING_FIELDS = [
     ['Standard', 'Centred', 'Shifted'],
     'shifted',
   ],
-  ['edgeDepth', 'Depth', 'Use shape default', ['Shallow', 'Standard', 'Deep'], 'deep'],
+  ['edgeDepth', 'Layer spacing', 'Use shape default', ['Close', 'Standard', 'Wide'], 'deep'],
   ['edgeStrength', 'Layer strength', 'Use shape default', ['Light', 'Standard', 'Strong'], 'light'],
   ['edgePalette', 'Colours', 'Use shape default', ['Tint', 'Ink', 'Highlight'], 'ink'],
   // Tide's, Contour's and Elevated's own choices: once Studio radios whose only clear was an unnamed icon.

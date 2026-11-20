@@ -416,7 +416,7 @@ const CLEAR_TO_SHAPE_DEFAULT = `Choose “${SECTION_EDGE_SHAPE_DEFAULT}” to cl
 
 /**
  * The warning for a generated shape's control left on another shape; true when there is nothing to say. Used by
- * Layer strength and Colours, and by Crest position and Depth when the shape has no steps at all.
+ * Layer strength and Colours, and by Crest position and Layer spacing when the shape has no steps at all.
  */
 export function staleGeneratedOptionMessage(
   value: unknown,
@@ -483,7 +483,7 @@ const offersLayerBelow = (parent: unknown) => {
 }
 
 /**
- * Layer below is not offered at Shallow, where the layer is too thin to read. A value already stored there
+ * Layer below is not offered at Close spacing, where the layer is too thin to read. A value already stored there
  * keeps the field visible, so the editor can see the warning below; the edge draws without it.
  */
 export const edgeLayerBelowHidden: ConditionalPropertyCallback = ({ parent, value }) =>
@@ -502,7 +502,7 @@ export function staleLayerBelowMessage(
     return `${SECTION_EDGE_TITLES[edge]} always draws its layer below, so this switch is ignored. ${CLEAR_TO_SHAPE_DEFAULT}`
   if (layerBelow === 'never')
     return `${SECTION_EDGE_TITLES[edge]} has no layer below, so this is ignored. ${CLEAR_TO_SHAPE_DEFAULT}`
-  return `A layer below is not drawn at Shallow depth, so this is ignored. Choose Standard or Deep to show it, or “${SECTION_EDGE_SHAPE_DEFAULT}” to clear it.`
+  return `A layer below is not drawn at Close spacing, so this is ignored. Choose Standard or Wide to show it, or “${SECTION_EDGE_SHAPE_DEFAULT}” to clear it.`
 }
 
 type LayerColoursValue = Record<string, unknown> | null | undefined
