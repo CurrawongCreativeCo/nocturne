@@ -3,7 +3,7 @@ import { defineConfig, devices } from '@playwright/test'
 import base from './playwright.config'
 
 /**
- * A targeted WebKit pass for section edges (task 151; Stage 3 section 12), run locally and never in CI:
+ * A targeted WebKit pass for section edges (task 151; Stage 3 section 12), run locally, and from the Task 3 branch by webkit-section-edges.yml:
  * `npx playwright test -c playwright.webkit.config.ts`. It is Playwright's WebKit build, not Safari on a Mac
  * or an iPhone, so it does not stand in for those checks. The same servers as the main config.
  */
@@ -14,6 +14,7 @@ export default defineConfig({
       name: 'webkit',
       testMatch: [
         /section-edge-composed\.spec\.ts/,
+        /section-edge-authored\.spec\.ts/,
         /section-edge-layered\.spec\.ts/,
         /section-edge-lagoon-reef\.spec\.ts/,
         /section-edge-layer-colours\.spec\.ts/,

@@ -1,0 +1,45 @@
+# A focused WebKit pass over the section-edge specs (composable section edges, Task 3). Playwright's WebKit build,
+# not Safari on a Mac or an iPhone: it is evidence about the engine, not a Safari check. Runs on pushes to the
+# Task 3 branch only, and is deleted with it.
+name: WebKit section edges
+
+on:
+  push:
+    branches: [feat/composed-edge-task-3]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: webkit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  webkit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install WebKit
+        run: npx playwright install --with-deps webkit
+
+      - name: WebKit pass
+        run: npx playwright test -c playwright.webkit.config.ts --workers=2 --reporter=list,html
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: webkit-report
+          path: playwright-report/
+          retention-days: 7
