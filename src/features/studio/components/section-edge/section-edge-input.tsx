@@ -13,7 +13,7 @@ import {
   type EdgeValue,
 } from '@/lib/sanity/composed-edge-editor'
 
-import { CentrePicture } from './centre-picture'
+import { CentrePicture, pictureRef } from './centre-picture'
 import { ContourEditor } from './contour-editor'
 import { ChoiceRow, NATIVE, Group, SelectRow, SliderRow } from './controls'
 import { DesignBar } from './design-bar'
@@ -21,6 +21,10 @@ import { LayerEditor } from './layer-editor'
 import { EdgePreview } from './preview'
 
 const HEIGHT_TITLES = { small: 'Small', medium: 'Medium', large: 'Large' } as const
+
+/** What the centre currently is, for noticing that the selection changed (kind, or which picture). */
+const centreChoice = (edge: EdgeValue | undefined) =>
+  `${edge?.centre?.kind ?? 'none'}|${pictureRef(edge?.centre) ?? ''}`
 
 /**
  * The one Section edge editor (composable section edges, Task 2). Basic controls come first (what it is, how
@@ -48,6 +52,10 @@ export function SectionEdgeInput(props: ObjectInputProps) {
   useEffect(() => {
     latest.current = { stored, hasValue, edge }
   })
+  // Tickets for pending picture uploads. A result counts only while its ticket is the newest, and the number
+  // moves on whenever the centre selection is cleared or replaced (another kind, another picture, a removed
+  // edge, Undo), so an earlier upload that finishes last cannot take the place of a later choice.
+  const tickets = useRef(0)
   // A problem names the control that fixes it. While the stored edge cannot draw, only Reset and Remove are
   // shown, so a control that is not on the page falls back to Reset, which always is.
   const focusTo = (control: string) => {
@@ -63,6 +71,7 @@ export function SectionEdgeInput(props: ObjectInputProps) {
 
   const write = (next: EdgeValue | undefined) => {
     const now = latest.current
+    if (centreChoice(now.edge) !== centreChoice(next)) tickets.current += 1
     history.current.push(now.hasValue ? (now.stored ?? undefined) : undefined)
     setUndoable(history.current.length)
     onChange(next ? set(next) : unset())
@@ -70,6 +79,7 @@ export function SectionEdgeInput(props: ObjectInputProps) {
   const undo = () => {
     if (!history.current.length) return
     const previous = history.current.pop()
+    tickets.current += 1
     setUndoable(history.current.length)
     onChange(previous ? set(previous) : unset())
   }
@@ -330,11 +340,11 @@ export function SectionEdgeInput(props: ObjectInputProps) {
           <CentrePicture
             centre={centre}
             readOnly={readOnly}
-            onPick={(ref) => {
-              // Attach to the edge as it is now. If the editor has since left Picture or removed the edge, the
-              // choice stands and the upload is not attached.
+            begin={() => (tickets.current += 1)}
+            onPick={(ref, ticket) => {
+              // Attach to the edge as it is now, unless the selection has since been cleared or replaced.
               const now = latest.current.edge
-              if (!now || now.centre?.kind !== 'image') return false
+              if (ticket !== tickets.current || !now || now.centre?.kind !== 'image') return false
               write({
                 ...now,
                 centre: {

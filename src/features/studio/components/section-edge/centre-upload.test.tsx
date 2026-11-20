@@ -11,7 +11,10 @@ import { startingEdge, type EdgeValue } from '@/lib/sanity/composed-edge-editor'
 import { SectionEdgeInput } from './section-edge-input'
 
 /** The upload the test finishes by hand: until `finish` runs, it is pending. */
-const pending: { finish: (id: string) => void } = { finish: () => undefined }
+const pending: { finish: (id: string) => void; all: ((id: string) => void)[] } = {
+  finish: () => undefined,
+  all: [],
+}
 // One client for the whole file, as Studio's useClient gives: a new object per render would re-run the design
 // bar's load effect on every render, which never settles.
 const client = {
@@ -19,9 +22,11 @@ const client = {
   assets: {
     upload: () =>
       new Promise<{ _id: string }>((resolve) => {
-        pending.finish = (id) => {
+        const finish = (id: string) => {
           resolve({ _id: id })
         }
+        pending.finish = finish
+        pending.all.push(finish)
       }),
   },
 }
@@ -32,7 +37,10 @@ vi.mock('sanity', async (importOriginal) => ({
 
 Element.prototype.scrollIntoView = vi.fn()
 const theme = buildTheme()
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  pending.all = []
+})
 
 const REF = 'image-0123456789abcdef0123456789abcdef01234567-640x480-png'
 
@@ -136,5 +144,55 @@ describe('a centre picture upload that finishes later', () => {
     await finish()
     expect(last(seen)).toBeUndefined()
     expect(seen).toHaveLength(writes)
+  })
+
+  it('keeps picture B when upload A, started earlier, finishes last', async () => {
+    const A = 'image-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-640x480-png'
+    const B = 'image-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-640x480-png'
+    const seen = startUpload() // upload A, pending
+    fireEvent.click(screen.getByRole('radio', { name: 'None' }))
+    fireEvent.click(screen.getByRole('radio', { name: 'Picture' }))
+    const input = document.querySelector<HTMLInputElement>('input[type=file]')
+    if (!input) throw new Error('no picture control')
+    fireEvent.change(input, {
+      target: { files: [new File(['y'], 'b.png', { type: 'image/png' })] },
+    })
+    const [finishA, finishB] = pending.all
+    if (!finishA || !finishB) throw new Error('two uploads expected')
+    await act(async () => {
+      finishB(B)
+      await new Promise((resolve) => setTimeout(resolve, 20))
+    })
+    expect(refOf(last(seen))).toBe(B)
+    await act(async () => {
+      finishA(A)
+      await new Promise((resolve) => setTimeout(resolve, 20))
+    })
+    expect(refOf(last(seen))).toBe(B)
+    expect(JSON.stringify(last(seen))).not.toContain(A)
+  })
+
+  it('drops an earlier upload when a later one replaces it, whichever finishes first', async () => {
+    const A = 'image-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-640x480-png'
+    const B = 'image-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-640x480-png'
+    const seen = startUpload() // A pending
+    const input = document.querySelector<HTMLInputElement>('input[type=file]')
+    if (!input) throw new Error('no picture control')
+    fireEvent.change(input, {
+      target: { files: [new File(['y'], 'b.png', { type: 'image/png' })] },
+    })
+    const [finishA, finishB] = pending.all
+    if (!finishA || !finishB) throw new Error('two uploads expected')
+    await act(async () => {
+      finishA(A)
+      await new Promise((resolve) => setTimeout(resolve, 20))
+    })
+    // A finished first but B replaced it, so A is not attached and B still lands.
+    expect(refOf(last(seen))).toBeUndefined()
+    await act(async () => {
+      finishB(B)
+      await new Promise((resolve) => setTimeout(resolve, 20))
+    })
+    expect(refOf(last(seen))).toBe(B)
   })
 })
