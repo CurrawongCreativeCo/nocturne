@@ -104,6 +104,7 @@ import {
 import { fetchBrandColours } from './brand-colours'
 import { fetchBrandGradientState, gradientFieldWarning } from './brand-gradients'
 import { builtBy, builtOptions } from './capability-marker'
+import { composedEdgeField } from './composed-edge'
 import { faintLayerWarning, uncheckedSceneNote } from './edge-visibility-validation'
 import { imageField, imageOptions } from './image-field'
 import { framing } from './image-framing-option'
@@ -1152,6 +1153,7 @@ export const sectionStyle = defineType({
       ],
       initialValue: 'none',
     }),
+    composedEdgeField,
     defineField({
       name: 'edgeHeight',
       title: 'Edge height',
@@ -1244,8 +1246,8 @@ export const sectionStyle = defineType({
         ],
         [
           'edgeDepth',
-          'Depth',
-          'How far the layers reach from the edge. Shallow draws no layer below.',
+          'Layer spacing',
+          'How far the layers reach from the edge. Close draws no layer below.',
           SECTION_EDGE_DEPTHS,
           SECTION_EDGE_DEPTH_TITLES,
         ],
@@ -1339,7 +1341,7 @@ export const sectionStyle = defineType({
       name: 'edgeLayerBelow',
       title: 'Layer below',
       description:
-        'A second soft layer below the edge, over the section that follows. Still water only; not offered at Shallow depth.',
+        'A second soft layer below the edge, over the section that follows. Still water only; unavailable at Close spacing.',
       type: 'boolean',
       // Studio adds a "Use shape default" button beside the switch (features/studio/components/clearable-boolean-input):
       // it unsets a saved true or false, which turning the switch off cannot do.

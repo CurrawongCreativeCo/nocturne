@@ -361,9 +361,9 @@ export const SECTION_EDGE_CREST_TITLES: Record<(typeof SECTION_EDGE_CRESTS)[numb
 /** How far a generated edge's layers reach from the cut: a share of the preset's own separation. */
 export const SECTION_EDGE_DEPTHS = ['shallow', 'standard', 'deep'] as const
 export const SECTION_EDGE_DEPTH_TITLES: Record<(typeof SECTION_EDGE_DEPTHS)[number], string> = {
-  shallow: 'Shallow',
+  shallow: 'Close',
   standard: 'Standard',
-  deep: 'Deep',
+  deep: 'Wide',
 }
 
 /** How strongly a generated edge's layers show: a share of the preset's own opacity. */

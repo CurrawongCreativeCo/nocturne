@@ -4,6 +4,8 @@
 
 **Amendment, 6 November 2026 (owner-approved):** §4's cards family is narrowed. See "The cards family" in §4, under "The model". Nothing else in this revision changes.
 
+**Amendment, 20 November 2026 (owner-approved):** Build one composable section-edge system alongside the existing saved edges. Starting designs are editable compositions. Depth is a shadow or lighting treatment, and vertical position is a geometry setting. See [the section edge contract](./composable-section-edges.md) and the [Build Plan decision](https://currawong-build-plan.vercel.app/build-plan/151). The owner reviews the model and renderer before Studio authoring begins.
+
 **Companion documents:**
 
 - [E2, Content Intelligence architecture](./NOCTURNE_CONTENT_INTELLIGENCE_ARCHITECTURE.md);

@@ -64,7 +64,7 @@ describe('section groups and fieldsets', () => {
 })
 
 describe('sectionStyle', () => {
-  it('keeps the stored field names, so no content needs migrating', () => {
+  it('retains the legacy fields and adds an optional composition', () => {
     expect(names(styleFields)).toEqual([
       'tone',
       'gradient',
@@ -97,6 +97,7 @@ describe('sectionStyle', () => {
       'motionEasing',
       'motionThreshold',
       'edge',
+      'composedEdge',
       'edgeHeight',
       'edgeFlip',
       'edgeAccent',

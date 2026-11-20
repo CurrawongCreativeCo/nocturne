@@ -35,6 +35,23 @@ export const decorativeDividerFields = /* groq */ `
   centreColour { colour, hex }
 `
 
+const edgeContourFields = /* groq */ `
+  interpolation,
+  points[]{ _key, x, y }
+`
+
+export const composedEdgeFields = /* groq */ `
+  version, mode, height, width, align,
+  contour { ${edgeContourFields} },
+  layers[]{
+    _key, placement, opacity, offsetX, offsetY, strokeWidth,
+    contour { ${edgeContourFields} },
+    paint { kind, colour, from, to, fadeEnds }
+  },
+  centre { kind, gap, icon, image { asset->{_id} } },
+  shadow { blur, distance, opacity }
+`
+
 /**
  * A section's `imageDesign` (schema: lib/sanity/schema/image-design.ts): project it as
  * `imageDesign { ${imageDesignFields} }`. The approved custom frame is resolved to its artwork's CDN URL
@@ -280,6 +297,7 @@ export const sectionStyleFields = /* groq */ `
   fillScreen,
   image { ${imageFields} },
   edge,
+  composedEdge { ${composedEdgeFields} },
   edgeHeight,
   edgeFlip,
   edgeAccent,

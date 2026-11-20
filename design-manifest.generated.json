@@ -44257,6 +44257,403 @@
         "clientEditable": false
       },
       {
+        "path": "composedEdge",
+        "kind": "object",
+        "required": false,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.version",
+        "kind": "number",
+        "required": null,
+        "max": null,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.mode",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "transition",
+            "title": "transition"
+          },
+          {
+            "value": "rule",
+            "title": "rule"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.height",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "small",
+            "title": "small"
+          },
+          {
+            "value": "medium",
+            "title": "medium"
+          },
+          {
+            "value": "large",
+            "title": "large"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.width",
+        "kind": "number",
+        "required": null,
+        "max": null,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.align",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "start",
+            "title": "start"
+          },
+          {
+            "value": "center",
+            "title": "center"
+          },
+          {
+            "value": "end",
+            "title": "end"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.contour",
+        "kind": "object",
+        "required": false,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.contour.interpolation",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "linear",
+            "title": "linear"
+          },
+          {
+            "value": "smooth",
+            "title": "smooth"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.contour.points",
+        "kind": "array",
+        "required": null,
+        "max": null,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.contour.points[].x",
+        "kind": "number",
+        "required": null,
+        "max": null,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.contour.points[].y",
+        "kind": "number",
+        "required": null,
+        "max": null,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.layers",
+        "kind": "array",
+        "required": null,
+        "max": null,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.layers[].placement",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "above",
+            "title": "above"
+          },
+          {
+            "value": "below",
+            "title": "below"
+          },
+          {
+            "value": "stroke",
+            "title": "stroke"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.layers[].contour",
+        "kind": "object",
+        "required": false,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.layers[].contour.interpolation",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "linear",
+            "title": "linear"
+          },
+          {
+            "value": "smooth",
+            "title": "smooth"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.layers[].contour.points",
+        "kind": "array",
+        "required": null,
+        "max": null,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.layers[].contour.points[].x",
+        "kind": "number",
+        "required": null,
+        "max": null,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.layers[].contour.points[].y",
+        "kind": "number",
+        "required": null,
+        "max": null,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.layers[].offsetX",
+        "kind": "number",
+        "required": null,
+        "max": null,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.layers[].offsetY",
+        "kind": "number",
+        "required": null,
+        "max": null,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.layers[].opacity",
+        "kind": "number",
+        "required": null,
+        "max": null,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.layers[].strokeWidth",
+        "kind": "number",
+        "required": null,
+        "max": null,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.layers[].paint",
+        "kind": "object",
+        "required": false,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.layers[].paint.kind",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "solid",
+            "title": "solid"
+          },
+          {
+            "value": "gradient",
+            "title": "gradient"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.layers[].paint.colour",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "accent",
+            "title": "accent"
+          },
+          {
+            "value": "accent-2",
+            "title": "accent-2"
+          },
+          {
+            "value": "highlight",
+            "title": "highlight"
+          },
+          {
+            "value": "ink",
+            "title": "ink"
+          },
+          {
+            "value": "ink-muted",
+            "title": "ink-muted"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.layers[].paint.from",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "accent",
+            "title": "accent"
+          },
+          {
+            "value": "accent-2",
+            "title": "accent-2"
+          },
+          {
+            "value": "highlight",
+            "title": "highlight"
+          },
+          {
+            "value": "ink",
+            "title": "ink"
+          },
+          {
+            "value": "ink-muted",
+            "title": "ink-muted"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.layers[].paint.to",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "accent",
+            "title": "accent"
+          },
+          {
+            "value": "accent-2",
+            "title": "accent-2"
+          },
+          {
+            "value": "highlight",
+            "title": "highlight"
+          },
+          {
+            "value": "ink",
+            "title": "ink"
+          },
+          {
+            "value": "ink-muted",
+            "title": "ink-muted"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.layers[].paint.fadeEnds",
+        "kind": "boolean",
+        "required": false,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.centre",
+        "kind": "object",
+        "required": false,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.centre.kind",
+        "kind": "string",
+        "required": false,
+        "list": [
+          {
+            "value": "icon",
+            "title": "icon"
+          },
+          {
+            "value": "image",
+            "title": "image"
+          }
+        ],
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.centre.gap",
+        "kind": "number",
+        "required": null,
+        "max": null,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.centre.icon",
+        "kind": "string",
+        "required": false,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.centre.image",
+        "kind": "image",
+        "required": false,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.shadow",
+        "kind": "object",
+        "required": false,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.shadow.blur",
+        "kind": "number",
+        "required": null,
+        "max": null,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.shadow.distance",
+        "kind": "number",
+        "required": null,
+        "max": null,
+        "clientEditable": false
+      },
+      {
+        "path": "composedEdge.shadow.opacity",
+        "kind": "number",
+        "required": null,
+        "max": null,
+        "clientEditable": false
+      },
+      {
         "path": "edgeHeight",
         "kind": "string",
         "required": null,
@@ -44415,7 +44812,7 @@
         "list": [
           {
             "value": "shallow",
-            "title": "Shallow"
+            "title": "Close"
           },
           {
             "value": "standard",
@@ -44423,7 +44820,7 @@
           },
           {
             "value": "deep",
-            "title": "Deep"
+            "title": "Wide"
           }
         ],
         "capability": "edge",

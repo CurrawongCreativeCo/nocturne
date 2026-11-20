@@ -13,6 +13,7 @@ import {
 } from '@/lib/sanity/section-panel'
 import type { SiteDesign } from '@/lib/sanity/site-design'
 
+import { ComposedEdgeArtwork, ComposedEdgeFrame, ComposedEdgeRule } from './composed-edge'
 import { DecorativeMark } from './decorative-mark'
 import { SectionBackground } from './section-background'
 import {
@@ -33,6 +34,7 @@ import {
   type ResolvedEdge,
 } from './section-edges'
 import {
+  edgeHasCut,
   resolveSectionStyle,
   sectionMotion,
   type SectionDefaults,
@@ -218,9 +220,7 @@ function SectionFrameView({
     hasOwnBackground: Boolean(background),
     // Elevated cuts nothing away, so nothing changes under a panel at the section's foot.
     overlaps:
-      (Boolean(resolved.edge) && resolved.edge?.shape !== 'elevated') ||
-      resolved.motion === 'parallax' ||
-      resolved.motion === 'float',
+      edgeHasCut(resolved.edge) || resolved.motion === 'parallax' || resolved.motion === 'float',
   })
   const panelProps = panel ? panelDomProps(panel) : undefined
   // A mark sits above the background and overlay. With a panel it stays behind the content unless asked
@@ -284,13 +284,21 @@ function SectionFrameView({
     )
   // A composed edge is worked out once: the frame draws its under parts, the section its over parts. They
   // join the slot above only when there are some, for the same reason (section-edge-parity.test.tsx).
-  const composition = resolved.edge ? edgeComposition(resolved.edge) : undefined
+  const authored = resolved.edge?.shape === 'composed' ? resolved.edge : undefined
+  const rule = authored?.mode === 'rule' ? authored : undefined
+  const legacy = resolved.edge?.shape !== 'composed' ? resolved.edge : undefined
+  const composition = legacy ? edgeComposition(legacy) : undefined
   const overParts = composition?.parts.filter((part) => part.side === 'over') ?? []
+  const authoredTint =
+    authored?.mode === 'transition' &&
+    authored.layers.some(({ placement }) => placement === 'above') ? (
+      <ComposedEdgeArtwork edge={authored} plane="above" />
+    ) : null
   const backLayers =
-    overParts.length > 0 ? (
+    authoredTint || overParts.length > 0 ? (
       <>
         {behind}
-        <EdgeOverLayers parts={overParts} />
+        {authoredTint ?? <EdgeOverLayers parts={overParts} />}
       </>
     ) : (
       behind
@@ -305,13 +313,46 @@ function SectionFrameView({
       inside
     )
 
+  const sectionContent =
+    plan.kind === 'enter' && plan.target === 'container' ? (
+      <MotionDiv
+        {...enterProps(plan)}
+        {...panelAttributes}
+        className={containerClass}
+        style={panelProps?.style}
+      >
+        {withMark(content)}
+      </MotionDiv>
+    ) : plan.kind === 'enter' ? (
+      <MotionDiv
+        {...enterProps(plan)}
+        {...panelAttributes}
+        className={containerClass}
+        style={panelProps?.style}
+      >
+        {withMark(
+          Children.map(
+            [children, mediaNode && <Fragment key="media">{mediaNode}</Fragment>],
+            (child) =>
+              child ? <MotionDiv {...revealChild(plan.childVariants)}>{child}</MotionDiv> : null,
+          ),
+        )}
+      </MotionDiv>
+    ) : (
+      <div className={containerClass} style={panelProps?.style} {...panelAttributes}>
+        {withMark(content)}
+      </div>
+    )
+
   const section = (
     <section
       id={resolved.anchorId}
       data-tone={resolved.tone}
       data-spacing={resolved.spacing}
+      data-composed-edge-rule={rule ? '' : undefined}
       aria-labelledby={labelledBy}
       className={`${resolved.sectionClass} ${className}`.trim()}
+      style={rule ? edgeHeightStyle(rule.height, '--edge-h') : undefined}
     >
       <SectionBackground
         tone={resolved.tone}
@@ -322,43 +363,24 @@ function SectionFrameView({
         isFirst={isFirst}
       />
       {backLayers}
-      {plan.kind === 'enter' && plan.target === 'container' ? (
-        <MotionDiv
-          {...enterProps(plan)}
-          {...panelAttributes}
-          className={containerClass}
-          style={panelProps?.style}
-        >
-          {withMark(content)}
-        </MotionDiv>
-      ) : plan.kind === 'enter' ? (
-        <MotionDiv
-          {...enterProps(plan)}
-          {...panelAttributes}
-          className={containerClass}
-          style={panelProps?.style}
-        >
-          {withMark(
-            Children.map(
-              [children, mediaNode && <Fragment key="media">{mediaNode}</Fragment>],
-              (child) =>
-                child ? <MotionDiv {...revealChild(plan.childVariants)}>{child}</MotionDiv> : null,
-            ),
-          )}
-        </MotionDiv>
+      {rule ? (
+        <>
+          {sectionContent}
+          <ComposedEdgeRule edge={rule} />
+        </>
       ) : (
-        <div className={containerClass} style={panelProps?.style} {...panelAttributes}>
-          {withMark(content)}
-        </div>
+        sectionContent
       )}
     </section>
   )
 
-  if (!resolved.edge) return section
-  if (resolved.edge.shape === 'elevated')
-    return <ElevatedFrame shadow={resolved.edge.shadow ?? 'soft'}>{section}</ElevatedFrame>
+  if (authored?.mode === 'transition')
+    return <ComposedEdgeFrame edge={authored}>{section}</ComposedEdgeFrame>
+  if (!legacy) return section
+  if (legacy.shape === 'elevated')
+    return <ElevatedFrame shadow={legacy.shadow ?? 'soft'}>{section}</ElevatedFrame>
   return (
-    <EdgeFrame edge={resolved.edge} composition={composition} tone={resolved.tone}>
+    <EdgeFrame edge={legacy} composition={composition} tone={resolved.tone}>
       {section}
     </EdgeFrame>
   )

@@ -374,8 +374,12 @@ describe('a composed edge’s parts: hidden without mask support and in forced c
     }
   }
 
-  it('keeps today’s no-mask rule as it was, and adds one for the parts beside it', () => {
-    expect(NO_MASK).toEqual(['[data-section-edge-frame] > svg', '[data-edge-part]'])
+  it('hides cut artwork and its opening without a CSS mask', () => {
+    expect(NO_MASK).toEqual([
+      '[data-section-edge-frame] > svg',
+      '[data-edge-part]',
+      "[data-section-edge-frame='composed'] [data-composed-edge-centre]",
+    ])
   })
 
   it('hides only the parts, and Elevated’s shadow, in forced colours', () => {

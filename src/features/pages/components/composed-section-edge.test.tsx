@@ -1,0 +1,426 @@
+import { writeFileSync } from 'node:fs'
+
+import { evaluate, parse } from 'groq-js'
+import { createElement } from 'react'
+import { describe, expect, it, vi } from 'vitest'
+
+import { edgeLine } from '@/components/ui/section-edges'
+import { resolveSectionEdge } from '@/components/ui/section-style'
+import { PAGE_QUERY } from '@/features/pages/api/queries'
+import { parseHtml, renderToHtml } from '@/lib/design/capability-harness'
+import { resolveComposedEdge } from '@/lib/sanity/composed-edge'
+import { composedEdgeField } from '@/lib/sanity/schema/composed-edge'
+
+import type { PageSection } from '../types'
+import { SectionRenderer } from './section-renderer'
+
+vi.mock('server-only', () => ({}))
+vi.mock('@/config/env', () => ({
+  projectId: 'e2etest1',
+  dataset: 'production',
+  apiVersion: '2026-10-01',
+  siteLanguage: 'en',
+  studioUrl: '/studio',
+}))
+vi.mock('@/lib/sanity/site-design', () => ({
+  getSiteDesign: () => Promise.resolve({ colours: undefined, gradients: [] }),
+}))
+// Keep the normal SanityImage call and alt treatment. The fake asset's bytes are local in browser review.
+vi.mock('next-sanity/image', () => ({
+  Image: ({ alt, className }: { alt: string; className: string }) =>
+    createElement('img', {
+      src: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Ccircle cx="32" cy="32" r="28" fill="%230d6062"/%3E%3Cpath d="M17 35q14 11 30-13M17 41q16 10 30-12" fill="none" stroke="%23f5f4e8" stroke-width="4"/%3E%3C/svg%3E',
+      alt,
+      className,
+    }),
+}))
+
+const contour = (pairs: [number, number][], interpolation = 'linear') => ({
+  interpolation,
+  points: pairs.map(([x, y], index) => ({ _type: 'contourPoint', _key: `point-${index}`, x, y })),
+})
+
+const slant = {
+  version: 1,
+  mode: 'transition',
+  contour: contour([
+    [0, 0],
+    [100, 100],
+  ]),
+}
+const gradient = { kind: 'gradient', from: 'accent', to: 'accent-2' }
+const waves = {
+  version: 1,
+  mode: 'transition',
+  height: 'large',
+  width: 78,
+  contour: contour(
+    [
+      [0, 76],
+      [21, 44],
+      [53, 83],
+      [82, 32],
+      [100, 47],
+    ],
+    'smooth',
+  ),
+  layers: [
+    {
+      _type: 'edgePaintLayer',
+      _key: 'sea-glass',
+      placement: 'above',
+      contour: contour(
+        [
+          [0, 23],
+          [30, 69],
+          [56, 31],
+          [84, 49],
+          [100, 31],
+        ],
+        'smooth',
+      ),
+      opacity: 43,
+      paint: { kind: 'solid', colour: 'accent' },
+    },
+    {
+      _type: 'edgePaintLayer',
+      _key: 'ink',
+      placement: 'above',
+      contour: contour(
+        [
+          [0, 52],
+          [21, 23],
+          [51, 63],
+          [79, 27],
+          [100, 38],
+        ],
+        'smooth',
+      ),
+      opacity: 27,
+      paint: { kind: 'solid', colour: 'ink-muted' },
+    },
+    {
+      _type: 'edgePaintLayer',
+      _key: 'gradient',
+      placement: 'stroke',
+      strokeWidth: 4,
+      paint: gradient,
+    },
+  ],
+  centre: { kind: 'icon', icon: 'sun', gap: 18 },
+  shadow: { blur: 10, distance: 14, opacity: 55 },
+}
+
+const zigzag = {
+  version: 1,
+  mode: 'transition',
+  contour: contour([
+    [0, 60],
+    [20, 32],
+    [37, 72],
+    [59, 28],
+    [80, 65],
+    [100, 39],
+  ]),
+  layers: [
+    {
+      _type: 'edgePaintLayer',
+      _key: 'left',
+      placement: 'stroke',
+      offsetX: -2,
+      offsetY: -4,
+      strokeWidth: 3,
+      paint: { colour: 'accent' },
+    },
+    {
+      _type: 'edgePaintLayer',
+      _key: 'right',
+      placement: 'stroke',
+      offsetX: 2,
+      offsetY: 3,
+      strokeWidth: 3,
+      paint: { colour: 'accent-2' },
+    },
+    {
+      _type: 'edgePaintLayer',
+      _key: 'underlay',
+      placement: 'below',
+      offsetY: 14,
+      opacity: 32,
+      paint: { colour: 'highlight' },
+    },
+  ],
+}
+
+const imageId = 'image-edgeFixture-64x64-png'
+const imageRule = {
+  ...waves,
+  mode: 'rule',
+  width: 58,
+  align: 'end',
+  layers: [waves.layers[0], waves.layers[2]],
+  centre: {
+    kind: 'image',
+    gap: 25,
+    image: { _type: 'image', asset: { _type: 'reference', _ref: imageId } },
+  },
+}
+
+const mark = { kind: 'icon', icon: 'sun', size: 'small', anchor: 'bottom-right', opacity: 18 }
+
+function richText(
+  key: string,
+  tone: string,
+  copy: string,
+  edge?: unknown,
+  watermark?: typeof mark,
+) {
+  return {
+    _type: 'richText',
+    _key: key,
+    style: {
+      _type: 'sectionStyle',
+      anchorId: key,
+      spacing: 'compact',
+      tone,
+      composedEdge: edge,
+      mark: watermark,
+    },
+    body: [
+      {
+        _type: 'block',
+        _key: 'copy',
+        style: 'normal',
+        markDefs: [],
+        children: [{ _type: 'span', _key: 'text', text: copy, marks: [] }],
+      },
+    ],
+  }
+}
+
+async function fromStore(pageBuilder: Record<string, unknown>[], members = false) {
+  const dataset = [
+    { _type: 'page', _id: 'edge-fixture', slug: { current: 'edges' }, title: 'Edges', pageBuilder },
+    { _type: 'sanity.imageAsset', _id: imageId },
+  ]
+  const data = await evaluate(parse(PAGE_QUERY), { dataset, params: { slug: 'edges', members } })
+  return ((await data.get()) as { pageBuilder: PageSection[] }).pageBuilder
+}
+
+const renderer = (sections: PageSection[], editable = false) => (
+  <SectionRenderer
+    sections={sections}
+    documentId="edge-fixture"
+    documentType="page"
+    editable={editable}
+  />
+)
+
+const render = (sections: PageSection[], editable = false) =>
+  renderToHtml(renderer(sections, editable))
+
+const sceneSections = (edge: unknown, prefix = '') =>
+  fromStore([
+    richText(
+      `${prefix}upper`,
+      'surface',
+      'The section above',
+      edge,
+      edge === waves ? mark : undefined,
+    ),
+    richText(`${prefix}lower`, 'alt', 'The section below'),
+  ])
+
+const scenes = async (edge: unknown, editable = false) =>
+  render(await sceneSections(edge), editable)
+
+describe('composable section edges', () => {
+  it('uses the same compiler for the original diagonal, smooth waves and offset angular strokes', () => {
+    expect(resolveComposedEdge(slant)?.cut).toBe(edgeLine('diagonal'))
+    expect(resolveComposedEdge(waves)?.cut).toContain('C')
+    const offset = resolveComposedEdge(zigzag)
+    expect(offset?.cut).not.toContain('C')
+    expect(offset?.layers).toHaveLength(3)
+    expect(offset?.layers[0]?.path).toMatch(/^M-0\.02.*L1 /)
+    expect(offset?.layers[1]?.path).toMatch(/^M0 .*L1\.02 /)
+  })
+
+  it('uses bounded defaults for incomplete paint, size and placement values', () => {
+    expect(
+      resolveComposedEdge({
+        ...slant,
+        mode: 'rule',
+        height: 'unknown',
+        align: 'start',
+        width: -20,
+        layers: [
+          {
+            placement: 'stroke',
+            offsetY: 800,
+            opacity: 500,
+            paint: { kind: 'gradient', from: 'unknown' },
+          },
+        ],
+        centre: { kind: 'icon', icon: 'unknown' },
+        shadow: { opacity: 50 },
+      }),
+    ).toMatchObject({
+      height: { kind: 'token', size: 'medium' },
+      span: { start: 0, end: 0.05 },
+      layers: [
+        {
+          paint: { kind: 'gradient', from: 'accent', to: 'accent-2', fadeEnds: true },
+          path: 'M0 0.3L1 1',
+          strokeWidth: 2,
+          opacity: 1,
+        },
+      ],
+    })
+  })
+
+  it('puts an underlay below the cut and its offset strokes, even when stored after them', async () => {
+    const doc = parseHtml(await scenes(zigzag))
+    const frame = doc.querySelector('[data-section-edge-frame=composed]')
+    expect(
+      [...(frame?.children ?? [])].map(
+        (child) => child.getAttribute('data-composed-edge-artwork') ?? child.tagName,
+      ),
+    ).toEqual(['below', 'SECTION', 'stroke'])
+    expect(frame?.querySelector('[data-composed-edge-artwork=stroke] g')?.children).toHaveLength(2)
+  })
+
+  it('places a partial-width gradient and an icon over layered geometry in both output modes', async () => {
+    for (const editable of [false, true]) {
+      const html = await scenes(waves, editable)
+      const doc = parseHtml(html)
+      const frame = doc.querySelector('[data-section-edge-frame=composed]')
+      const tint = frame?.querySelector('section [data-composed-edge-artwork=above]')
+      const foreground = frame?.querySelector(':scope > [data-composed-edge-artwork=stroke]')
+      expect(tint?.querySelectorAll('g > path')).toHaveLength(2)
+      expect(
+        tint?.previousElementSibling?.matches('[data-decorative-mark][aria-hidden=true]'),
+      ).toBe(true)
+      expect(Number(foreground?.querySelector('linearGradient')?.getAttribute('x1'))).toBeCloseTo(
+        0.11,
+      )
+      expect(foreground?.querySelectorAll('clipPath rect')).toHaveLength(2)
+      expect(foreground?.querySelector('g path')?.getAttribute('stroke')).toMatch(
+        /^url\(#.+gradient-0\)$/,
+      )
+      expect(doc.querySelector('[data-edge-above] #lower')).toBeTruthy()
+      expect(
+        doc.querySelector('span[data-composed-edge-centre][aria-hidden=true] svg[focusable=false]'),
+      ).toBeTruthy()
+      expect(Boolean(doc.querySelector('[data-sanity]'))).toBe(editable)
+    }
+  })
+
+  it('projects a saved image centre, preserves layer order and leaves the next section in flow in rule mode', async () => {
+    const doc = parseHtml(await scenes(imageRule))
+    const rule = doc.querySelector('[data-composed-edge-rule]')
+    expect(
+      rule?.querySelector('[data-composed-edge-centre][aria-hidden=true] img[alt=""]'),
+    ).toBeTruthy()
+    expect(rule?.querySelectorAll('[data-composed-edge-artwork=all] g > path')).toHaveLength(2)
+    expect(rule?.querySelector('g > path')?.getAttribute('fill')).toBe('var(--color-accent)')
+    expect(rule?.querySelector('g > path:last-child')?.getAttribute('stroke')).toMatch(
+      /^url\(#.+gradient-1\)$/,
+    )
+    expect(doc.querySelector('[data-edge-above]')).toBeNull()
+    expect(doc.querySelector('[data-composed-edge-shadow]')).toBeNull()
+  })
+
+  it('casts a separate shadow without shifting the cut or layer positions', async () => {
+    const before = resolveComposedEdge(waves)
+    const light = { ...waves, shadow: { blur: 21, distance: 24, opacity: 12 } }
+    const after = resolveComposedEdge(light)
+    expect(after?.cut).toBe(before?.cut)
+    expect(after?.layers).toEqual(before?.layers)
+    expect(after?.shadow).toEqual({ blur: 0.21, distance: 0.24, opacity: 0.12 })
+    const doc = parseHtml(await scenes(light))
+    expect(doc.querySelector('[data-composed-edge-shadow] feOffset')?.getAttribute('dy')).toBe(
+      '0.24',
+    )
+    expect(
+      doc.querySelector('[data-composed-edge-shadow] feGaussianBlur')?.getAttribute('stdDeviation'),
+    ).toBe('0 0.21')
+    expect(
+      doc
+        .querySelector('[data-composed-edge-shadow] feComposite:last-child')
+        ?.getAttribute('operator'),
+    ).toBe('out')
+  })
+
+  it('keeps legacy data for invalid versions, self-crossing geometry and duplicate layer keys', () => {
+    const old = resolveSectionEdge({ edge: 'diagonal' })
+    for (const edge of [
+      { ...slant, version: 9 },
+      {
+        ...slant,
+        contour: contour([
+          [0, 24],
+          [51, 40],
+          [30, 72],
+          [100, 82],
+        ]),
+      },
+      { ...zigzag, layers: [zigzag.layers[0], zigzag.layers[0]] },
+      {
+        ...slant,
+        contour: contour([
+          [2, 0],
+          [100, 100],
+        ]),
+      },
+    ]) {
+      expect(resolveSectionEdge({ edge: 'diagonal', composedEdge: edge })).toEqual(old)
+    }
+    expect(composedEdgeField.hidden).toBe(true)
+    expect(composedEdgeField.readOnly).toBe(true)
+  })
+
+  it('closes the opening if a reference cannot be resolved and hides a locked member’s payload', async () => {
+    const missing = {
+      ...imageRule,
+      centre: { kind: 'image', image: { asset: { _ref: 'missing' } } },
+    }
+    const doc = parseHtml(await scenes(missing))
+    expect(doc.querySelector('[data-composed-edge-centre]')).toBeNull()
+    expect(doc.querySelectorAll('[data-composed-edge-artwork=all] clipPath rect')).toHaveLength(1)
+    const restricted = await fromStore([
+      { ...richText('member', 'surface', 'Private', waves), access: 'members' },
+    ])
+    expect(restricted[0]).not.toHaveProperty('style')
+  })
+
+  it.runIf(Boolean(process.env.COMPOSED_EDGE_REVIEW_BODY))(
+    'exports real SectionRenderer output for local browser review',
+    async () => {
+      const destination = process.env.COMPOSED_EDGE_REVIEW_BODY
+      const examples = [
+        { id: 'layered', title: 'Layered gradient and icon', edge: waves },
+        { id: 'slant', title: 'Diagonal', edge: slant },
+        { id: 'offset', title: 'Offset angular strokes', edge: zigzag },
+        { id: 'rule', title: 'Right-aligned rule and image', edge: imageRule },
+      ]
+      for (const editable of [false, true]) {
+        const rows = await Promise.all(
+          examples.map(async ({ id, title, edge }) => (
+            <article key={id} id={id} className="edge-example">
+              <h2>{title}</h2>
+              <div className="edge-example-body">
+                {renderer(await sceneSections(edge, `${id}-`), editable)}
+              </div>
+            </article>
+          )),
+        )
+        if (destination)
+          writeFileSync(
+            editable ? `${destination}.editable` : destination,
+            await renderToHtml(<>{rows}</>),
+          )
+        expect(rows).toHaveLength(4)
+      }
+    },
+  )
+})
