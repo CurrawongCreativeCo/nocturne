@@ -63,3 +63,17 @@ Observed in a signed-in Studio against the Task 177 QA project (page draft and B
 - Hidden-field rules do appear in the Validation panel (as warnings), and Publish stays enabled. A hidden design whose name is empty or over 60 characters is listed in the editor (as "(unnamed design)" or truncated) so it can be renamed or deleted there; the warning clears.
 - Presentation could not connect to the preview: the site's draft-mode route needs `SANITY_API_READ_TOKEN`, which the QA target did not have. Recorded as pending in Task 3's card.
 - A centre picture upload that finishes later attaches to the edge as it is when it completes: edits made while waiting survive, and if the centre has since left Picture (or the custom edge was removed) the upload is not attached. Undo steps back from the value at the moment of attaching.
+
+## Release checks so far (Task 3, 21 November 2026)
+
+- **WebKit (Playwright's build 27.2, not Safari or an iPhone), GitHub run 44820147515:** 272 passed, 27 failed, 1 skipped.
+  The authored-edge spec passed in WebKit, including its forced-colours case. The one skip is Reef's "mirrors with
+  Flip" test (`section-edge-lagoon-reef.spec.ts`), not an authored-edge test.
+- **The 27 failures are pre-existing in this WebKit setup.** All are `section-edge-hairlines.spec.ts` cases at pixel
+  ratios 1.25 and 1.5 on saved shapes. The same spec on the pre-Task-1 commit e6730c2 (same runner image, Node and WebKit
+  build, two workers, two runs) fails the same 27 shape/ratio cases with identical widths and pixel counts. No new or
+  worse case. Evidence, comparison and screenshots: [evidence/webkit-hairlines-control](./evidence/webkit-hairlines-control/README.md).
+  Not fixed here (the spec is "measured, not fixed").
+- **Real Safari remains a separate check and has not been observed.**
+- **Page weight (local production build):** the composed page loads no extra JavaScript; HTML grows with the markup.
+- Presentation, the scratch publish and the live Build Plan import are pending credentials (see Task 3's card).
