@@ -3563,7 +3563,7 @@
               "field": "style.edge",
               "resolvers": [
                 "@/components/ui/section-style#resolveSectionStyle",
-                "@/components/ui/section-style#resolveEdge"
+                "@/components/ui/section-style#resolveSectionEdge"
               ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
@@ -3890,7 +3890,7 @@
               "field": "style.edge",
               "resolvers": [
                 "@/components/ui/section-style#resolveSectionStyle",
-                "@/components/ui/section-style#resolveEdge"
+                "@/components/ui/section-style#resolveSectionEdge"
               ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
@@ -6036,7 +6036,7 @@
               "field": "style.edge",
               "resolvers": [
                 "@/components/ui/section-style#resolveSectionStyle",
-                "@/components/ui/section-style#resolveEdge"
+                "@/components/ui/section-style#resolveSectionEdge"
               ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
@@ -7726,7 +7726,7 @@
               "field": "style.edge",
               "resolvers": [
                 "@/components/ui/section-style#resolveSectionStyle",
-                "@/components/ui/section-style#resolveEdge"
+                "@/components/ui/section-style#resolveSectionEdge"
               ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
@@ -8958,7 +8958,7 @@
               "field": "style.edge",
               "resolvers": [
                 "@/components/ui/section-style#resolveSectionStyle",
-                "@/components/ui/section-style#resolveEdge"
+                "@/components/ui/section-style#resolveSectionEdge"
               ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
@@ -11502,7 +11502,7 @@
               "field": "style.edge",
               "resolvers": [
                 "@/components/ui/section-style#resolveSectionStyle",
-                "@/components/ui/section-style#resolveEdge"
+                "@/components/ui/section-style#resolveSectionEdge"
               ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
@@ -13303,7 +13303,7 @@
               "field": "style.edge",
               "resolvers": [
                 "@/components/ui/section-style#resolveSectionStyle",
-                "@/components/ui/section-style#resolveEdge"
+                "@/components/ui/section-style#resolveSectionEdge"
               ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
@@ -14787,7 +14787,7 @@
               "field": "style.edge",
               "resolvers": [
                 "@/components/ui/section-style#resolveSectionStyle",
-                "@/components/ui/section-style#resolveEdge"
+                "@/components/ui/section-style#resolveSectionEdge"
               ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
@@ -16198,7 +16198,7 @@
               "field": "style.edge",
               "resolvers": [
                 "@/components/ui/section-style#resolveSectionStyle",
-                "@/components/ui/section-style#resolveEdge"
+                "@/components/ui/section-style#resolveSectionEdge"
               ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
@@ -19652,7 +19652,7 @@
               "field": "style.edge",
               "resolvers": [
                 "@/components/ui/section-style#resolveSectionStyle",
-                "@/components/ui/section-style#resolveEdge"
+                "@/components/ui/section-style#resolveSectionEdge"
               ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
@@ -21071,7 +21071,7 @@
               "field": "style.edge",
               "resolvers": [
                 "@/components/ui/section-style#resolveSectionStyle",
-                "@/components/ui/section-style#resolveEdge"
+                "@/components/ui/section-style#resolveSectionEdge"
               ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
@@ -22950,7 +22950,7 @@
               "field": "style.edge",
               "resolvers": [
                 "@/components/ui/section-style#resolveSectionStyle",
-                "@/components/ui/section-style#resolveEdge"
+                "@/components/ui/section-style#resolveSectionEdge"
               ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
@@ -24627,7 +24627,7 @@
               "field": "style.edge",
               "resolvers": [
                 "@/components/ui/section-style#resolveSectionStyle",
-                "@/components/ui/section-style#resolveEdge"
+                "@/components/ui/section-style#resolveSectionEdge"
               ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
@@ -26924,7 +26924,7 @@
               "field": "style.edge",
               "resolvers": [
                 "@/components/ui/section-style#resolveSectionStyle",
-                "@/components/ui/section-style#resolveEdge"
+                "@/components/ui/section-style#resolveSectionEdge"
               ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
@@ -29656,7 +29656,7 @@
               "field": "style.edge",
               "resolvers": [
                 "@/components/ui/section-style#resolveSectionStyle",
-                "@/components/ui/section-style#resolveEdge"
+                "@/components/ui/section-style#resolveSectionEdge"
               ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
@@ -30898,7 +30898,7 @@
               "field": "style.edge",
               "resolvers": [
                 "@/components/ui/section-style#resolveSectionStyle",
-                "@/components/ui/section-style#resolveEdge"
+                "@/components/ui/section-style#resolveSectionEdge"
               ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
@@ -32900,7 +32900,7 @@
               "field": "style.edge",
               "resolvers": [
                 "@/components/ui/section-style#resolveSectionStyle",
-                "@/components/ui/section-style#resolveEdge"
+                "@/components/ui/section-style#resolveSectionEdge"
               ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
@@ -34341,7 +34341,7 @@
               "field": "style.edge",
               "resolvers": [
                 "@/components/ui/section-style#resolveSectionStyle",
-                "@/components/ui/section-style#resolveEdge"
+                "@/components/ui/section-style#resolveSectionEdge"
               ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
@@ -41044,7 +41044,7 @@
               "field": "style.edge",
               "resolvers": [
                 "@/components/ui/section-style#resolveSectionStyle",
-                "@/components/ui/section-style#resolveEdge"
+                "@/components/ui/section-style#resolveSectionEdge"
               ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
@@ -43462,7 +43462,7 @@
               "field": "style.edge",
               "resolvers": [
                 "@/components/ui/section-style#resolveSectionStyle",
-                "@/components/ui/section-style#resolveEdge"
+                "@/components/ui/section-style#resolveSectionEdge"
               ],
               "render": "src/components/ui/section-frame.tsx",
               "target": ":has(> section)",
@@ -44260,6 +44260,7 @@
         "path": "composedEdge",
         "kind": "object",
         "required": false,
+        "capability": "edge",
         "clientEditable": false
       },
       {

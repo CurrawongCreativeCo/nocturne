@@ -387,6 +387,7 @@ const CAPABILITY_FIELDS: Readonly<Record<string, CapabilityId>> = {
   motionEasing: 'motion',
   motionThreshold: 'motion',
   edge: 'edge',
+  composedEdge: 'edge',
   edgeHeight: 'edge',
   edgeFlip: 'edge',
   edgeAccent: 'edge',

@@ -393,6 +393,62 @@ describe('composable section edges', () => {
     expect(restricted[0]).not.toHaveProperty('style')
   })
 
+  describe('which edge a section draws through SectionRenderer', () => {
+    const page = async (upper: Record<string, unknown>) => {
+      const section = richText('upper', 'surface', 'The section above')
+      return render(
+        await fromStore([
+          { ...section, style: { ...section.style, ...upper } },
+          richText('lower', 'alt', 'The section below'),
+        ]),
+      )
+    }
+    const frameOf = (html: string) =>
+      parseHtml(html)
+        .querySelector('[data-section-edge-frame]')
+        ?.getAttribute('data-section-edge-frame')
+
+    it('draws the composition, not the saved shape, when both are stored', async () => {
+      const html = await page({ edge: 'wave', composedEdge: slant })
+      const doc = parseHtml(html)
+      expect(frameOf(html)).toBe('composed')
+      expect(doc.querySelectorAll('[data-section-edge-frame]')).toHaveLength(1)
+      expect(doc.querySelector('[data-edge-layer]')).toBeNull()
+      expect(doc.querySelector('[data-edge-above] #lower')).toBeTruthy()
+    })
+
+    it.each([
+      ['an unknown version', { ...slant, version: 2 }],
+      [
+        'a contour that turns back on itself',
+        {
+          ...slant,
+          contour: contour([
+            [0, 10],
+            [60, 40],
+            [40, 60],
+            [100, 90],
+          ]),
+        },
+      ],
+      [
+        'a layer with no placement',
+        { ...slant, layers: [{ _key: 'x', paint: { colour: 'accent' } }] },
+      ],
+      ['a missing mode', { ...slant, mode: undefined }],
+    ])('keeps the saved shape exactly as it was for %s', async (_, composedEdge) => {
+      expect(await page({ edge: 'wave', composedEdge })).toBe(await page({ edge: 'wave' }))
+    })
+
+    it('stays a straight, unframed section when the composition cannot render and no shape is saved', async () => {
+      const html = await page({ composedEdge: { ...slant, version: 2 } })
+      expect(html).toBe(await page({}))
+      expect(
+        parseHtml(html).querySelector('[data-section-edge-frame], [data-edge-above]'),
+      ).toBeNull()
+    })
+  })
+
   it.runIf(Boolean(process.env.COMPOSED_EDGE_REVIEW_BODY))(
     'exports real SectionRenderer output for local browser review',
     async () => {

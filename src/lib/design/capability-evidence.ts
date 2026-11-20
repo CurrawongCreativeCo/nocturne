@@ -195,10 +195,11 @@ const FRAME: Record<FrameCapability, Omit<CapabilityEvidence, 'id' | 'component'
     scope: 'section',
     field: 'style.edge',
     // SectionFrame draws the edge's frame from the resolved style; SectionRenderer pulls the next
-    // section up under it through resolveEdge.
+    // section up under it through resolveSectionEdge, which reads a saved shape when no composed
+    // edge can render.
     resolvers: [
       { module: '@/components/ui/section-style', export: 'resolveSectionStyle' },
-      { module: '@/components/ui/section-style', export: 'resolveEdge' },
+      { module: '@/components/ui/section-style', export: 'resolveSectionEdge' },
     ],
     render: 'src/components/ui/section-frame.tsx',
     // The element directly around the section: the edge's frame once there is one.
