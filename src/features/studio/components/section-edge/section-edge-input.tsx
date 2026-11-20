@@ -1,6 +1,6 @@
 import { Button, Card, Flex, Stack, Text } from '@sanity/ui'
 import { useRef, useState } from 'react'
-import { MemberField, set, unset, type ObjectInputProps, type ObjectMember } from 'sanity'
+import { set, unset, type ObjectInputProps } from 'sanity'
 
 import { BADGE_ICONS } from '@/lib/sanity/badge-icons'
 import { COMPOSED_EDGE_HEIGHTS } from '@/lib/sanity/composed-edge'
@@ -13,8 +13,9 @@ import {
   type EdgeValue,
 } from '@/lib/sanity/composed-edge-editor'
 
+import { CentrePicture } from './centre-picture'
 import { ContourEditor } from './contour-editor'
-import { ChoiceRow, Group, SelectRow, SliderRow } from './controls'
+import { ChoiceRow, NATIVE, Group, SelectRow, SliderRow } from './controls'
 import { DesignBar } from './design-bar'
 import { LayerEditor } from './layer-editor'
 import { EdgePreview } from './preview'
@@ -33,7 +34,7 @@ const HEIGHT_TITLES = { small: 'Small', medium: 'Medium', large: 'Large' } as co
  * shape; "Remove custom edge" clears it. Undo steps back through this editor's own changes.
  */
 export function SectionEdgeInput(props: ObjectInputProps) {
-  const { value, onChange, readOnly, members } = props
+  const { value, onChange, readOnly } = props
   const stored = value as EdgeValue | null | undefined
   const hasValue =
     stored !== undefined && stored !== null && Object.keys(stored).some((k) => !k.startsWith('_'))
@@ -65,17 +66,6 @@ export function SectionEdgeInput(props: ObjectInputProps) {
     setUndoable(history.current.length)
     onChange(previous ? set(previous) : unset())
   }
-
-  const centreMember = members.find(
-    (member): member is Extract<ObjectMember, { kind: 'field' }> =>
-      member.kind === 'field' && member.name === 'centre',
-  )
-  const imageMember = (
-    (centreMember?.field as { members?: ObjectMember[] } | undefined)?.members ?? []
-  ).find(
-    (member): member is Extract<ObjectMember, { kind: 'field' }> =>
-      member.kind === 'field' && member.name === 'image',
-  )
 
   const header = (
     <Stack gap={3}>
@@ -330,21 +320,22 @@ export function SectionEdgeInput(props: ObjectInputProps) {
           />
         )}
         {centre?.kind === 'image' && (
-          <div data-edge-control="centre-image">
-            {imageMember ? (
-              <MemberField
-                member={imageMember}
-                renderInput={props.renderInput}
-                renderField={props.renderField}
-                renderItem={props.renderItem}
-                renderPreview={props.renderPreview}
-              />
-            ) : (
-              <Text size={1} muted>
-                The picture control is not available here.
-              </Text>
-            )}
-          </div>
+          <CentrePicture
+            centre={centre}
+            readOnly={readOnly}
+            onPick={(ref) => {
+              patch({
+                centre: {
+                  ...centre,
+                  image: { _type: 'image', asset: { _type: 'reference', _ref: ref } },
+                },
+              })
+            }}
+            onClear={() => {
+              const { image: _image, ...rest } = centre
+              patch({ centre: rest })
+            }}
+          />
         )}
         {centre?.kind && (
           <SliderRow
@@ -382,6 +373,7 @@ export function SectionEdgeInput(props: ObjectInputProps) {
             <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13 }}>
               <input
                 type="checkbox"
+                style={NATIVE}
                 checked={shadowOn}
                 disabled={readOnly}
                 data-edge-control="shadow"

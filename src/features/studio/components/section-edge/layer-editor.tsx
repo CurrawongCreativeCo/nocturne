@@ -11,7 +11,7 @@ import {
 } from '@/lib/sanity/composed-edge-editor'
 
 import { ContourEditor } from './contour-editor'
-import { ChoiceRow, SelectRow, SliderRow } from './controls'
+import { ChoiceRow, NATIVE, SelectRow, SliderRow } from './controls'
 
 const ROLE_TITLES: Record<string, string> = {
   accent: 'Primary',
@@ -152,6 +152,7 @@ export function LayerEditor({
             <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13 }}>
               <input
                 type="checkbox"
+                style={NATIVE}
                 checked={paint.fadeEnds !== false}
                 disabled={readOnly}
                 onChange={(event) => {
@@ -225,6 +226,7 @@ export function LayerEditor({
         <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13 }}>
           <input
             type="checkbox"
+            style={NATIVE}
             checked={Boolean(layer.contour)}
             disabled={readOnly}
             onChange={(event) => {

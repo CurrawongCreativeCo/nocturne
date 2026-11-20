@@ -9,7 +9,7 @@ import {
   fetchEdgeDesigns,
   renameEdgeDesign,
   saveEdgeDesign,
-  usableDesigns,
+  listDesigns,
   type DesignClient,
 } from './edge-designs'
 
@@ -56,13 +56,25 @@ const design = (name: string, key = 'd1'): EdgeDesign => ({
 })
 
 describe('reading designs', () => {
-  it('offers only designs with a name that draw', () => {
+  it('lists every design with a key, so a hidden bad name can be found, renamed or deleted', () => {
     const good = design('Sunrise')
     const broken = { ...design('Old', 'd2'), edge: { ...startingEdge(), version: 2 } }
-    expect(usableDesigns([good, broken, null, { _key: 'x' }, { ...design(' ', 'd3') }])).toEqual([
-      good,
+    const unnamed = design(' ', 'd3')
+    const long = design('x'.repeat(80), 'd4')
+    const listed = listDesigns([good, broken, null, { name: 'no key' }, unnamed, long])
+    expect(listed.map((d) => [d._key, d.applicable])).toEqual([
+      ['d1', true],
+      ['d2', false],
+      ['d3', true],
+      ['d4', true],
     ])
-    expect(usableDesigns(undefined)).toEqual([])
+    expect(listed.map((d) => d.label)).toEqual([
+      'Sunrise',
+      'Old (cannot be applied)',
+      '(unnamed design)',
+      `${'x'.repeat(60)}…`,
+    ])
+    expect(listDesigns(undefined)).toEqual([])
   })
 
   it('asks for the draft of Design settings first, then the published one', async () => {
@@ -200,5 +212,16 @@ describe('applying and deleting', () => {
     const { client, calls } = fakeClient()
     await deleteEdgeDesign(client, 'd1')
     expect(calls.patches[0]?.ops[1]).toEqual(['unset', ['edgeDesigns[_key=="d1"]']])
+  })
+})
+
+describe('recovering a hidden design whose name breaks its rules', () => {
+  it('renames an unnamed design by key, and deletes an over-long one', async () => {
+    const { client, calls } = fakeClient({
+      list: [design('', 'bad1'), design('y'.repeat(70), 'bad2')],
+    })
+    await expect(renameEdgeDesign(client, 'bad1', 'Fixed')).resolves.toBe('Fixed')
+    await deleteEdgeDesign(client, 'bad2')
+    expect(calls.patches.map((p) => p.ops[1]?.[0])).toEqual(['set', 'unset'])
   })
 })

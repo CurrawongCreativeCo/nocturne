@@ -2,7 +2,7 @@ import { Button, Flex, Stack, Text, TextInput } from '@sanity/ui'
 import { useEffect, useId, useState } from 'react'
 import { useClient } from 'sanity'
 
-import type { EdgeDesign, EdgeValue } from '@/lib/sanity/composed-edge-editor'
+import type { EdgeValue } from '@/lib/sanity/composed-edge-editor'
 import {
   EdgeDesignError,
   applyEdgeDesign,
@@ -11,6 +11,7 @@ import {
   renameEdgeDesign,
   saveEdgeDesign,
   type DesignClient,
+  type ListedDesign,
 } from '@/lib/sanity/edge-designs'
 
 /**
@@ -32,7 +33,7 @@ export function DesignBar({
 }) {
   const client = useClient({ apiVersion: '2025-01-01' }) as unknown as DesignClient
   const id = useId()
-  const [designs, setDesigns] = useState<EdgeDesign[] | null>(null)
+  const [designs, setDesigns] = useState<ListedDesign[] | null>(null)
   const [name, setName] = useState('')
   const [chosen, setChosen] = useState('')
   const [status, setStatus] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null)
@@ -122,7 +123,7 @@ export function DesignBar({
             </option>
             {designs?.map((design) => (
               <option key={design._key} value={design._key}>
-                {design.name}
+                {design.label}
               </option>
             ))}
           </select>
@@ -132,13 +133,13 @@ export function DesignBar({
             fontSize={1}
             padding={2}
             text="Apply copy to this section"
-            disabled={readOnly === true || busy || !selected}
+            disabled={readOnly === true || busy || !selected?.applicable}
             onClick={() => {
               if (!selected) return
-              onApply(applyEdgeDesign(selected))
+              onApply(applyEdgeDesign(selected.design))
               setStatus({
                 tone: 'ok',
-                text: `Copied “${selected.name}” into this section. Edit it freely: the saved design is unchanged.`,
+                text: `Copied “${selected.label}” into this section. Edit it freely: the saved design is unchanged.`,
               })
             }}
           />
@@ -148,10 +149,12 @@ export function DesignBar({
             fontSize={1}
             padding={2}
             text="Rename design"
-            aria-label={selected ? `Rename the design ${selected.name}` : 'Rename design'}
+            aria-label={selected ? `Rename the design ${selected.label}` : 'Rename design'}
             disabled={readOnly === true || busy || !selected}
             onClick={() => {
-              setRenaming(selected?.name ?? '')
+              setRenaming(
+                typeof selected?.design.name === 'string' ? selected.design.name.trim() : '',
+              )
             }}
           />
           <Button
@@ -161,7 +164,7 @@ export function DesignBar({
             fontSize={1}
             padding={2}
             text="Delete design"
-            aria-label={selected ? `Delete the design ${selected.name}` : 'Delete design'}
+            aria-label={selected ? `Delete the design ${selected.label}` : 'Delete design'}
             disabled={readOnly === true || busy || !selected}
             onClick={() => {
               if (!selected) return
@@ -170,7 +173,7 @@ export function DesignBar({
                 await deleteEdgeDesign(client, key)
                 setChosen('')
                 await reload()
-                return `Deleted “${selected.name}”. Sections that used it keep their own copy.`
+                return `Deleted “${selected.label}”. Sections that used it keep their own copy.`
               })
             }}
           />
@@ -179,7 +182,7 @@ export function DesignBar({
       {selected && renaming !== null && (
         <Stack gap={2} data-edge-control="rename">
           <label htmlFor={`${id}-rename`} style={{ fontSize: 13, fontWeight: 500 }}>
-            New name for “{selected.name}”
+            New name for “{selected.label}”
           </label>
           <Flex gap={2} wrap="wrap">
             <div style={{ flex: 1, minWidth: 180 }}>

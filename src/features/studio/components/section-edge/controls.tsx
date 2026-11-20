@@ -7,6 +7,15 @@ import { useId, type ReactNode } from 'react'
  * points at (`data-edge-control`).
  */
 
+/**
+ * Studio's global CSS strips the browser's own look from form controls (a radio draws nothing, a range has no
+ * track), so these opt back in: they stay native, keyboard-operable and labelled.
+ */
+export const NATIVE = {
+  appearance: 'auto',
+  accentColor: 'var(--card-focus-ring-color, #556bfc)',
+} as const
+
 const box = { display: 'block', width: '100%' } as const
 
 export function Group({
@@ -72,6 +81,7 @@ export function ChoiceRow<T extends string>({
           >
             <input
               type="radio"
+              style={NATIVE}
               name={name}
               value={option.value}
               checked={value === option.value}
@@ -135,7 +145,7 @@ export function SliderRow({
           onChange={(event) => {
             onChange(Number(event.currentTarget.value))
           }}
-          style={{ flex: 1 }}
+          style={{ ...NATIVE, flex: 1 }}
         />
         <span style={{ minWidth: 48, fontSize: 13, textAlign: 'right' }}>
           {value}

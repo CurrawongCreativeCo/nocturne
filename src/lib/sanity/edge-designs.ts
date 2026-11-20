@@ -46,22 +46,48 @@ const LIST = `coalesce(*[_id == "${DRAFT}"][0].edgeDesigns, *[_id == "${PUBLISHE
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 
-/** The designs that still draw. One that does not (hand-edited, a future version) is left out, never offered. */
-export function usableDesigns(list: unknown): EdgeDesign[] {
-  if (!Array.isArray(list)) return []
-  return (list as unknown[]).filter(
-    (item): item is EdgeDesign =>
-      isRecord(item) &&
-      typeof item._key === 'string' &&
-      typeof item.name === 'string' &&
-      item.name.trim() !== '' &&
-      isRecord(item.edge) &&
-      edgeProblems(item.edge).length === 0,
-  )
+/** A stored design as the list shows it: every entry with a key, whatever state its name and settings are in. */
+export interface ListedDesign {
+  _key: string
+  /** What the picker and the buttons call it: the name, or a plain stand-in for an empty or over-long one. */
+  label: string
+  /** The settings draw, so the design can be applied. A design that is not applicable can still be renamed or deleted. */
+  applicable: boolean
+  design: EdgeDesign
 }
 
-export async function fetchEdgeDesigns(client: DesignClient): Promise<EdgeDesign[]> {
-  return usableDesigns(await client.fetch<unknown>(LIST))
+/** The words for a name that is empty or too long to show (hand-edited or imported data). */
+export function designLabel(name: unknown): string {
+  const text = typeof name === 'string' ? name.trim().replace(/\s+/g, ' ') : ''
+  if (!text) return '(unnamed design)'
+  return text.length > EDGE_DESIGN_NAME_MAX ? `${text.slice(0, EDGE_DESIGN_NAME_MAX)}…` : text
+}
+
+/**
+ * Every stored design, so a hidden entry whose name fails its (warning-only) rules can still be found, renamed or
+ * deleted from the editor: that is how a warning in Brand colours is recovered. One whose settings no longer draw
+ * is listed but cannot be applied.
+ */
+export function listDesigns(list: unknown): ListedDesign[] {
+  if (!Array.isArray(list)) return []
+  return (list as unknown[]).flatMap((item) => {
+    if (!isRecord(item) || typeof item._key !== 'string') return []
+    const design = item as unknown as EdgeDesign
+    const applicable = isRecord(item.edge) && edgeProblems(item.edge).length === 0
+    const label = designLabel(item.name)
+    return [
+      {
+        _key: item._key,
+        label: applicable ? label : `${label} (cannot be applied)`,
+        applicable,
+        design,
+      },
+    ]
+  })
+}
+
+export async function fetchEdgeDesigns(client: DesignClient): Promise<ListedDesign[]> {
+  return listDesigns(await client.fetch<unknown>(LIST))
 }
 
 /** The name as saved, or why it cannot be used. */

@@ -14,6 +14,10 @@ import { ChoiceRow, NumberCell } from './controls'
 
 const W = 300
 const H = 120
+/** Room around the pad so the handles on the edges are not clipped. */
+const M = 12
+const px = (x: number) => M + (x / 100) * (W - 2 * M)
+const py = (y: number) => M + (y / 100) * (H - 2 * M)
 
 /**
  * One contour: a pad with a draggable handle for each point, and below it the same points as numbers. The
@@ -43,8 +47,8 @@ export function ContourEditor({
     const box = pad.current?.getBoundingClientRect()
     if (!box?.width || !box.height) return undefined
     return {
-      x: ((event.clientX - box.left) / box.width) * 100,
-      y: ((event.clientY - box.top) / box.height) * 100,
+      x: ((((event.clientX - box.left) / box.width) * W - M) / (W - 2 * M)) * 100,
+      y: ((((event.clientY - box.top) / box.height) * H - M) / (H - 2 * M)) * 100,
     }
   }
   const key = (index: number) => (event: KeyboardEvent) => {
@@ -96,9 +100,7 @@ export function ContourEditor({
         }}
       >
         <polyline
-          points={points
-            .map((p) => `${String((p.x / 100) * W)},${String((p.y / 100) * H)}`)
-            .join(' ')}
+          points={points.map((p) => `${String(px(p.x))},${String(py(p.y))}`).join(' ')}
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
@@ -108,8 +110,8 @@ export function ContourEditor({
           <circle
             key={p._key}
             data-edge-handle={index}
-            cx={(p.x / 100) * W}
-            cy={(p.y / 100) * H}
+            cx={px(p.x)}
+            cy={py(p.y)}
             r={8}
             tabIndex={readOnly ? -1 : 0}
             role="slider"
