@@ -300,6 +300,11 @@ describe('composable section edges', () => {
       expect(
         tint?.previousElementSibling?.matches('[data-decorative-mark][aria-hidden=true]'),
       ).toBe(true)
+      // Each class stands alone: a glued "overflow-hidden-z-10" would put the tint over the mark and content.
+      expect([...(tint?.classList ?? [])]).toEqual(
+        expect.arrayContaining(['overflow-hidden', '-z-10']),
+      )
+      expect(foreground?.classList.contains('-z-10')).toBe(false)
       expect(Number(foreground?.querySelector('linearGradient')?.getAttribute('x1'))).toBeCloseTo(
         0.11,
       )

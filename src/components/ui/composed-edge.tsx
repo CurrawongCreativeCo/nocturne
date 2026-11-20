@@ -33,7 +33,9 @@ export function ComposedEdgeArtwork({
   return (
     <svg
       {...svgBand}
-      className={`${svgBand.className} overflow-hidden${plane === 'above' ? '-z-10' : ''}`}
+      // The tint sits at -z-10 inside the section, as a saved shape's over parts do: above its background,
+      // below its Decorative mark and content. Keep the space outside the condition (Prettier trims it).
+      className={`${svgBand.className} overflow-hidden ${plane === 'above' ? '-z-10' : ''}`.trim()}
       data-composed-edge-artwork={plane}
       data-edge-part={plane === 'all' ? undefined : `composed-${plane}`}
     >
