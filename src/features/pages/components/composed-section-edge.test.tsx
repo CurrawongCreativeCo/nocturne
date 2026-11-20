@@ -381,8 +381,9 @@ describe('composable section edges', () => {
     ]) {
       expect(resolveSectionEdge({ edge: 'diagonal', composedEdge: edge })).toEqual(old)
     }
-    expect(composedEdgeField.hidden).toBe(true)
-    expect(composedEdgeField.readOnly).toBe(true)
+    // Task 2 shows the field through its one editor; the Design tab it sits in is already agency only.
+    expect(composedEdgeField).not.toHaveProperty('hidden')
+    expect(composedEdgeField.options).toMatchObject({ edgeEditor: true })
   })
 
   it('closes the opening if a reference cannot be resolved and hides a locked member’s payload', async () => {

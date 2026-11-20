@@ -348,6 +348,8 @@ declare module 'sanity' {
      * that unsets the whole object (features/studio/components/edge-layer-colours-input).
      */
     layerOverridesReset?: boolean
+    /** The Section edge editor draws the object (features/studio/components/section-edge, composable section edges). */
+    edgeEditor?: boolean
   }
   interface StringOptions {
     /** The field holds the slug of a brand gradient: the Studio draws the picker (features/studio/components/gradient-picker). */

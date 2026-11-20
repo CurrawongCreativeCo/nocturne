@@ -3075,6 +3075,32 @@ export type DesignSettings = {
     _type: 'gradient'
     _key: string
   }>
+  edgeDesigns?: Array<{
+    name: string
+    edge?: {
+      version?: number
+      mode?: 'transition' | 'rule'
+      height?: 'small' | 'medium' | 'large'
+      width?: number
+      align?: 'start' | 'center' | 'end'
+      contour?: Contour
+      layers?: Array<{
+        placement?: 'above' | 'below' | 'stroke'
+        contour?: EdgePaintLayerContour
+        offsetX?: number
+        offsetY?: number
+        opacity?: number
+        strokeWidth?: number
+        paint?: Paint
+        _type: 'edgePaintLayer'
+        _key: string
+      }>
+      centre?: Centre
+      shadow?: Shadow
+    }
+    _type: 'edgeDesign'
+    _key: string
+  }>
 }
 
 export type CookieBanner = {
