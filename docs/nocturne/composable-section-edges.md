@@ -78,4 +78,4 @@ Observed in a signed-in Studio against the Task 177 QA project (page draft and B
   legacy saved wave) in Mac Safari and iPhone Safari and reported that it looked good on both. Safari versions, viewport
   and zoom were not recorded, and no Safari screenshots exist. See [safari-preview](./evidence/safari-preview/README.md).
 - **Page weight (local production build):** the composed page loads no extra JavaScript; HTML grows with the markup.
-- Presentation, the scratch publish and the live Build Plan import are pending credentials (see Task 3's card).
+- **Presentation and a scratch publish: observed** on the disposable QA project (local site, real dataset); see [presentation-scratch-publish](./evidence/presentation-scratch-publish/README.md). The live Build Plan import is pending its connection.
