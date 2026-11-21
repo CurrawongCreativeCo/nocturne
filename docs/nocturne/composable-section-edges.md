@@ -74,6 +74,8 @@ Observed in a signed-in Studio against the Task 177 QA project (page draft and B
   build, two workers, two runs) fails the same 27 shape/ratio cases with identical widths and pixel counts. No new or
   worse case. Evidence, comparison and screenshots: [evidence/webkit-hairlines-control](./evidence/webkit-hairlines-control/README.md).
   Not fixed here (the spec is "measured, not fixed").
-- **Real Safari remains a separate check and has not been observed.**
+- **Real Safari: owner visual approval only.** On 21 November 2026 the owner checked the fixture preview (an authored edge and a
+  legacy saved wave) in Mac Safari and iPhone Safari and reported that it looked good on both. Safari versions, viewport
+  and zoom were not recorded, and no Safari screenshots exist. See [safari-preview](./evidence/safari-preview/README.md).
 - **Page weight (local production build):** the composed page loads no extra JavaScript; HTML grows with the markup.
 - Presentation, the scratch publish and the live Build Plan import are pending credentials (see Task 3's card).

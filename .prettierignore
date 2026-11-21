@@ -31,3 +31,6 @@ tests/e2e/diagnostics/evidence/**/harness-policy/
 # Saved credentials and generated performance measurements
 tests/studio-perf/.auth
 tests/studio-perf/results/*.json
+
+# Raw Playwright JSON from the WebKit hairlines control (Task 3), kept byte-for-byte
+docs/nocturne/evidence/webkit-hairlines-control/control-e6730c2-hairlines-report.json
