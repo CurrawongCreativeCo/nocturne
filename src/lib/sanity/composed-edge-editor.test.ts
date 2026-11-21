@@ -9,7 +9,9 @@ import {
   cannotRemovePoint,
   contourOf,
   copyEdge,
+  contourIsFlat,
   describeEdge,
+  flattenContour,
   edgeProblems,
   asProjected,
   movePoint,
@@ -18,6 +20,7 @@ import {
   removePoint,
   setIndependentContour,
   startingEdge,
+  startingRule,
   type EdgeValue,
 } from './composed-edge-editor'
 
@@ -303,7 +306,56 @@ describe('describeEdge', () => {
         shadow: undefined,
         centre: { kind: 'icon' },
       }),
-    ).toBe('Rule · Small · 0 layers · centre icon')
+    ).toBe('Rule · Small · 0 layers · centre icon not drawn')
+  })
+
+  it('describes what the page draws, not what is stored', () => {
+    // A rule has no shadow, and a layer at 0% strength is not drawn.
+    const [first, second] = base().layers ?? []
+    if (!first || !second) throw new Error('The starting design has two layers.')
+    const rule: EdgeValue = {
+      ...base(),
+      mode: 'rule',
+      height: 'medium',
+      layers: [first, { ...second, opacity: 0 }],
+      shadow: { blur: 6, distance: 8, opacity: 28 },
+    }
+    expect(describeEdge(rule)).toBe('Rule · Medium · 1 layer')
+    // With a layer drawn and an icon chosen, the centre is named.
+    expect(describeEdge({ ...rule, centre: { kind: 'icon', icon: 'lotus', gap: 20 } })).toBe(
+      'Rule · Medium · 1 layer · centre icon',
+    )
+    // A centre with no icon is not drawn.
+    expect(describeEdge({ ...rule, centre: { kind: 'icon', gap: 20 } })).toBe(
+      'Rule · Medium · 1 layer · centre icon not drawn',
+    )
+  })
+})
+
+describe('startingRule and flattenContour', () => {
+  it('is a straight rule the page draws: flat, one fading line, no shadow, no centre', () => {
+    const rule = startingRule(counter())
+    const drawn = resolveComposedEdge(rule)
+    expect(drawn?.mode).toBe('rule')
+    expect(drawn?.shadow).toBeUndefined()
+    expect(drawn?.centre).toBeUndefined()
+    expect(rule.height).toBe('medium')
+    expect(contourIsFlat(rule.contour)).toBe(true)
+    expect(rule.layers).toHaveLength(1)
+    expect(rule.layers?.[0]?.paint).toMatchObject({ kind: 'gradient', fadeEnds: true })
+    expect(edgeProblems(rule)).toEqual([])
+    expect(describeEdge(rule)).toBe('Rule · Medium · 1 layer')
+  })
+
+  it('lays a contour flat without moving the points across or losing any', () => {
+    const wavy = startingEdge(counter()).contour
+    expect(contourIsFlat(wavy)).toBe(false)
+    const flat = flattenContour(wavy)
+    expect(flat.points.map((p) => p.x)).toEqual(wavy.points.map((p) => p.x))
+    expect(flat.points.map((p) => p._key)).toEqual(wavy.points.map((p) => p._key))
+    expect(contourIsFlat(flat)).toBe(true)
+    // The original is untouched.
+    expect(contourIsFlat(wavy)).toBe(false)
   })
 })
 

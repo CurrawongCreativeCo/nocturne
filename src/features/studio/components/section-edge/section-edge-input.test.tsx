@@ -6,13 +6,25 @@ import { useState } from 'react'
 import type { FormPatch, ObjectInputProps, PatchEvent } from 'sanity'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { colorHex } from '@/config/tokens.generated'
 import { resolveComposedEdge } from '@/lib/sanity/composed-edge'
-import { edgeProblems, startingEdge, type EdgeValue } from '@/lib/sanity/composed-edge-editor'
+import {
+  edgeProblems,
+  startingEdge,
+  startingRule,
+  type EdgeValue,
+} from '@/lib/sanity/composed-edge-editor'
 
 import { SectionEdgeInput } from './section-edge-input'
 
 // One client for the file, as Studio's useClient gives (a new one per render re-runs the design bar's load effect).
-const cache = vi.hoisted(() => ({ client: undefined as object | undefined }))
+const cache = vi.hoisted(
+  (): {
+    client?: object
+    /** The document Studio would give `useFormValue([])`; a test sets it, and it is cleared after each. */
+    document?: unknown
+  } => ({}),
+)
 
 vi.mock('sanity', async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
@@ -24,15 +36,27 @@ vi.mock('sanity', async (importOriginal) => ({
       },
     }),
   MemberField: () => null,
+  useFormValue: () => cache.document,
 }))
 
 const theme = buildTheme()
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  cache.document = undefined
+})
 // jsdom has no layout, so no scrolling.
 Element.prototype.scrollIntoView = vi.fn()
 
 /** Applies the editor's patches the way Studio would: `set` replaces the object, `unset` clears it. */
-function Harness({ initial, onValue }: { initial?: unknown; onValue: (v: unknown) => void }) {
+function Harness({
+  initial,
+  onValue,
+  path,
+}: {
+  initial?: unknown
+  onValue: (v: unknown) => void
+  path?: unknown[]
+}) {
   const [value, setValue] = useState<unknown>(initial)
   const onChange = (event: FormPatch | FormPatch[] | PatchEvent) => {
     const patch = (Array.isArray(event) ? event[0] : event) as FormPatch
@@ -48,6 +72,7 @@ function Harness({ initial, onValue }: { initial?: unknown; onValue: (v: unknown
           onChange,
           readOnly: false,
           members: [],
+          path,
           renderInput: () => null,
           renderField: () => null,
           renderItem: () => null,
@@ -64,6 +89,12 @@ const mount = (initial?: unknown) => {
   return seen
 }
 const last = (seen: unknown[]) => seen.at(-1) as EdgeValue | undefined
+/** The newest written value; a test that expects a write fails here when there was none. */
+const written = (seen: unknown[]): EdgeValue => {
+  const value = last(seen)
+  if (!value) throw new Error('The editor wrote nothing.')
+  return value
+}
 
 describe('starting', () => {
   it('shows only the start button and the saved-shape note while nothing is stored', () => {
@@ -217,6 +248,11 @@ describe('a stored edge that cannot draw', () => {
 /** The previews on the page, found by their accessible name. */
 const previews = () => screen.queryAllByRole('img', { name: /Preview of the edge/ })
 /** The dashed marker for a centre opening (the only span inside a preview). */
+/** The icon drawn inside the preview's centre opening, if any. */
+const previewIcon = () =>
+  [...(previews()[0]?.getElementsByTagName('svg') ?? [])].find((svg) =>
+    svg.hasAttribute('data-edge-preview-icon'),
+  )
 const centreMarker = () => previews()[0]?.getElementsByTagName('span')[0] ?? null
 
 describe('the preview', () => {
@@ -279,3 +315,158 @@ function propsFor(value: unknown): ObjectInputProps {
     renderPreview: () => null,
   } as unknown as ObjectInputProps
 }
+
+describe('the empty state', () => {
+  it('says there is no custom edge yet, not that something needs fixing', () => {
+    mount()
+    expect(
+      screen.getByRole('img', { name: /There is no custom edge|no custom edge/i }),
+    ).toBeTruthy()
+    expect(screen.queryByText(/problems below/)).toBeNull()
+  })
+
+  it('still says to fix the problems when a stored edge cannot draw', () => {
+    mount({ version: 1, mode: 'rule', contour: { points: [] } })
+    expect(screen.getByText(/Nothing to preview until the problems below are fixed/)).toBeTruthy()
+  })
+})
+
+describe('starting a straight rule', () => {
+  it('writes the rule starter from its own button, with no shadow, no centre and a flat contour', () => {
+    const seen = mount()
+    fireEvent.click(screen.getByRole('button', { name: 'Start a straight rule' }))
+    const value = written(seen)
+    expect(value.mode).toBe('rule')
+    expect(value.shadow).toBeUndefined()
+    expect(value.centre).toBeUndefined()
+    expect(new Set(value.contour.points.map((p) => p.y)).size).toBe(1)
+    expect(resolveComposedEdge(value)?.mode).toBe('rule')
+  })
+
+  it('keeps every authored contour and layer when switching between transition and rule', () => {
+    const before = startingEdge()
+    const seen = mount(before)
+    fireEvent.click(screen.getByRole('radio', { name: /^Rule/ }))
+    const rule = written(seen)
+    expect(rule.mode).toBe('rule')
+    expect(rule.contour).toEqual(before.contour)
+    expect(rule.layers).toHaveLength(2)
+    fireEvent.click(screen.getByRole('radio', { name: /^Transition/ }))
+    const back = written(seen)
+    expect(back.mode).toBe('transition')
+    expect(back.contour).toEqual(rule.contour)
+    expect(back.layers).toEqual(rule.layers)
+  })
+
+  it('offers to straighten a wavy contour in a rule, and only changes the contour', () => {
+    const wavy: EdgeValue = { ...startingEdge(), mode: 'rule' }
+    const seen = mount(wavy)
+    fireEvent.click(screen.getByRole('button', { name: 'Straighten the contour' }))
+    const next = written(seen)
+    expect(new Set(next.contour.points.map((p) => p.y)).size).toBe(1)
+    expect(next.contour.points.map((p) => p.x)).toEqual(wavy.contour.points.map((p) => p.x))
+    expect(next.layers).toEqual(wavy.layers)
+    // Once it is straight the button goes away.
+    expect(screen.queryByRole('button', { name: 'Straighten the contour' })).toBeNull()
+  })
+
+  it('does not offer it for a transition', () => {
+    mount(startingEdge())
+    expect(screen.queryByRole('button', { name: 'Straighten the contour' })).toBeNull()
+  })
+})
+
+describe('the centre icon', () => {
+  const withIcon = (icon?: string): EdgeValue => ({
+    ...startingRule(),
+    centre: { kind: 'icon', gap: 20, ...(icon ? { icon } : {}) },
+  })
+
+  it('draws the chosen icon inside the opening in the preview', () => {
+    mount(withIcon('lotus'))
+    expect(previewIcon()?.getAttribute('data-edge-preview-icon')).toBe('lotus')
+  })
+
+  it('draws no icon and says to choose one while none is chosen', () => {
+    mount(withIcon())
+    expect(previewIcon()).toBeUndefined()
+    expect(screen.getByText('Choose an icon, or the artwork draws without a centre.')).toBeTruthy()
+  })
+
+  it('talks about the icon, not a picture, once an icon is chosen', () => {
+    mount(withIcon('lotus'))
+    expect(
+      screen.getByText('If the icon is unavailable, the artwork draws without a centre.'),
+    ).toBeTruthy()
+    expect(screen.queryByText(/picture is missing/)).toBeNull()
+  })
+
+  it('keeps the picture wording for a picture centre', () => {
+    mount({ ...startingRule(), centre: { kind: 'image', gap: 20 } })
+    expect(
+      screen.getByText('If the picture is missing, the artwork draws without a centre.'),
+    ).toBeTruthy()
+  })
+})
+
+describe('the summary', () => {
+  it('describes a rule as drawn: no shadow, and a centre without an icon is not drawn', () => {
+    mount({
+      ...startingEdge(),
+      mode: 'rule',
+      centre: { kind: 'icon', gap: 20 },
+    })
+    const summary = screen.getByText(/^Rule · /).textContent
+    expect(summary).toContain('Rule')
+    expect(summary).not.toContain('shadow')
+    expect(summary).toContain('centre icon not drawn')
+  })
+})
+
+describe("the preview's colours", () => {
+  const doc = {
+    pageBuilder: [
+      { _key: 'one', style: { tone: 'inverse' } },
+      { _key: 'two', style: { tone: 'alt' } },
+    ],
+  }
+
+  it("uses the section's own background and the next section's when the editor has them", () => {
+    cache.document = doc
+    render(
+      <Harness
+        initial={startingEdge()}
+        onValue={() => undefined}
+        path={['pageBuilder', { _key: 'one' }, 'style', 'composedEdge']}
+      />,
+    )
+    const fills = [...(previews()[0]?.querySelectorAll('rect, path') ?? [])].map((el) =>
+      el.getAttribute('fill'),
+    )
+    expect(fills).toContain(colorHex.surfaceInverse)
+    expect(fills).toContain(colorHex.surfaceAlt)
+  })
+
+  it('keeps the template defaults when there is no document', () => {
+    mount(startingEdge())
+    const fills = [...(previews()[0]?.querySelectorAll('rect, path') ?? [])].map((el) =>
+      el.getAttribute('fill'),
+    )
+    expect(fills).toContain(colorHex.surface)
+  })
+})
+
+describe('slider names', () => {
+  it('names every slider: range inputs by a visible label, contour points by an aria-label', () => {
+    mount(startingEdge())
+    const sliders = screen.getAllByRole('slider')
+    expect(sliders.length).toBeGreaterThan(4)
+    for (const slider of sliders) {
+      const label = slider.id
+        ? document.querySelector(`label[for="${CSS.escape(slider.id)}"]`)?.textContent
+        : undefined
+      const name = label ?? slider.getAttribute('aria-label')
+      expect(name && name.trim().length > 0).toBe(true)
+    }
+  })
+})
