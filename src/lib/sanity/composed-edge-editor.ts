@@ -154,6 +154,57 @@ export function startingEdge(key: KeyMaker = newKey): EdgeValue {
   }
 }
 
+/**
+ * The design a fresh straight rule starts with: a flat contour across the band, one fine gradient line that
+ * fades at both ends, a narrower artwork, and no shadow (a rule has none) and no centre (the editor picks one).
+ * Medium keeps clear space below the line before the next section; Small leaves about half the band there.
+ */
+export function startingRule(key: KeyMaker = newKey): EdgeValue {
+  return {
+    version: 1,
+    mode: 'rule',
+    height: 'medium',
+    width: 40,
+    align: 'center',
+    contour: {
+      ...contourOf(
+        [
+          [0, 50],
+          [100, 50],
+        ],
+        key,
+      ),
+      interpolation: 'linear',
+    },
+    layers: [
+      layer(
+        'stroke',
+        {
+          opacity: 100,
+          strokeWidth: 2,
+          paint: { kind: 'gradient', from: 'accent', to: 'accent-2', fadeEnds: true },
+        },
+        key,
+      ),
+    ],
+  }
+}
+
+/**
+ * The same contour laid flat: every point keeps its position across the band and moves to the middle. Layers
+ * that follow their own contour are left as authored; only the contour it is called with changes.
+ */
+export function flattenContour(contour: EdgeContour): EdgeContour {
+  return {
+    ...contour,
+    points: contour.points.map((p) => ({ ...p, y: 50 })),
+  }
+}
+
+/** Whether every point sits at the same height, so the contour reads as one straight line. */
+export const contourIsFlat = (contour: EdgeContour): boolean =>
+  contour.points.every((p) => p.y === contour.points[0]?.y)
+
 /** A copy with fresh keys, so two sections (or a section and a design) never share an array member. */
 export function copyEdge(value: EdgeValue, key: KeyMaker = newKey): EdgeValue {
   const contour = (source: EdgeContour): EdgeContour => ({
@@ -396,16 +447,24 @@ export function edgeProblems(value: unknown): EdgeProblem[] {
   return problems
 }
 
-/** The one-line description at the top of the editor. */
+/**
+ * The one-line description at the top of the editor. It describes what the page draws, from the same resolver:
+ * a layer at 0% strength is not counted, a rule has no shadow, and a centre with no icon (or a missing picture)
+ * is named as not drawn instead of as a centre.
+ */
 export function describeEdge(value: EdgeValue): string {
-  const layers = value.layers?.length ?? 0
+  const drawn = resolveComposedEdge(asProjected(value))
+  const layers = drawn ? drawn.layers.length : (value.layers?.length ?? 0)
   const parts = [
     value.mode === 'rule' ? 'Rule' : 'Transition',
     value.height === 'small' ? 'Small' : value.height === 'large' ? 'Large' : 'Medium',
     layers === 1 ? '1 layer' : `${String(layers)} layers`,
   ]
-  if (value.centre?.kind) parts.push(value.centre.kind === 'icon' ? 'centre icon' : 'centre image')
-  if (value.shadow && (value.shadow.opacity ?? 28) > 0) parts.push('shadow')
+  if (value.centre?.kind) {
+    const kind = value.centre.kind === 'icon' ? 'icon' : 'image'
+    parts.push(!drawn || drawn.centre ? `centre ${kind}` : `centre ${kind} not drawn`)
+  }
+  if (drawn?.shadow) parts.push('shadow')
   return parts.join(' · ')
 }
 

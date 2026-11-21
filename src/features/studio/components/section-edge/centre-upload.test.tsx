@@ -33,6 +33,7 @@ const client = {
 vi.mock('sanity', async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
   useClient: () => client,
+  useFormValue: () => undefined,
 }))
 
 Element.prototype.scrollIntoView = vi.fn()

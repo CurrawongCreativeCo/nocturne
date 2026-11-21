@@ -1,9 +1,11 @@
 import { useId } from 'react'
 
+import { BADGE_ICON_PATHS } from '@/components/ui/badge-icon'
 import { closeToBottom, closeToTop } from '@/components/ui/section-edges'
 import { colorHex } from '@/config/tokens.generated'
 import { resolveComposedEdge, type ResolvedComposedEdge } from '@/lib/sanity/composed-edge'
 import { asProjected } from '@/lib/sanity/composed-edge-editor'
+import type { EdgeTones } from '@/lib/sanity/composed-edge-tones'
 
 const HEIGHT = { small: 90, medium: 130, large: 170 } as const
 /** Room above the band for the upper section's colour. */
@@ -24,16 +26,34 @@ const hex = (role: string) => ROLE_HEX[role] ?? colorHex.accent
  * section with its tints, then lines and the centre). Colours are the template's defaults; the page uses the
  * site's. Decorative: the controls beside it say the same things in words.
  */
-export function EdgePreview({ value }: { value: unknown }) {
+export function EdgePreview({
+  value,
+  state = 'problems',
+  tones,
+}: {
+  value: unknown
+  /** Why there is nothing to draw: no custom edge stored yet, or one that cannot draw. */
+  state?: 'empty' | 'problems'
+  /** This section's and the next section's backgrounds, where the editor knows them. */
+  tones?: EdgeTones
+}) {
   const edge = resolveComposedEdge(asProjected(value))
   if (!edge) {
+    const empty = state === 'empty'
     return (
       <div
         role="img"
-        aria-label="No preview: this edge cannot be drawn yet."
+        aria-label={
+          empty
+            ? 'No preview yet: there is no custom edge.'
+            : 'No preview: this edge cannot be drawn yet.'
+        }
+        data-edge-preview-empty={empty ? 'empty' : 'problems'}
         style={{ height: 80, border: '1px dashed currentColor', opacity: 0.6, padding: 12 }}
       >
-        Nothing to preview until the problems below are fixed.
+        {empty
+          ? 'No custom edge yet. Start one below to see it here.'
+          : 'Nothing to preview until the problems below are fixed.'}
       </div>
     )
   }
@@ -45,7 +65,7 @@ export function EdgePreview({ value }: { value: unknown }) {
       aria-label={`Preview of the edge: ${edge.mode === 'rule' ? 'a rule' : 'a transition'} with ${String(edge.layers.length)} paint layers${edge.centre ? ' and a centre' : ''}${edge.shadow ? ' and a shadow' : ''}.`}
     >
       <div style={{ position: 'relative' }}>
-        <PreviewSvg edge={edge} height={height} />
+        <PreviewSvg edge={edge} height={height} tones={tones} />
         {edge.centre && (
           <span
             data-edge-preview-centre=""
@@ -59,15 +79,45 @@ export function EdgePreview({ value }: { value: unknown }) {
               border: '1.5px dashed currentColor',
               borderRadius: '50%',
               opacity: 0.7,
+              display: 'grid',
+              placeItems: 'center',
+              color: tones?.upperDark ? '#ffffff' : colorHex.ink,
             }}
-          />
+          >
+            {edge.centre.kind === 'icon' && (
+              <svg
+                data-edge-preview-icon={edge.centre.icon}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                focusable="false"
+                style={{ width: '70%', height: '70%' }}
+              >
+                {BADGE_ICON_PATHS[edge.centre.icon]}
+              </svg>
+            )}
+          </span>
         )}
       </div>
     </div>
   )
 }
 
-function PreviewSvg({ edge, height }: { edge: ResolvedComposedEdge; height: number }) {
+function PreviewSvg({
+  edge,
+  height,
+  tones,
+}: {
+  edge: ResolvedComposedEdge
+  height: number
+  tones?: EdgeTones
+}) {
+  const upperFill = tones?.upper ?? colorHex.surface
+  const lowerFill = tones?.lower ?? colorHex.surfaceAlt
   // Every definition id carries this instance's id, so two previews on one page never share or shadow one.
   const uid = useId()
   const ref = (name: string) => `${uid}-${name}`
@@ -177,7 +227,7 @@ function PreviewSvg({ edge, height }: { edge: ResolvedComposedEdge; height: numb
         )}
       </defs>
       {/* The section below, and what paints under the cut. */}
-      <rect x="0" y={top} width="1" height={total} fill={colorHex.surfaceAlt} />
+      <rect x="0" y={top} width="1" height={total} fill={lowerFill} />
       {!rule && (
         <g clipPath={url('span')}>
           {planes('below').map((layer) => layerPath(layer, index(layer)))}
@@ -187,8 +237,8 @@ function PreviewSvg({ edge, height }: { edge: ResolvedComposedEdge; height: numb
       {/* The upper section, cut along the contour, with its tints inside it. */}
       {!rule ? (
         <>
-          <path d={closeToTop(edge.cut)} fill={colorHex.surface} />
-          <rect x="0" y={top} width="1" height={ABOVE} fill={colorHex.surface} />
+          <path d={closeToTop(edge.cut)} fill={upperFill} />
+          <rect x="0" y={top} width="1" height={ABOVE} fill={upperFill} />
           <g clipPath={url('upper')}>
             <g clipPath={url('span')}>
               {planes('above').map((layer) => layerPath(layer, index(layer)))}
@@ -197,7 +247,7 @@ function PreviewSvg({ edge, height }: { edge: ResolvedComposedEdge; height: numb
         </>
       ) : (
         <>
-          <rect x="0" y={top} width="1" height={ABOVE + 1} fill={colorHex.surface} />
+          <rect x="0" y={top} width="1" height={ABOVE + 1} fill={upperFill} />
           <g clipPath={url('span')}>{edge.layers.map((layer) => layerPath(layer, index(layer)))}</g>
         </>
       )}

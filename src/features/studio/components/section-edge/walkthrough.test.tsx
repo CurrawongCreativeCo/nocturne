@@ -21,6 +21,7 @@ const cache = vi.hoisted(() => ({ client: undefined as object | undefined }))
 vi.mock('sanity', async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
   MemberField: () => null,
+  useFormValue: () => undefined,
   useClient: () =>
     (cache.client ??= {
       fetch: (query: string) =>

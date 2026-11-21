@@ -1,6 +1,6 @@
 import { Button, Card, Flex, Stack, Text } from '@sanity/ui'
 import { useEffect, useRef, useState } from 'react'
-import { set, unset, type ObjectInputProps } from 'sanity'
+import { set, unset, useFormValue, type ObjectInputProps } from 'sanity'
 
 import { BADGE_ICONS } from '@/lib/sanity/badge-icons'
 import { COMPOSED_EDGE_HEIGHTS } from '@/lib/sanity/composed-edge'
@@ -8,10 +8,14 @@ import {
   addLayer,
   cannotAddLayer,
   describeEdge,
+  contourIsFlat,
   edgeProblems,
+  flattenContour,
   startingEdge,
+  startingRule,
   type EdgeValue,
 } from '@/lib/sanity/composed-edge-editor'
+import { edgeTones } from '@/lib/sanity/composed-edge-tones'
 
 import { CentrePicture, pictureRef } from './centre-picture'
 import { ContourEditor } from './contour-editor'
@@ -38,7 +42,10 @@ const centreChoice = (edge: EdgeValue | undefined) =>
  * shape; "Remove custom edge" clears it. Undo steps back through this editor's own changes.
  */
 export function SectionEdgeInput(props: ObjectInputProps) {
-  const { value, onChange, readOnly } = props
+  const { value, onChange, readOnly, path } = props
+  // The section's own and the next section's backgrounds, so the preview can show the real colours.
+  const formDocument = useFormValue([])
+  const tones = edgeTones(formDocument, path)
   const stored = value as EdgeValue | null | undefined
   const hasValue =
     stored !== undefined && stored !== null && Object.keys(stored).some((k) => !k.startsWith('_'))
@@ -91,7 +98,7 @@ export function SectionEdgeInput(props: ObjectInputProps) {
         centre and a shadow. While a custom edge draws, the Bottom edge choice above is kept but not
         drawn.
       </Text>
-      <EdgePreview value={edge} />
+      <EdgePreview value={edge} state={hasValue ? 'problems' : 'empty'} tones={tones} />
       <Flex gap={2} wrap="wrap" align="center">
         {edge ? (
           <Text size={1} data-edge-summary="">
@@ -120,6 +127,20 @@ export function SectionEdgeInput(props: ObjectInputProps) {
           disabled={readOnly}
           onClick={() => {
             write(startingEdge())
+          }}
+        />
+      )}
+      {!hasValue && (
+        <Button
+          type="button"
+          mode="ghost"
+          fontSize={1}
+          padding={3}
+          text="Start a straight rule"
+          disabled={readOnly}
+          data-edge-control="start-rule"
+          onClick={() => {
+            write(startingRule())
           }}
         />
       )}
@@ -262,6 +283,25 @@ export function SectionEdgeInput(props: ObjectInputProps) {
             patch({ contour })
           }}
         />
+        {edge.mode === 'rule' && !contourIsFlat(edge.contour) && (
+          <Flex gap={3} align="center" wrap="wrap">
+            <Button
+              type="button"
+              mode="ghost"
+              fontSize={1}
+              padding={2}
+              text="Straighten the contour"
+              disabled={readOnly}
+              data-edge-control="flatten-contour"
+              onClick={() => {
+                patch({ contour: flattenContour(edge.contour) })
+              }}
+            />
+            <Text size={1} muted>
+              A rule usually reads best as a straight line. Layers with their own contour keep it.
+            </Text>
+          </Flex>
+        )}
       </Group>
 
       <Group
@@ -376,8 +416,10 @@ export function SectionEdgeInput(props: ObjectInputProps) {
         )}
         {centre?.kind && (
           <Text size={1} muted>
-            {centre.kind === 'icon' && !centre.icon
-              ? 'Choose an icon, or the artwork draws without a centre.'
+            {centre.kind === 'icon'
+              ? centre.icon
+                ? 'If the icon is unavailable, the artwork draws without a centre.'
+                : 'Choose an icon, or the artwork draws without a centre.'
               : 'If the picture is missing, the artwork draws without a centre.'}
           </Text>
         )}
