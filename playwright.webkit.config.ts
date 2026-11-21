@@ -14,6 +14,7 @@ export default defineConfig({
       name: 'webkit',
       testMatch: [
         /section-edge-composed\.spec\.ts/,
+        /section-edge-authored\.spec\.ts/,
         /section-edge-layered\.spec\.ts/,
         /section-edge-lagoon-reef\.spec\.ts/,
         /section-edge-layer-colours\.spec\.ts/,
